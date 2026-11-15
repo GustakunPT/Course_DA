@@ -1,0 +1,16 @@
+id,nome,categoria,preco
+1,Pão,Padaria,0.25
+2,Leite,Laticínios,0.89
+3,Ovos (dúzia),Mercearia,2.35
+4,Arroz,Mercearia,1.2
+5,Massa,Mercearia,0.99
+6,Azeite,Mercearia,7.5
+7,Café,Mercearia,3.4
+8,Açúcar,Mercearia,1.05
+9,Maçãs (kg),Frutaria,1.8
+10,Bananas (kg),Frutaria,1.6
+11,Queijo,Charcutaria,4.9
+12,Fiambre,Charcutaria,2.6
+13,Iogurte,Laticínios,0.55
+14,"Água (1,5 L)",Bebidas,0.65
+15,Sumo,Bebidas,1.75

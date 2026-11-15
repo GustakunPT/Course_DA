@@ -1,0 +1,98 @@
+/// Tabela de factos de vendas sazonais da Mercearia (2025)
+table vendas_sazonais
+	lineageTag: a3ba5bc9-f3e2-463e-b363-2b144b72eeed
+
+	/// Faturação total em euros calculada linha a linha (SUMX)
+	measure 'Faturacao Total' = SUMX(vendas_sazonais, vendas_sazonais[quantidade] * vendas_sazonais[preco])
+		formatString: #,0.00 "€"
+		displayFolder: 01. KPIs Globais
+		lineageTag: 36f08e5f-bc69-44d8-a712-41c5bd03a922
+
+	/// Total de unidades físicas vendidas
+	measure 'Total Unidades' = SUM(vendas_sazonais[quantidade])
+		formatString: #,0
+		displayFolder: 01. KPIs Globais
+		lineageTag: f709e6be-3b57-4c95-b9a5-07cd4b23d513
+
+	/// Número total de linhas de venda registadas
+	measure Transacoes = COUNTROWS(vendas_sazonais)
+		formatString: #,0
+		displayFolder: 01. KPIs Globais
+		lineageTag: 7f2b6939-57ec-40d6-9f3a-ebd853b2999d
+
+	/// Valor médio por linha de venda (protegido contra divisão por zero)
+	measure 'Ticket Medio por Linha' = DIVIDE([Faturacao Total], [Transacoes], 0)
+		formatString: #,0.00 "€"
+		displayFolder: 01. KPIs Globais
+		lineageTag: d9e60ff9-7775-415d-8a5b-d8b24e3f1abf
+
+	/// Número de clientes distintos que efetuaram compras no período
+	measure 'Clientes Ativos' = DISTINCTCOUNT(vendas_sazonais[cliente_id])
+		formatString: #,0
+		displayFolder: 02. Clientes & LTV
+		lineageTag: 6cbe58a8-f4a1-49c1-bf2f-bc1eaa0b798b
+
+	/// Faturação média anual/mensal por cliente ativo (LTV)
+	measure 'Gasto Medio por Cliente' = DIVIDE([Faturacao Total], [Clientes Ativos], 0)
+		formatString: #,0.00 "€"
+		displayFolder: 02. Clientes & LTV
+		lineageTag: a36048d5-f0e6-40ef-95d8-84ac4cbf43ee
+
+	/// Peso percentual na faturação total ignorando filtros de produto/categoria
+	measure 'Quota Produto %' = DIVIDE([Faturacao Total], CALCULATE([Faturacao Total], ALL(produtos)), 0)
+		formatString: 0.00%
+		displayFolder: 03. Quotas & Time Intelligence
+		lineageTag: 1c41acd5-04bd-4b7d-9d57-28db63496436
+
+	/// Faturação acumulada no ano até à data selecionada (Year-To-Date)
+	measure 'Faturacao Acumulada YTD' = TOTALYTD([Faturacao Total], calendario[Date])
+		formatString: #,0.00 "€"
+		displayFolder: 03. Quotas & Time Intelligence
+		lineageTag: 4e2653d5-89b0-4765-ad54-7596f5a2431f
+
+	column data
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 6d2845e4-f5b0-4b2f-8cbe-f933e7f6bc49
+		sourceColumn: data
+
+	column cliente_id
+		dataType: int64
+		lineageTag: 05b3acbd-43e5-450f-b0aa-7bcbbe952d40
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+	column produto_id
+		dataType: int64
+		lineageTag: 613b9fab-038e-40f5-b56c-764614a9027c
+		summarizeBy: none
+		sourceColumn: produto_id
+
+	column produto
+		dataType: string
+		lineageTag: 6ffa3c2e-1e86-497b-8077-6e38b250bef1
+		sourceColumn: produto
+
+	column quantidade
+		dataType: int64
+		lineageTag: 151be764-3280-4e48-b71c-53e953d23b01
+		summarizeBy: sum
+		sourceColumn: quantidade
+
+	column preco
+		dataType: double
+		formatString: #,0.00 "€"
+		lineageTag: 50eea5bc-d58e-46c0-92bc-e4b5ef47a909
+		summarizeBy: average
+		sourceColumn: preco
+
+	partition vendas_sazonais = m
+		mode: import
+		source =
+				let
+				    Fonte = Csv.Document(File.Contents("C:\Users\gusta\Downloads\mercearia-do-bairro\mercearia-do-bairro\dados\vendas_sazonais.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Cabecalhos,{{"data", type date}, {"cliente_id", Int64.Type}, {"produto_id", Int64.Type}, {"produto", type text}, {"quantidade", Int64.Type}, {"preco", type number}}, "en-US")
+				in
+				    Tipos
+

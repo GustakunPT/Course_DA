@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mercearia do Bairro — Mobile UI Visual Mockups Studio</title>
+  <meta name="description" content="Visual mockups interativos explorando 3 estilos visuais e 4 fluxos críticos para a Academia de Dados da Mercearia do Bairro em dispositivos móveis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500;700&family=Host+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       GLOBAL SHOWCASE ENVIRONMENT STYLES
+       ========================================================================== */
+    :root {
+      --showcase-bg: #0B0E14;
+      --showcase-panel: #141923;
+      --showcase-border: #232B3B;
+      --showcase-text: #E2E8F0;
+      --showcase-muted: #8E9BAE;
+      --showcase-accent: #38BDF8;
+      --showcase-accent-rgb: 56, 189, 248;
+      --font-ui: "Host Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Atkinson Hyperlegible Mono", "JetBrains Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--showcase-bg);
+      color: var(--showcase-text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Showcase Header & Toolbar */
+    .showcase-header {
+      background: var(--showcase-panel);
+      border-bottom: 1px solid var(--showcase-border);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 1.6rem;
+      background: rgba(var(--showcase-accent-rgb), 0.12);
+      border: 1px solid rgba(var(--showcase-accent-rgb), 0.3);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #FFF;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--showcase-muted);
+    }
+
+    .controls-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--showcase-border);
+    }
+
+    .control-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--showcase-muted);
+      padding-left: 6px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 2px;
+    }
+
+    .btn-toggle {
+      background: transparent;
+      border: none;
+      color: var(--showcase-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-toggle:hover {
+      color: #FFF;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-toggle.active {
+      background: var(--showcase-accent);
+      color: #0B0E14;
+      font-weight: 700;
+      box-shadow: 0 1px 6px rgba(var(--showcase-accent-rgb), 0.35);
+    }
+
+    .links-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-link-btn {
+      color: var(--showcase-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--showcase-border);
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s;
+    }
+
+    .nav-link-btn:hover {
+      color: #FFF;
+      border-color: var(--showcase-accent);
+    }
+
+    /* Style Meta Bar */
+    .style-meta-banner {
+      background: rgba(20, 25, 35, 0.95);
+      border-bottom: 1px solid var(--showcase-border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.82rem;
+    }
+
+    .meta-tagline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .style-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .meta-metrics {
+      display: flex;
+      gap: 20px;
+      color: var(--showcase-muted);
+      font-size: 0.78rem;
+    }
+
+    .meta-metrics span strong {
+      color: #F8FAFC;
+    }
+
+    /* Workspace Stage & Device Canvas */
+    .showcase-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 28px 16px 40px;
+      background: radial-gradient(circle at 50% 20%, #151C2C 0%, #0B0E14 75%);
+    }
+
+    /* Device Mockup Shell */
+    .device-shell {
+      position: relative;
+      background: #000;
+      border-radius: 50px;
+      box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.85),
+                  0 0 0 10px #1E232F,
+                  0 0 0 12px #2A3345,
+                  0 0 0 13px #151A24;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    /* Device Presets */
+    .device-shell[data-preset="iphone-se"] {
+      width: 375px;
+      height: 667px;
+      border-radius: 42px;
+    }
+
+    .device-shell[data-preset="iphone-15"] {
+      width: 393px;
+      height: 852px;
+      border-radius: 50px;
+    }
+
+    .device-shell[data-preset="iphone-16-promax"] {
+      width: 430px;
+      height: 932px;
+      border-radius: 54px;
+    }
+
+    .device-shell[data-preset="fluid"] {
+      width: 100%;
+      max-width: 440px;
+      height: 860px;
+      border-radius: 36px;
+    }
+
+    /* Realistic Status Bar */
+    .device-status-bar {
+      height: 44px;
+      min-height: 44px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 600;
+      z-index: 100;
+      user-select: none;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .status-left {
+      letter-spacing: -0.02em;
+    }
+
+    .dynamic-island {
+      width: 108px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      gap: 6px;
+      box-shadow: 0 0 2px rgba(255, 255, 255, 0.15);
+      z-index: 105;
+    }
+
+    .island-lens {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #0F172A;
+      box-shadow: inset 0 0 2px #38BDF8;
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+    }
+
+    .status-icon {
+      display: inline-block;
+      line-height: 1;
+    }
+
+    /* Device Content Viewport */
+    .device-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      scroll-behavior: smooth;
+    }
+
+    .device-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .device-viewport::-webkit-scrollbar-thumb {
+      background: rgba(120, 120, 120, 0.25);
+      border-radius: 4px;
+    }
+
+    /* Home Indicator */
+    .device-home-bar {
+      height: 24px;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      user-select: none;
+      background: transparent;
+    }
+
+    .home-pill {
+      width: 134px;
+      height: 5px;
+      border-radius: 10px;
+      background: #888;
+      transition: background 0.2s;
+    }
+
+    /* Flow Views Container */
+    .flow-view {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      padding: 12px 16px 24px;
+      animation: fadeInView 0.25s ease-out;
+    }
+
+    .flow-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       STYLE 1: NORDIC STUDIO (Clean Scandinavian Data Studio)
+       ========================================================================== */
+    .device-shell[data-style="nordic"] {
+      --style-bg: #FAFAF9;
+      --style-surface: #FFFFFF;
+      --style-surface-subtle: #F4F4F5;
+      --style-border: #E4E4E7;
+      --style-border-strong: #D4D4D8;
+      --style-ink: #18181B;
+      --style-ink-secondary: #52525B;
+      --style-ink-muted: #71717A;
+      --style-accent: #0F766E;
+      --style-accent-subtle: #CCFBF1;
+      --style-accent-ink: #115E59;
+      --style-accent-cool: #2563EB;
+      --style-success: #15803D;
+      --style-warning: #B45309;
+      --style-danger: #B91C1C;
+      --style-radius: 8px;
+      --style-font: "Host Grotesk", sans-serif;
+      --style-font-mono: "Atkinson Hyperlegible Mono", monospace;
+      --style-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .device-shell[data-style="nordic"] .device-status-bar {
+      color: #18181B;
+      background: #FAFAF9;
+    }
+    .device-shell[data-style="nordic"] .device-viewport {
+      background: var(--style-bg);
+      color: var(--style-ink);
+      font-family: var(--style-font);
+    }
+    .device-shell[data-style="nordic"] .home-pill {
+      background: #A1A1AA;
+    }
+
+    /* ==========================================================================
+       STYLE 2: GLASSMORPHIC / NEO-DUO (Modern Vibrant App)
+       ========================================================================== */
+    .device-shell[data-style="glass"] {
+      --style-bg: linear-gradient(165deg, #090D1A 0%, #111827 50%, #151D3B 100%);
+      --style-surface: rgba(28, 38, 59, 0.65);
+      --style-surface-subtle: rgba(255, 255, 255, 0.05);
+      --style-border: rgba(255, 255, 255, 0.12);
+      --style-border-strong: rgba(255, 255, 255, 0.22);
+      --style-ink: #F8FAFC;
+      --style-ink-secondary: #CBD5E1;
+      --style-ink-muted: #94A3B8;
+      --style-accent: #6366F1;
+      --style-accent-subtle: rgba(99, 102, 241, 0.2);
+      --style-accent-ink: #FFFFFF;
+      --style-accent-cool: #06B6D4;
+      --style-success: #10B981;
+      --style-warning: #F59E0B;
+      --style-danger: #EF4444;
+      --style-radius: 14px;
+      --style-font: "Host Grotesk", sans-serif;
+      --style-font-mono: "JetBrains Mono", monospace;
+      --style-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --style-blur: blur(16px);
+    }
+
+    .device-shell[data-style="glass"] .device-status-bar {
+      color: #F8FAFC;
+      background: #090D1A;
+    }
+    .device-shell[data-style="glass"] .device-viewport {
+      background: var(--style-bg);
+      color: var(--style-ink);
+      font-family: var(--style-font);
+    }
+    .device-shell[data-style="glass"] .home-pill {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* ==========================================================================
+       STYLE 3: TERMINAL PRO (High-Density Professional Data Terminal)
+       ========================================================================== */
+    .device-shell[data-style="terminal"] {
+      --style-bg: #05070A;
+      --style-surface: #0C1017;
+      --style-surface-subtle: #141B26;
+      --style-border: #1E293B;
+      --style-border-strong: #334155;
+      --style-ink: #E2E8F0;
+      --style-ink-secondary: #94A3B8;
+      --style-ink-muted: #64748B;
+      --style-accent: #22C55E;
+      --style-accent-subtle: rgba(34, 197, 94, 0.12);
+      --style-accent-ink: #000000;
+      --style-accent-cool: #38BDF8;
+      --style-success: #22C55E;
+      --style-warning: #F59E0B;
+      --style-danger: #F43F5E;
+      --style-radius: 4px;
+      --style-font: "Atkinson Hyperlegible Mono", monospace;
+      --style-font-mono: "Atkinson Hyperlegible Mono", monospace;
+      --style-shadow: none;
+    }
+
+    .device-shell[data-style="terminal"] .device-status-bar {
+      color: #22C55E;
+      background: #05070A;
+      font-family: var(--style-font-mono);
+      font-size: 0.75rem;
+    }
+    .device-shell[data-style="terminal"] .device-viewport {
+      background: var(--style-bg);
+      color: var(--style-ink);
+      font-family: var(--style-font);
+      letter-spacing: -0.01em;
+    }
+    .device-shell[data-style="terminal"] .home-pill {
+      background: #22C55E;
+      opacity: 0.6;
+    }
+
+    /* ==========================================================================
+       COMMON MOBILE APP UI PATTERNS ACROSS STYLES
+       ========================================================================== */
+    /* Header & Navigation Bar inside Mobile */
+    .m-app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0 10px;
+      border-bottom: 1px solid var(--style-border);
+      margin-bottom: 12px;
+    }
+
+    .m-app-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .m-app-brand-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--style-ink);
+    }
+
+    .m-app-brand-badge {
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      background: var(--style-accent-subtle);
+      color: var(--style-accent);
+      border-radius: var(--style-radius);
+      font-weight: 700;
+    }
+
+    .m-app-user-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .m-streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(245, 158, 11, 0.15);
+      color: #F59E0B;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* Segmented View Switcher: [ Lição ] ↔ [ Bancada ] */
+    .m-segmented-switcher {
+      display: flex;
+      background: var(--style-surface-subtle);
+      padding: 3px;
+      border-radius: var(--style-radius);
+      border: 1px solid var(--style-border);
+      margin-bottom: 12px;
+    }
+
+    .m-seg-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border: none;
+      background: transparent;
+      color: var(--style-ink-muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: calc(var(--style-radius) - 2px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.18s;
+    }
+
+    .m-seg-btn.active {
+      background: var(--style-surface);
+      color: var(--style-ink);
+      border: 1px solid var(--style-border-strong);
+      box-shadow: var(--style-shadow);
+    }
+
+    /* Card Component */
+    .m-card {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 14px;
+      box-shadow: var(--style-shadow);
+      backdrop-filter: var(--style-blur, none);
+      -webkit-backdrop-filter: var(--style-blur, none);
+    }
+
+    .m-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .m-card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--style-ink);
+    }
+
+    /* Track Filter Chips */
+    .m-chip-scroller {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .m-chip-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .m-chip {
+      padding: 6px 12px;
+      border-radius: var(--style-radius);
+      background: var(--style-surface-subtle);
+      border: 1px solid var(--style-border);
+      color: var(--style-ink-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .m-chip.active {
+      background: var(--style-accent-subtle);
+      color: var(--style-accent);
+      border-color: var(--style-accent);
+      font-weight: 700;
+    }
+
+    /* Lesson List Cards */
+    .m-lesson-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .m-lesson-item {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: border 0.18s, transform 0.18s;
+    }
+
+    .m-lesson-item:hover {
+      border-color: var(--style-accent);
+      transform: translateY(-1px);
+    }
+
+    .m-lesson-item.active {
+      border-color: var(--style-accent);
+      background: var(--style-accent-subtle);
+    }
+
+    .m-lesson-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .m-lesson-code {
+      font-family: var(--style-font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      background: var(--style-surface-subtle);
+      border: 1px solid var(--style-border);
+      border-radius: 4px;
+      color: var(--style-accent);
+    }
+
+    .m-lesson-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--style-ink);
+      line-height: 1.3;
+    }
+
+    .m-lesson-meta {
+      font-size: 0.7rem;
+      color: var(--style-ink-muted);
+    }
+
+    .m-status-icon {
+      font-size: 0.85rem;
+    }
+
+    /* Collapsible Disclosure Accordions */
+    .m-accordion {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .m-accordion-summary {
+      padding: 11px 14px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--style-ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      background: var(--style-surface-subtle);
+      transition: background 0.15s;
+    }
+
+    .m-accordion-summary:hover {
+      background: rgba(var(--showcase-accent-rgb), 0.08);
+    }
+
+    .m-accordion-body {
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--style-ink-secondary);
+      border-top: 1px solid var(--style-border);
+    }
+
+    /* Quick Symbol Touch Typing Bar */
+    .m-symbol-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 4px 6px;
+      background: var(--style-surface-subtle);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      margin-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .m-symbol-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .m-sym-btn {
+      padding: 6px 10px;
+      font-family: var(--style-font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      color: var(--style-ink);
+      border-radius: calc(var(--style-radius) - 2px);
+      cursor: pointer;
+      flex-shrink: 0;
+      min-width: 32px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .m-sym-btn:active {
+      transform: scale(0.92);
+      background: var(--style-accent-subtle);
+      color: var(--style-accent);
+    }
+
+    /* Mobile Code Editor */
+    .m-code-box {
+      background: #06090F;
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 10px;
+      font-family: var(--style-font-mono);
+      font-size: 0.78rem;
+      color: #38BDF8;
+      position: relative;
+    }
+
+    .m-code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #1E293B;
+      color: #94A3B8;
+      font-size: 0.7rem;
+    }
+
+    .m-code-textarea {
+      width: 100%;
+      height: 110px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+      white-space: pre;
+    }
+
+    /* Action Buttons Row */
+    .m-action-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .m-btn-run {
+      flex: 2;
+      min-height: 44px;
+      background: var(--style-accent);
+      color: var(--style-accent-ink);
+      border: none;
+      border-radius: var(--style-radius);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.15s;
+    }
+
+    .m-btn-run:active {
+      transform: scale(0.98);
+      filter: brightness(0.9);
+    }
+
+    .m-btn-sec {
+      flex: 1;
+      min-height: 44px;
+      background: var(--style-surface);
+      color: var(--style-ink);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    /* Output & Telemetry Drawer */
+    .m-output-box {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 10px;
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+
+    .m-telemetry-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--style-success);
+      font-family: var(--style-font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--style-border);
+      margin-bottom: 8px;
+    }
+
+    /* Responsive Mini Data Table */
+    .m-table-wrap {
+      overflow-x: auto;
+      border-radius: 4px;
+      border: 1px solid var(--style-border);
+    }
+
+    .m-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72rem;
+      text-align: left;
+    }
+
+    .m-table th {
+      background: var(--style-surface-subtle);
+      color: var(--style-ink-muted);
+      padding: 6px 8px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--style-border);
+    }
+
+    .m-table td {
+      padding: 6px 8px;
+      color: var(--style-ink);
+      border-bottom: 1px solid var(--style-border);
+      white-space: nowrap;
+    }
+
+    /* Test Validation Checks */
+    .m-check-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--style-success);
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* KPI Grid for Explorer Flow */
+    .m-kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .m-kpi-card {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .m-kpi-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--style-ink-muted);
+      letter-spacing: 0.03em;
+    }
+
+    .m-kpi-val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--style-ink);
+      font-family: var(--style-font-mono);
+    }
+
+    .m-kpi-delta {
+      font-size: 0.68rem;
+      color: var(--style-success);
+      font-weight: 600;
+    }
+
+    /* SVG Chart */
+    .m-chart-card {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 12px;
+    }
+
+    /* Quiz Component */
+    .m-quiz-card {
+      background: var(--style-surface);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .m-quiz-q {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--style-ink);
+      margin-bottom: 8px;
+    }
+
+    .m-quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .m-quiz-opt {
+      padding: 8px 10px;
+      background: var(--style-surface-subtle);
+      border: 1px solid var(--style-border);
+      border-radius: var(--style-radius);
+      font-size: 0.78rem;
+      color: var(--style-ink);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .m-quiz-opt:hover {
+      border-color: var(--style-accent);
+    }
+
+    .m-quiz-opt.correct {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: #22C55E;
+      color: #16A34A;
+      font-weight: 700;
+    }
+
+    .m-quiz-feedback {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: var(--style-radius);
+      font-size: 0.75rem;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* Showcase Footer */
+    .showcase-footer {
+      background: var(--showcase-panel);
+      border-top: 1px solid var(--showcase-border);
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--showcase-muted);
+    }
+
+    .svg-gallery-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .svg-pill-link {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--showcase-border);
+      color: var(--showcase-text);
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: border 0.15s;
+    }
+
+    .svg-pill-link:hover {
+      border-color: var(--showcase-accent);
+    }
+
+    /* Responsive Tweaks for Desktop / Tablet */
+    @media (max-width: 900px) {
+      .showcase-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls-strip {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       SHOWCASE GLOBAL HEADER & INTERACTIVE CONTROLS
+       ======================================================================== -->
+  <header class="showcase-header">
+    <div class="brand-group">
+      <span class="brand-icon">🛒</span>
+      <div>
+        <h1 class="brand-title">Mercearia do Bairro — Mobile Design Studio</h1>
+        <p class="brand-subtitle">Simulador de Mockups Visuais Multi-Estilo & Fluxos de Aprendizagem de Dados</p>
+      </div>
+    </div>
+
+    <div class="controls-strip">
+      <!-- Device Preset Switcher -->
+      <div class="control-block">
+        <span class="control-label">Dispositivo</span>
+        <div class="btn-group" id="deviceControls">
+          <button class="btn-toggle" data-preset="iphone-se" title="375 × 667px (iPhone SE)">375px SE</button>
+          <button class="btn-toggle active" data-preset="iphone-15" title="393 × 852px (iPhone 15 / 16)">393px i15</button>
+          <button class="btn-toggle" data-preset="iphone-16-promax" title="430 × 932px (iPhone 16 Pro Max)">430px Max</button>
+          <button class="btn-toggle" data-preset="fluid" title="Fluido / 100% responsivo">Fluido</button>
+        </div>
+      </div>
+
+      <!-- Visual Style Switcher -->
+      <div class="control-block">
+        <span class="control-label">Estilo Visual</span>
+        <div class="btn-group" id="styleControls">
+          <button class="btn-toggle active" data-style="nordic" title="Clean Scandinavian Minimalist Studio">🌱 Nordic Studio</button>
+          <button class="btn-toggle" data-style="glass" title="Vibrant Glassmorphic & Gamified App">✨ Glassmorphic</button>
+          <button class="btn-toggle" data-style="terminal" title="High-Density Professional Terminal IDE">⚡ Terminal Pro</button>
+        </div>
+      </div>
+
+      <!-- Flow Selector -->
+      <div class="control-block">
+        <span class="control-label">Fluxo / Ecrã</span>
+        <div class="btn-group" id="flowControls">
+          <button class="btn-toggle active" data-flow="roadmap" title="6 Trilhas e 47 Lições">1. Roadmap</button>
+          <button class="btn-toggle" data-flow="theory" title="Leitor Pedagógico com Analogias">2. Teoria</button>
+          <button class="btn-toggle" data-flow="workbench" title="Bancada Móvel e Editor">3. Bancada</button>
+          <button class="btn-toggle" data-flow="explorer" title="Explorador CSV e KPIs">4. Explorador</button>
+        </div>
+      </div>
+
+      <div class="links-strip">
+        <a href="/" class="nav-link-btn" title="Voltar à aplicação principal">← App Web</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Style Meta Information Banner -->
+  <div class="style-meta-banner">
+    <div class="meta-tagline">
+      <span class="style-badge" id="currentStyleBadge" style="background:#0F766E; color:#FFF;">Nordic Studio</span>
+      <span id="currentStyleDesc" style="color:#CBD5E1;">Minimalismo escandinavo, paleta obsidiana serena, contraste calmo, foco total na leitura e zero ruído.</span>
+    </div>
+    <div class="meta-metrics">
+      <span>Currículo: <strong>6 Trilhas / 47 Lições</strong></span>
+      <span>Dataset: <strong>5.078 Vendas</strong></span>
+      <span>WASM: <strong>Pyodide + SQLite</strong></span>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       CENTRAL WORKSPACE: PHONE SHELL WITH REALISTIC HARDWARE BEZELS
+       ======================================================================== -->
+  <main class="showcase-stage">
+    <div class="device-shell" id="phoneShell" data-preset="iphone-15" data-style="nordic">
+      
+      <!-- Realistic Dynamic Island & Camera -->
+      <div class="dynamic-island">
+        <div class="island-lens"></div>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="device-status-bar">
+        <span class="status-left">09:41</span>
+        <div class="status-right">
+          <span class="status-icon">5G</span>
+          <span class="status-icon">📶</span>
+          <span class="status-icon">􀛨 100%</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Mobile Viewport -->
+      <div class="device-viewport" id="viewportScroll">
+
+        <!-- ====================================================================
+             FLOW 1: CURRICULUM ROADMAP (6 Trilhas, 47 Lições)
+             ==================================================================== -->
+        <section class="flow-view active" id="view-roadmap">
+          <!-- App Header -->
+          <div class="m-app-header">
+            <div class="m-app-brand">
+              <span style="font-size:1.2rem;">🛒</span>
+              <div>
+                <div class="m-app-brand-title">Mercearia do Bairro</div>
+                <div style="font-size:0.68rem; color:var(--style-ink-muted);">Academia de Analistas de Dados</div>
+              </div>
+            </div>
+            <div class="m-app-user-stats">
+              <span class="m-streak-badge">🔥 14 dias</span>
+              <span style="color:var(--style-accent); font-weight:700;">14/47</span>
+            </div>
+          </div>
+
+          <!-- Overall Progress Card -->
+          <div class="m-card" style="background:var(--style-surface-subtle);">
+            <div class="m-card-header">
+              <span class="m-card-title">O Teu Percurso Profissional</span>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--style-accent);">30% Concluído</span>
+            </div>
+            <div style="height:6px; background:var(--style-border); border-radius:10px; overflow:hidden; margin:6px 0 8px;">
+              <div style="width:30%; height:100%; background:var(--style-accent); border-radius:10px;"></div>
+            </div>
+            <p style="font-size:0.72rem; color:var(--style-ink-muted);">Do zero absoluto a Analista de Dados preparado para entrevistas.</p>
+          </div>
+
+          <!-- Track Filter Strip -->
+          <div>
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--style-ink-muted); margin-bottom:6px;">Trilhas Disponíveis (6)</div>
+            <div class="m-chip-scroller" id="trackChipScroller">
+              <button class="m-chip" data-track="python">1. Python (11)</button>
+              <button class="m-chip active" data-track="sql">2. SQL (10)</button>
+              <button class="m-chip" data-track="pandas">3. Pandas (7)</button>
+              <button class="m-chip" data-track="git">4. Git & GitHub (5)</button>
+              <button class="m-chip" data-track="bi">5. Estatística & BI (6)</button>
+              <button class="m-chip" data-track="carreira">6. Profissional (8)</button>
+            </div>
+          </div>
+
+          <!-- Active Track Header Summary -->
+          <div class="m-card" id="trackInfoCard">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:0.68rem; font-weight:700; text-transform:uppercase; color:var(--style-accent);">Trilha 2 // 10 Lições</span>
+                <h2 style="font-size:0.95rem; font-weight:700; margin:2px 0 4px; color:var(--style-ink);" id="trackTitle">SQL para Analistas de Dados</h2>
+              </div>
+              <span class="m-app-brand-badge" id="trackEngine">SQLite WASM</span>
+            </div>
+            <p style="font-size:0.75rem; color:var(--style-ink-secondary); line-height:1.4;" id="trackSummary">
+              Consultas relacionais ao vivo sobre produtos (15), clientes (120) e vendas (5 078): filtros, agregações, JOINs, CTEs e Window Functions.
+            </p>
+          </div>
+
+          <!-- Lessons List for Active Track -->
+          <div class="m-lesson-list" id="lessonContainer">
+            <!-- Dynamically populated / initial SQL lessons -->
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             FLOW 2: THEORY READER (Leitor Pedagógico com Analogias Reais)
+             ==================================================================== -->
+        <section class="flow-view" id="view-theory">
+          <!-- Segmented View Switcher -->
+          <div class="m-segmented-switcher">
+            <button class="m-seg-btn active">📖 Lição & Teoria</button>
+            <button class="m-seg-btn" id="btnGoToWorkbenchFromTheory">⚡ Bancada Prática</button>
+          </div>
+
+          <!-- Lesson Meta Header -->
+          <div class="m-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:0.7rem; font-weight:700; color:var(--style-accent);">SQL // ETAPA 04</span>
+              <span style="font-size:0.68rem; color:var(--style-ink-muted);">⏱️ 8 min • Nível Intermédio</span>
+            </div>
+            <h2 style="font-size:1.05rem; font-weight:700; color:var(--style-ink); line-height:1.3; margin-bottom:6px;">
+              GROUP BY e Agregações: Faturar por Categoria na Mercearia
+            </h2>
+            <p style="font-size:0.78rem; color:var(--style-ink-secondary); line-height:1.4;">
+              Como transformar 5.078 linhas soltas de talões num resumo executivo por secção (Padaria, Frutaria, Laticínios) usando SUM, COUNT e AVG.
+            </p>
+          </div>
+
+          <!-- Real Grocery Analogy Card ("Analogia da Mercearia") -->
+          <div class="m-card" style="border-left: 3px solid var(--style-accent);">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+              <span style="font-size:1.1rem;">🥖</span>
+              <span style="font-size:0.82rem; font-weight:700; color:var(--style-ink);">Analogia da Mercearia: Os Montes de Talões</span>
+            </div>
+            <p style="font-size:0.78rem; color:var(--style-ink-secondary); line-height:1.5;">
+              Imagine que ao fechar a loja à noite tem 5.078 talões de compra espalhados pelo balcão. Se o gerente perguntar <em>"Quanto faturou a Padaria?"</em>, não vai somar talão a talão.
+              Primeiro separa os talões em <strong>montes por categoria</strong> (isso é o <code>GROUP BY categoria</code>). Depois passa a calculadora somando cada monte (isso é o <code>SUM(total)</code>).
+            </p>
+          </div>
+
+          <!-- Concepts Card -->
+          <div class="m-card">
+            <div class="m-card-title" style="margin-bottom:8px;">Conceitos Fundamentais</div>
+            <ul style="padding-left:16px; font-size:0.78rem; color:var(--style-ink-secondary); line-height:1.6;">
+              <li><strong>COUNT(*)</strong>: Conta quantos pedidos ou transações existem em cada grupo.</li>
+              <li><strong>SUM(coluna)</strong>: Soma o valor numérico total (ex: receita faturada).</li>
+              <li><strong>AVG(coluna)</strong>: Calcula o ticket médio por compra.</li>
+              <li><strong>AS alias</strong>: Dá um nome limpo à coluna de saída para relatórios da direção.</li>
+            </ul>
+          </div>
+
+          <!-- Progressive Disclosure Accordions -->
+          <div class="m-accordion">
+            <div class="m-accordion-summary" onclick="toggleAccordion(this)">
+              <span>📋 Tabela de Sintaxe Rápida</span>
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="m-accordion-body">
+              <div class="m-table-wrap">
+                <table class="m-table">
+                  <thead>
+                    <tr><th>Função</th><th>O que faz</th><th>Exemplo SQL</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>COUNT(*)</code></td><td>Contagem de linhas</td><td><code>COUNT(*) AS qtd</code></td></tr>
+                    <tr><td><code>SUM(col)</code></td><td>Soma monetária</td><td><code>SUM(total) AS receita</code></td></tr>
+                    <tr><td><code>AVG(col)</code></td><td>Média aritmética</td><td><code>ROUND(AVG(total), 2)</code></td></tr>
+                    <tr><td><code>GROUP BY</code></td><td>Define os grupos</td><td><code>GROUP BY categoria</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-accordion">
+            <div class="m-accordion-summary" onclick="toggleAccordion(this)">
+              <span>⚠️ Armadilha Comum (Pitfall de Entrevista)</span>
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="m-accordion-body">
+              <p>
+                <strong>Esquecer o GROUP BY nas colunas não agregadas:</strong> Se selecionar <code>SELECT categoria, produto, SUM(total)</code> sem colocar ambas no <code>GROUP BY</code>, o SQL gerará um erro ou retornará dados truncados. Regra de ouro: toda coluna no SELECT sem agregação tem de estar no GROUP BY!
+              </p>
+            </div>
+          </div>
+
+          <div class="m-accordion">
+            <div class="m-accordion-summary" onclick="toggleAccordion(this)">
+              <span>💡 Dica da Prática Profissional</span>
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="m-accordion-body">
+              <p>
+                Em pipelines de dados profissionais, use sempre <code>ROUND(SUM(total), 2)</code> para evitar valores de ponto flutuante estranhos (ex: 14892.400000000001) em relatórios executivos e dashboards do Power BI.
+              </p>
+            </div>
+          </div>
+
+          <!-- Interactive Quiz -->
+          <div class="m-quiz-card">
+            <div class="m-quiz-q">❓ Verificação Rápida: Qual função SQL calcula a receita monetária total faturada por categoria?</div>
+            <div class="m-quiz-options">
+              <button class="m-quiz-opt" onclick="checkQuiz(this, false)">A) COUNT(total)</button>
+              <button class="m-quiz-opt" onclick="checkQuiz(this, true)">B) SUM(total)</button>
+              <button class="m-quiz-opt" onclick="checkQuiz(this, false)">C) AVG(total)</button>
+              <button class="m-quiz-opt" onclick="checkQuiz(this, false)">D) MAX(total)</button>
+            </div>
+            <div class="m-quiz-feedback" id="quizFeedback"></div>
+          </div>
+
+          <!-- Bottom Action to Switch to Workbench -->
+          <button class="m-btn-run" style="width:100%; margin-top:8px;" id="btnGoWorkbenchAction">
+            Praticar na Bancada Interativa ➔
+          </button>
+        </section>
+
+        <!-- ====================================================================
+             FLOW 3: LIVE WORKBENCH (Bancada Prática, Editor & Execução)
+             ==================================================================== -->
+        <section class="flow-view" id="view-workbench">
+          <!-- Segmented View Switcher -->
+          <div class="m-segmented-switcher">
+            <button class="m-seg-btn" id="btnGoToTheoryFromWorkbench">📖 Lição & Teoria</button>
+            <button class="m-seg-btn active">⚡ Bancada Prática</button>
+          </div>
+
+          <!-- Challenge Card -->
+          <div class="m-card" style="padding:10px 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.7rem; font-weight:700; color:var(--style-accent);">DESAFIO SQL: ETAPA 04</span>
+              <span style="font-size:0.68rem; color:var(--style-success); font-weight:600;">Dataset: vendas.csv</span>
+            </div>
+            <p style="font-size:0.78rem; font-weight:600; color:var(--style-ink); margin-top:4px;">
+              Agrupe as vendas por categoria, conte o número de pedidos e calcule a receita total arredondada a 2 casas decimais.
+            </p>
+          </div>
+
+          <!-- Mobile Code Quick-Symbol Strip (Ergonomic Touch Typing) -->
+          <div>
+            <div style="font-size:0.68rem; font-weight:600; color:var(--style-ink-muted); margin-bottom:4px;">Barra Rápida de Símbolos Touch:</div>
+            <div class="m-symbol-bar">
+              <button class="m-sym-btn" onclick="insertSymbol('(')">(</button>
+              <button class="m-sym-btn" onclick="insertSymbol(')')">)</button>
+              <button class="m-sym-btn" onclick="insertSymbol('[')">[</button>
+              <button class="m-sym-btn" onclick="insertSymbol(']')">]</button>
+              <button class="m-sym-btn" onclick="insertSymbol('{')">{</button>
+              <button class="m-sym-btn" onclick="insertSymbol('}')">}</button>
+              <button class="m-sym-btn" onclick="insertSymbol('=')">=</button>
+              <button class="m-sym-btn" onclick="insertSymbol(':')">:</button>
+              <button class="m-sym-btn" onclick="insertSymbol('\'')">'</button>
+              <button class="m-sym-btn" onclick="insertSymbol('&quot;')">"</button>
+              <button class="m-sym-btn" onclick="insertSymbol('_')">_</button>
+              <button class="m-sym-btn" onclick="insertSymbol(',')">,</button>
+              <button class="m-sym-btn" onclick="insertSymbol(';')">;</button>
+              <button class="m-sym-btn" onclick="insertSymbol('SELECT ')">SELECT</button>
+              <button class="m-sym-btn" onclick="insertSymbol('FROM ')">FROM</button>
+              <button class="m-sym-btn" onclick="insertSymbol('GROUP BY ')">GROUP BY</button>
+            </div>
+          </div>
+
+          <!-- Code Editor Box -->
+          <div class="m-code-box">
+            <div class="m-code-header">
+              <span>editor.sql • SQLite WASM</span>
+              <span style="font-size:0.68rem; color:#64748B;">5.078 linhas carregadas</span>
+            </div>
+            <textarea class="m-code-textarea" id="sqlEditor" spellcheck="false">SELECT 
+  categoria,
+  COUNT(*) AS total_pedidos,
+  ROUND(SUM(total), 2) AS receita_total
+FROM vendas
+GROUP BY categoria
+ORDER BY receita_total DESC;</textarea>
+          </div>
+
+          <!-- Action Buttons Bar -->
+          <div class="m-action-bar">
+            <button class="m-btn-run" id="btnRunQuery" onclick="executeMockQuery()">
+              <span>▶ Executar Consulta</span>
+            </button>
+            <button class="m-btn-sec" onclick="resetEditor()">
+              <span>↺ Repor</span>
+            </button>
+            <button class="m-btn-sec" onclick="showTip()">
+              <span>💡 Dica</span>
+            </button>
+          </div>
+
+          <!-- Execution Output & Telemetry -->
+          <div class="m-output-box" id="outputDrawer">
+            <div class="m-telemetry-strip" id="telemetryBar">
+              <span>✓ Executado com sucesso em 11.2ms</span>
+              <span>5 linhas retornadas</span>
+            </div>
+
+            <!-- Result Table Preview -->
+            <div style="font-size:0.7rem; font-weight:700; color:var(--style-ink); margin:6px 0 4px;">
+              Resultado da Consulta (vendas.csv):
+            </div>
+            <div class="m-table-wrap">
+              <table class="m-table">
+                <thead>
+                  <tr>
+                    <th>categoria</th>
+                    <th>total_pedidos</th>
+                    <th>receita_total</th>
+                  </tr>
+                </thead>
+                <tbody id="resultTableBody">
+                  <tr>
+                    <td>Padaria</td>
+                    <td>1.842</td>
+                    <td>€ 14.892,40</td>
+                  </tr>
+                  <tr>
+                    <td>Frutaria</td>
+                    <td>1.410</td>
+                    <td>€ 11.230,10</td>
+                  </tr>
+                  <tr>
+                    <td>Laticínios</td>
+                    <td>986</td>
+                    <td>€ 8.420,50</td>
+                  </tr>
+                  <tr>
+                    <td>Mercearia Seca</td>
+                    <td>840</td>
+                    <td>€ 7.150,00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Validation Assertions Checklist -->
+            <div style="margin-top:8px; padding-top:6px; border-top:1px solid var(--style-border);">
+              <div style="font-size:0.68rem; font-weight:700; color:var(--style-ink-muted); margin-bottom:4px;">Verificações Automáticas:</div>
+              <div class="m-check-item"><span>✓</span> <span>Cláusula GROUP BY categoria aplicada</span></div>
+              <div class="m-check-item"><span>✓</span> <span>Agregação SUM(total) com alias receita_total</span></div>
+              <div class="m-check-item"><span>✓</span> <span>Ordenação descendente por receita verificada</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             FLOW 4: CSV ANALYTICAL EXPLORER (KPIs e Gráficos da Mercearia)
+             ==================================================================== -->
+        <section class="flow-view" id="view-explorer">
+          <!-- App Header -->
+          <div class="m-app-header">
+            <div class="m-app-brand">
+              <span style="font-size:1.2rem;">📊</span>
+              <div>
+                <div class="m-app-brand-title">Explorador de Vendas</div>
+                <div style="font-size:0.68rem; color:var(--style-ink-muted);">vendas.csv • 5.078 transações</div>
+              </div>
+            </div>
+            <span class="m-app-brand-badge" style="background:rgba(34,197,94,0.15); color:#22C55E;">Auditado: 100% Íntegro</span>
+          </div>
+
+          <!-- 2x2 KPI Grid for Mobile -->
+          <div class="m-kpi-grid">
+            <div class="m-kpi-card">
+              <span class="m-kpi-label">Receita Faturada</span>
+              <span class="m-kpi-val">€ 47.892</span>
+              <span class="m-kpi-delta">▲ +8.4% vs mês ant.</span>
+            </div>
+            <div class="m-kpi-card">
+              <span class="m-kpi-label">Total Transações</span>
+              <span class="m-kpi-val">5.078</span>
+              <span class="m-kpi-delta">▲ +340 pedidos</span>
+            </div>
+            <div class="m-kpi-card">
+              <span class="m-kpi-label">Ticket Médio</span>
+              <span class="m-kpi-val">€ 9,43</span>
+              <span class="m-kpi-delta" style="color:var(--style-accent-cool);">Estável (Padaria)</span>
+            </div>
+            <div class="m-kpi-card">
+              <span class="m-kpi-label">Clientes Únicos</span>
+              <span class="m-kpi-val">120</span>
+              <span class="m-kpi-delta">▲ 92% fidelizados</span>
+            </div>
+          </div>
+
+          <!-- Category Filter Strip -->
+          <div>
+            <div style="font-size:0.7rem; font-weight:600; color:var(--style-ink-muted); margin-bottom:4px;">Filtrar por Categoria:</div>
+            <div class="m-chip-scroller">
+              <button class="m-chip active">Todas (5.078)</button>
+              <button class="m-chip">Padaria (1.842)</button>
+              <button class="m-chip">Frutaria (1.410)</button>
+              <button class="m-chip">Laticínios (986)</button>
+              <button class="m-chip">Mercearia Seca (840)</button>
+            </div>
+          </div>
+
+          <!-- Mobile Monthly Revenue Trend Chart (SVG) -->
+          <div class="m-chart-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:0.8rem; font-weight:700; color:var(--style-ink);">Evolução Mensal da Receita (€)</span>
+              <span style="font-size:0.68rem; color:var(--style-accent); font-weight:600;">Out - Mar</span>
+            </div>
+            <!-- Embedded Responsive SVG Chart -->
+            <svg viewBox="0 0 320 120" style="width:100%; height:auto; overflow:visible;">
+              <defs>
+                <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="var(--style-accent)" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="var(--style-accent)" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="20" y1="20" x2="310" y2="20" stroke="var(--style-border)" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="20" y1="60" x2="310" y2="60" stroke="var(--style-border)" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="20" y1="100" x2="310" y2="100" stroke="var(--style-border)" stroke-width="1" />
+              
+              <!-- Area curve -->
+              <polygon points="30,85 80,72 135,50 190,30 245,60 300,45 300,100 30,100" fill="url(#chartGrad)" />
+              <!-- Trend Line -->
+              <polyline points="30,85 80,72 135,50 190,30 245,60 300,45" fill="none" stroke="var(--style-accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              
+              <!-- Data Points -->
+              <circle cx="30" cy="85" r="3.5" fill="var(--style-surface)" stroke="var(--style-accent)" stroke-width="2" />
+              <circle cx="80" cy="72" r="3.5" fill="var(--style-surface)" stroke="var(--style-accent)" stroke-width="2" />
+              <circle cx="135" cy="50" r="3.5" fill="var(--style-surface)" stroke="var(--style-accent)" stroke-width="2" />
+              <circle cx="190" cy="30" r="4.5" fill="var(--style-accent)" stroke="var(--style-surface)" stroke-width="2" />
+              <circle cx="245" cy="60" r="3.5" fill="var(--style-surface)" stroke="var(--style-accent)" stroke-width="2" />
+              <circle cx="300" cy="45" r="3.5" fill="var(--style-surface)" stroke="var(--style-accent)" stroke-width="2" />
+              
+              <!-- Labels -->
+              <text x="30" y="114" font-size="8" fill="var(--style-ink-muted)" text-anchor="middle">Out</text>
+              <text x="80" y="114" font-size="8" fill="var(--style-ink-muted)" text-anchor="middle">Nov</text>
+              <text x="135" y="114" font-size="8" fill="var(--style-ink-muted)" text-anchor="middle">Dez</text>
+              <text x="190" y="114" font-size="8" font-weight="700" fill="var(--style-accent)" text-anchor="middle">Jan (Pico)</text>
+              <text x="245" y="114" font-size="8" fill="var(--style-ink-muted)" text-anchor="middle">Fev</text>
+              <text x="300" y="114" font-size="8" fill="var(--style-ink-muted)" text-anchor="middle">Mar</text>
+            </svg>
+          </div>
+
+          <!-- Raw Data Table with Swipe Prompt -->
+          <div class="m-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span class="m-card-title">Amostra de Vendas</span>
+              <span style="font-size:0.68rem; color:var(--style-accent);">↔ Deslize para navegar</span>
+            </div>
+            <div class="m-table-wrap">
+              <table class="m-table">
+                <thead>
+                  <tr>
+                    <th>id_venda</th>
+                    <th>data</th>
+                    <th>cliente</th>
+                    <th>categoria</th>
+                    <th>produto</th>
+                    <th>qtd</th>
+                    <th>total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#V0001</td>
+                    <td>2024-01-02</td>
+                    <td>Maria Silva</td>
+                    <td>Padaria</td>
+                    <td>Pão de Mafra</td>
+                    <td>2</td>
+                    <td>€ 2,40</td>
+                  </tr>
+                  <tr>
+                    <td>#V0002</td>
+                    <td>2024-01-02</td>
+                    <td>João Santos</td>
+                    <td>Laticínios</td>
+                    <td>Queijo Serra</td>
+                    <td>1</td>
+                    <td>€ 6,80</td>
+                  </tr>
+                  <tr>
+                    <td>#V0003</td>
+                    <td>2024-01-03</td>
+                    <td>Ana Pereira</td>
+                    <td>Frutaria</td>
+                    <td>Maçã Bravo</td>
+                    <td>3</td>
+                    <td>€ 4,20</td>
+                  </tr>
+                  <tr>
+                    <td>#V0004</td>
+                    <td>2024-01-03</td>
+                    <td>Carlos Sousa</td>
+                    <td>Padaria</td>
+                    <td>Broa de Milho</td>
+                    <td>1</td>
+                    <td>€ 1,80</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /.device-viewport -->
+
+      <!-- Hardware Home Indicator Bar -->
+      <div class="device-home-bar">
+        <div class="home-pill"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Showcase Footer -->
+  <footer class="showcase-footer">
+    <div>
+      <strong>Mercearia do Bairro — Milestone 2: Mobile UI Mockups (R2)</strong>
+      <div style="font-size:0.75rem; margin-top:2px;">Suporta 375px (iPhone SE), 393px (iPhone 15/16) e 430px (iPhone 16 Pro Max).</div>
+    </div>
+    <div class="svg-gallery-preview">
+      <span>SVG Mockups Disponíveis:</span>
+      <a href="/mockups/01_nordic_roadmap.svg" target="_blank" class="svg-pill-link">01_Roadmap.svg</a>
+      <a href="/mockups/02_nordic_theory_reader.svg" target="_blank" class="svg-pill-link">02_Teoria.svg</a>
+      <a href="/mockups/03_glassmorphic_workbench.svg" target="_blank" class="svg-pill-link">03_Bancada.svg</a>
+      <a href="/mockups/04_terminal_explorer.svg" target="_blank" class="svg-pill-link">04_Explorador.svg</a>
+      <a href="/mockups/05_style_comparison_matrix.svg" target="_blank" class="svg-pill-link">05_Comparativo.svg</a>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       INTERACTIVE JAVASCRIPT CONTROLLERS
+       ======================================================================== -->
+  <script>
+    // --- Data Definitions for Curriculum Tracks (47 Total Lessons) ---
+    const curriculumData = {
+      python: {
+        title: "Python do Zero Absoluto à Caixa Registadora",
+        short: "1. Python",
+        engine: "Python 3.12 (Pyodide)",
+        summary: "Pensamento computacional desde a primeira linha de código até à leitura e validação real das 5 078 vendas da Mercearia.",
+        lessons: [
+          { code: "PY:00", title: "Ponto Zero: como o computador pensa e o que faz um Analista", time: "10 min", status: "completed" },
+          { code: "PY:01", title: "Sintaxe, print() e comentários", time: "8 min", status: "completed" },
+          { code: "PY:02", title: "Variáveis e tipos de dados no caixa da mercearia", time: "8 min", status: "completed" },
+          { code: "PY:03", title: "Strings, f-strings e limpeza de texto", time: "10 min", status: "completed" },
+          { code: "PY:04", title: "Condições if / elif / else: regras de desconto", time: "12 min", status: "completed" },
+          { code: "PY:05", title: "Ciclo for e range(): iterar faturas", time: "10 min", status: "completed" },
+          { code: "PY:06", title: "Ciclo while e acumuladores de total diário", time: "10 min", status: "completed" },
+          { code: "PY:07", title: "Listas, fatias e compreensão de listas", time: "12 min", status: "completed" },
+          { code: "PY:08", title: "Dicionários: agrupar vendas por cliente", time: "12 min", status: "completed" },
+          { code: "PY:09", title: "Funções e return: modularizar o cálculo do IVA", time: "10 min", status: "completed" },
+          { code: "PY:10", title: "Projeto Caixa Registadora: ler vendas.csv do zero", time: "25 min", status: "current" }
+        ]
+      },
+      sql: {
+        title: "SQL para Analistas de Dados",
+        short: "2. SQL",
+        engine: "SQLite WebAssembly",
+        summary: "Consultas relacionais ao vivo sobre produtos (15), clientes (120) e vendas (5 078): filtros, agregações, JOINs, CTEs e Window Functions.",
+        lessons: [
+          { code: "SQL:01", title: "SELECT, DISTINCT e LIMIT: explorar tabelas", time: "6 min", status: "completed" },
+          { code: "SQL:02", title: "WHERE, IN, BETWEEN e LIKE: filtrar registos", time: "8 min", status: "completed" },
+          { code: "SQL:03", title: "ORDER BY e colunas calculadas com AS", time: "8 min", status: "completed" },
+          { code: "SQL:04", title: "GROUP BY e agregações: faturar por categoria", time: "8 min", status: "current" },
+          { code: "SQL:05", title: "HAVING vs WHERE: filtrar totais agrupados", time: "10 min", status: "available" },
+          { code: "SQL:06", title: "INNER JOIN e LEFT JOIN: cruzar clientes e produtos", time: "12 min", status: "available" },
+          { code: "SQL:07", title: "CASE WHEN, COALESCE e limpeza de nulos", time: "12 min", status: "available" },
+          { code: "SQL:08", title: "CTEs com WITH e Window Functions com OVER", time: "15 min", status: "available" },
+          { code: "SQL:09", title: "Subqueries, EXISTS vs IN e UNION ALL", time: "14 min", status: "available" },
+          { code: "SQL:10", title: "Médias Móveis com ROWS BETWEEN e Matriz RFM", time: "18 min", status: "available" }
+        ]
+      },
+      pandas: {
+        title: "Pandas e Oficina de Limpeza de Dados",
+        short: "3. Pandas",
+        engine: "Python + Pandas WASM",
+        summary: "Os cadernos das Etapas 13 a 17 diretamente no browser: DataFrames, filtros, groupby, merge e limpeza de vendas_sujas.csv.",
+        lessons: [
+          { code: "PD:13", title: "DataFrames, colunas e contagens de vendas", time: "10 min", status: "available" },
+          { code: "PD:14", title: "Máscaras booleanas, .loc e .isin()", time: "10 min", status: "available" },
+          { code: "PD:15A", title: "Acessores .str e datas com pd.to_datetime", time: "12 min", status: "available" },
+          { code: "PD:15B", title: "sort_values e value_counts por freguesia", time: "8 min", status: "available" },
+          { code: "PD:15", title: "groupby e pd.merge: tabela analítica consolidada", time: "15 min", status: "available" },
+          { code: "PD:16", title: "Oficina de limpeza em vendas_sujas.csv (Outliers e nulos)", time: "20 min", status: "available" },
+          { code: "PD:17", title: "pivot_table e transform para relatórios executivos", time: "15 min", status: "available" }
+        ]
+      },
+      git: {
+        title: "Git, GitHub e Portfólio para Analistas de Dados",
+        short: "4. Git",
+        engine: "Simulador Terminal Git",
+        summary: "Controlo de versões ao vivo no terminal simulado: commits limpos, proteção de dados com .gitignore, branches e publicação de portfólio.",
+        lessons: [
+          { code: "GIT:01", title: "Linha de comandos, git init e git status", time: "8 min", status: "available" },
+          { code: "GIT:02", title: "Staging e histórico: git add, commit e log", time: "10 min", status: "available" },
+          { code: "GIT:03", title: ".gitignore e privacidade em projetos de dados", time: "10 min", status: "available" },
+          { code: "GIT:04", title: "Branches e git merge: gerir análises paralelas", time: "12 min", status: "available" },
+          { code: "GIT:05", title: "GitHub e montagem de portfólio analítico", time: "15 min", status: "available" }
+        ]
+      },
+      bi: {
+        title: "Estatística, Excel/DAX e Power BI para Analistas",
+        short: "5. Estatística & BI",
+        engine: "Python + SQLite Analítico",
+        summary: "Medidas estatísticas robustas, deteção de outliers, Curva ABC (Pareto), Star Schema, DAX e visualização honesta.",
+        lessons: [
+          { code: "BI:01", title: "Média vs Mediana: quando os extremos enganam", time: "10 min", status: "available" },
+          { code: "BI:02", title: "Quartis, IQR e deteção de Outliers no caixa", time: "12 min", status: "available" },
+          { code: "BI:03", title: "Curva ABC / Princípio de Pareto nos produtos", time: "12 min", status: "available" },
+          { code: "BI:04", title: "Modelagem dimensional Star Schema para Power BI", time: "15 min", status: "available" },
+          { code: "BI:05", title: "Ponte SQL/Pandas para Excel e fórmulas DAX", time: "15 min", status: "available" },
+          { code: "BI:06", title: "Visualização de dados honesta e Storytelling", time: "15 min", status: "available" }
+        ]
+      },
+      carreira: {
+        title: "Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista",
+        short: "6. Profissional",
+        engine: "Python + SQL Profissional",
+        summary: "A ponte final entre saber sintaxe e trabalhar como Analista de Dados: pipelines ETL, testes de qualidade, retenção de clientes e casos reais de entrevista.",
+        lessons: [
+          { code: "PRO:01", title: "Arquitetura ETL em Produção: Extrair, Transformar e Carregar", time: "15 min", status: "available" },
+          { code: "PRO:02", title: "Testes Automáticos de Qualidade de Dados (Data Contracts)", time: "15 min", status: "available" },
+          { code: "PRO:03", title: "Métricas de Negócio: Retenção, Recorrência e Coortes", time: "18 min", status: "available" },
+          { code: "PRO:04", title: "SQL de Alta Performance: Índices e EXPLAIN QUERY PLAN", time: "15 min", status: "available" },
+          { code: "PRO:05", title: "Desafio de Entrevista Técnica: Top N por Categoria e LAG", time: "20 min", status: "available" },
+          { code: "PRO:06", title: "Caso Executivo 360º para Apresentação à Direção", time: "25 min", status: "available" },
+          { code: "PRO:07", title: "APIs REST, dados em JSON e tratamento de exceções", time: "15 min", status: "available" },
+          { code: "PRO:08", title: "sqlite3 em Python, queries parametrizadas e pd.read_sql", time: "20 min", status: "available" }
+        ]
+      }
+    };
+
+    // --- State Management ---
+    const state = {
+      device: 'iphone-15',
+      style: 'nordic',
+      flow: 'roadmap',
+      currentTrack: 'sql'
+    };
+
+    // --- DOM Elements ---
+    const phoneShell = document.getElementById('phoneShell');
+    const viewportScroll = document.getElementById('viewportScroll');
+    const currentStyleBadge = document.getElementById('currentStyleBadge');
+    const currentStyleDesc = document.getElementById('currentStyleDesc');
+
+    // --- Style Switcher Logic ---
+    const styleDescriptions = {
+      nordic: {
+        name: "Nordic Studio",
+        bg: "#0F766E",
+        text: "#FFFFFF",
+        desc: "Minimalismo escandinavo, paleta obsidiana serena, contraste calmo, foco total na leitura e zero ruído."
+      },
+      glass: {
+        name: "Glassmorphic Neo-Duo",
+        bg: "#6366F1",
+        text: "#FFFFFF",
+        desc: "Cartões translúcidos com efeito frosted glass, gradientes elétricos, feedback táctil e mecânica motivacional gamificada."
+      },
+      terminal: {
+        name: "Terminal Pro",
+        bg: "#22C55E",
+        text: "#000000",
+        desc: "Densidade máxima de dados, preto OLED puro, verde fósforo e telemetria de queries em tempo real estilo Bloomberg/IDE."
+      }
+    };
+
+    function setStyle(newStyle) {
+      state.style = newStyle;
+      phoneShell.setAttribute('data-style', newStyle);
+      
+      const meta = styleDescriptions[newStyle];
+      currentStyleBadge.textContent = meta.name;
+      currentStyleBadge.style.background = meta.bg;
+      currentStyleBadge.style.color = meta.text;
+      currentStyleDesc.textContent = meta.desc;
+
+      // Update button active state
+      document.querySelectorAll('#styleControls .btn-toggle').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === newStyle);
+      });
+    }
+
+    // --- Device Preset Logic ---
+    function setDevice(newPreset) {
+      state.device = newPreset;
+      phoneShell.setAttribute('data-preset', newPreset);
+
+      document.querySelectorAll('#deviceControls .btn-toggle').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === newPreset);
+      });
+    }
+
+    // --- Flow Selector Logic ---
+    function setFlow(flowId) {
+      state.flow = flowId;
+      document.querySelectorAll('.flow-view').forEach(view => {
+        view.classList.toggle('active', view.id === `view-${flowId}`);
+      });
+
+      document.querySelectorAll('#flowControls .btn-toggle').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.flow === flowId);
+      });
+
+      // Smooth scroll viewport to top
+      viewportScroll.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Render Track & Lessons (Flow 1) ---
+    function renderTrack(trackKey) {
+      state.currentTrack = trackKey;
+      const data = curriculumData[trackKey];
+      if (!data) return;
+
+      document.getElementById('trackTitle').textContent = data.title;
+      document.getElementById('trackEngine').textContent = data.engine;
+      document.getElementById('trackSummary').textContent = data.summary;
+
+      // Render chip active state
+      document.querySelectorAll('#trackChipScroller .m-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.track === trackKey);
+      });
+
+      // Render lessons list
+      const container = document.getElementById('lessonContainer');
+      container.innerHTML = '';
+
+      data.lessons.forEach((les, idx) => {
+        const item = document.createElement('div');
+        item.className = `m-lesson-item ${les.status === 'current' ? 'active' : ''}`;
+        
+        let statusBadge = '🔒';
+        if (les.status === 'completed') statusBadge = '✓';
+        if (les.status === 'current') statusBadge = '⚡ Em Curso';
+        if (les.status === 'available') statusBadge = '🔓';
+
+        item.innerHTML = `
+          <div class="m-lesson-left">
+            <span class="m-lesson-code">${les.code}</span>
+            <div>
+              <div class="m-lesson-name">${les.title}</div>
+              <div class="m-lesson-meta">${les.time} • ${data.engine}</div>
+            </div>
+          </div>
+          <span style="font-size:0.75rem; font-weight:700; color:${les.status === 'completed' ? 'var(--style-success)' : les.status === 'current' ? 'var(--style-accent)' : 'var(--style-ink-muted)'};">${statusBadge}</span>
+        `;
+
+        item.addEventListener('click', () => {
+          // Navigating to Theory or Workbench for SQL Stage 4
+          if (les.code.includes('04') || les.code.includes('SQL')) {
+            setFlow('theory');
+          } else {
+            setFlow('workbench');
+          }
+        });
+
+        container.appendChild(item);
+      });
+    }
+
+    // --- Accordion Toggle Helper ---
+    function toggleAccordion(summaryElem) {
+      const parent = summaryElem.parentElement;
+      const body = parent.querySelector('.m-accordion-body');
+      const arrow = summaryElem.querySelector('.acc-arrow');
+      
+      if (body.style.display === 'none' || !body.style.display) {
+        body.style.display = 'block';
+        if (arrow) arrow.textContent = '▲';
+      } else {
+        body.style.display = 'none';
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+
+    // --- Interactive Quiz Helper ---
+    function checkQuiz(btn, isCorrect) {
+      const parent = btn.parentElement;
+      const feedback = document.getElementById('quizFeedback');
+      
+      parent.querySelectorAll('.m-quiz-opt').forEach(opt => {
+        opt.style.borderColor = 'var(--style-border)';
+        opt.style.background = 'var(--style-surface-subtle)';
+        opt.style.color = 'var(--style-ink)';
+      });
+
+      feedback.style.display = 'block';
+      if (isCorrect) {
+        btn.classList.add('correct');
+        feedback.style.background = 'rgba(34, 197, 94, 0.15)';
+        feedback.style.color = '#15803D';
+        feedback.style.border = '1px solid #22C55E';
+        feedback.innerHTML = '<strong>🎉 Correto!</strong> A função <code>SUM(total)</code> soma os montantes financeiros de todos os talões da categoria correspondente.';
+      } else {
+        btn.style.borderColor = '#EF4444';
+        btn.style.color = '#DC2626';
+        feedback.style.background = 'rgba(239, 68, 68, 0.12)';
+        feedback.style.color = '#B91C1C';
+        feedback.style.border = '1px solid #EF4444';
+        feedback.innerHTML = '<strong>Atenção:</strong> <code>COUNT</code> conta o número de linhas (pedidos), enquanto que a receita monetária exige a soma com <code>SUM(total)</code>.';
+      }
+    }
+
+    // --- Quick Symbol Typing Insertion ---
+    function insertSymbol(symbol) {
+      const editor = document.getElementById('sqlEditor');
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const val = editor.value;
+
+      editor.value = val.substring(0, start) + symbol + val.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + symbol.length;
+      editor.focus();
+    }
+
+    // --- Workbench Query Execution Simulator ---
+    function executeMockQuery() {
+      const btn = document.getElementById('btnRunQuery');
+      const telemetry = document.getElementById('telemetryBar');
+      const origContent = btn.innerHTML;
+
+      btn.innerHTML = '<span>⏳ A processar no SQLite WASM…</span>';
+      btn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        btn.innerHTML = origContent;
+        btn.style.opacity = '1';
+
+        const randMs = (Math.random() * 4 + 9).toFixed(1);
+        telemetry.innerHTML = `<span>✓ Executado com sucesso em ${randMs}ms</span><span>5 linhas • 5.078 registos escaneados</span>`;
+        telemetry.style.color = 'var(--style-success)';
+      }, 350);
+    }
+
+    function resetEditor() {
+      document.getElementById('sqlEditor').value = `SELECT \n  categoria,\n  COUNT(*) AS total_pedidos,\n  ROUND(SUM(total), 2) AS receita_total\nFROM vendas\nGROUP BY categoria\nORDER BY receita_total DESC;`;
+    }
+
+    function showTip() {
+      alert("Dica de Analista: Não te esqueças de incluir no GROUP BY todas as colunas do SELECT que não tenham funções agregadoras!");
+    }
+
+    // --- Initialize Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Style Controls
+      document.querySelectorAll('#styleControls .btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => setStyle(btn.dataset.style));
+      });
+
+      // Device Controls
+      document.querySelectorAll('#deviceControls .btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => setDevice(btn.dataset.preset));
+      });
+
+      // Flow Controls
+      document.querySelectorAll('#flowControls .btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => setFlow(btn.dataset.flow));
+      });
+
+      // Track Chips
+      document.querySelectorAll('#trackChipScroller .m-chip').forEach(chip => {
+        chip.addEventListener('click', () => renderTrack(chip.dataset.track));
+      });
+
+      // In-App Segmented Switchers
+      document.getElementById('btnGoToWorkbenchFromTheory').addEventListener('click', () => setFlow('workbench'));
+      document.getElementById('btnGoWorkbenchAction').addEventListener('click', () => setFlow('workbench'));
+      document.getElementById('btnGoToTheoryFromWorkbench').addEventListener('click', () => setFlow('theory'));
+
+      // Initial Render
+      renderTrack('sql');
+      setStyle('nordic');
+      setDevice('iphone-15');
+      setFlow('roadmap');
+    });
+  </script>
+</body>
+</html>

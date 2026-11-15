@@ -1,0 +1,2246 @@
+import './styles/app.css';
+import { allTracks, cheatsheets } from './data/curriculum';
+import type { EngineKind, Lesson, Track } from './data/types';
+import { loadMerceariaDataset, type MerceariaDataset } from './engines/csvEngine';
+import { runSqlQuery } from './engines/sqlEngine';
+import { runPythonCode } from './engines/pythonEngine';
+import { createInitialGitState, runGitSimulator, type GitRepoState } from './engines/gitEngine';
+import { renderExplorerHtml } from './ui/explorerView';
+import { renderCheatsheetHtml } from './ui/cheatsheetView';
+import { formatCodePrettier, highlightCode, renderLineNumbers } from './ui/codeEditor';
+import {
+  clearAllUserProgress,
+  decodeProgressCode,
+  encodeProgressCode,
+  exportProgressJson,
+  generatePortfolioMarkdown,
+  importProgressJson,
+  isCloudSyncCode,
+  loadLastLocation,
+  loadSavedDrafts,
+  loadSavedProgress,
+  loadSavedQuizzes,
+  loadSyncCode,
+  mergeProgressRecords,
+  pullCloudSync,
+  pushCloudSync,
+  saveDrafts,
+  saveLastLocation,
+  saveProgress,
+  saveQuizzes,
+  saveSyncCode,
+  type UserProgressMap,
+} from './data/progress';
+
+type ViewMode = 'academia' | 'explorador' | 'referencia';
+type WorkbenchTab = 'challenge' | 'example' | 'sqlfree';
+type OutputStateKind = 'empty' | 'loading' | 'error' | 'full';
+type ThemeId = 'terminal' | 'nordic' | 'glass' | 'graphite' | 'paper';
+
+interface ThemeOption {
+  id: ThemeId;
+  label: string;
+  tag: string;
+  desc: string;
+  swatches: [string, string, string];
+  themeColor: string;
+}
+
+const THEME_OPTIONS: ThemeOption[] = [
+  {
+    id: 'terminal',
+    label: 'Terminal Pro',
+    tag: 'OLED · Mono',
+    desc: 'Fundo OLED #05070A com grelha subtil, verde fósforo e tipografia monoespaçada.',
+    swatches: ['#05070a', '#22c55e', '#38bdf8'],
+    themeColor: '#05070a',
+  },
+  {
+    id: 'nordic',
+    label: 'Nordic Studio',
+    tag: 'Claro · Editorial',
+    desc: 'Branco limpo, bordas Slate e azul cobalto para leitura prolongada de dia.',
+    swatches: ['#f8fafc', '#2563eb', '#d97706'],
+    themeColor: '#f8fafc',
+  },
+  {
+    id: 'glass',
+    label: 'Glassmorphic',
+    tag: 'Escuro · Vidro',
+    desc: 'Gradiente noturno índigo/ciano com painéis translúcidos e cantos suaves.',
+    swatches: ['#1e1b4b', '#6366f1', '#22d3ee'],
+    themeColor: '#0f172a',
+  },
+  {
+    id: 'graphite',
+    label: 'Console Grafite',
+    tag: 'Escuro · Âmbar',
+    desc: 'Grafite quente com contraste equilibrado e destaque âmbar clássico.',
+    swatches: ['#25272d', '#f5b942', '#70a5ff'],
+    themeColor: '#1f2127',
+  },
+  {
+    id: 'paper',
+    label: 'Papel Editorial',
+    tag: 'Claro · Quente',
+    desc: 'Tom papel quente tipo livro técnico com baixo encandeamento.',
+    swatches: ['#f6f4ef', '#a36a1b', '#2c68b8'],
+    themeColor: '#f6f4ef',
+  },
+];
+
+interface OutputViewModel {
+  kind: OutputStateKind;
+  statusMessage?: string;
+  elapsedMs?: number;
+  stdout?: string;
+  table?: { columns: string[]; rows: (string | number | null)[][] };
+  checks?: { label: string; passed: boolean; actual?: string; hint?: string }[];
+  bannerOk?: boolean;
+  bannerText?: string;
+  errorText?: string;
+}
+
+const STORAGE_THEME_KEY = 'mercearia_academia_theme_v1';
+const STORAGE_LAYOUT_KEY = 'mercearia_academia_layout_v1';
+
+interface LayoutPrefs {
+  sidebarWidth: number;
+  lessonRatio: number;
+  editorHeight: number;
+  sidebarCollapsed: boolean;
+}
+
+const DEFAULT_LAYOUT: LayoutPrefs = {
+  sidebarWidth: 256,
+  lessonRatio: 48,
+  editorHeight: 250,
+  sidebarCollapsed: false,
+};
+
+function loadSavedLayout(): LayoutPrefs {
+  try {
+    const raw = localStorage.getItem(STORAGE_LAYOUT_KEY);
+    if (!raw) return { ...DEFAULT_LAYOUT };
+    const parsed = JSON.parse(raw);
+    return {
+      sidebarWidth: Math.min(420, Math.max(180, Number(parsed.sidebarWidth) || DEFAULT_LAYOUT.sidebarWidth)),
+      lessonRatio: Math.min(72, Math.max(28, Number(parsed.lessonRatio) || DEFAULT_LAYOUT.lessonRatio)),
+      editorHeight: Math.min(640, Math.max(140, Number(parsed.editorHeight) || DEFAULT_LAYOUT.editorHeight)),
+      sidebarCollapsed: Boolean(parsed.sidebarCollapsed),
+    };
+  } catch {
+    return { ...DEFAULT_LAYOUT };
+  }
+}
+
+function saveLayoutPrefs(prefs: LayoutPrefs): void {
+  try {
+    localStorage.setItem(STORAGE_LAYOUT_KEY, JSON.stringify(prefs));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+interface AppState {
+  view: ViewMode;
+  trackId: string;
+  lessonId: string;
+  wbTab: WorkbenchTab;
+  editorDrafts: Record<string, string>;
+  quizSelection: Record<string, number>;
+  completedLessons: UserProgressMap;
+  helpedInSession: Set<string>;
+  hintLevel: number;
+  showProgressModal: boolean;
+  showThemeModal: boolean;
+  generatedProgressCode: string;
+  progressCodeInput: string;
+  progressModalFeedback: { ok: boolean; text: string } | null;
+  confirmClearProgress: boolean;
+  syncCode: string | null;
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
+  syncLastUpdatedAt: string | null;
+  output: OutputViewModel;
+  gitState: GitRepoState;
+  sidebarOpenMobile: boolean;
+  mobileTab: 'lesson' | 'workbench';
+  layout: LayoutPrefs;
+  explorerSerie: 'sazonal' | 'base';
+  explorerCidade: string;
+  explorerCategoria: string;
+  refQuery: string;
+  refCategory: string;
+  theme: ThemeId;
+  dataset: MerceariaDataset | null;
+  datasetError: string | null;
+  confirmSolutionLessonId: string | null;
+}
+
+function loadSavedTheme(): ThemeId {
+  try {
+    const saved = localStorage.getItem(STORAGE_THEME_KEY);
+    if (saved && THEME_OPTIONS.some((t) => t.id === saved)) {
+      return saved as ThemeId;
+    }
+    return 'terminal';
+  } catch {
+    return 'terminal';
+  }
+}
+
+function applyTheme(theme: ThemeId): void {
+  if (theme === 'terminal') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  const opt = THEME_OPTIONS.find((t) => t.id === theme) ?? THEME_OPTIONS[0];
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', opt.themeColor);
+  }
+  try {
+    localStorage.setItem(STORAGE_THEME_KEY, theme);
+  } catch {
+    // Ignore
+  }
+}
+
+const totalLessonsCount = allTracks.reduce((sum, t) => sum + t.lessons.length, 0);
+
+const state: AppState = {
+  view: 'academia',
+  trackId: allTracks[0].id,
+  lessonId: allTracks[0].lessons[0].id,
+  wbTab: 'challenge',
+  editorDrafts: loadSavedDrafts(),
+  quizSelection: loadSavedQuizzes(),
+  completedLessons: loadSavedProgress(),
+  helpedInSession: new Set(),
+  hintLevel: 0,
+  showProgressModal: false,
+  showThemeModal: false,
+  generatedProgressCode: '',
+  progressCodeInput: '',
+  progressModalFeedback: null,
+  confirmClearProgress: false,
+  syncCode: loadSyncCode(),
+  syncStatus: loadSyncCode() ? 'synced' : 'idle',
+  syncLastUpdatedAt: null,
+  output: { kind: 'empty' },
+  gitState: createInitialGitState(),
+  sidebarOpenMobile: false,
+  mobileTab: 'lesson',
+  layout: loadSavedLayout(),
+  explorerSerie: 'sazonal',
+  explorerCidade: 'todas',
+  explorerCategoria: 'todas',
+  refQuery: '',
+  refCategory: 'Todas',
+  theme: loadSavedTheme(),
+  dataset: null,
+  datasetError: null,
+  confirmSolutionLessonId: null,
+};
+
+applyTheme(state.theme);
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function currentTrack(): Track {
+  return allTracks.find((t) => t.id === state.trackId) ?? allTracks[0];
+}
+
+function currentLesson(): Lesson {
+  const track = currentTrack();
+  return track.lessons.find((l) => l.id === state.lessonId) ?? track.lessons[0];
+}
+
+function draftKey(lesson: Lesson, tab: WorkbenchTab): string {
+  return `${lesson.id}:${tab}`;
+}
+
+function defaultEditorCode(lesson: Lesson, tab: WorkbenchTab): string {
+  if (tab === 'sqlfree') {
+    return `SELECT produto, SUM(quantidade) AS unidades, ROUND(SUM(quantidade * preco), 2) AS faturacao_eur\nFROM vendas\nGROUP BY produto\nORDER BY faturacao_eur DESC\nLIMIT 5;`;
+  }
+  if (tab === 'example') {
+    return lesson.exampleCode;
+  }
+  if (lesson.pythonChallenge) return lesson.pythonChallenge.starterCode;
+  if (lesson.sqlChallenge) return lesson.sqlChallenge.starterSql;
+  if (lesson.gitChallenge) return lesson.gitChallenge.starterCommands;
+  return lesson.exampleCode;
+}
+
+function getEditorValue(): string {
+  const lesson = currentLesson();
+  const key = draftKey(lesson, state.wbTab);
+  return state.editorDrafts[key] ?? defaultEditorCode(lesson, state.wbTab);
+}
+
+function activeEngine(): EngineKind {
+  if (state.wbTab === 'sqlfree') return 'sql';
+  return currentLesson().engine;
+}
+
+function syncStateFromUrl(): void {
+  const raw = window.location.hash.replace(/^#/, '');
+  if (!raw) {
+    const last = loadLastLocation();
+    if (last) {
+      if (last.view === 'academia' || last.view === 'explorador' || last.view === 'referencia') {
+        state.view = last.view;
+      }
+      const tr = allTracks.find((t) => t.id === last.trackId);
+      if (tr) {
+        state.trackId = tr.id;
+        state.lessonId = tr.lessons.some((l) => l.id === last.lessonId) ? last.lessonId : tr.lessons[0].id;
+      }
+    }
+    return;
+  }
+  const params = new URLSearchParams(raw);
+  const v = params.get('vista');
+  if (v === 'academia' || v === 'explorador' || v === 'referencia') {
+    state.view = v;
+  }
+  const t = params.get('trilha');
+  if (t && allTracks.some((tr) => tr.id === t)) {
+    state.trackId = t;
+    const track = allTracks.find((tr) => tr.id === t)!;
+    const l = params.get('licao');
+    state.lessonId = l && track.lessons.some((le) => le.id === l) ? l : track.lessons[0].id;
+  }
+  const cid = params.get('cidade');
+  if (cid) state.explorerCidade = cid;
+  const cat = params.get('categoria');
+  if (cat) state.explorerCategoria = cat;
+  const q = params.get('q');
+  if (q !== null) state.refQuery = q;
+  const f = params.get('ferramenta');
+  if (f) state.refCategory = f;
+}
+
+function writeStateToUrl(): void {
+  const params = new URLSearchParams();
+  params.set('vista', state.view);
+  if (state.view === 'academia') {
+    params.set('trilha', state.trackId);
+    params.set('licao', state.lessonId);
+  } else if (state.view === 'explorador') {
+    if (state.explorerCidade !== 'todas') params.set('cidade', state.explorerCidade);
+    if (state.explorerCategoria !== 'todas') params.set('categoria', state.explorerCategoria);
+  } else if (state.view === 'referencia') {
+    if (state.refQuery) params.set('q', state.refQuery);
+    if (state.refCategory !== 'Todas') params.set('ferramenta', state.refCategory);
+  }
+  const nextHash = `#${params.toString()}`;
+  if (window.location.hash !== nextHash) {
+    history.replaceState(null, '', nextHash);
+  }
+  saveLastLocation({
+    trackId: state.trackId,
+    lessonId: state.lessonId,
+    view: state.view,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+function markLessonCompleted(lesson: Lesson): void {
+  const existing = state.completedLessons[lesson.id];
+  const wasHelped = state.helpedInSession.has(lesson.id);
+  const status = existing?.status === 'autonomous' ? 'autonomous' : wasHelped ? 'helped' : 'autonomous';
+  const quizIdx = state.quizSelection[lesson.id];
+  const quizPassed = existing?.quizPassed || (quizIdx !== undefined && quizIdx === lesson.quiz.correctIndex);
+
+  state.completedLessons[lesson.id] = {
+    status,
+    quizPassed,
+    completedAt: existing?.completedAt ?? new Date().toISOString(),
+  };
+  saveProgress(state.completedLessons);
+  scheduleCloudSync();
+}
+
+let cloudSyncTimer: number | undefined;
+function scheduleCloudSync(): void {
+  if (!state.syncCode) return;
+  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  state.syncStatus = 'syncing';
+  cloudSyncTimer = window.setTimeout(() => {
+    if (!state.syncCode) return;
+    void pushCloudSync({
+      code: state.syncCode,
+      progress: state.completedLessons,
+      drafts: state.editorDrafts,
+      quizzes: state.quizSelection,
+      lastLocation: {
+        trackId: state.trackId,
+        lessonId: state.lessonId,
+        view: state.view,
+        timestamp: new Date().toISOString(),
+      },
+    })
+      .then((res) => {
+        state.syncStatus = 'synced';
+        state.syncLastUpdatedAt = res.updatedAt;
+        if (state.showProgressModal) renderApp();
+      })
+      .catch(() => {
+        state.syncStatus = 'error';
+        if (state.showProgressModal) renderApp();
+      });
+  }, 1200);
+}
+
+function extractSyncCode(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (isCloudSyncCode(trimmed)) return trimmed.toUpperCase();
+  const match = trimmed.match(/MB-[A-Z2-9]{4}-[A-Z2-9]{4}(?:-[A-Z2-9]{4})?/i);
+  return match ? match[0].toUpperCase() : null;
+}
+
+function buildSyncShareUrl(code: string): string {
+  const url = new URL(window.location.href);
+  url.searchParams.set('sync', code);
+  return url.toString();
+}
+
+function renderOutputRegion(out: OutputViewModel, engine: EngineKind): string {
+  const engineName =
+    engine === 'sql' ? 'SQLite WebAssembly' : engine === 'git' ? 'Simulador Git' : 'Python 3.12 (Pyodide)';
+
+  if (out.kind === 'loading') {
+    return `
+      <div class="output-panel" role="status" aria-live="polite">
+        <div class="output-header">
+          <span class="status-chip">${escapeHtml(engineName)}</span>
+          <span class="measured">${escapeHtml(out.statusMessage ?? 'A executar…')}</span>
+        </div>
+        <div class="skeleton-stack">
+          <div class="skeleton-bar"></div>
+          <div class="skeleton-bar"></div>
+          <div class="skeleton-bar"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (out.kind === 'empty') {
+    return `
+      <div class="output-panel">
+        <div class="output-header">
+          <span class="status-chip">${escapeHtml(engineName)}</span>
+          <span class="measured">Pronto a executar</span>
+        </div>
+        <div class="empty-state">
+          <p>O resultado das tuas queries SQL, código Python/Pandas ou comandos Git aparece aqui em tempo real.</p>
+          <div>
+            <button type="button" class="btn" data-action="run-code">Executar código atual</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (out.kind === 'error') {
+    return `
+      <div class="output-panel" role="alert">
+        <div class="output-header">
+          <span class="status-chip is-bad">Erro de execução</span>
+          ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
+        </div>
+        <div class="error-state">
+          <p>${escapeHtml(out.errorText ?? 'Não foi possível concluir a execução.')}</p>
+          <p class="helper-slot">Revê a sintaxe na linha indicada ou clica em Repor código para recomeçar limpo.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="output-panel" aria-live="polite">
+      <div class="output-header">
+        <span class="status-chip ${out.bannerOk === true ? 'is-ok' : out.bannerOk === false ? 'is-person' : ''}">
+          ${
+            out.bannerText
+              ? escapeHtml(out.bannerText)
+              : escapeHtml(`${engineName} executado`)
+          }
+        </span>
+        ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
+      </div>
+
+      ${out.stdout ? `<pre class="output-stdout">${escapeHtml(out.stdout)}</pre>` : ''}
+
+      ${
+        out.table && out.table.columns.length > 0
+          ? `
+        <div class="table-scroll">
+          <table class="data-table">
+            <caption class="visually-hidden">Resultados da execução SQL ou Python/Pandas</caption>
+            <thead>
+              <tr>${out.table.columns.map((c) => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              ${
+                out.table.rows.length === 0
+                  ? `<tr><td colspan="${out.table.columns.length}">0 linhas devolvidas pela consulta.</td></tr>`
+                  : out.table.rows
+                      .slice(0, 25)
+                      .map(
+                        (row) =>
+                          `<tr>${row
+                            .map((cell) => {
+                              const isNum = typeof cell === 'number' || (typeof cell === 'string' && /^-?\d+(\.\d+)?$/.test(cell));
+                              return `<td class="${isNum ? 'mono-cell' : ''}">${cell === null ? 'NULL' : escapeHtml(String(cell))}</td>`;
+                            })
+                            .join('')}</tr>`,
+                      )
+                      .join('')
+              }
+            </tbody>
+          </table>
+        </div>
+      `
+          : ''
+      }
+
+      ${
+        out.checks && out.checks.length > 0
+          ? `
+        <ul class="check-list">
+          ${out.checks
+            .map(
+              (c) => `
+            <li class="check-row ${c.passed ? 'pass' : 'fail'}">
+              <strong class="measured">${c.passed ? '[certo]' : '[rever]'}</strong>
+              <span>${escapeHtml(c.label)}</span>
+              ${!c.passed && c.actual !== undefined ? `<span class="measured">(obtido: ${escapeHtml(c.actual)})</span>` : ''}
+              ${!c.passed && c.hint ? `<span>Dica: ${escapeHtml(c.hint)}</span>` : ''}
+            </li>
+          `,
+            )
+            .join('')}
+        </ul>
+      `
+          : ''
+      }
+    </div>
+  `;
+}
+
+function renderAcademyWorkspace(): string {
+  const track = currentTrack();
+  const lesson = currentLesson();
+  const lessonIdx = track.lessons.findIndex((l) => l.id === lesson.id);
+  const prevLesson = lessonIdx > 0 ? track.lessons[lessonIdx - 1] : null;
+  const nextLesson = lessonIdx < track.lessons.length - 1 ? track.lessons[lessonIdx + 1] : null;
+
+  const selectedQuiz = state.quizSelection[lesson.id];
+  const engine = activeEngine();
+  const editorVal = getEditorValue();
+
+  const promptDescription =
+    state.wbTab === 'sqlfree'
+      ? 'Consola SQLite aberta com todas as tabelas da Mercearia: produtos (15), clientes (120), vendas (5 078) e vendas_sujas (12).'
+      : state.wbTab === 'example'
+        ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
+        : lesson.pythonChallenge?.description ??
+          lesson.sqlChallenge?.description ??
+          lesson.gitChallenge?.description ??
+          'Execute o código abaixo para validar esta etapa.';
+
+  const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
+  const workbenchRatio = 100 - lessonRatio;
+
+  return `
+    <div class="layout-bar" role="region" aria-label="Controlo de painéis e redimensionamento">
+      <div class="layout-controls">
+        <button type="button" class="btn mobile-index-toggle" data-action="toggle-mobile-sidebar">
+          ${state.sidebarOpenMobile ? 'Ocultar índice' : `Etapas (${lessonIdx + 1}/${track.lessons.length})`}
+        </button>
+        <button type="button" class="btn" data-action="toggle-desktop-sidebar">
+          ${sidebarCollapsed ? 'Mostrar índice' : 'Recolher índice'}
+        </button>
+        <button type="button" class="mode-btn" aria-selected="${lessonRatio >= 58}" data-layout-preset="reading">
+          Foco leitura
+        </button>
+        <button type="button" class="mode-btn" aria-selected="${lessonRatio > 42 && lessonRatio < 58}" data-layout-preset="balanced">
+          Divisão 50 / 50
+        </button>
+        <button type="button" class="mode-btn" aria-selected="${lessonRatio <= 42}" data-layout-preset="coding">
+          Foco código
+        </button>
+      </div>
+      <div class="layout-controls desktop-only-controls">
+        <span class="status-chip">Arraste as divisórias para redimensionar</span>
+        <button type="button" class="btn" data-action="reset-layout">Repor painéis</button>
+      </div>
+    </div>
+
+    <!-- Mobile Segmented View Switcher (Lição vs Bancada) -->
+    <div class="mobile-view-segmented" role="tablist" aria-label="Alternar entre lição e bancada">
+      <button
+        type="button"
+        role="tab"
+        class="segmented-btn ${state.mobileTab === 'lesson' ? 'is-active' : ''}"
+        data-mobile-tab="lesson"
+        aria-selected="${state.mobileTab === 'lesson'}"
+      >
+        📖 Lição
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="segmented-btn ${state.mobileTab === 'workbench' ? 'is-active' : ''}"
+        data-mobile-tab="workbench"
+        aria-selected="${state.mobileTab === 'workbench'}"
+      >
+        ⚡ Bancada
+      </button>
+    </div>
+
+    ${state.sidebarOpenMobile ? `<div class="sidebar-backdrop" data-action="toggle-mobile-sidebar" aria-hidden="true"></div>` : ''}
+
+    <div
+      id="academy-grid"
+      class="seam-panels academy-grid ${sidebarCollapsed ? 'is-sidebar-collapsed' : ''}"
+      data-mobile-active="${state.mobileTab}"
+      style="--sidebar-w: ${sidebarWidth}px; --lesson-fr: ${lessonRatio}fr; --workbench-fr: ${workbenchRatio}fr; --editor-h: ${editorHeight}px;"
+    >
+      <!-- Left Sidebar -->
+      <nav class="seam-panel sidebar-panel ${state.sidebarOpenMobile ? 'is-open' : ''}" aria-label="Índice de etapas">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">${escapeHtml(track.fullTitle)}</div>
+          <ul class="lesson-nav-list">
+            ${track.lessons
+              .map((item) => {
+                const isCur = item.id === lesson.id;
+                const rec = state.completedLessons[item.id];
+                const isDone = Boolean(rec);
+                const isHelped = rec?.status === 'helped';
+                const statusClass = isDone ? (isHelped ? 'is-helped' : 'is-done') : '';
+                return `
+                  <li>
+                    <button
+                      type="button"
+                      class="lesson-nav-btn ${isCur ? 'is-current' : ''} ${statusClass}"
+                      data-select-lesson="${escapeHtml(item.id)}"
+                      ${isCur ? 'aria-current="step"' : ''}
+                    >
+                      <span class="lesson-nav-title">${escapeHtml(item.title)}</span>
+                      <span class="lesson-step-id">${isDone ? (isHelped ? 'REF' : 'OK') : escapeHtml(item.code)}</span>
+                    </button>
+                  </li>
+                `;
+              })
+              .join('')}
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Tabelas na bancada</div>
+          <ul class="lesson-nav-list">
+            <li class="schema-row"><span>vendas_sazonais</span><span class="lesson-step-id">7031</span></li>
+            <li class="schema-row"><span>vendas</span><span class="lesson-step-id">5078</span></li>
+            <li class="schema-row"><span>clientes</span><span class="lesson-step-id">120</span></li>
+            <li class="schema-row"><span>produtos</span><span class="lesson-step-id">15</span></li>
+            <li class="schema-row"><span>vendas_sujas</span><span class="lesson-step-id">12</span></li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Resizable Splitter: Sidebar <-> Lesson -->
+      <div
+        id="splitter-sidebar"
+        class="pane-splitter-v splitter-sidebar"
+        role="separator"
+        tabindex="0"
+        aria-orientation="vertical"
+        aria-label="Redimensionar largura do índice lateral"
+        title="Arraste para redimensionar o índice lateral (duplo clique para repor)"
+      ></div>
+
+      <!-- Center Lesson Column -->
+      <article class="seam-panel lesson-article">
+        <header class="lesson-header">
+          <div class="workbench-toolbar">
+            <span class="status-chip is-person">Etapa ${escapeHtml(lesson.code)} de ${track.lessons.length}</span>
+            ${
+              state.completedLessons[lesson.id]
+                ? state.completedLessons[lesson.id].status === 'helped'
+                  ? `<span class="status-chip is-helped">Concluída c/ apoio</span>`
+                  : `<span class="status-chip is-ok">Concluída</span>`
+                : `<span class="status-chip">${escapeHtml(track.engineLabel)}</span>`
+            }
+          </div>
+          <h1>${escapeHtml(lesson.title)}</h1>
+          <p class="lesson-lede">${escapeHtml(lesson.lede)}</p>
+        </header>
+
+        <section class="analogy-box" aria-label="Analogia prática">
+          <h2>${escapeHtml(lesson.analogyTitle)}</h2>
+          <p>${escapeHtml(lesson.analogyBody)}</p>
+        </section>
+
+        ${
+          lesson.beginnerSteps && lesson.beginnerSteps.length
+            ? `
+          <section class="prose-section">
+            <h2>Passo a passo (do zero absoluto)</h2>
+            <ol class="prose-list">
+              ${lesson.beginnerSteps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
+            </ol>
+          </section>
+        `
+            : ''
+        }
+
+        <section class="prose-section">
+          <h2>Conceitos essenciais</h2>
+          <ul class="prose-list">
+            ${lesson.concepts.map((c) => `<li>${escapeHtml(c)}</li>`).join('')}
+          </ul>
+        </section>
+
+        ${
+          lesson.proPractice || lesson.commonPitfall
+            ? `
+          <section class="pro-grid" aria-label="Prática profissional e erros comuns">
+            ${
+              lesson.proPractice
+                ? `
+              <div class="pro-box">
+                <h3>No trabalho real (Nível Profissional)</h3>
+                <p>${escapeHtml(lesson.proPractice)}</p>
+              </div>
+            `
+                : ''
+            }
+            ${
+              lesson.commonPitfall
+                ? `
+              <div class="pro-box is-pitfall">
+                <h3>Armadilha clássica a evitar</h3>
+                <p>${escapeHtml(lesson.commonPitfall)}</p>
+              </div>
+            `
+                : ''
+            }
+          </section>
+        `
+            : ''
+        }
+
+        <section class="prose-section">
+          <h2>${escapeHtml(lesson.referenceTitle)}</h2>
+          <div class="table-scroll">
+            <table class="data-table">
+              <caption class="visually-hidden">${escapeHtml(lesson.referenceTitle)}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Sintaxe</th>
+                  <th scope="col">O que faz</th>
+                  <th scope="col">Exemplo prático</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${lesson.referenceRows
+                  .map(
+                    (r) => `
+                  <tr>
+                    <td class="mono-cell">${escapeHtml(r.syntax)}</td>
+                    <td>${escapeHtml(r.meaning)}</td>
+                    <td class="mono-cell">${escapeHtml(r.example)}</td>
+                  </tr>
+                `,
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="prose-section">
+          <div class="workbench-toolbar">
+            <h2>Exemplo demonstrativo</h2>
+            <button type="button" class="btn" data-action="load-example-tab">Experimentar no editor</button>
+          </div>
+          <pre class="code-sample"><code>${highlightCode(lesson.exampleCode, lesson.engine)}</code></pre>
+        </section>
+
+        <div class="quiz-well" role="group" aria-labelledby="quiz-title">
+          <h3 id="quiz-title">Verificação rápida de conceito</h3>
+          <p>${escapeHtml(lesson.quiz.question)}</p>
+          <div class="quiz-options">
+            ${lesson.quiz.options
+              .map((opt, idx) => {
+                let cls = '';
+                if (selectedQuiz !== undefined) {
+                  if (idx === lesson.quiz.correctIndex) cls = 'is-correct';
+                  else if (idx === selectedQuiz) cls = 'is-wrong';
+                }
+                return `
+                  <label class="quiz-option ${cls}">
+                    <input
+                      type="radio"
+                      name="quiz-${escapeHtml(lesson.id)}"
+                      value="${idx}"
+                      class="quiz-radio"
+                      data-quiz-idx="${idx}"
+                      ${selectedQuiz === idx ? 'checked' : ''}
+                    />
+                    <span>${escapeHtml(opt)}</span>
+                  </label>
+                `;
+              })
+              .join('')}
+          </div>
+          <div class="helper-slot ${selectedQuiz !== undefined ? (selectedQuiz === lesson.quiz.correctIndex ? 'is-ok' : 'is-bad') : ''}">
+            ${
+              selectedQuiz === undefined
+                ? 'Seleciona uma opção para testar a tua compreensão.'
+                : selectedQuiz === lesson.quiz.correctIndex
+                  ? `Correto! ${escapeHtml(lesson.quiz.explanation)}`
+                  : `Ainda não: ${escapeHtml(lesson.quiz.explanation)}`
+            }
+          </div>
+        </div>
+
+        <nav class="lesson-pager" aria-label="Navegação entre lições">
+          <button type="button" class="btn" data-select-lesson="${prevLesson ? escapeHtml(prevLesson.id) : ''}" ${!prevLesson ? 'disabled' : ''}>
+            Etapa anterior
+          </button>
+          <button type="button" class="btn" data-select-lesson="${nextLesson ? escapeHtml(nextLesson.id) : ''}" ${!nextLesson ? 'disabled' : ''}>
+            Próxima etapa
+          </button>
+        </nav>
+
+        <div class="mobile-switch-wrap">
+          <button type="button" class="btn btn-primary mobile-switch-btn" data-action="switch-to-workbench">
+            Ir para a Bancada ⚡ ▶
+          </button>
+        </div>
+      </article>
+
+      <!-- Resizable Splitter: Lesson <-> Workbench -->
+      <div
+        id="splitter-main"
+        class="pane-splitter-v"
+        role="separator"
+        tabindex="0"
+        aria-orientation="vertical"
+        aria-label="Redimensionar largura entre a lição e o editor de código"
+        title="Arraste para redimensionar lição vs editor (duplo clique para 50/50)"
+      ></div>
+
+      <!-- Right Live Workbench -->
+      <section class="seam-panel seam-panel-deep workbench-panel" aria-label="Bancada interativa de código">
+        <div class="mobile-switch-wrap">
+          <button type="button" class="btn mobile-switch-btn" data-action="switch-to-lesson">
+            ◀ Ver Enunciado da Lição
+          </button>
+        </div>
+
+        <div class="workbench-toolbar">
+          <div class="mode-tabs" role="tablist" aria-label="Modo do editor">
+            <button type="button" role="tab" class="mode-btn" aria-selected="${state.wbTab === 'challenge'}" data-wb-tab="challenge">
+              Desafio guiado
+            </button>
+            <button type="button" role="tab" class="mode-btn" aria-selected="${state.wbTab === 'example'}" data-wb-tab="example">
+              Experimenta livre
+            </button>
+            <button type="button" role="tab" class="mode-btn" aria-selected="${state.wbTab === 'sqlfree'}" data-wb-tab="sqlfree">
+              Consola SQL
+            </button>
+          </div>
+          <span class="status-chip desktop-shortcut-chip">Ctrl + Enter para correr</span>
+        </div>
+
+        <div class="challenge-prompt">
+          <strong>${state.wbTab === 'challenge' ? 'Enunciado do desafio' : state.wbTab === 'example' ? 'Laboratório Experimenta' : 'Consulta SQL livre'}</strong>
+          <p>${escapeHtml(promptDescription)}</p>
+        </div>
+
+        <div class="mobile-symbols-bar" aria-label="Símbolos rápidos de código">
+          <button type="button" class="sym-btn" data-insert="SELECT ">SELECT </button>
+          <button type="button" class="sym-btn" data-insert="FROM ">FROM </button>
+          <button type="button" class="sym-btn" data-insert="WHERE ">WHERE </button>
+          <button type="button" class="sym-btn" data-insert="*">*</button>
+          <button type="button" class="sym-btn" data-insert="=">=</button>
+          <button type="button" class="sym-btn" data-insert="'">'</button>
+          <button type="button" class="sym-btn" data-insert="&quot;">&quot;</button>
+          <button type="button" class="sym-btn" data-insert="(">(</button>
+          <button type="button" class="sym-btn" data-insert=")">)</button>
+          <button type="button" class="sym-btn" data-insert=",">,</button>
+          <button type="button" class="sym-btn" data-insert=";">;</button>
+        </div>
+
+        <div class="code-editor-shell" id="editor-shell">
+          <div class="code-gutter" id="workbench-gutter" aria-hidden="true">${renderLineNumbers(editorVal)}</div>
+          <div class="code-stage">
+            <pre class="code-highlight-layer" id="workbench-highlight" aria-hidden="true"><code>${highlightCode(editorVal, engine)}</code></pre>
+            <label for="workbench-editor" class="visually-hidden">Editor de código interativo</label>
+            <textarea
+              id="workbench-editor"
+              name="code"
+              class="code-editor"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+            >${escapeHtml(editorVal)}</textarea>
+          </div>
+        </div>
+
+        <!-- Resizable Horizontal Splitter: Editor <-> Output -->
+        <div
+          id="splitter-editor"
+          class="pane-splitter-h"
+          role="separator"
+          tabindex="0"
+          aria-orientation="horizontal"
+          aria-label="Redimensionar altura do editor de código"
+          title="Arraste para aumentar ou diminuir a altura do editor (duplo clique para repor)"
+        ></div>
+
+        <div class="workbench-actions">
+          <div class="action-pair">
+            <button type="button" class="btn btn-primary" data-action="run-code" ${state.output.kind === 'loading' ? 'disabled' : ''}>
+              ${state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar agora'}
+            </button>
+            <button type="button" class="btn" data-action="format-code" title="Formatar código com Prettier (Shift + Alt + F)">
+              Formatar Prettier
+            </button>
+            <button type="button" class="btn" data-action="reset-code">Repor código</button>
+          </div>
+          ${
+            state.wbTab === 'challenge'
+              ? `<div class="action-pair">
+                  ${
+                    state.hintLevel < 2
+                      ? `<button type="button" class="btn" data-action="next-hint">${state.hintLevel === 0 ? 'Pedir pista (1/2)' : 'Mais uma pista (2/2)'}</button>`
+                      : ''
+                  }
+                  ${
+                    state.confirmSolutionLessonId === lesson.id
+                      ? `<button type="button" class="btn" data-action="apply-solution">Confirmar solução</button>
+                         <button type="button" class="btn" data-action="cancel-solution">Cancelar</button>`
+                      : `<button type="button" class="btn" data-action="ask-solution">Mostrar solução de referência</button>`
+                  }
+                </div>`
+              : ''
+          }
+        </div>
+
+        ${
+          state.wbTab === 'challenge' && state.hintLevel > 0
+            ? (() => {
+                const hint1 =
+                  lesson.sqlChallenge?.hint ??
+                  lesson.gitChallenge?.hint ??
+                  lesson.pythonChallenge?.checks[0]?.hint ??
+                  lesson.beginnerSteps?.[0] ??
+                  'Revê a sintaxe na tabela de referência à esquerda.';
+                const hint2 =
+                  lesson.beginnerSteps && lesson.beginnerSteps.length > 0
+                    ? lesson.beginnerSteps.join(' · ')
+                    : lesson.commonPitfall ?? 'Compara a tua lógica passo a passo com o exemplo demonstrativo.';
+                return `
+                  <div class="hints-panel" role="region" aria-label="Pistas progressivas">
+                    <div class="hint-card">
+                      <strong>Pista 1:</strong> ${escapeHtml(hint1)}
+                    </div>
+                    ${
+                      state.hintLevel >= 2
+                        ? `<div class="hint-card is-step2">
+                             <strong>Pista 2 (Passo a passo):</strong> ${escapeHtml(hint2)}
+                           </div>`
+                        : ''
+                    }
+                  </div>
+                `;
+              })()
+            : ''
+        }
+
+        ${renderOutputRegion(state.output, engine)}
+      </section>
+    </div>
+  `;
+}
+
+function renderThemeModal(): string {
+  return `
+    <div class="modal-backdrop" data-action="close-theme-backdrop" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+      <div class="modal-card seam-panel">
+        <div class="modal-head">
+          <div>
+            <span class="badge-chip">Aparência · 5 estilos</span>
+            <h2 id="theme-modal-title">Escolher estilo visual</h2>
+            <p class="measured">Personaliza as cores, contraste e tipografia da academia. A tua escolha fica guardada neste dispositivo.</p>
+          </div>
+          <button type="button" class="btn" data-action="close-theme-modal" aria-label="Fechar seletor de estilo">Fechar</button>
+        </div>
+        <div class="theme-grid">
+          ${THEME_OPTIONS.map((opt) => {
+            const active = state.theme === opt.id;
+            return `
+              <button
+                type="button"
+                class="theme-option-card ${active ? 'is-active' : ''}"
+                data-action="select-theme"
+                data-theme-id="${opt.id}"
+                aria-pressed="${active ? 'true' : 'false'}"
+              >
+                <div class="theme-option-top">
+                  <strong>${escapeHtml(opt.label)}</strong>
+                  <span class="theme-swatches" aria-hidden="true">
+                    ${opt.swatches.map((hex) => `<span class="theme-swatch" style="background:${hex};"></span>`).join('')}
+                  </span>
+                </div>
+                <span class="status-chip ${active ? 'is-ok' : ''}">${active ? 'Ativo · ' : ''}${escapeHtml(opt.tag)}</span>
+                <span class="theme-option-desc">${escapeHtml(opt.desc)}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProgressModal(): string {
+  const entries = Object.values(state.completedLessons);
+  const doneCount = entries.length;
+  const autonomousCount = entries.filter((e) => e.status === 'autonomous').length;
+  const quizCorrectCount = allTracks.reduce((acc, tr) => {
+    return (
+      acc +
+      tr.lessons.filter((l) => {
+        const sel = state.quizSelection[l.id];
+        return sel !== undefined && sel === l.quiz.correctIndex;
+      }).length
+    );
+  }, 0);
+
+  return `
+    <div class="modal-backdrop" data-action="close-progress-backdrop" role="dialog" aria-modal="true" aria-labelledby="progress-modal-title">
+      <div class="progress-modal">
+        <div class="workbench-toolbar">
+          <div>
+            <h2 id="progress-modal-title">Progresso, Código de Retoma & Portfólio</h2>
+            <p class="measured">O teu progresso, rascunhos de código e quizzes ficam guardados automaticamente neste navegador.</p>
+          </div>
+          <button type="button" class="btn" data-action="close-progress-modal" aria-label="Fechar janela">Fechar</button>
+        </div>
+
+        <div class="progress-summary-grid">
+          <div class="progress-stat-card">
+            <div class="progress-stat-val">${doneCount} / ${totalLessonsCount}</div>
+            <div class="progress-stat-lbl">Etapas concluídas</div>
+          </div>
+          <div class="progress-stat-card">
+            <div class="progress-stat-val">${autonomousCount}</div>
+            <div class="progress-stat-lbl">Resolvidas s/ ajuda</div>
+          </div>
+          <div class="progress-stat-card">
+            <div class="progress-stat-val">${quizCorrectCount} / ${totalLessonsCount}</div>
+            <div class="progress-stat-lbl">Quizzes certos</div>
+          </div>
+        </div>
+
+        <div class="progress-track-list">
+          ${allTracks
+            .map((tr) => {
+              const trDone = tr.lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
+              const pct = Math.round((trDone / tr.lessons.length) * 100);
+              return `
+                <div class="progress-track-row">
+                  <span>${escapeHtml(tr.shortTitle)}</span>
+                  <span class="measured">${trDone}/${tr.lessons.length}</span>
+                  <div class="progress-bar-bg" aria-hidden="true">
+                    <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+                  </div>
+                </div>
+              `;
+            })
+            .join('')}
+        </div>
+
+        <div class="hints-panel">
+          <strong>Sincronização na Cloud (sem login)</strong>
+          <p class="measured">Liga este dispositivo a um código (<code>MB-XXXX-XXXX-XXXX</code>) para sincronizar automaticamente o progresso entre telemóvel e PC.</p>
+          ${
+            state.syncCode
+              ? `<div class="action-pair" style="align-items:center;flex-wrap:wrap;gap:8px;">
+                  <span class="status-chip is-ok">${escapeHtml(state.syncCode)}</span>
+                  <span class="status-chip">${
+                    state.syncStatus === 'syncing'
+                      ? 'A sincronizar…'
+                      : state.syncStatus === 'error'
+                        ? 'Erro de rede (guardado local)'
+                        : 'Sincronizado na cloud'
+                  }</span>
+                </div>
+                <div class="action-pair" style="margin-top:8px;flex-wrap:wrap;">
+                  <button type="button" class="btn btn-primary" data-action="copy-sync-link">Copiar link de retoma</button>
+                  <button type="button" class="btn" data-action="sync-now">Sincronizar agora</button>
+                  <button type="button" class="btn" data-action="disconnect-cloud-sync">Desligar</button>
+                </div>`
+              : `<div class="action-pair" style="flex-wrap:wrap;">
+                  <button type="button" class="btn btn-primary" data-action="activate-cloud-sync">Ativar código na cloud</button>
+                  <button type="button" class="btn" data-action="generate-progress-code">Gerar código offline (MB1)</button>
+                </div>`
+          }
+          ${
+            state.generatedProgressCode
+              ? `<div class="action-pair" style="margin-top:6px;">
+                  <input type="text" readonly class="code-input-inline" id="generated-code-field" value="${escapeHtml(state.generatedProgressCode)}" aria-label="Código de progresso gerado" style="flex:1;min-width:180px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);" />
+                </div>`
+              : ''
+          }
+          <div class="action-pair" style="margin-top:8px;">
+            <input
+              type="text"
+              id="progress-code-input"
+              placeholder="Cola MB-XXXX-XXXX-XXXX, link ?sync=… ou MB1-…"
+              value="${escapeHtml(state.progressCodeInput)}"
+              aria-label="Colar código de sincronização ou progresso"
+              style="flex:1;min-width:200px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);"
+            />
+            <button type="button" class="btn" data-action="apply-progress-code">Continuar com código</button>
+          </div>
+          ${
+            state.progressModalFeedback
+              ? `<div class="helper-slot ${state.progressModalFeedback.ok ? 'is-ok' : 'is-bad'}">${escapeHtml(state.progressModalFeedback.text)}</div>`
+              : ''
+          }
+        </div>
+
+        <div class="modal-actions-row">
+          <div class="action-pair">
+            <button type="button" class="btn btn-primary" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
+            <button type="button" class="btn" data-action="export-progress-json">Backup (.json)</button>
+            <button type="button" class="btn" data-action="trigger-import-json">Restaurar (.json)</button>
+            <input type="file" id="import-progress-file" accept=".json,application/json" aria-label="Selecionar ficheiro JSON de cópia de segurança do progresso" style="display:none" />
+          </div>
+          <div class="action-pair">
+            ${
+              state.confirmClearProgress
+                ? `<button type="button" class="btn" data-action="confirm-clear-progress" style="color:var(--color-bad);">Confirmar limpeza</button>
+                   <button type="button" class="btn" data-action="cancel-clear-progress">Cancelar</button>`
+                : `<button type="button" class="btn" data-action="ask-clear-progress">Limpar progresso</button>`
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderApp(): void {
+  const root = document.getElementById('app');
+  if (!root) return;
+
+  writeStateToUrl();
+
+  let mainContent = '';
+  if (state.view === 'academia') {
+    mainContent = renderAcademyWorkspace();
+  } else if (state.view === 'explorador') {
+    if (state.datasetError) {
+      mainContent = `
+        <section class="seam-panels">
+          <div class="seam-panel error-state" role="alert">
+            <h1>Erro ao carregar os ficheiros CSV</h1>
+            <p>${escapeHtml(state.datasetError)}</p>
+            <div><button type="button" class="btn btn-primary" data-action="retry-dataset">Tentar carregar novamente</button></div>
+          </div>
+        </section>
+      `;
+    } else if (!state.dataset) {
+      mainContent = `
+        <section class="seam-panels">
+          <div class="seam-panel skeleton-stack" role="status">
+            <h1>A carregar dados da Mercearia do Bairro…</h1>
+            <div class="skeleton-bar"></div>
+            <div class="skeleton-bar"></div>
+            <div class="skeleton-bar"></div>
+          </div>
+        </section>
+      `;
+    } else {
+      mainContent = renderExplorerHtml(state.dataset, {
+        serie: state.explorerSerie,
+        cidade: state.explorerCidade,
+        categoria: state.explorerCategoria,
+      });
+    }
+  } else {
+    mainContent = renderCheatsheetHtml(state.refQuery, state.refCategory);
+  }
+
+  root.innerHTML = `
+    <div class="app-root">
+      <header class="top-nav">
+        <div class="top-nav-inner">
+          <div class="brand-group">
+            <a href="#vista=academia&trilha=python&licao=py-00-pensamento" class="brand-link" aria-label="Mercearia do Bairro, página inicial da academia" data-action="go-home">
+              <span class="brand-wordmark"><span class="brand-icon">🛒</span> <span class="brand-name">Mercearia</span><span class="brand-full"> do Bairro</span></span>
+              <span class="brand-context">Academia de Dados</span>
+            </a>
+          </div>
+
+          <nav class="track-strip" aria-label="Trilhas e ferramentas">
+            ${allTracks
+              .map((tr) => {
+                const isActive = state.view === 'academia' && state.trackId === tr.id;
+                return `
+                  <button
+                    type="button"
+                    class="nav-tab ${isActive ? 'is-active' : ''}"
+                    ${isActive ? 'aria-current="page"' : ''}
+                    data-select-track="${escapeHtml(tr.id)}"
+                  >
+                    ${escapeHtml(tr.shortTitle)}
+                  </button>
+                `;
+              })
+              .join('')}
+            <button
+              type="button"
+              class="nav-tab ${state.view === 'explorador' ? 'is-active' : ''}"
+              ${state.view === 'explorador' ? 'aria-current="page"' : ''}
+              data-select-view="explorador"
+            >
+              Explorador CSV
+            </button>
+            <button
+              type="button"
+              class="nav-tab ${state.view === 'referencia' ? 'is-active' : ''}"
+              ${state.view === 'referencia' ? 'aria-current="page"' : ''}
+              data-select-view="referencia"
+            >
+              Referência W3
+            </button>
+          </nav>
+
+          <div class="nav-actions">
+            <button
+              type="button"
+              class="btn nav-progress-btn"
+              data-action="open-progress-modal"
+              title="Ver progresso por trilha, código de retoma e exportar portfólio"
+            >
+              <span class="progress-full">${Object.keys(state.completedLessons).length} / ${totalLessonsCount} etapas · Progresso</span>
+              <span class="progress-compact">🏆 ${Object.keys(state.completedLessons).length}/${totalLessonsCount}</span>
+            </button>
+            <button
+              type="button"
+              class="btn nav-theme-btn"
+              data-action="open-theme-modal"
+              aria-label="Escolher estilo visual da academia"
+              title="Escolher estilo visual (5 temas)"
+            >
+              <span class="theme-full">🎨 ${escapeHtml((THEME_OPTIONS.find((t) => t.id === state.theme) ?? THEME_OPTIONS[0]).label)}</span>
+              <span class="theme-compact">🎨</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace-wrap">
+        ${mainContent}
+      </main>
+      ${state.showProgressModal ? renderProgressModal() : ''}
+      ${state.showThemeModal ? renderThemeModal() : ''}
+    </div>
+  `;
+
+  attachDomListeners();
+}
+
+async function executeWorkbench(): Promise<void> {
+  const lesson = currentLesson();
+  const engine = activeEngine();
+  const code = getEditorValue();
+
+  state.output = { kind: 'loading', statusMessage: 'A processar código…' };
+  renderApp();
+
+  if (engine === 'sql') {
+    const res = await runSqlQuery(code);
+    if (res.error) {
+      state.output = { kind: 'error', errorText: res.error, elapsedMs: res.elapsedMs };
+      renderApp();
+      return;
+    }
+
+    if (state.wbTab === 'challenge' && lesson.sqlChallenge) {
+      const check = lesson.sqlChallenge.validate(res.columns, res.rows);
+      if (check.passed) {
+        markLessonCompleted(lesson);
+      }
+      state.output = {
+        kind: 'full',
+        elapsedMs: res.elapsedMs,
+        table: { columns: res.columns, rows: res.rows },
+        bannerOk: check.passed,
+        bannerText: check.passed ? 'Desafio SQL validado' : 'Query executada: revê o requisito',
+        checks: [
+          {
+            label: check.message,
+            passed: check.passed,
+            hint: check.passed ? undefined : lesson.sqlChallenge.hint,
+          },
+        ],
+      };
+    } else {
+      state.output = {
+        kind: 'full',
+        elapsedMs: res.elapsedMs,
+        table: { columns: res.columns, rows: res.rows },
+        bannerText: `${res.rows.length} linha(s) devolvidas`,
+      };
+    }
+    renderApp();
+    return;
+  }
+
+  if (engine === 'git') {
+    const freshBase = state.wbTab === 'challenge' ? createInitialGitState() : state.gitState;
+    const { output, nextState } = runGitSimulator(freshBase, code);
+    state.gitState = nextState;
+
+    if (state.wbTab === 'challenge' && lesson.gitChallenge) {
+      const check = lesson.gitChallenge.validate(nextState, output);
+      if (check.passed) {
+        markLessonCompleted(lesson);
+      }
+      state.output = {
+        kind: 'full',
+        elapsedMs: 1.2,
+        stdout: output || 'Nenhum comando executado.',
+        bannerOk: check.passed,
+        bannerText: check.passed ? 'Desafio Git concluído' : 'Comandos executados: falta um passo',
+        checks: [
+          {
+            label: check.message,
+            passed: check.passed,
+            hint: check.passed ? undefined : lesson.gitChallenge.hint,
+          },
+        ],
+      };
+    } else {
+      state.output = {
+        kind: 'full',
+        elapsedMs: 1.0,
+        stdout: output || 'Nenhum comando executado.',
+        bannerText: `Ramo ativo: ${nextState.currentBranch}`,
+      };
+    }
+    renderApp();
+    return;
+  }
+
+  const pyChecks = state.wbTab === 'challenge' && lesson.pythonChallenge ? lesson.pythonChallenge.checks : undefined;
+  const pyRes = await runPythonCode(code, pyChecks, (statusMsg) => {
+    state.output = { kind: 'loading', statusMessage: statusMsg };
+    const statusEl = document.querySelector('.output-panel .measured');
+    if (statusEl) statusEl.textContent = statusMsg;
+  });
+
+  if (pyRes.error) {
+    state.output = {
+      kind: 'error',
+      elapsedMs: pyRes.elapsedMs,
+      errorText: pyRes.error,
+    };
+    renderApp();
+    return;
+  }
+
+  const allPassed = pyRes.checks ? pyRes.checks.every((c) => c.passed) : undefined;
+  if (allPassed) {
+    markLessonCompleted(lesson);
+  }
+
+  state.output = {
+    kind: 'full',
+    elapsedMs: pyRes.elapsedMs,
+    stdout: pyRes.stdout,
+    table: pyRes.table,
+    checks: pyRes.checks,
+    bannerOk: allPassed,
+    bannerText:
+      allPassed === true
+        ? 'Todos os testes passaram!'
+        : allPassed === false
+          ? `${pyRes.checks!.filter((c) => c.passed).length}/${pyRes.checks!.length} verificações certas`
+          : 'Código Python executado',
+  };
+  renderApp();
+}
+
+function downloadTextFile(filename: string, content: string, mime = 'text/plain;charset=utf-8'): void {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function attachDomListeners(): void {
+  const editor = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+  const highlightPre = document.getElementById('workbench-highlight') as HTMLElement | null;
+  const gutterEl = document.getElementById('workbench-gutter') as HTMLElement | null;
+
+  const syncEditorOverlay = (): void => {
+    if (!editor) return;
+    const val = editor.value;
+    state.editorDrafts[draftKey(currentLesson(), state.wbTab)] = val;
+    saveDrafts(state.editorDrafts);
+    scheduleCloudSync();
+    if (highlightPre) {
+      highlightPre.innerHTML = `<code>${highlightCode(val, activeEngine())}</code>`;
+      highlightPre.scrollTop = editor.scrollTop;
+      highlightPre.scrollLeft = editor.scrollLeft;
+    }
+    if (gutterEl) {
+      gutterEl.innerHTML = renderLineNumbers(val);
+    }
+  };
+
+  if (editor) {
+    let tabTrapActive = true;
+    editor.addEventListener('input', syncEditorOverlay);
+    editor.addEventListener('blur', () => {
+      tabTrapActive = true;
+    });
+    editor.addEventListener('scroll', () => {
+      if (highlightPre) {
+        highlightPre.scrollTop = editor.scrollTop;
+        highlightPre.scrollLeft = editor.scrollLeft;
+      }
+    });
+    editor.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') {
+        tabTrapActive = false;
+        return;
+      }
+      if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
+        ev.preventDefault();
+        void executeWorkbench();
+      } else if (ev.shiftKey && ev.altKey && (ev.key === 'F' || ev.key === 'f')) {
+        ev.preventDefault();
+        editor.value = formatCodePrettier(editor.value, activeEngine());
+        syncEditorOverlay();
+      } else if (ev.key === 'Tab' && !ev.shiftKey && tabTrapActive) {
+        ev.preventDefault();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.slice(0, start) + '    ' + editor.value.slice(end);
+        editor.selectionStart = editor.selectionEnd = start + 4;
+        syncEditorOverlay();
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-insert]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const textToInsert = btn.dataset.insert;
+      if (!textToInsert) return;
+      const editorEl = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+      if (!editorEl) return;
+      const start = editorEl.selectionStart ?? editorEl.value.length;
+      const end = editorEl.selectionEnd ?? editorEl.value.length;
+      editorEl.value = editorEl.value.slice(0, start) + textToInsert + editorEl.value.slice(end);
+      const newPos = start + textToInsert.length;
+      editorEl.selectionStart = editorEl.selectionEnd = newPos;
+      editorEl.focus();
+      syncEditorOverlay();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-mobile-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.mobileTab = btn.dataset.mobileTab === 'workbench' ? 'workbench' : 'lesson';
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-select-track]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tid = btn.dataset.selectTrack!;
+      const tr = allTracks.find((t) => t.id === tid);
+      if (!tr) return;
+      state.view = 'academia';
+      state.trackId = tr.id;
+      if (!tr.lessons.some((l) => l.id === state.lessonId)) {
+        state.lessonId = tr.lessons[0].id;
+      }
+      state.wbTab = 'challenge';
+      state.output = { kind: 'empty' };
+      state.confirmSolutionLessonId = null;
+      state.hintLevel = 0;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-select-view]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.view = btn.dataset.selectView as ViewMode;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-select-lesson]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const lid = btn.dataset.selectLesson;
+      if (!lid) return;
+      state.lessonId = lid;
+      state.wbTab = 'challenge';
+      state.output = { kind: 'empty' };
+      state.sidebarOpenMobile = false;
+      state.confirmSolutionLessonId = null;
+      state.hintLevel = 0;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-wb-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.wbTab = btn.dataset.wbTab as WorkbenchTab;
+      state.output = { kind: 'empty' };
+      state.confirmSolutionLessonId = null;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLInputElement>('input[data-quiz-idx]').forEach((inp) => {
+    inp.addEventListener('change', () => {
+      const lesson = currentLesson();
+      const idx = Number(inp.dataset.quizIdx);
+      state.quizSelection[lesson.id] = idx;
+      saveQuizzes(state.quizSelection);
+      if (state.completedLessons[lesson.id] && idx === lesson.quiz.correctIndex) {
+        state.completedLessons[lesson.id].quizPassed = true;
+        saveProgress(state.completedLessons);
+      }
+      scheduleCloudSync();
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-try-ref]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const entry = cheatsheets[Number(btn.dataset.tryRef)];
+      if (!entry || !entry.tryEngine || !entry.trySnippet) return;
+      const targetTrack =
+        entry.tryEngine === 'sql'
+          ? allTracks.find((t) => t.id === 'sql')!
+          : entry.tryEngine === 'git'
+            ? allTracks.find((t) => t.id === 'git')!
+            : allTracks.find((t) => t.id === (entry.category === 'Pandas' ? 'pandas' : 'python'))!;
+      state.view = 'academia';
+      state.trackId = targetTrack.id;
+      state.lessonId = targetTrack.lessons[0].id;
+      state.wbTab = 'example';
+      state.mobileTab = 'workbench';
+      state.editorDrafts[draftKey(targetTrack.lessons[0], 'example')] = entry.trySnippet;
+      saveDrafts(state.editorDrafts, true);
+      state.output = { kind: 'empty' };
+      renderApp();
+      void executeWorkbench();
+    });
+  });
+
+  const serieSelect = document.querySelector<HTMLSelectElement>('select[data-filter="serie"]');
+  if (serieSelect) {
+    serieSelect.addEventListener('change', () => {
+      state.explorerSerie = serieSelect.value === 'base' ? 'base' : 'sazonal';
+      renderApp();
+    });
+  }
+
+  const citySelect = document.querySelector<HTMLSelectElement>('select[data-filter="cidade"]');
+  if (citySelect) {
+    citySelect.addEventListener('change', () => {
+      state.explorerCidade = citySelect.value;
+      renderApp();
+    });
+  }
+
+  const catSelect = document.querySelector<HTMLSelectElement>('select[data-filter="categoria"]');
+  if (catSelect) {
+    catSelect.addEventListener('change', () => {
+      state.explorerCategoria = catSelect.value;
+      renderApp();
+    });
+  }
+
+  const refSearch = document.getElementById('ref-search') as HTMLInputElement | null;
+  if (refSearch) {
+    refSearch.addEventListener('input', () => {
+      const pos = refSearch.selectionStart ?? refSearch.value.length;
+      state.refQuery = refSearch.value;
+      renderApp();
+      const nextInput = document.getElementById('ref-search') as HTMLInputElement | null;
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.setSelectionRange(pos, pos);
+      }
+    });
+  }
+
+  const refCat = document.getElementById('ref-cat') as HTMLSelectElement | null;
+  if (refCat) {
+    refCat.addEventListener('change', () => {
+      state.refCategory = refCat.value;
+      renderApp();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-action]').forEach((el) => {
+    el.addEventListener('click', (ev) => {
+      const act = el.dataset.action;
+      if (act === 'go-home') {
+        ev.preventDefault();
+        state.view = 'academia';
+        state.trackId = allTracks[0].id;
+        state.lessonId = allTracks[0].lessons[0].id;
+        state.wbTab = 'challenge';
+        renderApp();
+      } else if (act === 'open-theme-modal') {
+        state.showThemeModal = true;
+        renderApp();
+      } else if (act === 'close-theme-modal') {
+        state.showThemeModal = false;
+        renderApp();
+      } else if (act === 'close-theme-backdrop') {
+        if (ev.target === el) {
+          state.showThemeModal = false;
+          renderApp();
+        }
+      } else if (act === 'select-theme') {
+        const nextTheme = el.dataset.themeId as ThemeId | undefined;
+        if (nextTheme && THEME_OPTIONS.some((t) => t.id === nextTheme)) {
+          state.theme = nextTheme;
+          applyTheme(state.theme);
+          state.showThemeModal = false;
+          renderApp();
+        }
+      } else if (act === 'toggle-theme') {
+        const idx = THEME_OPTIONS.findIndex((t) => t.id === state.theme);
+        state.theme = THEME_OPTIONS[(idx + 1) % THEME_OPTIONS.length].id;
+        applyTheme(state.theme);
+        renderApp();
+      } else if (act === 'toggle-mobile-sidebar') {
+        state.sidebarOpenMobile = !state.sidebarOpenMobile;
+        renderApp();
+      } else if (act === 'toggle-desktop-sidebar') {
+        state.layout.sidebarCollapsed = !state.layout.sidebarCollapsed;
+        saveLayoutPrefs(state.layout);
+        renderApp();
+      } else if (act === 'reset-layout') {
+        state.layout = { ...DEFAULT_LAYOUT };
+        saveLayoutPrefs(state.layout);
+        renderApp();
+      } else if (act === 'switch-to-workbench') {
+        state.mobileTab = 'workbench';
+        renderApp();
+      } else if (act === 'switch-to-lesson') {
+        state.mobileTab = 'lesson';
+        renderApp();
+      } else if (act === 'load-example-tab') {
+        state.wbTab = 'example';
+        state.mobileTab = 'workbench';
+        state.editorDrafts[draftKey(currentLesson(), 'example')] = currentLesson().exampleCode;
+        saveDrafts(state.editorDrafts, true);
+        renderApp();
+        void executeWorkbench();
+      } else if (act === 'run-code') {
+        void executeWorkbench();
+      } else if (act === 'format-code') {
+        const cur = getEditorValue();
+        state.editorDrafts[draftKey(currentLesson(), state.wbTab)] = formatCodePrettier(cur, activeEngine());
+        saveDrafts(state.editorDrafts, true);
+        renderApp();
+      } else if (act === 'reset-code') {
+        delete state.editorDrafts[draftKey(currentLesson(), state.wbTab)];
+        saveDrafts(state.editorDrafts, true);
+        if (currentLesson().engine === 'git') {
+          state.gitState = createInitialGitState();
+        }
+        state.output = { kind: 'empty' };
+        state.confirmSolutionLessonId = null;
+        state.hintLevel = 0;
+        renderApp();
+      } else if (act === 'next-hint') {
+        state.hintLevel = Math.min(2, state.hintLevel + 1);
+        renderApp();
+      } else if (act === 'ask-solution') {
+        state.confirmSolutionLessonId = currentLesson().id;
+        renderApp();
+      } else if (act === 'cancel-solution') {
+        state.confirmSolutionLessonId = null;
+        renderApp();
+      } else if (act === 'apply-solution') {
+        const l = currentLesson();
+        const sol =
+          l.pythonChallenge?.solutionCode ??
+          l.sqlChallenge?.solutionSql ??
+          l.gitChallenge?.solutionCommands ??
+          l.exampleCode;
+        state.editorDrafts[draftKey(l, 'challenge')] = sol;
+        saveDrafts(state.editorDrafts, true);
+        state.helpedInSession.add(l.id);
+        state.confirmSolutionLessonId = null;
+        renderApp();
+      } else if (act === 'open-progress-modal') {
+        state.showProgressModal = true;
+        state.progressModalFeedback = null;
+        state.confirmClearProgress = false;
+        renderApp();
+      } else if (act === 'close-progress-modal') {
+        state.showProgressModal = false;
+        renderApp();
+      } else if (act === 'close-progress-backdrop') {
+        if (ev.target === el) {
+          state.showProgressModal = false;
+          renderApp();
+        }
+      } else if (act === 'generate-progress-code') {
+        void (async () => {
+          try {
+            const code = await encodeProgressCode(
+              state.completedLessons,
+              state.editorDrafts,
+              state.quizSelection,
+              {
+                trackId: state.trackId,
+                lessonId: state.lessonId,
+                view: state.view,
+                timestamp: new Date().toISOString(),
+              },
+            );
+            state.generatedProgressCode = code;
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(code);
+              state.progressModalFeedback = {
+                ok: true,
+                text: 'Código gerado e copiado para a área de transferência!',
+              };
+            } else {
+              state.progressModalFeedback = {
+                ok: true,
+                text: 'Código gerado! Copia o texto abaixo para continuar noutro dispositivo.',
+              };
+            }
+          } catch (err) {
+            state.progressModalFeedback = {
+              ok: false,
+              text: err instanceof Error ? err.message : 'Não foi possível gerar o código.',
+            };
+          }
+          renderApp();
+        })();
+      } else if (act === 'activate-cloud-sync') {
+        state.syncStatus = 'syncing';
+        state.progressModalFeedback = { ok: true, text: 'A criar código de sincronização na cloud…' };
+        renderApp();
+        void (async () => {
+          try {
+            const res = await pushCloudSync({
+              progress: state.completedLessons,
+              drafts: state.editorDrafts,
+              quizzes: state.quizSelection,
+              lastLocation: {
+                trackId: state.trackId,
+                lessonId: state.lessonId,
+                view: state.view,
+                timestamp: new Date().toISOString(),
+              },
+            });
+            state.syncCode = res.code;
+            state.syncStatus = 'synced';
+            state.syncLastUpdatedAt = res.updatedAt;
+            const shareUrl = buildSyncShareUrl(res.code);
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(shareUrl);
+              state.progressModalFeedback = {
+                ok: true,
+                text: `Código ${res.code} ativado! Link de retoma copiado para a área de transferência.`,
+              };
+            } else {
+              state.progressModalFeedback = {
+                ok: true,
+                text: `Código ${res.code} ativado! Guarda este código para retomar noutro dispositivo.`,
+              };
+            }
+          } catch (err) {
+            state.syncStatus = 'error';
+            state.progressModalFeedback = {
+              ok: false,
+              text: err instanceof Error ? err.message : 'Erro ao ativar sincronização na cloud.',
+            };
+          }
+          renderApp();
+        })();
+      } else if (act === 'copy-sync-link') {
+        if (!state.syncCode) return;
+        const shareUrl = buildSyncShareUrl(state.syncCode);
+        void (async () => {
+          try {
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(shareUrl);
+              state.progressModalFeedback = {
+                ok: true,
+                text: `Link de retoma (${state.syncCode}) copiado! Abre-o no telemóvel ou PC.`,
+              };
+            } else {
+              state.progressModalFeedback = {
+                ok: true,
+                text: `Usa o código ${state.syncCode} ou o URL: ${shareUrl}`,
+              };
+            }
+          } catch {
+            state.progressModalFeedback = {
+              ok: true,
+              text: `Código ativo: ${state.syncCode}`,
+            };
+          }
+          renderApp();
+        })();
+      } else if (act === 'sync-now') {
+        if (!state.syncCode) return;
+        state.syncStatus = 'syncing';
+        renderApp();
+        void (async () => {
+          try {
+            const res = await pushCloudSync({
+              code: state.syncCode,
+              progress: state.completedLessons,
+              drafts: state.editorDrafts,
+              quizzes: state.quizSelection,
+              lastLocation: {
+                trackId: state.trackId,
+                lessonId: state.lessonId,
+                view: state.view,
+                timestamp: new Date().toISOString(),
+              },
+            });
+            state.syncStatus = 'synced';
+            state.syncLastUpdatedAt = res.updatedAt;
+            state.progressModalFeedback = {
+              ok: true,
+              text: `Sincronizado com sucesso (${res.code}).`,
+            };
+          } catch (err) {
+            state.syncStatus = 'error';
+            state.progressModalFeedback = {
+              ok: false,
+              text: err instanceof Error ? err.message : 'Falha ao sincronizar com a cloud.',
+            };
+          }
+          renderApp();
+        })();
+      } else if (act === 'disconnect-cloud-sync') {
+        state.syncCode = null;
+        state.syncStatus = 'idle';
+        saveSyncCode(null);
+        state.progressModalFeedback = {
+          ok: true,
+          text: 'Sincronização na cloud desligada neste dispositivo (o progresso local mantém-se).',
+        };
+        renderApp();
+      } else if (act === 'apply-progress-code') {
+        const raw = state.progressCodeInput.trim();
+        if (!raw) {
+          state.progressModalFeedback = {
+            ok: false,
+            text: 'Cola primeiro um código MB-XXXX-XXXX-XXXX, link ?sync=… ou código MB1-….',
+          };
+          renderApp();
+          return;
+        }
+        const cloudCode = extractSyncCode(raw);
+        if (cloudCode) {
+          state.syncStatus = 'syncing';
+          state.progressModalFeedback = { ok: true, text: `A ligar ao código ${cloudCode}…` };
+          renderApp();
+          void (async () => {
+            try {
+              const remote = await pullCloudSync(cloudCode);
+              state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
+              state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
+              state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
+              saveProgress(state.completedLessons);
+              saveDrafts(state.editorDrafts, true);
+              saveQuizzes(state.quizSelection);
+              saveSyncCode(remote.code);
+              state.syncCode = remote.code;
+              state.syncStatus = 'synced';
+              state.syncLastUpdatedAt = remote.updatedAt;
+              if (remote.lastLocation) {
+                const tr = allTracks.find((t) => t.id === remote.lastLocation!.trackId);
+                if (tr) {
+                  state.trackId = tr.id;
+                  state.lessonId = tr.lessons.some((l) => l.id === remote.lastLocation!.lessonId)
+                    ? remote.lastLocation!.lessonId
+                    : tr.lessons[0].id;
+                }
+                state.view = remote.lastLocation.view;
+                saveLastLocation(remote.lastLocation);
+              }
+              state.progressCodeInput = '';
+              state.progressModalFeedback = {
+                ok: true,
+                text: `Dispositivo ligado ao código ${remote.code}! Progresso sincronizado.`,
+              };
+            } catch (err) {
+              state.syncStatus = 'error';
+              state.progressModalFeedback = {
+                ok: false,
+                text: err instanceof Error ? err.message : 'Código não encontrado na cloud.',
+              };
+            }
+            renderApp();
+          })();
+          return;
+        }
+        void (async () => {
+          try {
+            const restored = await decodeProgressCode(raw);
+            state.completedLessons = restored.progress;
+            state.editorDrafts = restored.drafts;
+            state.quizSelection = restored.quizzes;
+            if (restored.lastLocation) {
+              const tr = allTracks.find((t) => t.id === restored.lastLocation!.trackId);
+              if (tr) {
+                state.trackId = tr.id;
+                state.lessonId = tr.lessons.some((l) => l.id === restored.lastLocation!.lessonId)
+                  ? restored.lastLocation!.lessonId
+                  : tr.lessons[0].id;
+              }
+              state.view = restored.lastLocation.view;
+            }
+            state.progressCodeInput = '';
+            state.progressModalFeedback = {
+              ok: true,
+              text: `Progresso restaurado! (${Object.keys(restored.progress).length} etapas concluídas).`,
+            };
+          } catch (err) {
+            state.progressModalFeedback = {
+              ok: false,
+              text: err instanceof Error ? err.message : 'Código inválido.',
+            };
+          }
+          renderApp();
+        })();
+      } else if (act === 'export-portfolio-md') {
+        const md = generatePortfolioMarkdown(state.completedLessons, state.editorDrafts, allTracks);
+        downloadTextFile('portfolio_mercearia_do_bairro.md', md, 'text/markdown;charset=utf-8');
+        state.progressModalFeedback = { ok: true, text: 'Portfólio (.md) descarregado com sucesso.' };
+        renderApp();
+      } else if (act === 'export-progress-json') {
+        const json = exportProgressJson(state.completedLessons, state.editorDrafts, state.quizSelection);
+        downloadTextFile('mercearia_progresso_backup.json', json, 'application/json;charset=utf-8');
+        state.progressModalFeedback = { ok: true, text: 'Backup (.json) descarregado com sucesso.' };
+        renderApp();
+      } else if (act === 'trigger-import-json') {
+        document.getElementById('import-progress-file')?.click();
+      } else if (act === 'ask-clear-progress') {
+        state.confirmClearProgress = true;
+        renderApp();
+      } else if (act === 'cancel-clear-progress') {
+        state.confirmClearProgress = false;
+        renderApp();
+      } else if (act === 'confirm-clear-progress') {
+        clearAllUserProgress();
+        state.completedLessons = {};
+        state.editorDrafts = {};
+        state.quizSelection = {};
+        state.helpedInSession.clear();
+        state.generatedProgressCode = '';
+        state.confirmClearProgress = false;
+        state.progressModalFeedback = { ok: true, text: 'Progresso local limpo.' };
+        renderApp();
+      } else if (act === 'reset-explorer-filters') {
+        state.explorerCidade = 'todas';
+        state.explorerCategoria = 'todas';
+        renderApp();
+      } else if (act === 'clear-ref-search') {
+        state.refQuery = '';
+        state.refCategory = 'Todas';
+        renderApp();
+      } else if (act === 'retry-dataset') {
+        state.datasetError = null;
+        renderApp();
+        void bootstrapData();
+      }
+    });
+  });
+
+  const codeInput = document.getElementById('progress-code-input') as HTMLInputElement | null;
+  if (codeInput) {
+    codeInput.addEventListener('input', () => {
+      state.progressCodeInput = codeInput.value;
+    });
+  }
+
+  const importFile = document.getElementById('import-progress-file') as HTMLInputElement | null;
+  if (importFile) {
+    importFile.addEventListener('change', () => {
+      const file = importFile.files?.[0];
+      if (!file) return;
+      void (async () => {
+        try {
+          const text = await file.text();
+          const imported = importProgressJson(text);
+          state.completedLessons = imported.progress;
+          state.editorDrafts = imported.drafts;
+          state.quizSelection = imported.quizzes;
+          state.progressModalFeedback = {
+            ok: true,
+            text: `Backup importado! (${Object.keys(imported.progress).length} etapas concluídas).`,
+          };
+        } catch (err) {
+          state.progressModalFeedback = {
+            ok: false,
+            text: err instanceof Error ? err.message : 'Erro ao importar ficheiro JSON.',
+          };
+        }
+        renderApp();
+      })();
+    });
+  }
+  document.querySelectorAll<HTMLElement>('[data-layout-preset]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const preset = btn.dataset.layoutPreset;
+      if (preset === 'reading') {
+        state.layout.lessonRatio = 62;
+      } else if (preset === 'coding') {
+        state.layout.lessonRatio = 36;
+      } else {
+        state.layout.lessonRatio = 48;
+      }
+      saveLayoutPrefs(state.layout);
+      renderApp();
+    });
+  });
+
+  const gridEl = document.getElementById('academy-grid');
+  const sidebarSplitter = document.getElementById('splitter-sidebar');
+  const mainSplitter = document.getElementById('splitter-main');
+  const editorSplitter = document.getElementById('splitter-editor');
+
+  const applyCssVarsLive = (): void => {
+    if (!gridEl) return;
+    gridEl.style.setProperty('--sidebar-w', `${state.layout.sidebarWidth}px`);
+    gridEl.style.setProperty('--lesson-fr', `${state.layout.lessonRatio}fr`);
+    gridEl.style.setProperty('--workbench-fr', `${100 - state.layout.lessonRatio}fr`);
+    gridEl.style.setProperty('--editor-h', `${state.layout.editorHeight}px`);
+  };
+
+  if (sidebarSplitter && gridEl) {
+    sidebarSplitter.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      sidebarSplitter.setPointerCapture(ev.pointerId);
+      sidebarSplitter.classList.add('is-dragging');
+      const rect = gridEl.getBoundingClientRect();
+      const onMove = (moveEv: PointerEvent): void => {
+        const nextW = Math.round(Math.min(420, Math.max(180, moveEv.clientX - rect.left)));
+        state.layout.sidebarWidth = nextW;
+        applyCssVarsLive();
+      };
+      const onUp = (): void => {
+        sidebarSplitter.classList.remove('is-dragging');
+        sidebarSplitter.removeEventListener('pointermove', onMove);
+        sidebarSplitter.removeEventListener('pointerup', onUp);
+        saveLayoutPrefs(state.layout);
+      };
+      sidebarSplitter.addEventListener('pointermove', onMove);
+      sidebarSplitter.addEventListener('pointerup', onUp);
+    });
+    sidebarSplitter.addEventListener('dblclick', () => {
+      state.layout.sidebarWidth = DEFAULT_LAYOUT.sidebarWidth;
+      applyCssVarsLive();
+      saveLayoutPrefs(state.layout);
+    });
+    sidebarSplitter.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+        ev.preventDefault();
+        const delta = ev.key === 'ArrowRight' ? 16 : -16;
+        state.layout.sidebarWidth = Math.min(420, Math.max(180, state.layout.sidebarWidth + delta));
+        applyCssVarsLive();
+        saveLayoutPrefs(state.layout);
+      }
+    });
+  }
+
+  if (mainSplitter && gridEl) {
+    mainSplitter.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      mainSplitter.setPointerCapture(ev.pointerId);
+      mainSplitter.classList.add('is-dragging');
+      const onMove = (moveEv: PointerEvent): void => {
+        const rect = gridEl.getBoundingClientRect();
+        const sideOffset = state.layout.sidebarCollapsed ? 0 : state.layout.sidebarWidth + 8;
+        const availW = Math.max(400, rect.width - sideOffset);
+        const relX = moveEv.clientX - (rect.left + sideOffset);
+        const ratio = Math.round(Math.min(70, Math.max(30, (relX / availW) * 100)));
+        state.layout.lessonRatio = ratio;
+        applyCssVarsLive();
+      };
+      const onUp = (): void => {
+        mainSplitter.classList.remove('is-dragging');
+        mainSplitter.removeEventListener('pointermove', onMove);
+        mainSplitter.removeEventListener('pointerup', onUp);
+        saveLayoutPrefs(state.layout);
+        renderApp();
+      };
+      mainSplitter.addEventListener('pointermove', onMove);
+      mainSplitter.addEventListener('pointerup', onUp);
+    });
+    mainSplitter.addEventListener('dblclick', () => {
+      state.layout.lessonRatio = DEFAULT_LAYOUT.lessonRatio;
+      saveLayoutPrefs(state.layout);
+      renderApp();
+    });
+    mainSplitter.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+        ev.preventDefault();
+        const delta = ev.key === 'ArrowRight' ? 4 : -4;
+        state.layout.lessonRatio = Math.min(70, Math.max(30, state.layout.lessonRatio + delta));
+        applyCssVarsLive();
+        saveLayoutPrefs(state.layout);
+      }
+    });
+  }
+
+  if (editorSplitter && gridEl) {
+    const editorShell = document.getElementById('editor-shell');
+    editorSplitter.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      editorSplitter.setPointerCapture(ev.pointerId);
+      editorSplitter.classList.add('is-dragging');
+      const startY = ev.clientY;
+      const startH = editorShell?.getBoundingClientRect().height ?? state.layout.editorHeight;
+      const onMove = (moveEv: PointerEvent): void => {
+        const nextH = Math.round(Math.min(640, Math.max(140, startH + (moveEv.clientY - startY))));
+        state.layout.editorHeight = nextH;
+        applyCssVarsLive();
+      };
+      const onUp = (): void => {
+        editorSplitter.classList.remove('is-dragging');
+        editorSplitter.removeEventListener('pointermove', onMove);
+        editorSplitter.removeEventListener('pointerup', onUp);
+        saveLayoutPrefs(state.layout);
+      };
+      editorSplitter.addEventListener('pointermove', onMove);
+      editorSplitter.addEventListener('pointerup', onUp);
+    });
+    editorSplitter.addEventListener('dblclick', () => {
+      state.layout.editorHeight = DEFAULT_LAYOUT.editorHeight;
+      applyCssVarsLive();
+      saveLayoutPrefs(state.layout);
+    });
+    editorSplitter.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        const delta = ev.key === 'ArrowDown' ? 24 : -24;
+        state.layout.editorHeight = Math.min(640, Math.max(140, state.layout.editorHeight + delta));
+        applyCssVarsLive();
+        saveLayoutPrefs(state.layout);
+      }
+    });
+  }
+}
+
+async function bootstrapData(): Promise<void> {
+  try {
+    state.dataset = await loadMerceariaDataset();
+    state.datasetError = null;
+    if (state.view === 'explorador') renderApp();
+  } catch (err) {
+    state.datasetError = err instanceof Error ? err.message : String(err);
+    if (state.view === 'explorador') renderApp();
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  syncStateFromUrl();
+  renderApp();
+});
+
+window.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && (state.showProgressModal || state.showThemeModal)) {
+    state.showProgressModal = false;
+    state.showThemeModal = false;
+    renderApp();
+  }
+});
+
+async function bootstrapCloudSync(): Promise<void> {
+  const params = new URLSearchParams(window.location.search);
+  const urlCode = params.get('sync');
+  const normalizedUrlCode = urlCode ? extractSyncCode(urlCode) : null;
+  const targetCode = normalizedUrlCode ?? state.syncCode;
+  if (!targetCode) return;
+
+  try {
+    const remote = await pullCloudSync(targetCode);
+    state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
+    state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
+    state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
+    saveProgress(state.completedLessons);
+    saveDrafts(state.editorDrafts, true);
+    saveQuizzes(state.quizSelection);
+    saveSyncCode(remote.code);
+    state.syncCode = remote.code;
+    state.syncStatus = 'synced';
+    state.syncLastUpdatedAt = remote.updatedAt;
+
+    if (normalizedUrlCode && remote.lastLocation) {
+      const tr = allTracks.find((t) => t.id === remote.lastLocation!.trackId);
+      if (tr) {
+        state.trackId = tr.id;
+        state.lessonId = tr.lessons.some((l) => l.id === remote.lastLocation!.lessonId)
+          ? remote.lastLocation!.lessonId
+          : tr.lessons[0].id;
+      }
+      state.view = remote.lastLocation.view;
+      saveLastLocation(remote.lastLocation);
+    }
+
+    if (urlCode) {
+      params.delete('sync');
+      const cleanSearch = params.toString();
+      const nextUrl = `${window.location.pathname}${cleanSearch ? `?${cleanSearch}` : ''}${window.location.hash}`;
+      history.replaceState(null, '', nextUrl);
+    }
+    renderApp();
+  } catch {
+    state.syncStatus = 'error';
+  }
+}
+
+syncStateFromUrl();
+renderApp();
+void bootstrapData();
+void bootstrapCloudSync();

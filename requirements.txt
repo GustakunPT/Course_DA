@@ -1,0 +1,7 @@
+# Fase 1 (Python puro): não precisa de nada além do Python.
+# Para os cadernos de pandas (pasta cadernos/) e da Fase 3 em diante, corra:
+#   pip install -r requirements.txt
+pandas
+notebook
+# matplotlib
+# seaborn

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Dados sensíveis ou muito grandes (nunca publicar dados reais de clientes)
+dados/privados/
+*.sqlite
+*.db
+
+# Web (Node/Vite)
+node_modules/
+web/dist/
+# gerado por "npm run sync" a partir de node_modules/sql.js
+web/public/sql-wasm.wasm
+*.log

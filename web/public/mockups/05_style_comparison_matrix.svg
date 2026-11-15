@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&amp;family=Atkinson+Hyperlegible+Mono:wght@400;700&amp;display=swap');
+      .font-sans { font-family: 'Host Grotesk', -apple-system, sans-serif; }
+      .font-mono { font-family: 'Atkinson Hyperlegible Mono', monospace; }
+    </style>
+    <filter id="matrixShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Dark Background Canvas -->
+  <rect width="1200" height="800" fill="#0A0D14" />
+
+  <!-- Global Header -->
+  <g transform="translate(60, 40)">
+    <text x="0" y="24" class="font-sans" font-size="24" font-weight="700" fill="#FFFFFF">Mercearia do Bairro — Matriz Comparativa de Estilos Móveis (R2)</text>
+    <text x="0" y="48" class="font-sans" font-size="14" fill="#94A3B8">Exploração estética e ergonómica para a Academia de Analistas de Dados em viewports de 375px a 430px</text>
+  </g>
+
+  <!-- ========================================================================
+       COLUMN 1: NORDIC STUDIO
+       ======================================================================== -->
+  <g transform="translate(60, 110)">
+    <!-- Column Card Background -->
+    <rect width="340" height="640" rx="16" fill="#141923" stroke="#232B3B" stroke-width="1" filter="url(#matrixShadow)" />
+    
+    <!-- Header Banner -->
+    <rect width="340" height="74" rx="16" fill="#1B2230" />
+    <rect x="0" y="58" width="340" height="16" fill="#1B2230" />
+    <circle cx="36" cy="36" r="16" fill="#0F766E" />
+    <text x="30" y="42" font-size="15">🌱</text>
+    <text x="64" y="32" class="font-sans" font-size="16" font-weight="700" fill="#FFFFFF">1. Nordic Studio</text>
+    <text x="64" y="48" class="font-sans" font-size="11" fill="#94A3B8">Clean Scandinavian Data Studio</text>
+
+    <!-- Mini Mockup Frame Preview -->
+    <g transform="translate(45, 90)">
+      <!-- Mini Phone Shell -->
+      <rect width="250" height="280" rx="20" fill="#FAFAF9" stroke="#E4E4E7" stroke-width="1.5" />
+      <!-- Island -->
+      <rect x="85" y="8" width="80" height="16" rx="8" fill="#000000" />
+      
+      <!-- Mini Content -->
+      <text x="16" y="42" class="font-sans" font-size="10" font-weight="700" fill="#18181B">Mercearia do Bairro</text>
+      <text x="16" y="54" class="font-mono" font-size="8" fill="#0F766E">SQL // ETAPA 04</text>
+      
+      <!-- Mini Switcher -->
+      <rect x="16" y="62" width="218" height="20" rx="4" fill="#F4F4F5" />
+      <rect x="18" y="64" width="105" height="16" rx="3" fill="#FFFFFF" />
+      <text x="34" y="76" class="font-sans" font-size="7" font-weight="700" fill="#18181B">📖 Lição</text>
+      <text x="148" y="76" class="font-sans" font-size="7" fill="#71717A">⚡ Bancada</text>
+
+      <!-- Mini Theory Card -->
+      <rect x="16" y="90" width="218" height="54" rx="6" fill="#FFFFFF" stroke="#E4E4E7" stroke-width="0.8" />
+      <rect x="16" y="90" width="3" height="54" fill="#0F766E" />
+      <text x="24" y="104" class="font-sans" font-size="8" font-weight="700" fill="#18181B">Analogia da Mercearia</text>
+      <text x="24" y="116" class="font-sans" font-size="7" fill="#52525B">Montes de talões por categoria</text>
+      <text x="24" y="126" class="font-sans" font-size="7" fill="#52525B">GROUP BY + SUM(total)</text>
+
+      <!-- Mini Accordion -->
+      <rect x="16" y="152" width="218" height="22" rx="4" fill="#F4F4F5" stroke="#E4E4E7" stroke-width="0.8" />
+      <text x="24" y="166" class="font-sans" font-size="7" font-weight="600" fill="#18181B">📋 Tabela de Sintaxe Rápida</text>
+      <text x="218" y="166" class="font-sans" font-size="7" fill="#71717A">▼</text>
+
+      <!-- Mini Action Button -->
+      <rect x="16" y="184" width="218" height="26" rx="5" fill="#0F766E" />
+      <text x="64" y="200" class="font-sans" font-size="8" font-weight="700" fill="#FFFFFF">Praticar na Bancada ➔</text>
+
+      <!-- Mini Home Bar -->
+      <rect x="85" y="266" width="80" height="3" rx="1.5" fill="#18181B" opacity="0.4" />
+    </g>
+
+    <!-- Specs Breakdown -->
+    <g transform="translate(24, 390)">
+      <!-- Attribute 1: Paleta -->
+      <text x="0" y="16" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PALETA &amp; TEMA</text>
+      <text x="0" y="32" class="font-sans" font-size="11" fill="#E2E8F0">Neutro quente (#FAFAF9), Obsidiana (#18181B), Sage Suave (#0F766E), Bordas 1px (#E4E4E7).</text>
+      
+      <!-- Attribute 2: Tipografia -->
+      <text x="0" y="64" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">TIPOGRAFIA</text>
+      <text x="0" y="80" class="font-sans" font-size="11" fill="#E2E8F0">Host Grotesk editorial + Atkinson Hyperlegible Mono. Generoso respiro vertical.</text>
+
+      <!-- Attribute 3: Ergonomia Touch -->
+      <text x="0" y="112" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">ERGONOMIA TOUCH</text>
+      <text x="0" y="128" class="font-sans" font-size="11" fill="#E2E8F0">Acordeões expansíveis para eliminar scroll longo. Transição fluida entre leitura e código.</text>
+
+      <!-- Attribute 4: Persona -->
+      <text x="0" y="160" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PERFIL DO ALUNO</text>
+      <text x="0" y="176" class="font-sans" font-size="11" fill="#E2E8F0">Sessões de estudo aprofundado, sem fadiga visual, leitura calma e reflexiva.</text>
+
+      <!-- Recommendation Tag -->
+      <rect x="0" y="200" width="292" height="28" rx="6" fill="rgba(15, 118, 110, 0.2)" stroke="#0F766E" stroke-width="1" />
+      <text x="24" y="218" class="font-sans" font-size="10" font-weight="700" fill="#2DD4BF">★ MELHOR PARA: FOCO &amp; MENOR COGNITIVO</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================
+       COLUMN 2: GLASSMORPHIC / NEO-DUO
+       ======================================================================== -->
+  <g transform="translate(430, 110)">
+    <!-- Column Card Background -->
+    <rect width="340" height="640" rx="16" fill="#141923" stroke="#232B3B" stroke-width="1" filter="url(#matrixShadow)" />
+    
+    <!-- Header Banner -->
+    <rect width="340" height="74" rx="16" fill="#1B2230" />
+    <rect x="0" y="58" width="340" height="16" fill="#1B2230" />
+    <circle cx="36" cy="36" r="16" fill="#6366F1" />
+    <text x="30" y="42" font-size="15">✨</text>
+    <text x="64" y="32" class="font-sans" font-size="16" font-weight="700" fill="#FFFFFF">2. Glassmorphic</text>
+    <text x="64" y="48" class="font-sans" font-size="11" fill="#94A3B8">Modern Vibrant &amp; Gamified App</text>
+
+    <!-- Mini Mockup Frame Preview -->
+    <g transform="translate(45, 90)">
+      <!-- Mini Phone Shell -->
+      <rect width="250" height="280" rx="20" fill="#0B1020" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" />
+      <!-- Island -->
+      <rect x="85" y="8" width="80" height="16" rx="8" fill="#000000" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
+      
+      <!-- Mini Content -->
+      <text x="16" y="42" class="font-sans" font-size="10" font-weight="700" fill="#F8FAFC">Mercearia do Bairro</text>
+      <rect x="180" y="32" width="54" height="16" rx="8" fill="#FEF3C7" />
+      <text x="186" y="43" class="font-sans" font-size="8" font-weight="700" fill="#B45309">🔥 14d</text>
+
+      <!-- Mini Switcher Active Bancada -->
+      <rect x="16" y="58" width="218" height="20" rx="6" fill="rgba(255,255,255,0.06)" />
+      <rect x="125" y="60" width="107" height="16" rx="5" fill="#6366F1" />
+      <text x="34" y="72" class="font-sans" font-size="7" fill="#94A3B8">📖 Lição</text>
+      <text x="144" y="72" class="font-sans" font-size="7" font-weight="700" fill="#FFFFFF">⚡ Bancada</text>
+
+      <!-- Mini Code Box -->
+      <rect x="16" y="86" width="218" height="60" rx="6" fill="#050811" stroke="rgba(255,255,255,0.12)" stroke-width="0.8" />
+      <text x="22" y="98" class="font-mono" font-size="6" fill="#F43F5E">SELECT categoria, SUM(total)</text>
+      <text x="22" y="108" class="font-mono" font-size="6" fill="#F43F5E">FROM vendas GROUP BY categoria;</text>
+
+      <!-- Mini Quick Touch Symbols -->
+      <g transform="translate(16, 122)">
+        <rect x="0" y="0" width="16" height="16" rx="3" fill="rgba(255,255,255,0.1)" />
+        <text x="5" y="11" class="font-mono" font-size="8" fill="#38BDF8">(</text>
+        <rect x="20" y="0" width="16" height="16" rx="3" fill="rgba(255,255,255,0.1)" />
+        <text x="25" y="11" class="font-mono" font-size="8" fill="#38BDF8">)</text>
+        <rect x="40" y="0" width="16" height="16" rx="3" fill="rgba(255,255,255,0.1)" />
+        <text x="45" y="11" class="font-mono" font-size="8" fill="#F59E0B">=</text>
+      </g>
+
+      <!-- Mini Glowing Run Button -->
+      <rect x="16" y="154" width="218" height="24" rx="6" fill="#6366F1" />
+      <text x="80" y="170" class="font-sans" font-size="8" font-weight="700" fill="#FFFFFF">▶ Executar Consulta</text>
+
+      <!-- Mini Results Table -->
+      <rect x="16" y="186" width="218" height="48" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" />
+      <text x="22" y="198" class="font-mono" font-size="7" font-weight="700" fill="#10B981">✓ 5.078 transações processadas</text>
+      <text x="22" y="210" class="font-sans" font-size="7" fill="#CBD5E1">Padaria: €14.892 | Frutaria: €11.230</text>
+
+      <!-- Mini Home Bar -->
+      <rect x="85" y="266" width="80" height="3" rx="1.5" fill="#FFFFFF" opacity="0.4" />
+    </g>
+
+    <!-- Specs Breakdown -->
+    <g transform="translate(24, 390)">
+      <!-- Attribute 1: Paleta -->
+      <text x="0" y="16" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PALETA &amp; TEMA</text>
+      <text x="0" y="32" class="font-sans" font-size="11" fill="#E2E8F0">Azul cósmico (#090D1A), Indigo (#6366F1), Âmbar (#F59E0B), Vidro fosco translúcido.</text>
+      
+      <!-- Attribute 2: Tipografia -->
+      <text x="0" y="64" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">TIPOGRAFIA</text>
+      <text x="0" y="80" class="font-sans" font-size="11" fill="#E2E8F0">Host Grotesk impactante + JetBrains Mono com syntax highlighting vibrante.</text>
+
+      <!-- Attribute 3: Ergonomia Touch -->
+      <text x="0" y="112" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">ERGONOMIA TOUCH</text>
+      <text x="0" y="128" class="font-sans" font-size="11" fill="#E2E8F0">Barra de símbolos rápidos touch, feedback vibrante com glowing buttons, badges de streak.</text>
+
+      <!-- Attribute 4: Persona -->
+      <text x="0" y="160" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PERFIL DO ALUNO</text>
+      <text x="0" y="176" class="font-sans" font-size="11" fill="#E2E8F0">Alunos que adoram gamificação, streaks diários, e estética moderna estilo Linear/Duolingo.</text>
+
+      <!-- Recommendation Tag -->
+      <rect x="0" y="200" width="292" height="28" rx="6" fill="rgba(99, 102, 241, 0.2)" stroke="#6366F1" stroke-width="1" />
+      <text x="28" y="218" class="font-sans" font-size="10" font-weight="700" fill="#A5B4FC">★ MELHOR PARA: MOTIVAÇÃO &amp; RETENÇÃO</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================
+       COLUMN 3: TERMINAL PRO
+       ======================================================================== -->
+  <g transform="translate(800, 110)">
+    <!-- Column Card Background -->
+    <rect width="340" height="640" rx="16" fill="#141923" stroke="#232B3B" stroke-width="1" filter="url(#matrixShadow)" />
+    
+    <!-- Header Banner -->
+    <rect width="340" height="74" rx="16" fill="#1B2230" />
+    <rect x="0" y="58" width="340" height="16" fill="#1B2230" />
+    <circle cx="36" cy="36" r="16" fill="#22C55E" />
+    <text x="30" y="42" font-size="15">⚡</text>
+    <text x="64" y="32" class="font-sans" font-size="16" font-weight="700" fill="#FFFFFF">3. Terminal Pro</text>
+    <text x="64" y="48" class="font-sans" font-size="11" fill="#94A3B8">High-Density Bloomberg/IDE</text>
+
+    <!-- Mini Mockup Frame Preview -->
+    <g transform="translate(45, 90)">
+      <!-- Mini Phone Shell -->
+      <rect width="250" height="280" rx="20" fill="#05070A" stroke="#1E293B" stroke-width="1.5" />
+      <!-- Island -->
+      <rect x="85" y="8" width="80" height="16" rx="8" fill="#000000" stroke="#1E293B" stroke-width="0.8" />
+      
+      <!-- Mini Content -->
+      <text x="16" y="42" class="font-mono" font-size="9" font-weight="700" fill="#22C55E">[SYS::SQLITE_WASM]</text>
+      <text x="165" y="42" class="font-mono" font-size="8" fill="#F59E0B">[MEM:4.2MB]</text>
+
+      <!-- Mini KPI Strip -->
+      <rect x="16" y="52" width="105" height="34" rx="3" fill="#0C1017" stroke="#1E293B" stroke-width="0.8" />
+      <text x="22" y="66" class="font-mono" font-size="7" fill="#64748B">// RECEITA</text>
+      <text x="22" y="78" class="font-mono" font-size="9" font-weight="700" fill="#22C55E">€47.892</text>
+
+      <rect x="129" y="52" width="105" height="34" rx="3" fill="#0C1017" stroke="#1E293B" stroke-width="0.8" />
+      <text x="135" y="66" class="font-mono" font-size="7" fill="#64748B">// ROWS</text>
+      <text x="135" y="78" class="font-mono" font-size="9" font-weight="700" fill="#F8FAFC">5.078</text>
+
+      <!-- Mini Chart -->
+      <rect x="16" y="94" width="218" height="58" rx="3" fill="#0C1017" stroke="#1E293B" stroke-width="0.8" />
+      <polyline points="26,138 60,130 95,120 130,108 175,125 215,115" fill="none" stroke="#22C55E" stroke-width="1.5" />
+      <circle cx="130" cy="108" r="2.5" fill="#22C55E" />
+      <text x="22" y="106" class="font-mono" font-size="6" fill="#22C55E">HISTOGRAMA_EUR [OUT-MAR]</text>
+
+      <!-- Mini Terminal Query Prompt -->
+      <rect x="16" y="160" width="218" height="42" rx="3" fill="#0C1017" stroke="#1E293B" stroke-width="0.8" />
+      <text x="22" y="174" class="font-mono" font-size="6" fill="#22C55E">&gt; SELECT categoria, sum(total) FROM vendas</text>
+      <text x="22" y="188" class="font-mono" font-size="6" fill="#38BDF8">&gt; Padaria: €14.892, Frutaria: €11.230 [OK]</text>
+
+      <!-- Mini Telemetry Bar -->
+      <rect x="16" y="210" width="218" height="24" rx="3" fill="#22C55E" />
+      <text x="48" y="226" class="font-mono" font-size="8" font-weight="700" fill="#000000">[EXECUTE_QUERY :: 11.2ms]</text>
+
+      <!-- Mini Home Bar -->
+      <rect x="85" y="266" width="80" height="3" rx="1.5" fill="#22C55E" opacity="0.5" />
+    </g>
+
+    <!-- Specs Breakdown -->
+    <g transform="translate(24, 390)">
+      <!-- Attribute 1: Paleta -->
+      <text x="0" y="16" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PALETA &amp; TEMA</text>
+      <text x="0" y="32" class="font-sans" font-size="11" fill="#E2E8F0">Preto OLED (#05070A), Verde Fósforo (#22C55E), Âmbar (#F59E0B), Cyan (#38BDF8).</text>
+      
+      <!-- Attribute 2: Tipografia -->
+      <text x="0" y="64" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">TIPOGRAFIA</text>
+      <text x="0" y="80" class="font-sans" font-size="11" fill="#E2E8F0">100% Monoespaçada Atkinson Hyperlegible. Máxima densidade de caracteres.</text>
+
+      <!-- Attribute 3: Ergonomia Touch -->
+      <text x="0" y="112" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">ERGONOMIA TOUCH</text>
+      <text x="0" y="128" class="font-sans" font-size="11" fill="#E2E8F0">Telemetria de queries em tempo real, métricas de memória/ms, densidade máxima.</text>
+
+      <!-- Attribute 4: Persona -->
+      <text x="0" y="160" class="font-sans" font-size="10" font-weight="700" fill="#38BDF8">PERFIL DO ALUNO</text>
+      <text x="0" y="176" class="font-sans" font-size="11" fill="#E2E8F0">Ambição técnica avançada, mentalidade DataOps e engenharia de dados profissional.</text>
+
+      <!-- Recommendation Tag -->
+      <rect x="0" y="200" width="292" height="28" rx="6" fill="rgba(34, 197, 94, 0.2)" stroke="#22C55E" stroke-width="1" />
+      <text x="24" y="218" class="font-sans" font-size="10" font-weight="700" fill="#4ADE80">★ MELHOR PARA: DENSIDADE &amp; TELEMETRIA</text>
+    </g>
+  </g>
+
+</svg>

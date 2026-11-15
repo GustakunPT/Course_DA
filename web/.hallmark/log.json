@@ -1,0 +1,24 @@
+[
+  {
+    "date": "2026-11-12",
+    "scope": "app",
+    "shape": "app screen",
+    "theme": "Console",
+    "axes": "dark/grotesk-sans/chromatic-amber",
+    "nav": "top bar with track tabs and collapsible lesson index",
+    "footer": "none",
+    "imagery": "none",
+    "photos": [],
+    "entry": "dual live SQL and Python workbench",
+    "fingerprint": "app-console-workbench",
+    "sections": [
+      "TopNav",
+      "SidebarIndex",
+      "LessonArticle",
+      "LiveWorkbench"
+    ],
+    "signature": "dual live SQL and Python workbench querying 5078 Mercearia sales with VS Code Prettier syntax editor",
+    "waived": [],
+    "prompt": "Mercearia do Bairro interactive data analyst academy on Vercel"
+  }
+]

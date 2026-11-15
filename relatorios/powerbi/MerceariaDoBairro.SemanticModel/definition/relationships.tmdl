@@ -1,0 +1,8 @@
+relationship rel_vendas_produtos
+	fromColumn: vendas_sazonais.produto_id
+	toColumn: produtos.id
+
+relationship rel_vendas_clientes
+	fromColumn: vendas_sazonais.cliente_id
+	toColumn: clientes.id
+

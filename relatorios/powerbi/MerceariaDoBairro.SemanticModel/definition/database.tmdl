@@ -1,0 +1,4 @@
+/// Modelo Semantico Star Schema da Mercearia do Bairro (2025)
+database MerceariaDoBairro
+	compatibilityLevel: 1600
+

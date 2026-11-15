@@ -1,0 +1,16 @@
+/// Dimensão Calendário contínua para Time Intelligence DAX
+table calendario
+	lineageTag: 2f8fc127-aa69-4b33-8dd0-999c6d32cd11
+
+	partition calendario = calculated
+		mode: import
+		source =
+				ADDCOLUMNS(
+				    CALENDAR(DATE(2025, 1, 1), DATE(2025, 12, 31)),
+				    "Ano", YEAR([Date]),
+				    "MesNumero", MONTH([Date]),
+				    "AnoMes", FORMAT([Date], "yyyy-MM"),
+				    "Trimestre", "T" & FORMAT([Date], "q"),
+				    "DiaSemana", WEEKDAY([Date], 2)
+				)
+

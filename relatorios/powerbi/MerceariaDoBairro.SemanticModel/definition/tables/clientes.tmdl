@@ -1,0 +1,32 @@
+/// Dimensão de clientes e cidades da Mercearia
+table clientes
+	lineageTag: e1188c5a-1e95-4d9a-a249-3782d5c50474
+
+	column id
+		dataType: int64
+		isKey
+		lineageTag: 8dfcfd86-3d56-45aa-92b3-6dd4c4d5f227
+		summarizeBy: none
+		sourceColumn: id
+
+	column nome
+		dataType: string
+		lineageTag: 96eaae46-47ef-487a-9bf2-821ec5f2da77
+		sourceColumn: nome
+
+	column cidade
+		dataType: string
+		lineageTag: f8e4005a-f180-4ec5-9da6-9321583769cf
+		dataCategory: City
+		sourceColumn: cidade
+
+	partition clientes = m
+		mode: import
+		source =
+				let
+				    Fonte = Csv.Document(File.Contents("C:\Users\gusta\Downloads\mercearia-do-bairro\mercearia-do-bairro\dados\clientes.csv"),[Delimiter=",", Columns=3, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Cabecalhos,{{"id", Int64.Type}, {"nome", type text}, {"cidade", type text}})
+				in
+				    Tipos
+

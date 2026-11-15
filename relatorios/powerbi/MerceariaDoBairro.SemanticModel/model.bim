@@ -1,0 +1,262 @@
+{
+  "name": "MerceariaDoBairro",
+  "description": "Modelo Semantico Star Schema da Mercearia do Bairro (2025)",
+  "compatibilityLevel": 1600,
+  "model": {
+    "name": "MerceariaDoBairro",
+    "culture": "en-US",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "tables": [
+      {
+        "name": "produtos",
+        "description": "Dimensão de produtos do catálogo da Mercearia",
+        "lineageTag": "3ff5d73e-90d5-4de5-ab96-4188383a9e4a",
+        "columns": [
+          {
+            "name": "id",
+            "dataType": "int64",
+            "isKey": true,
+            "sourceColumn": "id",
+            "lineageTag": "9934902f-2252-4be4-9958-327091deadb5",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "nome",
+            "dataType": "string",
+            "sourceColumn": "nome",
+            "lineageTag": "aec51b98-6c3a-454c-a57e-1e0f043b2ed2"
+          },
+          {
+            "name": "categoria",
+            "dataType": "string",
+            "sourceColumn": "categoria",
+            "lineageTag": "564b929e-e6eb-4754-a6a7-bc8c8844eed4"
+          },
+          {
+            "name": "preco",
+            "dataType": "double",
+            "sourceColumn": "preco",
+            "formatString": "#,0.00 \"€\"",
+            "lineageTag": "f83b4513-7596-4bdf-8e02-e2e2a1290126",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "produtos",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Fonte = Csv.Document(File.Contents(\"C:\\Users\\gusta\\Downloads\\mercearia-do-bairro\\mercearia-do-bairro\\dados\\produtos.csv\"),[Delimiter=\",\", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.None]),\n    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),\n    Tipos = Table.TransformColumnTypes(Cabecalhos,{{\"id\", Int64.Type}, {\"nome\", type text}, {\"categoria\", type text}, {\"preco\", type number}}, \"en-US\")\nin\n    Tipos"
+            }
+          }
+        ]
+      },
+      {
+        "name": "clientes",
+        "description": "Dimensão de clientes e cidades da Mercearia",
+        "lineageTag": "e1188c5a-1e95-4d9a-a249-3782d5c50474",
+        "columns": [
+          {
+            "name": "id",
+            "dataType": "int64",
+            "isKey": true,
+            "sourceColumn": "id",
+            "lineageTag": "8dfcfd86-3d56-45aa-92b3-6dd4c4d5f227",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "nome",
+            "dataType": "string",
+            "sourceColumn": "nome",
+            "lineageTag": "96eaae46-47ef-487a-9bf2-821ec5f2da77"
+          },
+          {
+            "name": "cidade",
+            "dataType": "string",
+            "sourceColumn": "cidade",
+            "lineageTag": "f8e4005a-f180-4ec5-9da6-9321583769cf",
+            "dataCategory": "City"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "clientes",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Fonte = Csv.Document(File.Contents(\"C:\\Users\\gusta\\Downloads\\mercearia-do-bairro\\mercearia-do-bairro\\dados\\clientes.csv\"),[Delimiter=\",\", Columns=3, Encoding=65001, QuoteStyle=QuoteStyle.None]),\n    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),\n    Tipos = Table.TransformColumnTypes(Cabecalhos,{{\"id\", Int64.Type}, {\"nome\", type text}, {\"cidade\", type text}})\nin\n    Tipos"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vendas_sazonais",
+        "description": "Tabela de factos de vendas sazonais da Mercearia (2025)",
+        "lineageTag": "a3ba5bc9-f3e2-463e-b363-2b144b72eeed",
+        "columns": [
+          {
+            "name": "data",
+            "dataType": "dateTime",
+            "sourceColumn": "data",
+            "formatString": "yyyy-mm-dd",
+            "lineageTag": "6d2845e4-f5b0-4b2f-8cbe-f933e7f6bc49"
+          },
+          {
+            "name": "cliente_id",
+            "dataType": "int64",
+            "sourceColumn": "cliente_id",
+            "lineageTag": "05b3acbd-43e5-450f-b0aa-7bcbbe952d40",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "produto_id",
+            "dataType": "int64",
+            "sourceColumn": "produto_id",
+            "lineageTag": "613b9fab-038e-40f5-b56c-764614a9027c",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "produto",
+            "dataType": "string",
+            "sourceColumn": "produto",
+            "lineageTag": "6ffa3c2e-1e86-497b-8077-6e38b250bef1"
+          },
+          {
+            "name": "quantidade",
+            "dataType": "int64",
+            "sourceColumn": "quantidade",
+            "lineageTag": "151be764-3280-4e48-b71c-53e953d23b01",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "preco",
+            "dataType": "double",
+            "sourceColumn": "preco",
+            "formatString": "#,0.00 \"€\"",
+            "lineageTag": "50eea5bc-d58e-46c0-92bc-e4b5ef47a909",
+            "summarizeBy": "average"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "vendas_sazonais",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Fonte = Csv.Document(File.Contents(\"C:\\Users\\gusta\\Downloads\\mercearia-do-bairro\\mercearia-do-bairro\\dados\\vendas_sazonais.csv\"),[Delimiter=\",\", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),\n    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),\n    Tipos = Table.TransformColumnTypes(Cabecalhos,{{\"data\", type date}, {\"cliente_id\", Int64.Type}, {\"produto_id\", Int64.Type}, {\"produto\", type text}, {\"quantidade\", Int64.Type}, {\"preco\", type number}}, \"en-US\")\nin\n    Tipos"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Faturacao Total",
+            "description": "Faturação total em euros calculada linha a linha (SUMX)",
+            "expression": "SUMX(vendas_sazonais, vendas_sazonais[quantidade] * vendas_sazonais[preco])",
+            "formatString": "#,0.00 \"€\"",
+            "displayFolder": "01. KPIs Globais",
+            "lineageTag": "36f08e5f-bc69-44d8-a712-41c5bd03a922"
+          },
+          {
+            "name": "Total Unidades",
+            "description": "Total de unidades físicas vendidas",
+            "expression": "SUM(vendas_sazonais[quantidade])",
+            "formatString": "#,0",
+            "displayFolder": "01. KPIs Globais",
+            "lineageTag": "f709e6be-3b57-4c95-b9a5-07cd4b23d513"
+          },
+          {
+            "name": "Transacoes",
+            "description": "Número total de linhas de venda registadas",
+            "expression": "COUNTROWS(vendas_sazonais)",
+            "formatString": "#,0",
+            "displayFolder": "01. KPIs Globais",
+            "lineageTag": "7f2b6939-57ec-40d6-9f3a-ebd853b2999d"
+          },
+          {
+            "name": "Ticket Medio por Linha",
+            "description": "Valor médio por linha de venda (protegido contra divisão por zero)",
+            "expression": "DIVIDE([Faturacao Total], [Transacoes], 0)",
+            "formatString": "#,0.00 \"€\"",
+            "displayFolder": "01. KPIs Globais",
+            "lineageTag": "d9e60ff9-7775-415d-8a5b-d8b24e3f1abf"
+          },
+          {
+            "name": "Clientes Ativos",
+            "description": "Número de clientes distintos que efetuaram compras no período",
+            "expression": "DISTINCTCOUNT(vendas_sazonais[cliente_id])",
+            "formatString": "#,0",
+            "displayFolder": "02. Clientes & LTV",
+            "lineageTag": "6cbe58a8-f4a1-49c1-bf2f-bc1eaa0b798b"
+          },
+          {
+            "name": "Gasto Medio por Cliente",
+            "description": "Faturação média anual/mensal por cliente ativo (LTV)",
+            "expression": "DIVIDE([Faturacao Total], [Clientes Ativos], 0)",
+            "formatString": "#,0.00 \"€\"",
+            "displayFolder": "02. Clientes & LTV",
+            "lineageTag": "a36048d5-f0e6-40ef-95d8-84ac4cbf43ee"
+          },
+          {
+            "name": "Quota Produto %",
+            "description": "Peso percentual na faturação total ignorando filtros de produto/categoria",
+            "expression": "DIVIDE([Faturacao Total], CALCULATE([Faturacao Total], ALL(produtos)), 0)",
+            "formatString": "0.00%",
+            "displayFolder": "03. Quotas & Time Intelligence",
+            "lineageTag": "1c41acd5-04bd-4b7d-9d57-28db63496436"
+          },
+          {
+            "name": "Faturacao Acumulada YTD",
+            "description": "Faturação acumulada no ano até à data selecionada (Year-To-Date)",
+            "expression": "TOTALYTD([Faturacao Total], calendario[Date])",
+            "formatString": "#,0.00 \"€\"",
+            "displayFolder": "03. Quotas & Time Intelligence",
+            "lineageTag": "4e2653d5-89b0-4765-ad54-7596f5a2431f"
+          }
+        ]
+      },
+      {
+        "name": "calendario",
+        "description": "Dimensão Calendário contínua para Time Intelligence DAX",
+        "lineageTag": "2f8fc127-aa69-4b33-8dd0-999c6d32cd11",
+        "partitions": [
+          {
+            "name": "calendario",
+            "mode": "import",
+            "source": {
+              "type": "calculated",
+              "expression": "ADDCOLUMNS(\n    CALENDAR(DATE(2025, 1, 1), DATE(2025, 12, 31)),\n    \"Ano\", YEAR([Date]),\n    \"MesNumero\", MONTH([Date]),\n    \"AnoMes\", FORMAT([Date], \"yyyy-MM\"),\n    \"Trimestre\", \"T\" & FORMAT([Date], \"q\"),\n    \"DiaSemana\", WEEKDAY([Date], 2)\n)"
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "rel_vendas_produtos",
+        "fromTable": "vendas_sazonais",
+        "fromColumn": "produto_id",
+        "toTable": "produtos",
+        "toColumn": "id"
+      },
+      {
+        "name": "rel_vendas_clientes",
+        "fromTable": "vendas_sazonais",
+        "fromColumn": "cliente_id",
+        "toTable": "clientes",
+        "toColumn": "id"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_ProTooling",
+        "value": "[\"MCP-PBIModeling\"]"
+      }
+    ]
+  }
+}

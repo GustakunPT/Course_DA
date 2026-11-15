@@ -1,0 +1,38 @@
+/// Dimensão de produtos do catálogo da Mercearia
+table produtos
+	lineageTag: 3ff5d73e-90d5-4de5-ab96-4188383a9e4a
+
+	column id
+		dataType: int64
+		isKey
+		lineageTag: 9934902f-2252-4be4-9958-327091deadb5
+		summarizeBy: none
+		sourceColumn: id
+
+	column nome
+		dataType: string
+		lineageTag: aec51b98-6c3a-454c-a57e-1e0f043b2ed2
+		sourceColumn: nome
+
+	column categoria
+		dataType: string
+		lineageTag: 564b929e-e6eb-4754-a6a7-bc8c8844eed4
+		sourceColumn: categoria
+
+	column preco
+		dataType: double
+		formatString: #,0.00 "€"
+		lineageTag: f83b4513-7596-4bdf-8e02-e2e2a1290126
+		summarizeBy: none
+		sourceColumn: preco
+
+	partition produtos = m
+		mode: import
+		source =
+				let
+				    Fonte = Csv.Document(File.Contents("C:\Users\gusta\Downloads\mercearia-do-bairro\mercearia-do-bairro\dados\produtos.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    Cabecalhos = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Cabecalhos,{{"id", Int64.Type}, {"nome", type text}, {"categoria", type text}, {"preco", type number}}, "en-US")
+				in
+				    Tipos
+

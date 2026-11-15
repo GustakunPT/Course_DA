@@ -1,0 +1,22 @@
+{
+  "name": "mercearia-do-bairro-academia",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-assets.mjs",
+    "dev": "npm run sync && vite",
+    "build": "npm run sync && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test:mockups": "node scripts/test-mockups.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.9.0",
+    "sql.js": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

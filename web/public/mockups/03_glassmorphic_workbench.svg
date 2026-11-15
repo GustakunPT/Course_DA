@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 393 852" width="393" height="852">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600;700&amp;display=swap');
+      .font-sans { font-family: 'Host Grotesk', -apple-system, sans-serif; }
+      .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090D1A" />
+      <stop offset="50%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#151D3B" />
+    </linearGradient>
+
+    <!-- Glass Fill -->
+    <linearGradient id="glassFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.65" />
+    </linearGradient>
+
+    <!-- Glowing Accent Gradient -->
+    <linearGradient id="glowAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+
+    <filter id="glassShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+    <filter id="btnGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#6366F1" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Deep Cosmic Canvas -->
+  <rect width="393" height="852" fill="url(#bgGrad)" />
+
+  <!-- Outer Glass Frame Ring -->
+  <rect x="0.5" y="0.5" width="392" height="851" rx="48" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="60" cy="180" r="120" fill="#6366F1" opacity="0.15" filter="blur(50px)" />
+  <circle cx="330" cy="500" r="140" fill="#06B6D4" opacity="0.12" filter="blur(60px)" />
+
+  <!-- Dynamic Island -->
+  <rect x="142" y="11" width="109" height="28" rx="14" fill="#000000" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" />
+  <circle cx="233" cy="25" r="4.5" fill="#0F172A" stroke="#38BDF8" stroke-width="0.5" />
+
+  <!-- Status Bar -->
+  <text x="32" y="30" class="font-sans" font-size="13" font-weight="600" fill="#F8FAFC">09:41</text>
+  <g transform="translate(325, 18)" fill="#F8FAFC">
+    <path d="M1 9h2v3H1zm4-2h2v5H5zm4-3h2v8H9zm4-3h2v11h-2z" />
+    <path d="M22 2a10 10 0 0 0-7 2.9l1.4 1.4A8 8 0 0 1 22 4a8 8 0 0 1 5.6 2.3l1.4-1.4A10 10 0 0 0 22 2zm0 4a6 6 0 0 0-4.2 1.8l1.4 1.4A4 4 0 0 1 22 8a4 4 0 0 1 2.8 1.2l1.4-1.4A6 6 0 0 0 22 6zm0 4a2 2 0 0 0-1.4.6l1.4 1.4 1.4-1.4A2 2 0 0 0 22 10z" transform="translate(6, -2)" />
+    <rect x="36" y="2" width="18" height="9" rx="2" fill="none" stroke="#F8FAFC" stroke-width="1" />
+    <rect x="38" y="4" width="13" height="5" rx="1" fill="#F8FAFC" />
+  </g>
+
+  <!-- Segmented View Switcher: [ Lição ] ↔ [ Bancada ] -->
+  <g transform="translate(20, 54)">
+    <rect width="353" height="40" rx="12" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+    <!-- Inactive: Lição -->
+    <text x="44" y="25" class="font-sans" font-size="12" font-weight="500" fill="#94A3B8">📖 Lição &amp; Teoria</text>
+    <!-- Active: Bancada (Glowing Frosted Card) -->
+    <rect x="178" y="3" width="172" height="34" rx="10" fill="url(#glassFill)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" filter="url(#glassShadow)" />
+    <text x="212" y="24" class="font-sans" font-size="12" font-weight="700" fill="#FFFFFF">⚡ Bancada Prática</text>
+  </g>
+
+  <!-- Challenge Card -->
+  <g transform="translate(20, 106)">
+    <rect width="353" height="66" rx="14" fill="url(#glassFill)" stroke="rgba(255,255,255,0.15)" stroke-width="1" filter="url(#glassShadow)" />
+    <text x="14" y="20" class="font-mono" font-size="10" font-weight="700" fill="#F59E0B">DESAFIO SQL // ETAPA 04</text>
+    <rect x="254" y="10" width="85" height="18" rx="6" fill="rgba(34, 197, 94, 0.2)" stroke="#22C55E" stroke-width="0.8" />
+    <text x="260" y="22" class="font-sans" font-size="9" font-weight="700" fill="#4ADE80">vendas.csv (5k)</text>
+    
+    <text x="14" y="40" class="font-sans" font-size="12" font-weight="600" fill="#F8FAFC">Calcule o número de pedidos e a receita</text>
+    <text x="14" y="54" class="font-sans" font-size="12" font-weight="600" fill="#F8FAFC">total faturada por categoria de produto.</text>
+  </g>
+
+  <!-- Quick-Symbol Touch Typing Bar -->
+  <g transform="translate(20, 182)">
+    <text x="0" y="0" class="font-sans" font-size="10" font-weight="600" fill="#94A3B8">TECLADO TOUCH // SÍMBOLOS RÁPIDOS</text>
+    
+    <g transform="translate(0, 8)">
+      <!-- Symbol Buttons -->
+      <rect x="0" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="10" y="20" class="font-mono" font-size="13" font-weight="700" fill="#38BDF8">(</text>
+
+      <rect x="36" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="46" y="20" class="font-mono" font-size="13" font-weight="700" fill="#38BDF8">)</text>
+
+      <rect x="72" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="82" y="20" class="font-mono" font-size="13" font-weight="700" fill="#38BDF8">[</text>
+
+      <rect x="108" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="118" y="20" class="font-mono" font-size="13" font-weight="700" fill="#38BDF8">]</text>
+
+      <rect x="144" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="154" y="20" class="font-mono" font-size="13" font-weight="700" fill="#F59E0B">=</text>
+
+      <rect x="180" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="190" y="20" class="font-mono" font-size="13" font-weight="700" fill="#F59E0B">:</text>
+
+      <rect x="216" y="0" width="30" height="30" rx="8" fill="rgba(30, 41, 59, 0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="226" y="20" class="font-mono" font-size="13" font-weight="700" fill="#F43F5E">'</text>
+
+      <rect x="252" y="0" width="46" height="30" rx="8" fill="rgba(99, 102, 241, 0.25)" stroke="#6366F1" stroke-width="1" />
+      <text x="257" y="19" class="font-mono" font-size="10" font-weight="700" fill="#A5B4FC">SELECT</text>
+
+      <rect x="304" y="0" width="48" height="30" rx="8" fill="rgba(99, 102, 241, 0.25)" stroke="#6366F1" stroke-width="1" />
+      <text x="309" y="19" class="font-mono" font-size="10" font-weight="700" fill="#A5B4FC">GROUP</text>
+    </g>
+  </g>
+
+  <!-- Mobile Code Editor Card -->
+  <g transform="translate(20, 230)">
+    <rect width="353" height="154" rx="14" fill="#030712" stroke="rgba(255,255,255,0.18)" stroke-width="1" />
+    <!-- Editor Header -->
+    <rect width="353" height="28" rx="14" fill="rgba(255,255,255,0.04)" />
+    <circle cx="16" cy="14" r="3.5" fill="#EF4444" />
+    <circle cx="28" cy="14" r="3.5" fill="#F59E0B" />
+    <circle cx="40" cy="14" r="3.5" fill="#10B981" />
+    <text x="56" y="18" class="font-mono" font-size="10" fill="#94A3B8">query_vendas.sql • SQLite WASM</text>
+    
+    <!-- Code Lines with Syntax Colors -->
+    <g transform="translate(16, 46)" class="font-mono" font-size="11" font-weight="600">
+      <text x="0" y="0"><tspan fill="#F43F5E">SELECT</tspan></text>
+      <text x="0" y="16">  categoria,</text>
+      <text x="0" y="32">  <tspan fill="#38BDF8">COUNT</tspan>(*) <tspan fill="#F43F5E">AS</tspan> total_pedidos,</text>
+      <text x="0" y="48">  <tspan fill="#38BDF8">ROUND</tspan>(<tspan fill="#38BDF8">SUM</tspan>(total), <tspan fill="#F59E0B">2</tspan>) <tspan fill="#F43F5E">AS</tspan> receita_total</text>
+      <text x="0" y="64"><tspan fill="#F43F5E">FROM</tspan> vendas</text>
+      <text x="0" y="80"><tspan fill="#F43F5E">GROUP BY</tspan> categoria</text>
+      <text x="0" y="96"><tspan fill="#F43F5E">ORDER BY</tspan> receita_total <tspan fill="#F43F5E">DESC</tspan>;</text>
+    </g>
+  </g>
+
+  <!-- Mobile Action Buttons -->
+  <g transform="translate(20, 394)">
+    <!-- Primary Glowing Run Button -->
+    <rect width="235" height="46" rx="12" fill="url(#glowAccent)" filter="url(#btnGlow)" />
+    <text x="50" y="28" class="font-sans" font-size="13" font-weight="700" fill="#0F172A">▶ Executar Consulta</text>
+    
+    <!-- Secondary Reset Button -->
+    <rect x="245" y="0" width="50" height="46" rx="12" fill="url(#glassFill)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+    <text x="261" y="28" class="font-sans" font-size="14" fill="#F8FAFC">↺</text>
+
+    <!-- Hint Button -->
+    <rect x="303" y="0" width="50" height="46" rx="12" fill="url(#glassFill)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+    <text x="319" y="28" class="font-sans" font-size="14" fill="#F8FAFC">💡</text>
+  </g>
+
+  <!-- Execution Output & Telemetry Glass Drawer -->
+  <g transform="translate(20, 452)">
+    <rect width="353" height="236" rx="14" fill="url(#glassFill)" stroke="rgba(255,255,255,0.15)" stroke-width="1" filter="url(#glassShadow)" />
+    
+    <!-- Telemetry Strip -->
+    <rect width="353" height="30" rx="14" fill="rgba(16, 185, 129, 0.12)" />
+    <circle cx="16" cy="15" r="4" fill="#10B981" />
+    <text x="28" y="19" class="font-mono" font-size="10" font-weight="700" fill="#10B981">✓ Executado em 11.2ms • 5 linhas • 5.078 lidos</text>
+
+    <!-- Table Header -->
+    <g transform="translate(14, 46)">
+      <rect width="325" height="22" rx="6" fill="rgba(255,255,255,0.06)" />
+      <text x="10" y="15" class="font-mono" font-size="10" font-weight="700" fill="#94A3B8">categoria</text>
+      <text x="130" y="15" class="font-mono" font-size="10" font-weight="700" fill="#94A3B8">total_pedidos</text>
+      <text x="235" y="15" class="font-mono" font-size="10" font-weight="700" fill="#94A3B8">receita_total</text>
+    </g>
+
+    <!-- Row 1: Padaria -->
+    <g transform="translate(14, 74)">
+      <text x="10" y="14" class="font-sans" font-size="11" font-weight="600" fill="#F8FAFC">Padaria</text>
+      <text x="130" y="14" class="font-mono" font-size="11" fill="#CBD5E1">1.842</text>
+      <text x="235" y="14" class="font-mono" font-size="11" font-weight="700" fill="#38BDF8">€ 14.892,40</text>
+      <line x1="0" y1="22" x2="325" y2="22" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+    </g>
+
+    <!-- Row 2: Frutaria -->
+    <g transform="translate(14, 102)">
+      <text x="10" y="14" class="font-sans" font-size="11" font-weight="600" fill="#F8FAFC">Frutaria</text>
+      <text x="130" y="14" class="font-mono" font-size="11" fill="#CBD5E1">1.410</text>
+      <text x="235" y="14" class="font-mono" font-size="11" font-weight="700" fill="#38BDF8">€ 11.230,10</text>
+      <line x1="0" y1="22" x2="325" y2="22" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+    </g>
+
+    <!-- Row 3: Laticínios -->
+    <g transform="translate(14, 130)">
+      <text x="10" y="14" class="font-sans" font-size="11" font-weight="600" fill="#F8FAFC">Laticínios</text>
+      <text x="130" y="14" class="font-mono" font-size="11" fill="#CBD5E1">986</text>
+      <text x="235" y="14" class="font-mono" font-size="11" font-weight="700" fill="#38BDF8">€ 8.420,50</text>
+      <line x1="0" y1="22" x2="325" y2="22" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+    </g>
+
+    <!-- Passing Checks List -->
+    <g transform="translate(14, 168)">
+      <line x1="0" y1="0" x2="325" y2="0" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <text x="6" y="16" class="font-sans" font-size="9" font-weight="700" fill="#94A3B8">TESTES DE VALIDAÇÃO AUTOMÁTICA:</text>
+      
+      <circle cx="10" cy="30" r="4" fill="#10B981" />
+      <text x="20" y="33" class="font-sans" font-size="10" font-weight="600" fill="#4ADE80">Cláusula GROUP BY categoria aplicada com sucesso</text>
+
+      <circle cx="10" cy="46" r="4" fill="#10B981" />
+      <text x="20" y="49" class="font-sans" font-size="10" font-weight="600" fill="#4ADE80">SUM(total) arredondado a 2 casas com alias receita_total</text>
+    </g>
+  </g>
+
+  <!-- Style Watermark -->
+  <g transform="translate(20, 700)">
+    <rect width="353" height="42" rx="10" fill="url(#glassFill)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+    <text x="14" y="18" class="font-sans" font-size="10" font-weight="700" fill="#FFFFFF">ESTILO 2: GLASSMORPHIC / NEO-DUO</text>
+    <text x="14" y="32" class="font-sans" font-size="9" fill="#94A3B8">Frosted glass, gradientes elétricos, feedback tátil e foco motivacional.</text>
+  </g>
+
+  <!-- Home Indicator Bar -->
+  <rect x="129" y="833" width="135" height="5" rx="2.5" fill="#FFFFFF" opacity="0.4" />
+</svg>
