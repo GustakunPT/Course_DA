@@ -33,6 +33,7 @@ import {
 } from './data/progress';
 import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
 import { downloadTextFile, escapeHtml } from './ui/html';
+import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
 import { renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
@@ -319,6 +320,7 @@ function renderAcademyWorkspace(): string {
                       type="button"
                       class="lesson-nav-btn ${isCur ? 'is-current' : ''} ${statusClass}"
                       data-select-lesson="${escapeHtml(item.id)}"
+                      title="${escapeHtml(item.title)}"
                       ${isCur ? 'aria-current="step"' : ''}
                     >
                       <span class="lesson-nav-title">${escapeHtml(item.title)}</span>
@@ -467,8 +469,9 @@ function renderAcademyWorkspace(): string {
           <h3 id="quiz-title">Verificação rápida de conceito</h3>
           <p>${escapeHtml(lesson.quiz.question)}</p>
           <div class="quiz-options">
-            ${lesson.quiz.options
-              .map((opt, idx) => {
+            ${quizDisplayOrder(lesson.id, lesson.quiz.options.length)
+              .map((idx) => {
+                const opt = lesson.quiz.options[idx];
                 let cls = '';
                 if (selectedQuiz !== undefined) {
                   if (idx === lesson.quiz.correctIndex) cls = 'is-correct';

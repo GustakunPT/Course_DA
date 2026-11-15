@@ -93,6 +93,23 @@
   }
 }
 
+/* As 6 trilhas + Explorador + Referência precisam de ~1170px. Abaixo de 1920px não cabem
+   ao lado do logótipo e dos botões, por isso passam para uma segunda linha, todas visíveis
+   (antes ficavam escondidas num scroll horizontal sem indicação). */
+@media (min-width: 48.01rem) and (max-width: 120rem) {
+  .top-nav-inner {
+    flex-wrap: wrap;
+    row-gap: var(--space-xs);
+  }
+
+  .track-strip {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
 .nav-tab {
   height: 36px;
   padding-inline: var(--space-sm);
@@ -483,7 +500,24 @@ pre,
   color: var(--color-ink);
 }
 
+/* Sem minmax(0, 1fr) a coluna implícita da grelha cresce até ao título mais longo
+   e o painel corta o texto a meio, sem reticências. */
+.sidebar-section,
+.lesson-nav-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lesson-nav-list > li {
+  min-width: 0;
+}
+
+.lesson-nav-btn {
+  width: 100%;
+  min-width: 0;
+}
+
 .lesson-nav-title {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -984,8 +1018,10 @@ pre,
 
 .action-pair {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-xs);
+  min-width: 0;
 }
 
 /* Output Region with 4 Required States: loading, empty, error, full */

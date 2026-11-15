@@ -50,7 +50,12 @@ ORDER BY categoria ASC;`,
       },
       quiz: {
         question: 'Qual cláusula SQL impede que a mesma cidade apareça repetida 20 vezes no resultado?',
-        options: ['UNIQUE', 'DISTINCT', 'GROUP'],
+        options: [
+          'UNIQUE',
+          'DISTINCT',
+          'GROUP',
+          'LIMIT',
+        ],
         correctIndex: 1,
         explanation: 'SELECT DISTINCT cidade FROM clientes devolve apenas uma linha por cada cidade distinta.',
       },
@@ -78,28 +83,34 @@ ORDER BY categoria ASC;`,
 FROM produtos
 WHERE categoria = 'Mercearia' AND preco >= 1.20;`,
       sqlChallenge: {
-        description: 'Selecione id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termine em "Silva".',
+        description: 'Selecione id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termine em "Santos".',
         starterSql: `SELECT id, nome, cidade
 FROM clientes
 WHERE cidade IN ('Porto', 'Matosinhos');`,
         solutionSql: `SELECT id, nome, cidade
 FROM clientes
 WHERE cidade IN ('Porto', 'Matosinhos')
-  AND nome LIKE '%Silva';`,
-        hint: "Junte AND nome LIKE '%Silva' à condição WHERE.",
+  AND nome LIKE '%Santos';`,
+        hint: "Junte AND nome LIKE '%Santos' à condição WHERE.",
         validate: (_cols, rows) => {
-          const ok = rows.length > 0 && rows.every((r) => ['Porto', 'Matosinhos'].includes(String(r[2])) && String(r[1]).endsWith('Silva'));
-          return {
-            passed: ok,
-            message: ok
-              ? `Certo: encontraste os ${rows.length} clientes Silva do Porto e Matosinhos.`
-              : 'Verifica se filtraste simultaneamente cidade IN ("Porto", "Matosinhos") e nome LIKE "%Silva".',
-          };
+          const certas = rows.every((r) => ['Porto', 'Matosinhos'].includes(String(r[2])) && String(r[1]).endsWith('Santos'));
+          const cidades = new Set(rows.map((r) => String(r[2])));
+          const ok = certas && rows.length === 9 && cidades.has('Porto') && cidades.has('Matosinhos');
+          let message = 'Certo: encontraste os 9 clientes Santos (6 do Porto e 3 de Matosinhos).';
+          if (!certas) message = 'Há linhas a mais: confirma o filtro de cidade IN ("Porto", "Matosinhos") e o nome LIKE "%Santos".';
+          else if (!cidades.has('Matosinhos') || !cidades.has('Porto')) message = 'Falta uma das cidades: devem aparecer clientes do Porto e de Matosinhos.';
+          else if (!ok) message = `Encontraste ${rows.length} clientes, mas são 9 no total. Tiraste algum LIMIT?`;
+          return { passed: ok, message };
         },
       },
       quiz: {
         question: 'Se misturares AND e OR num WHERE sem parênteses, qual operador tem precedência em SQL?',
-        options: ['OR é avaliado primeiro', 'AND é avaliado primeiro', 'São avaliados sempre da direita para a esquerda'],
+        options: [
+          'O OR é avaliado primeiro',
+          'O AND é avaliado primeiro',
+          'São avaliados da esquerda para a direita',
+          'Têm a mesma precedência, por isso dá erro',
+        ],
         correctIndex: 1,
         explanation: 'Tal como a multiplicação precede a soma, o AND liga mais forte do que o OR. Usa sempre parênteses quando combinas ambos!',
       },
@@ -162,6 +173,7 @@ LIMIT 5;`,
           'SELECT -> FROM -> ORDER BY -> WHERE -> LIMIT',
           'SELECT -> FROM -> WHERE -> ORDER BY -> LIMIT',
           'SELECT -> WHERE -> FROM -> LIMIT -> ORDER BY',
+          'SELECT -> FROM -> WHERE -> LIMIT -> ORDER BY',
         ],
         correctIndex: 1,
         explanation: 'Em SQL a ordem gramatical fixa é: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY e por fim LIMIT.',
@@ -224,9 +236,10 @@ LIMIT 3;`,
       quiz: {
         question: 'Qual a diferença entre COUNT(*) e COUNT(coluna)?',
         options: [
-          'São sempre iguais.',
-          'COUNT(*) conta todas as linhas, incluindo nulos; COUNT(coluna) conta apenas linhas onde essa coluna não é NULL.',
-          'COUNT(*) soma os valores numéricos.',
+          'São sempre iguais, em qualquer tabela.',
+          'COUNT(*) conta todas as linhas; COUNT(coluna) ignora os NULL.',
+          'COUNT(coluna) conta todas as linhas; COUNT(*) ignora os NULL.',
+          'COUNT(coluna) conta só os valores diferentes dessa coluna.',
         ],
         correctIndex: 1,
         explanation: 'Detalhe crucial em entrevistas de análise de dados: COUNT(coluna) ignora valores NULL!',
@@ -288,8 +301,9 @@ ORDER BY unidades DESC;`,
         question: 'Porque falha a query SELECT cliente_id, COUNT(*) FROM vendas WHERE COUNT(*) > 50 GROUP BY cliente_id?',
         options: [
           'Porque COUNT(*) não pode ser usado com cliente_id.',
-          'Porque funções de agregação não podem estar no WHERE; devem ir para o HAVING.',
-          'Porque falta um JOIN.',
+          'Porque agregações não podem ir no WHERE; vão no HAVING.',
+          'Porque o GROUP BY tem de ser escrito sempre antes do WHERE.',
+          'Porque falta dar um nome à contagem com AS.',
         ],
         correctIndex: 1,
         explanation: 'No momento em que o WHERE é executado os grupos ainda não existem; filtros sobre agregações pertencem ao HAVING.',
@@ -351,7 +365,12 @@ ORDER BY faturacao_eur DESC;`,
       },
       quiz: {
         question: 'Queres listar todos os 120 clientes, incluindo os que nunca compraram nada (mostrando 0 €). Que JOIN deves usar a partir de clientes?',
-        options: ['INNER JOIN vendas', 'LEFT JOIN vendas', 'CROSS JOIN vendas'],
+        options: [
+          'INNER JOIN vendas',
+          'LEFT JOIN vendas',
+          'CROSS JOIN vendas',
+          'RIGHT JOIN vendas',
+        ],
         correctIndex: 1,
         explanation: 'LEFT JOIN a partir de clientes preserva os 120 clientes mesmo que algum não tenha linhas correspondentes em vendas.',
       },
@@ -417,7 +436,12 @@ ORDER BY qtd_produtos DESC;`,
       },
       quiz: {
         question: 'Qual é o resultado de COALESCE(NULL, NULL, "Porto", "Lisboa")?',
-        options: ['NULL', '"Porto"', '"Lisboa"'],
+        options: [
+          'NULL',
+          '"Porto"',
+          '"Lisboa"',
+          '"Porto, Lisboa"',
+        ],
         correctIndex: 1,
         explanation: 'COALESCE avalia os argumentos da esquerda para a direita e devolve o primeiro que não seja NULL.',
       },
@@ -502,7 +526,12 @@ ORDER BY mes;`,
       },
       quiz: {
         question: 'Qual cláusula dentro de OVER (...) reinicia o ranking ou a soma para cada categoria separadamente?',
-        options: ['GROUP BY categoria', 'PARTITION BY categoria', 'SPLIT BY categoria'],
+        options: [
+          'GROUP BY categoria',
+          'PARTITION BY categoria',
+          'ORDER BY categoria',
+          'SPLIT BY categoria',
+        ],
         correctIndex: 1,
         explanation: 'PARTITION BY divide a janela por grupos (como categorias ou cidades) sem reduzir o número de linhas.',
       },
@@ -569,12 +598,13 @@ ORDER BY preco DESC;`,
       quiz: {
         question: 'Qual é o grande perigo de usar WHERE id NOT IN (SELECT id_pai FROM tabela) em SQL profissional?',
         options: [
-          'Não funciona com números inteiros.',
-          'Se a subquery devolver um único valor NULL, o NOT IN devolve 0 linhas no total! Por isso os profissionais preferem NOT EXISTS ou LEFT JOIN ... IS NULL.',
-          'Apaga a tabela.',
+          'Fica lento, mas o resultado está sempre certo.',
+          'Se a subquery devolver um NULL, não sai nenhuma linha.',
+          'Só funciona se a subquery devolver um único valor.',
+          'Repete linhas do resultado quando a subquery tem ids duplicados.',
         ],
         correctIndex: 1,
-        explanation: 'Esta é uma das perguntas mais clássicas de entrevistas seniores de SQL: X NOT IN (1, 2, NULL) avalia para UNKNOWN e devolve vazio.',
+        explanation: 'X NOT IN (1, 2, NULL) dá UNKNOWN para todas as linhas e o resultado vem vazio, sem erro nenhum. Por isso prefere-se NOT EXISTS ou LEFT JOIN ... IS NULL.',
       },
     },
     {
@@ -656,7 +686,12 @@ ORDER BY mes;`,
       },
       quiz: {
         question: 'Na janela ROWS BETWEEN 6 PRECEDING AND CURRENT ROW sobre uma tabela diária ordenada por data, quantos dias entram no cálculo de cada linha?',
-        options: ['6 dias', '7 dias (os 6 dias anteriores mais o próprio dia atual)', '12 dias'],
+        options: [
+          '6 dias (o dia atual não conta)',
+          '7 dias (os 6 anteriores e o atual)',
+          '13 dias (6 antes, o atual e 6 depois)',
+          '7 dias (o atual e os 6 seguintes)',
+        ],
         correctIndex: 1,
         explanation: '6 anteriores + 1 atual = janela móvel exata de 7 dias (1 semana completa).',
       },

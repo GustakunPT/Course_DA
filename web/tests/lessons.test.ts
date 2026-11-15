@@ -70,6 +70,18 @@ describe('soluções SQL passam na correção', () => {
   });
 });
 
+describe('sql-02 recusa respostas incompletas', () => {
+  const desafio = todas.find((l) => l.id === 'sql-02-where')!.sqlChallenge!;
+  it.each([
+    ['LIMIT 1', "SELECT id, nome, cidade FROM clientes WHERE cidade IN ('Porto', 'Matosinhos') AND nome LIKE '%Santos' LIMIT 1"],
+    ['esquecer Matosinhos', "SELECT id, nome, cidade FROM clientes WHERE cidade = 'Porto' AND nome LIKE '%Santos'"],
+    ['esquecer o Porto', "SELECT id, nome, cidade FROM clientes WHERE cidade = 'Matosinhos' AND nome LIKE '%Santos'"],
+  ])('%s', async (_nome, sql) => {
+    const res = await runSqlQuery(sql);
+    expect(desafio.validate(res.columns, res.rows).passed).toBe(false);
+  });
+});
+
 const gitLessons = todas.filter((l) => l.gitChallenge);
 describe('soluções Git passam na correção', () => {
   it.each(gitLessons.map((l) => [l.id, l] as const))('%s', (_id, l) => {
