@@ -1,5 +1,7 @@
 # Prática guiada: Excel e Power BI
 
+> **Na app:** Visualização & BI, etapa 06. [abrir a folha de respostas](https://web-one-nu-34.vercel.app/#vista=academia&trilha=bi&licao=bi-10-pratica-excel-powerbi). Escreve lá os 8 números que encontrares.
+
 Já calculaste estas métricas em SQL e em pandas. Aqui vais calculá-las no Excel e no Power BI, com os mesmos dados. No fim, escreve os números na folha de respostas da etapa **06 da trilha Visualização & BI** da app: a bancada diz-te quais estão certos.
 
 **Precisas de:** Excel 365 ou 2021 (para o `PROCX`) e Power BI Desktop (gratuito, só para Windows). Os ficheiros estão na pasta `dados/`: `vendas.csv`, `produtos.csv` e `clientes.csv`.

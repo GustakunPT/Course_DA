@@ -432,6 +432,7 @@ print(linhas_bronze, linhas_rejeitadas, taxa_aproveitamento_pct)`,
           { label: 'linhas_bronze == 12', expr: 'int(linhas_bronze) == 12', actualExpr: 'linhas_bronze', hint: 'len(bronze) é 12.' },
           { label: 'linhas_rejeitadas == 5', expr: 'int(linhas_rejeitadas) == 5', actualExpr: 'linhas_rejeitadas', hint: '12 linhas brutas menos 7 linhas válidas = 5 rejeitadas.' },
           { label: 'taxa_aproveitamento_pct == 58.33', expr: 'math.isclose(float(taxa_aproveitamento_pct), 58.33, abs_tol=0.02)', actualExpr: 'taxa_aproveitamento_pct', hint: 'round(7 / 12 * 100, 2) = 58.33.' },
+          { label: 'O pipeline funciona com outro lote Bronze', expr: '(lambda r: int(r["linhas_bronze"]) == 4 and int(r["linhas_rejeitadas"]) == 2 and abs(float(r["taxa_aproveitamento_pct"]) - 50.0) < 0.01)(correr_com(bronze=pd.DataFrame({"data": ["2025-01-01", "2025-01-01", "2025-01-02", "2025-01-03"], "produto": [" pão ", "Pão", "Leite", "Café"], "quantidade": [2, 2, 1, 1], "preco": ["0,25", "0.25", "-1", "3.4"]})))', actualExpr: 'correr_com(bronze=pd.DataFrame({"data": ["2025-01-01", "2025-01-01", "2025-01-02", "2025-01-03"], "produto": [" pão ", "Pão", "Leite", "Café"], "quantidade": [2, 2, 1, 1], "preco": ["0,25", "0.25", "-1", "3.4"]})).get("linhas_rejeitadas")', hint: 'Calcula as contagens a partir de bronze e silver: normaliza, tira duplicados e rejeita preços ou quantidades inválidos.' },
         ],
       },
       quiz: {
@@ -511,6 +512,7 @@ print(catalogo_unico, zero_orfaos, precos_consistentes)`,
           { label: 'catalogo_unico is True', expr: 'catalogo_unico is True', actualExpr: 'catalogo_unico', hint: 'Usa bool(produtos["id"].is_unique).' },
           { label: 'zero_orfaos is True', expr: 'zero_orfaos is True', actualExpr: 'zero_orfaos', hint: 'Usa bool(vendas["produto_id"].isin(produtos["id"]).all()).' },
           { label: 'precos_consistentes is True', expr: 'precos_consistentes is True', actualExpr: 'precos_consistentes', hint: 'Mapeie o preço de produtos por produto_id e compara com vendas["preco"].' },
+          { label: 'Os testes apanham dados com problemas', expr: '(lambda r: r["catalogo_unico"] is True and r["zero_orfaos"] is False and r["precos_consistentes"] is False)(correr_com(produtos=pd.DataFrame({"id": [1, 2], "nome": ["A", "B"], "categoria": ["X", "X"], "preco": [1.0, 2.0]}), vendas=pd.DataFrame({"produto_id": [1, 9], "preco": [1.5, 2.0]})))', actualExpr: 'correr_com(produtos=pd.DataFrame({"id": [1, 2], "nome": ["A", "B"], "categoria": ["X", "X"], "preco": [1.0, 2.0]}), vendas=pd.DataFrame({"produto_id": [1, 9], "preco": [1.5, 2.0]}))', hint: 'Um teste de qualidade tem de falhar quando os dados estão errados: calcula cada resultado a partir das tabelas (is_unique, isin, map), em vez de escrever True.' },
         ],
       },
       quiz: {
@@ -855,6 +857,7 @@ print(receita_anual, ticket_mediano, quota_mercearia_pct, cidade_maior_ltv)`,
           { label: 'ticket_mediano (3.50)', expr: 'math.isclose(float(ticket_mediano), 3.50, abs_tol=0.02)', actualExpr: 'ticket_mediano', hint: 'round(float(vendas["subtotal"].median()), 2).' },
           { label: 'quota_mercearia_pct (51.59%)', expr: 'math.isclose(float(quota_mercearia_pct), 51.59, abs_tol=0.05)', actualExpr: 'quota_mercearia_pct', hint: 'Faturação da categoria Mercearia a dividir pela faturação total * 100.' },
           { label: 'cidade_maior_ltv ("Braga")', expr: 'cidade_maior_ltv == "Braga"', actualExpr: 'cidade_maior_ltv', hint: 'Divide a soma de subtotal pelo nunique de cliente_id em cada cidade (Braga tem 254.18 € / cliente).' },
+          { label: 'O diagnóstico funciona com outras tabelas', expr: '(lambda r: abs(float(r["receita_anual"]) - 5.0) < 0.01 and abs(float(r["ticket_mediano"]) - 1.0) < 0.01 and abs(float(r["quota_mercearia_pct"]) - 60.0) < 0.01 and r["cidade_maior_ltv"] == "Faro")(correr_com(vendas=pd.DataFrame({"cliente_id": [1, 2, 3], "produto_id": [1, 2, 2], "quantidade": [1, 1, 1], "preco": [3.0, 1.0, 1.0]}), produtos=pd.DataFrame({"id": [1, 2], "categoria": ["Mercearia", "Bebidas"]}), clientes=pd.DataFrame({"id": [1, 2, 3], "cidade": ["Faro", "Beja", "Beja"]})))', actualExpr: 'correr_com(vendas=pd.DataFrame({"cliente_id": [1, 2, 3], "produto_id": [1, 2, 2], "quantidade": [1, 1, 1], "preco": [3.0, 1.0, 1.0]}), produtos=pd.DataFrame({"id": [1, 2], "categoria": ["Mercearia", "Bebidas"]}), clientes=pd.DataFrame({"id": [1, 2, 3], "cidade": ["Faro", "Beja", "Beja"]})).get("cidade_maior_ltv")', hint: 'Cada indicador tem de sair de vendas, produtos e clientes, sem números escritos à mão.' },
         ],
       },
       quiz: {
@@ -963,6 +966,7 @@ print(valor_valido, registos_invalidos)`,
         checks: [
           { label: 'valor_valido == 40.0 €', expr: 'math.isclose(float(valor_valido), 40.0, abs_tol=0.01)', actualExpr: 'valor_valido', hint: '40 * 0.25 (10 €) + 4 * 7.50 (30 €) = 40.0 €.' },
           { label: 'registos_invalidos == 2', expr: 'int(registos_invalidos) == 2', actualExpr: 'registos_invalidos', hint: '"vinte" e "N/A" disparam ValueError, somando 2 inválidos.' },
+          { label: 'O try / except funciona com outro ficheiro JSON', expr: '(lambda r: abs(float(r["valor_valido"]) - 3.0) < 0.001 and int(r["registos_invalidos"]) == 1)(correr_com(entregas_json=\'[{"artigo": "A", "unidades": "2", "preco": "1.5"}, {"artigo": "B", "unidades": "x", "preco": "1"}]\'))', actualExpr: 'correr_com(entregas_json=\'[{"artigo": "A", "unidades": "2", "preco": "1.5"}, {"artigo": "B", "unidades": "x", "preco": "1"}]\').get("valor_valido")', hint: 'Percorre json.loads(entregas_json) e soma dentro do try; conta os ValueError no except.' },
         ],
       },
       quiz: {
@@ -1052,6 +1056,7 @@ faturacao_queijo_q4 = float(res["total"].iloc[0])
 print(faturacao_queijo_q4)`,
         checks: [
           { label: 'faturacao_queijo_q4 calculada via SQL + Python', expr: 'faturacao_queijo_q4 is not None and math.isclose(float(faturacao_queijo_q4), float(pd.read_csv("dados/vendas.csv").query("produto == \'Queijo\' and data >= \'2025-10-01\'").eval("quantidade * preco").sum()), abs_tol=0.05)', actualExpr: 'faturacao_queijo_q4', hint: 'Filtra WHERE produto = ? AND data >= ? com params=["Queijo", "2025-10-01"].' },
+          { label: 'A consulta parametrizada funciona com outros dados', expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["2025-10-05", "2025-09-01"], "produto": ["Queijo", "Queijo"], "quantidade": [2, 5], "preco": [4.9, 4.9]}))["faturacao_queijo_q4"]) - 9.8) < 0.001', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-10-05", "2025-09-01"], "produto": ["Queijo", "Queijo"], "quantidade": [2, 5], "preco": [4.9, 4.9]})).get("faturacao_queijo_q4")', hint: 'Carrega df com to_sql e lê o resultado da query com read_sql_query, sem escrever o número à mão.' },
         ],
       },
       quiz: {

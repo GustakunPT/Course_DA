@@ -1,5 +1,7 @@
 # Semana 3: Variáveis e tipos de dados
 
+> **Na app:** Python, etapas 01 e 02. [abrir a etapa 01 da trilha Python](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-01-sintaxe). Cada etapa tem 2 treinos extra.
+
 ## A analogia: frascos na despensa
 
 Uma variável é um frasco com um rótulo. O rótulo é o **nome**, o que está lá dentro é o **valor**.

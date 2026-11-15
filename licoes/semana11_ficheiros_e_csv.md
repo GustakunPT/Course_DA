@@ -1,5 +1,7 @@
 # Semana 11: Ficheiros, `with open` e o módulo `csv`
 
+> **Na app:** Python, etapas 10 e 11. [abrir a revisão (etapa 10)](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-11-revisao). A etapa 10 revê tudo e a 11 é o projeto da Caixa Registadora com as 5 078 vendas.
+
 ## A analogia: abrir a arca frigorífica e fechá-la sempre ao sair
 
 Quando um programa abre um ficheiro no disco, precisa de o fechar no fim. O bloco `with open(...) as f:` é uma porta com mola automática: mesmo que aconteça um erro lá dentro, o Python fecha o ficheiro sozinho.

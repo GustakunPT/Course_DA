@@ -357,6 +357,7 @@ print(round(media, 2), mediana, desvio_padrao, amplitude)`,
           { label: 'mediana (4.80)', expr: 'isinstance(mediana, (int, float)) and math.isclose(mediana, 4.80, abs_tol=0.01)', actualExpr: 'mediana', hint: 'Usa statistics.median(taloes_amostra).' },
           { label: 'desvio_padrao (14.66)', expr: 'isinstance(desvio_padrao, (int, float)) and math.isclose(desvio_padrao, 14.66, abs_tol=0.02)', actualExpr: 'desvio_padrao', hint: 'Usa round(statistics.stdev(taloes_amostra), 2).' },
           { label: 'amplitude (46.80)', expr: 'isinstance(amplitude, (int, float)) and math.isclose(amplitude, 46.80, abs_tol=0.01)', actualExpr: 'amplitude', hint: 'Calcula max(taloes_amostra) - min(taloes_amostra).' },
+          { label: 'As medidas são calculadas a partir da lista', expr: '(lambda r: abs(r["media"] - 4.0) < 1e-9 and abs(r["mediana"] - 2.0) < 1e-9 and abs(r["amplitude"] - 8.0) < 1e-9)(correr_com(taloes_amostra=[1.0, 2.0, 9.0]))', actualExpr: 'correr_com(taloes_amostra=[1.0, 2.0, 9.0]).get("media")', hint: 'Usa statistics.mean, statistics.median e max/min sobre taloes_amostra.' },
         ],
       },
       quiz: {
@@ -427,6 +428,7 @@ print(iqr, num_outliers)`,
         checks: [
           { label: 'iqr calculado corretamente (5.22)', expr: 'iqr is not None and math.isclose(float(iqr), 5.22, abs_tol=0.01)', actualExpr: 'iqr', hint: 'Calcula sub.quantile(0.75) - sub.quantile(0.25) (esperado ~5.22).' },
           { label: 'num_outliers acima do limite superior (348)', expr: 'num_outliers is not None and int(num_outliers) == 348', actualExpr: 'num_outliers', hint: 'Conta int((sub > (q3 + 1.5 * (q3 - q1))).sum()).' },
+          { label: 'O IQR e os outliers vêm dos dados', expr: '(lambda r: abs(float(r["iqr"]) - 2.0) < 1e-9 and int(r["num_outliers"]) == 1)(correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})))', actualExpr: 'correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})).get("num_outliers")', hint: 'q1 e q3 com .quantile, iqr = q3 - q1, e conta os valores acima de q3 + 1.5 * iqr.' },
         ],
       },
       quiz: {
@@ -486,6 +488,7 @@ quota_top2_pct = round(float(por_prod.iloc[:2].sum() / por_prod.sum() * 100), 2)
 print(quota_top2_pct)`,
         checks: [
           { label: 'quota_top2_pct (39.78%)', expr: 'quota_top2_pct is not None and math.isclose(float(quota_top2_pct), 39.78, abs_tol=0.1)', actualExpr: 'quota_top2_pct', hint: '(6262.50 + 4439.40) / 26902.89 * 100 = 39.78%.' },
+          { label: 'A quota é calculada a partir das vendas', expr: 'abs(float(correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]}))["quota_top2_pct"]) - 80.0) < 0.01', actualExpr: 'correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]})).get("quota_top2_pct")', hint: 'Ordena a faturação por produto e divide os 2 primeiros pelo total.' },
         ],
       },
       quiz: {
@@ -690,6 +693,7 @@ ranking_meses`,
         checks: [
           { label: 'ranking_meses tem os 12 meses do maior para o menor', expr: 'hasattr(ranking_meses, "is_monotonic_decreasing") and len(ranking_meses) == 12 and ranking_meses.is_monotonic_decreasing and str(ranking_meses.index[0]) == "2025-09"', actualExpr: 'list(ranking_meses.index) if hasattr(ranking_meses, "index") else ranking_meses', hint: 'Agrupa por mes, soma sub e usa .sort_values(ascending=False).' },
           { label: 'variacao_pico_vale (493.83 €)', expr: 'variacao_pico_vale is not None and math.isclose(float(variacao_pico_vale), 493.83, abs_tol=0.01)', actualExpr: 'variacao_pico_vale', hint: 'Subtrai o último valor do ranking ao primeiro (.iloc[0] - .iloc[-1]).' },
+          { label: 'O ranking e a variação vêm dos dados', expr: 'abs(float(correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]}))["variacao_pico_vale"]) - 4.0) < 0.01', actualExpr: 'correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]})).get("variacao_pico_vale")', hint: 'variacao_pico_vale = primeiro menos último valor de ranking_meses.' },
         ],
       },
       quiz: {
@@ -890,6 +894,7 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
           { label: 'erro_padrao (0.160)', expr: 'math.isclose(float(erro_padrao), 0.1601, abs_tol=0.001)', actualExpr: 'erro_padrao', hint: 'math.sqrt(a.var() / len(a) + b.var() / len(b)).' },
           { label: 'estatistica_t (-1.73) e p_valor (0.083)', expr: 'math.isclose(float(estatistica_t), -1.734, abs_tol=0.005) and math.isclose(float(p_valor), 0.0829, abs_tol=0.001)', actualExpr: '(estatistica_t, p_valor)', hint: 'estatistica_t = diferenca / erro_padrao e p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2)).' },
           { label: 'Decisão a 5%: a diferença não é significativa', expr: 'significativo is False or (hasattr(significativo, "item") and significativo.item() is False)', actualExpr: 'significativo', hint: 'significativo = p_valor < 0.05. Com p ≈ 0.083 não há provas suficientes.' },
+          { label: 'O teste é calculado a partir dos dados', expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]}))["diferenca"]) - 1.0) < 1e-9', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]})).get("diferenca")', hint: 'Separa os grupos com a coluna fim_de_semana e calcula as médias, sem números escritos à mão.' },
         ],
       },
       quiz: {

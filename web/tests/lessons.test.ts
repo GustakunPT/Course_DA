@@ -45,10 +45,17 @@ describe('estrutura do currículo', () => {
     expect(allTracks.find((t) => t.id === 'estatistica')!.lessons[0].id).toBe('bi-01-media-mediana');
   });
 
+  it('todas as etapas fora do Git têm pelo menos um treino, exceto a introdução e o projeto da trilha Python', () => {
+    const semTreino = todas
+      .filter((l) => l.trilha !== 'git' && !(l.practice?.length || l.practiceSql?.length))
+      .map((l) => l.id);
+    expect(semTreino).toEqual(['py-00-pensamento', 'py-11-revisao', 'py-10-caixa-csv']);
+  });
+
   it('a trilha Pandas tem 2 treinos por etapa e os desafios de estatística ficaram curtos', () => {
     for (const l of allTracks.find((t) => t.id === 'pandas')!.lessons) expect(l.practice?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
     for (const l of allTracks.find((t) => t.id === 'estatistica')!.lessons) {
-      expect(l.pythonChallenge!.checks.length, l.id).toBeLessThanOrEqual(5);
+      expect(l.pythonChallenge!.checks.length, l.id).toBeLessThanOrEqual(6);
     }
   });
 

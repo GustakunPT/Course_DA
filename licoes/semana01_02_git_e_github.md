@@ -1,5 +1,7 @@
 # Semanas 1 e 2: Terminal, Git e GitHub para Analistas de Dados
 
+> **Na app:** Git, etapas 01 a 05. [abrir a etapa 01 da trilha Git](https://web-one-nu-34.vercel.app/#vista=academia&trilha=git&licao=git-01-init-status). Na app, os comandos correm num terminal simulado: podes treinar sem medo de estragar nada.
+
 ## A analogia: o livro de registo da caixa e o cofre do banco
 
 Imagina que na Mercearia escreves todas as alterações de preços a lápis num papel solto e apagas por cima sempre que mudas de ideias. No fim do mês, ninguém sabe quando o Azeite subiu para `7.50 €` nem quem mudou a fórmula.

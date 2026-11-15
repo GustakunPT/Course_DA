@@ -1,5 +1,7 @@
 # Semana 10: Funções — escrever a receita uma vez, cozinhar mil vezes
 
+> **Na app:** Python, etapa 09. [abrir a etapa 09](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-09-funcoes). Tem 2 treinos extra.
+
 ## A analogia: a tecla programada na balança da frutaria
 
 Se todos os dias precisas de calcular o preço final com desconto e IVA em 10 lugares diferentes do código, copiar e colar a conta 10 vezes é pedir problemas: no dia em que a regra muda, esqueces-te de atualizar uma das cópias.

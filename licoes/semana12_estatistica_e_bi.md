@@ -1,5 +1,7 @@
 # Semana 12: Estatística Descritiva, KPIs e Power BI
 
+> **Na app:** Estatística, etapas 01 e 02. [abrir a etapa 01 da trilha Estatística](https://web-one-nu-34.vercel.app/#vista=academia&trilha=estatistica&licao=bi-01-media-mediana). Esta lição é só a introdução: a trilha Estatística da app continua com probabilidade, intervalos de confiança, testes A/B, qui-quadrado e regressão, e a trilha Visualização & BI cobre gráficos, Excel e Power BI.
+
 ## A analogia: porque é que a média mente quando entra um milionário na mercearia
 
 Imagina 9 clientes que compram um pão (`0.25 €`) e 1 restaurante que compra 20 garrafões de azeite (`150.00 €`):

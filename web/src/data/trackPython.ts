@@ -711,103 +711,10 @@ print(calcular_subtotal(3, 0.89), limpar_nome_produto("  pão "), aplicar_iva(10
       },
     },
     {
-      id: 'py-10-caixa-csv',
-      code: '10',
-      title: 'Projeto Caixa Registadora sobre vendas.csv',
-      lede: 'Chegou o momento de juntar tudo: ler as 5 078 linhas reais de dados/vendas.csv em Python puro e responder às 4 perguntas da gerência.',
-      analogyTitle: 'O fecho anual de contas da Mercearia',
-      analogyBody: 'Os ficheiros CSV reais do projeto já estão montados nesta bancada em dados/vendas.csv. Com csv.DictReader, int(), float() e dicionários acumuladores, vais obter os números exatos que depois confirmarás em SQL!',
-      concepts: [
-        'csv.DictReader(f) lê o cabeçalho na primeira linha e devolve cada venda como um dicionário.',
-        'Em vendas.csv todas as colunas vêm como texto: converte sempre int(linha["quantidade"]) e float(linha["preco"]).',
-        'Os 4 valores oficiais da semente 42 servem de prova real entre Python, SQL e Pandas.',
-      ],
-      referenceTitle: 'Leitura de CSV na biblioteca padrão',
-      referenceRows: [
-        { syntax: 'with open(p, encoding="utf-8") as f:', meaning: 'Abre ficheiro UTF-8 e fecha no fim', example: 'with open("dados/vendas.csv", encoding="utf-8") as f:' },
-        { syntax: 'csv.DictReader(f)', meaning: 'Lê linhas como dicionários por coluna', example: 'vendas = list(csv.DictReader(f))' },
-        { syntax: 'max(d, key=d.get)', meaning: 'Obtém chave com maior valor acumulado', example: 'dia_topo = max(por_dia, key=por_dia.get)' },
-      ],
-      engine: 'python',
-      exampleCode: `import csv
-
-with open("dados/vendas.csv", encoding="utf-8") as f:
-    vendas = list(csv.DictReader(f))
-
-print("Total de linhas carregadas:", len(vendas))
-print("Primeira venda:", vendas[0])`,
-      pythonChallenge: {
-        description: 'Implementa a Caixa Registadora completa (src/caixa.py): calcula faturacao_total, produto_campeao (em unidades), melhor_dia (data com maior faturação) e media_linha sobre dados/vendas.csv.',
-        starterCode: `import csv
-
-with open("dados/vendas.csv", encoding="utf-8") as f:
-    vendas = list(csv.DictReader(f))
-
-faturacao_total = 0.0
-unidades_por_produto = {}
-faturacao_por_dia = {}
-
-# Percorre vendas e acumula os valores pedidos:
-
-
-produto_campeao = None
-melhor_dia = None
-media_linha = None
-
-print(f"Faturação: {faturacao_total:.2f} €")
-print("Mais vendido (un.):", produto_campeao)
-print("Dia recorde:", melhor_dia)
-print(f"Média por linha: {media_linha:.2f} €" if media_linha else "Por calcular")`,
-        solutionCode: `import csv
-
-with open("dados/vendas.csv", encoding="utf-8") as f:
-    vendas = list(csv.DictReader(f))
-
-faturacao_total = 0.0
-unidades_por_produto = {}
-faturacao_por_dia = {}
-
-for v in vendas:
-    qtd = int(v["quantidade"])
-    sub = qtd * float(v["preco"])
-    faturacao_total += sub
-    prod = v["produto"]
-    dia = v["data"]
-    unidades_por_produto[prod] = unidades_por_produto.get(prod, 0) + qtd
-    faturacao_por_dia[dia] = faturacao_por_dia.get(dia, 0.0) + sub
-
-produto_campeao = max(unidades_por_produto, key=unidades_por_produto.get)
-melhor_dia = max(faturacao_por_dia, key=faturacao_por_dia.get)
-media_linha = faturacao_total / len(vendas)
-
-print(f"Faturação: {faturacao_total:.2f} €")
-print("Mais vendido (un.):", produto_campeao)
-print("Dia recorde:", melhor_dia)
-print(f"Média por linha: {media_linha:.2f} €")`,
-        checks: [
-          { label: 'faturacao_total (26902.89 €)', expr: 'math.isclose(faturacao_total, 26902.89, abs_tol=0.02)', actualExpr: 'round(faturacao_total, 2)', hint: 'Soma int(v["quantidade"]) * float(v["preco"]).' },
-          { label: 'produto_campeao ("Leite")', expr: 'produto_campeao == "Leite"', actualExpr: 'produto_campeao', hint: 'Soma a quantidade por produto e tira max(..., key=....get).' },
-          { label: 'melhor_dia ("2025-09-14")', expr: 'melhor_dia == "2025-09-14"', actualExpr: 'melhor_dia', hint: 'Soma a faturação por v["data"] e obtém a data com maior soma.' },
-          { label: 'media_linha (~5.30 €)', expr: 'isinstance(media_linha, (int, float)) and math.isclose(media_linha, 26902.89 / 5078, abs_tol=0.01)', actualExpr: 'round(media_linha, 4) if media_linha else None', hint: 'Divide faturacao_total por len(vendas).' },
-        ],
-      },
-      quiz: {
-        question: 'Qual o produto que mais unidades vendeu em 2025 e qual o que mais euros faturou na Mercearia?',
-        options: [
-          'Pão em unidades e Leite em euros',
-          'Leite em unidades e Azeite em euros',
-          'Azeite em unidades e em euros',
-          'Leite em unidades e em euros',
-        ],
-        correctIndex: 1,
-        explanation: 'O Leite lidera em quantidade (960 unidades), mas o Azeite (a 7,50 € cada) lidera destacadamente em faturação!',
-      },
-    },
-    {
       id: 'py-11-revisao',
-      code: '11',
+      code: '10',
       title: 'Revisão geral: o talão de compra completo',
-      lede: 'Antes de passares ao SQL e ao pandas, volta a usar tudo o que aprendeste num só problema: variáveis, texto formatado, condições, ciclos, listas, dicionários e funções. A correção testa o teu código com outros carrinhos, por isso tem de funcionar para qualquer compra.',
+      lede: 'Antes do projeto da Caixa Registadora, volta a usar tudo o que aprendeste num só problema: variáveis, texto formatado, condições, ciclos, listas, dicionários e funções. A correção testa o teu código com outros carrinhos, por isso tem de funcionar para qualquer compra.',
       analogyTitle: 'O teste de condução depois das aulas',
       analogyBody: 'Nas aulas treinaste cada manobra em separado: arrancar, travar, estacionar. No exame fazes tudo seguido, numa rua que não conheces. Esta etapa é esse exame: nenhum conceito é novo, mas tens de decidir sozinho qual usar em cada passo.',
       concepts: [
@@ -921,6 +828,99 @@ print(unidades_por_categoria, produtos_caros)`,
         ],
         correctIndex: 1,
         explanation: 'Se um resultado está escrito à mão (total = 23.05), só acerta no exemplo. Calcular tudo a partir de carrinho faz o código funcionar com quaisquer dados.',
+      },
+    },
+    {
+      id: 'py-10-caixa-csv',
+      code: '11',
+      title: 'Projeto Caixa Registadora sobre vendas.csv',
+      lede: 'Chegou o momento de juntar tudo: ler as 5 078 linhas reais de dados/vendas.csv em Python puro e responder às 4 perguntas da gerência.',
+      analogyTitle: 'O fecho anual de contas da Mercearia',
+      analogyBody: 'Os ficheiros CSV reais do projeto já estão montados nesta bancada em dados/vendas.csv. Com csv.DictReader, int(), float() e dicionários acumuladores, vais obter os números exatos que depois confirmarás em SQL!',
+      concepts: [
+        'csv.DictReader(f) lê o cabeçalho na primeira linha e devolve cada venda como um dicionário.',
+        'Em vendas.csv todas as colunas vêm como texto: converte sempre int(linha["quantidade"]) e float(linha["preco"]).',
+        'Os 4 valores oficiais da semente 42 servem de prova real entre Python, SQL e Pandas.',
+      ],
+      referenceTitle: 'Leitura de CSV na biblioteca padrão',
+      referenceRows: [
+        { syntax: 'with open(p, encoding="utf-8") as f:', meaning: 'Abre ficheiro UTF-8 e fecha no fim', example: 'with open("dados/vendas.csv", encoding="utf-8") as f:' },
+        { syntax: 'csv.DictReader(f)', meaning: 'Lê linhas como dicionários por coluna', example: 'vendas = list(csv.DictReader(f))' },
+        { syntax: 'max(d, key=d.get)', meaning: 'Obtém chave com maior valor acumulado', example: 'dia_topo = max(por_dia, key=por_dia.get)' },
+      ],
+      engine: 'python',
+      exampleCode: `import csv
+
+with open("dados/vendas.csv", encoding="utf-8") as f:
+    vendas = list(csv.DictReader(f))
+
+print("Total de linhas carregadas:", len(vendas))
+print("Primeira venda:", vendas[0])`,
+      pythonChallenge: {
+        description: 'Implementa a Caixa Registadora completa (src/caixa.py): calcula faturacao_total, produto_campeao (em unidades), melhor_dia (data com maior faturação) e media_linha sobre dados/vendas.csv.',
+        starterCode: `import csv
+
+with open("dados/vendas.csv", encoding="utf-8") as f:
+    vendas = list(csv.DictReader(f))
+
+faturacao_total = 0.0
+unidades_por_produto = {}
+faturacao_por_dia = {}
+
+# Percorre vendas e acumula os valores pedidos:
+
+
+produto_campeao = None
+melhor_dia = None
+media_linha = None
+
+print(f"Faturação: {faturacao_total:.2f} €")
+print("Mais vendido (un.):", produto_campeao)
+print("Dia recorde:", melhor_dia)
+print(f"Média por linha: {media_linha:.2f} €" if media_linha else "Por calcular")`,
+        solutionCode: `import csv
+
+with open("dados/vendas.csv", encoding="utf-8") as f:
+    vendas = list(csv.DictReader(f))
+
+faturacao_total = 0.0
+unidades_por_produto = {}
+faturacao_por_dia = {}
+
+for v in vendas:
+    qtd = int(v["quantidade"])
+    sub = qtd * float(v["preco"])
+    faturacao_total += sub
+    prod = v["produto"]
+    dia = v["data"]
+    unidades_por_produto[prod] = unidades_por_produto.get(prod, 0) + qtd
+    faturacao_por_dia[dia] = faturacao_por_dia.get(dia, 0.0) + sub
+
+produto_campeao = max(unidades_por_produto, key=unidades_por_produto.get)
+melhor_dia = max(faturacao_por_dia, key=faturacao_por_dia.get)
+media_linha = faturacao_total / len(vendas)
+
+print(f"Faturação: {faturacao_total:.2f} €")
+print("Mais vendido (un.):", produto_campeao)
+print("Dia recorde:", melhor_dia)
+print(f"Média por linha: {media_linha:.2f} €")`,
+        checks: [
+          { label: 'faturacao_total (26902.89 €)', expr: 'math.isclose(faturacao_total, 26902.89, abs_tol=0.02)', actualExpr: 'round(faturacao_total, 2)', hint: 'Soma int(v["quantidade"]) * float(v["preco"]).' },
+          { label: 'produto_campeao ("Leite")', expr: 'produto_campeao == "Leite"', actualExpr: 'produto_campeao', hint: 'Soma a quantidade por produto e tira max(..., key=....get).' },
+          { label: 'melhor_dia ("2025-09-14")', expr: 'melhor_dia == "2025-09-14"', actualExpr: 'melhor_dia', hint: 'Soma a faturação por v["data"] e obtém a data com maior soma.' },
+          { label: 'media_linha (~5.30 €)', expr: 'isinstance(media_linha, (int, float)) and math.isclose(media_linha, 26902.89 / 5078, abs_tol=0.01)', actualExpr: 'round(media_linha, 4) if media_linha else None', hint: 'Divide faturacao_total por len(vendas).' },
+        ],
+      },
+      quiz: {
+        question: 'Qual o produto que mais unidades vendeu em 2025 e qual o que mais euros faturou na Mercearia?',
+        options: [
+          'Pão em unidades e Leite em euros',
+          'Leite em unidades e Azeite em euros',
+          'Azeite em unidades e em euros',
+          'Leite em unidades e em euros',
+        ],
+        correctIndex: 1,
+        explanation: 'O Leite lidera em quantidade (960 unidades), mas o Azeite (a 7,50 € cada) lidera destacadamente em faturação!',
       },
     },
   ],

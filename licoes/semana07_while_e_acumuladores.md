@@ -1,5 +1,7 @@
 # Semana 7: O ciclo while e os acumuladores
 
+> **Na app:** Python, etapa 06. [abrir a etapa 06](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-06-while). Tem 2 treinos extra.
+
 ## A analogia: mexer a sopa enquanto não ferve
 
 O `for` sabe à partida quantas voltas dá (uma por elemento). O `while` não sabe:

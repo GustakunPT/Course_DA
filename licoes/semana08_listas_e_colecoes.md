@@ -1,5 +1,7 @@
 # Semana 8: Listas, tuplos e fatias (`slicing`)
 
+> **Na app:** Python, etapa 07. [abrir a etapa 07](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-07-listas-colecoes). Tem 2 treinos extra.
+
 ## A analogia: o cesto de compras vs a etiqueta plastificada
 
 - Uma **lista** (`list`, com parênteses retos `[...]`) é um cesto de compras: podes pôr mais um pacote de arroz (`.append()`), trocar um artigo de sítio ou ordenar tudo.

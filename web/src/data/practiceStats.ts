@@ -278,4 +278,164 @@ print(f"ANOVA: F = {f_anova:.1f} (crítico {f_critico})")`,
       ],
     },
   ],
+  'bi-01-media-mediana': [
+    {
+      title: 'Média e mediana com pandas',
+      description: 'Em vendas.csv (sub = quantidade * preco), guarda media_linha e mediana_linha do sub, e cauda_direita (True se a média for maior do que a mediana).',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+media_linha = None
+mediana_linha = None
+cauda_direita = None
+print(media_linha, mediana_linha, cauda_direita)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+media_linha = df["sub"].mean()
+mediana_linha = df["sub"].median()
+cauda_direita = media_linha > mediana_linha
+print(f"Média {media_linha:.2f} € | mediana {mediana_linha:.2f} € | cauda à direita? {cauda_direita}")`,
+      checks: [
+        { label: 'media_linha (5.30 €) e mediana_linha (3.50 €)', expr: 'abs(float(media_linha) - 5.2979) < 0.001 and abs(float(mediana_linha) - 3.50) < 0.001', actualExpr: '(media_linha, mediana_linha)', hint: 'df["sub"].mean() e df["sub"].median().' },
+        { label: 'cauda_direita calculada a partir dos dados', expr: 'bool(cauda_direita) is True and bool(correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]}))["cauda_direita"]) is False', actualExpr: 'cauda_direita', hint: 'cauda_direita = media_linha > mediana_linha.' },
+      ],
+    },
+  ],
+  'bi-02-quartis-outliers': [
+    {
+      title: 'Dias fora do normal',
+      description: 'Aplica a regra do IQR à faturação diária de vendas.csv: soma o sub por data e guarda q1, q3, limite_superior (q3 + 1.5 × IQR), dias_excecionais (dias acima do limite) e dia_recorde.',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = None
+q1 = None
+q3 = None
+limite_superior = None
+dias_excecionais = None
+dia_recorde = None
+print(q1, q3, limite_superior, dias_excecionais, dia_recorde)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = df.groupby("data")["sub"].sum()
+q1 = por_dia.quantile(0.25)
+q3 = por_dia.quantile(0.75)
+limite_superior = q3 + 1.5 * (q3 - q1)
+dias_excecionais = int((por_dia > limite_superior).sum())
+dia_recorde = por_dia.idxmax()
+print(f"Q1 {q1:.2f} € | Q3 {q3:.2f} € | limite {limite_superior:.2f} € | {dias_excecionais} dias acima | recorde {dia_recorde}")`,
+      checks: [
+        { label: 'q1 (50.90 €), q3 (93.52 €) e limite_superior (157.45 €)', expr: 'abs(float(q1) - 50.90) < 0.01 and abs(float(q3) - 93.52) < 0.01 and abs(float(limite_superior) - 157.45) < 0.01', actualExpr: '(q1, q3, limite_superior)', hint: 'por_dia = df.groupby("data")["sub"].sum(), depois .quantile(0.25) e .quantile(0.75).' },
+        { label: '2 dias excecionais e o recorde em 2025-09-14', expr: 'int(dias_excecionais) == 2 and dia_recorde == "2025-09-14"', actualExpr: '(dias_excecionais, dia_recorde)', hint: '(por_dia > limite_superior).sum() e por_dia.idxmax().' },
+        { label: 'A regra funciona com outros dias', expr: 'int(correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3", "d4", "d5"], "quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]}))["dias_excecionais"]) == 1', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3", "d4", "d5"], "quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})).get("dias_excecionais")', hint: 'Calcula os quartis a partir de por_dia, sem números escritos à mão.' },
+      ],
+    },
+  ],
+  'bi-08-teste-ab': [
+    {
+      title: 'Lisboa gasta mais do que o Porto?',
+      description: 'Junta vendas.csv a clientes.csv e compara o sub por linha dos clientes de Lisboa (a) e do Porto (b) com o mesmo teste da etapa: diferenca (Lisboa menos Porto), estatistica_t, p_valor e significativo.',
+      starterCode: `import math
+import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+clientes = pd.read_csv("dados/clientes.csv")
+
+diferenca = None
+estatistica_t = None
+p_valor = None
+significativo = None
+print(diferenca, estatistica_t, p_valor, significativo)`,
+      solutionCode: `import math
+import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+clientes = pd.read_csv("dados/clientes.csv")
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+juntas = vendas.merge(clientes, left_on="cliente_id", right_on="id")
+
+a = juntas[juntas["cidade"] == "Lisboa"]["sub"]
+b = juntas[juntas["cidade"] == "Porto"]["sub"]
+diferenca = a.mean() - b.mean()
+erro_padrao = math.sqrt(a.var() / len(a) + b.var() / len(b))
+estatistica_t = diferenca / erro_padrao
+p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2))
+significativo = p_valor < 0.05
+print(f"Diferença {diferenca:.3f} € | t = {estatistica_t:.2f} | p = {p_valor:.2f} | significativo? {significativo}")`,
+      checks: [
+        { label: 'diferenca (-0.017 €) e estatistica_t (-0.07)', expr: 'abs(float(diferenca) - (-0.01715)) < 0.0005 and abs(float(estatistica_t) - (-0.0658)) < 0.002', actualExpr: '(diferenca, estatistica_t)', hint: 'Junta as cidades com merge e separa a = Lisboa, b = Porto.' },
+        { label: 'p_valor (0.95): não é significativo', expr: 'abs(float(p_valor) - 0.9476) < 0.002 and bool(significativo) is False', actualExpr: '(p_valor, significativo)', hint: 'p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2)).' },
+        { label: 'O teste usa os dados', expr: 'abs(float(correr_com(vendas=pd.DataFrame({"cliente_id": [1, 1, 2, 2], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]}), clientes=pd.DataFrame({"id": [1, 2], "cidade": ["Lisboa", "Porto"]}))["diferenca"]) - 1.0) < 1e-9', actualExpr: 'correr_com(vendas=pd.DataFrame({"cliente_id": [1, 1, 2, 2], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]}), clientes=pd.DataFrame({"id": [1, 2], "cidade": ["Lisboa", "Porto"]})).get("diferenca")', hint: 'Calcula a partir de vendas e clientes, sem números escritos à mão.' },
+      ],
+    },
+  ],
+  'bi-16-regressao-multipla': [
+    {
+      title: 'Uma variável inútil e o R² ajustado',
+      description: 'Junta ao modelo da etapa uma variável sem sentido: dia_par (1 se o dia do mês for par). Guarda r2_sem e r2_aj_sem (modelo com clientes, fim de semana e dezembro), r2_com e r2_aj_com (com dia_par também), r2_subiu e r2_ajustado_desceu.',
+      starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).reset_index()
+por_dia["fim_de_semana"] = (pd.to_datetime(por_dia["data"]).dt.day_of_week >= 5).astype(int)
+por_dia["dezembro"] = (por_dia["data"].str[5:7] == "12").astype(int)
+por_dia["dia_par"] = (por_dia["data"].str[8:10].astype(int) % 2 == 0).astype(int)
+
+
+def ajustar(colunas):
+    """Devolve (r2, r2_ajustado) do modelo faturacao ~ colunas."""
+    return None, None
+
+
+r2_sem, r2_aj_sem = ajustar(["clientes", "fim_de_semana", "dezembro"])
+r2_com, r2_aj_com = ajustar(["clientes", "fim_de_semana", "dezembro", "dia_par"])
+r2_subiu = None
+r2_ajustado_desceu = None
+print(r2_sem, r2_aj_sem, r2_com, r2_aj_com)`,
+      solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).reset_index()
+por_dia["fim_de_semana"] = (pd.to_datetime(por_dia["data"]).dt.day_of_week >= 5).astype(int)
+por_dia["dezembro"] = (por_dia["data"].str[5:7] == "12").astype(int)
+por_dia["dia_par"] = (por_dia["data"].str[8:10].astype(int) % 2 == 0).astype(int)
+
+
+def ajustar(colunas):
+    """Devolve (r2, r2_ajustado) do modelo faturacao ~ colunas."""
+    n = len(por_dia)
+    y = por_dia["faturacao"].to_numpy()
+    X = np.column_stack([np.ones(n)] + [por_dia[c] for c in colunas])
+    coef = np.linalg.lstsq(X, y, rcond=None)[0]
+    r2 = 1 - ((y - X @ coef) ** 2).sum() / ((y - y.mean()) ** 2).sum()
+    r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - len(colunas) - 1)
+    return r2, r2_ajustado
+
+
+r2_sem, r2_aj_sem = ajustar(["clientes", "fim_de_semana", "dezembro"])
+r2_com, r2_aj_com = ajustar(["clientes", "fim_de_semana", "dezembro", "dia_par"])
+r2_subiu = r2_com > r2_sem
+r2_ajustado_desceu = r2_aj_com < r2_aj_sem
+print(f"Sem dia_par: R² {r2_sem:.4f}, ajustado {r2_aj_sem:.4f}")
+print(f"Com dia_par: R² {r2_com:.4f}, ajustado {r2_aj_com:.4f}")`,
+      checks: [
+        { label: 'Sem dia_par: R² 0.7346 e ajustado 0.7324', expr: 'abs(float(r2_sem) - 0.73457) < 0.0001 and abs(float(r2_aj_sem) - 0.73236) < 0.0001', actualExpr: '(r2_sem, r2_aj_sem)', hint: 'X = np.column_stack([np.ones(n)] + [por_dia[c] for c in colunas]) e np.linalg.lstsq. No R² ajustado, p = len(colunas).' },
+        { label: 'Com dia_par: R² sobe (0.7350) mas o ajustado desce (0.7321)', expr: 'abs(float(r2_com) - 0.73501) < 0.0001 and abs(float(r2_aj_com) - 0.73207) < 0.0001 and bool(r2_subiu) is True and bool(r2_ajustado_desceu) is True', actualExpr: '(r2_com, r2_aj_com, r2_subiu, r2_ajustado_desceu)', hint: 'O R² normal nunca desce ao acrescentar variáveis; o ajustado desce se a variável não ajudar o suficiente.' },
+      ],
+    },
+  ],
 };

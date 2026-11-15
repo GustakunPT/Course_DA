@@ -7,7 +7,8 @@ import { pythonPractice } from './practicePython';
 import { sqlPractice } from './practiceSql';
 import { pandasPractice } from './practicePandas';
 import { statsPractice } from './practiceStats';
-import type { Track } from './types';
+import { biProPractice, biProSqlPractice } from './practiceBiPro';
+import type { Lesson, PythonChallengeSpec, Track } from './types';
 
 // Os exercícios de treino ficam num ficheiro à parte e juntam-se aqui à etapa respetiva.
 const pythonTrackComTreinos: Track = {
@@ -25,12 +26,23 @@ const pandasTrackComTreinos: Track = {
   lessons: pandasTrack.lessons.map((l) => (pandasPractice[l.id] ? { ...l, practice: pandasPractice[l.id] } : l)),
 };
 
+/** Junta os treinos Python e SQL que existirem para a etapa. */
+function comTreinosExtra(l: Lesson, python?: PythonChallengeSpec[]): Lesson {
+  const sql = biProSqlPractice[l.id];
+  return { ...l, ...(python ? { practice: python } : {}), ...(sql ? { practiceSql: sql } : {}) };
+}
+
+const careerProComTreinos: Track = {
+  ...careerProTrack,
+  lessons: careerProTrack.lessons.map((l) => comTreinosExtra(l, biProPractice[l.id])),
+};
+
 /** Escolhe e ordena etapas de uma trilha base e renumera os códigos (01, 02, ...). */
 function montarTrilha(base: Track, meta: Pick<Track, 'id' | 'shortTitle' | 'fullTitle' | 'summary'>, ordem: string[]): Track {
   const lessons = ordem.map((id, i) => {
     const l = base.lessons.find((x) => x.id === id);
     if (!l) throw new Error(`Etapa em falta: ${id}`);
-    const comTreinos = statsPractice[id] ? { ...l, practice: statsPractice[id] } : l;
+    const comTreinos = comTreinosExtra(l, statsPractice[id] ?? biProPractice[id]);
     return { ...comTreinos, code: String(i + 1).padStart(2, '0') };
   });
   return { ...base, ...meta, lessons };
@@ -78,7 +90,7 @@ export const allTracks: Track[] = enrichTracksWithPedagogy([
   gitTrack,
   visualBiTrack,
   estatisticaTrack,
-  careerProTrack,
+  careerProComTreinos,
 ]);
 
 export { cheatsheets };

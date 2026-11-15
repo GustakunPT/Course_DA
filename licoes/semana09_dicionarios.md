@@ -1,5 +1,7 @@
 # Semana 9: Dicionários e contadores por chave
 
+> **Na app:** Python, etapa 08. [abrir a etapa 08](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-08-dicionarios). Tem 2 treinos extra.
+
 ## A analogia: a tabela de preços afixada atrás do balcão
 
 Numa lista tens de saber o número da gaveta (`precos[5]`). Mas ninguém na caixa decora que o Azeite é o índice 5: procuras pela **palavra** `"Azeite"` e vês logo `7.50` à frente.

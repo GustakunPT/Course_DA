@@ -18,7 +18,7 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
 - **7 Trilhas de Analista de Dados (60 etapas do Zero Absoluto ao Nível Profissional):**
-  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada e a etapa 11 é uma revisão geral de todos os conceitos)
+  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada, a etapa 10 é uma revisão geral de todos os conceitos e a 11 é o projeto da Caixa Registadora)
   2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais; cada etapa tem pelo menos um treino extra e a etapa 10 treina a matriz RFM)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser; 2 treinos por etapa e uma etapa 08 com NumPy, `pd.crosstab`, quantis e datas, as ferramentas que a trilha de Estatística usa)
   4. **Git, GitHub e Portfólio** (Simulador interativo de terminal Git)
@@ -119,13 +119,41 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python 
 | `pandas05_groupby_merge.ipynb` (etapa 05) | Agrupar (`groupby`) e juntar tabelas (`merge`) |
 | `pandas06_limpeza.ipynb` (etapa 06) | Limpar dados: vazios, duplicados, texto, números e datas (usa `dados/vendas_sujas.csv`) |
 
-## Como estudar cada semana
+## Como juntar o curso local e a app
 
-1. Lê a lição em `licoes/` (começa pela analogia).
-2. Faz a secção "Experimenta partir": errar de propósito é a forma mais rápida de perceber.
-3. Completa o ficheiro correspondente em `exercicios/`.
-4. Corre `python verificar.py N` até estar tudo certo.
-5. Faz um commit com uma mensagem clara.
+O projeto tem dois percursos que se completam:
+
+- **A app** (`web/`, publicada na Vercel) é o percurso principal: 60 etapas com desafios corrigidos e treinos.
+- **O curso local** (`licoes/`, `exercicios/` e `cadernos/`) dá mais leitura e prática no teu computador, com o
+  VS Code, o terminal e o Git a sério.
+
+Cada lição local começa com um link "Na app" para a etapa certa. A correspondência completa:
+
+| Curso local | Exercício local | Na app |
+| --- | --- | --- |
+| `semana01_02_git_e_github.md` | (commits no teu repositório) | Git, etapas 01 a 05 |
+| `semana03_variaveis_e_tipos.md` | `semana03_variaveis.py` | Python, etapas 01 e 02 |
+| `semana04_texto_e_conversoes.md` | `semana04_conversoes.py` | Python, etapa 03 |
+| `semana05_condicoes.md` | `semana05_condicoes.py` | Python, etapa 04 |
+| `semana06_ciclo_for.md` | `semana06_ciclo_for.py` | Python, etapa 05 |
+| `semana07_while_e_acumuladores.md` | `semana07_while.py` | Python, etapa 06 |
+| `semana08_listas_e_colecoes.md` | `semana08_listas.py` | Python, etapa 07 |
+| `semana09_dicionarios.md` | `semana09_dicionarios.py` | Python, etapa 08 |
+| `semana10_funcoes.md` | `semana10_funcoes.py` | Python, etapa 09 |
+| `semana11_ficheiros_e_csv.md` | `semana11_csv.py` | Python, etapas 10 (revisão) e 11 (Caixa Registadora) |
+| `semana12_estatistica_e_bi.md` | `semana12_estatistica.py` | Estatística, etapas 01 e 02 |
+| `cadernos/pandas01` a `pandas06` | (o próprio caderno) | Pandas, etapas 01 a 06 |
+| `pratica_excel_powerbi.md` | (Excel e Power BI) | Visualização & BI, etapa 06 |
+
+Depois da semana 12, o curso continua só na app: SQL, Pandas, Visualização & BI, Estatística e Nível Profissional.
+
+### Como estudar cada tema
+
+1. Faz a etapa na app: lê a analogia, resolve o desafio e pelo menos um treino.
+2. Lê a lição em `licoes/` e faz a secção "Experimenta partir": errar de propósito é a forma mais rápida de perceber.
+3. Completa o ficheiro correspondente em `exercicios/` e corre `python verificar.py N` até estar tudo certo.
+4. Faz um commit com uma mensagem clara. Quem segue o curso local começa pelo Git (semanas 1 e 2); na app, a trilha
+   Git pode ser feita em qualquer altura.
 
 ## Estrutura
 
