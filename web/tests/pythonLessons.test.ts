@@ -78,6 +78,14 @@ describe('desafios Python e pandas', () => {
     ['py-04-condicoes', 'total = 37.5\ndesconto_pct = 5\ntotal_final = 35.625\nidade = 17\npode_entrar = False\ncidade = "Porto"\nentrega_gratis = True'],
     ['py-06-while', 'vendas = [120, 80, 250, 40, 100, 310]\ntotal_vendas = 900\nmedia_vendas = 150\nsaldo = 100\nsemanas = 12\nsaldo_final = 520'],
     ['py-09-funcoes', 'def calcular_subtotal(quantidade, preco):\n    return 2.67\ndef limpar_nome_produto(texto):\n    return "Pão"\ndef aplicar_iva(valor, taxa=0.23):\n    return round(valor * (1 + taxa), 2)'],
+    ['py-11-revisao', `carrinho = [("Pão", 6, 0.25), ("Leite", 4, 0.89), ("Azeite", 1, 7.50), ("Café", 2, 3.40), ("Queijo", 1, 4.90)]
+def linha_talao(produto, quantidade, preco):
+    return f"{produto} x{quantidade} = {quantidade * preco:.2f} €"
+subtotal = 24.26
+desconto_pct = 5
+total = 23.05
+unidades_por_categoria = {"Padaria": 6, "Laticínios": 4, "Mercearia": 3, "Charcutaria": 1}
+produtos_caros = ["Azeite", "Café", "Queijo"]`],
   ])('%s: resultados escritos à mão não passam', async (id, codigo) => {
     const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
     const res = await runPythonCode(codigo, ch.checks);

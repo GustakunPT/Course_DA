@@ -95,6 +95,9 @@ export async function POST(request: Request): Promise<Response> {
     const drafts = isPlainObject(body.drafts) ? body.drafts : {};
     const quizzes = isPlainObject(body.quizzes) ? body.quizzes : {};
     const lastLocation = isPlainObject(body.lastLocation) ? body.lastLocation : null;
+    const practice = Array.isArray(body.practice)
+      ? body.practice.filter((x: unknown) => typeof x === 'string' && x.length <= 80).slice(0, 500)
+      : [];
 
     const updatedAt = new Date().toISOString();
     const payload = {
@@ -104,6 +107,7 @@ export async function POST(request: Request): Promise<Response> {
       progress,
       drafts,
       quizzes,
+      practice,
       lastLocation,
     };
 

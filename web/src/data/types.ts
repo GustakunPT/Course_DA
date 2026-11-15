@@ -10,6 +10,8 @@ export interface ReferenceRow {
 }
 
 export interface SqlChallengeSpec {
+  /** Nome curto do exercício de treino; o desafio principal não precisa. */
+  title?: string;
   description: string;
   starterSql: string;
   solutionSql: string;
@@ -59,6 +61,8 @@ export interface Lesson {
   pythonChallenge?: PythonChallengeSpec;
   /** Exercícios de treino extra (opcionais): repetem o conceito com outros dados. */
   practice?: PythonChallengeSpec[];
+  /** Exercícios de treino SQL extra (não contam para o progresso). */
+  practiceSql?: SqlChallengeSpec[];
   sqlChallenge?: SqlChallengeSpec;
   gitChallenge?: GitChallengeSpec;
   quiz: QuizSpec;

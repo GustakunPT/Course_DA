@@ -60,6 +60,12 @@ describe('POST /api/sync', () => {
     expect(saved.lastLocation).toBeNull();
   });
 
+  it('guarda os treinos resolvidos e ignora entradas que não são texto', async () => {
+    const { code } = await (await post({ practice: ['py-04-condicoes:1', 7, 'x'.repeat(200)] })).json();
+    const saved = JSON.parse(store.get(`sync/${code}.json`)!);
+    expect(saved.practice).toEqual(['py-04-condicoes:1']);
+  });
+
   it('não expõe erros internos', async () => {
     const blob = await import('@vercel/blob');
     vi.mocked(blob.put).mockRejectedValueOnce(new Error('token secreto inválido'));

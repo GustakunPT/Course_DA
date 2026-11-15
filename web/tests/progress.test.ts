@@ -54,6 +54,19 @@ describe('códigos de progresso MB1', () => {
     expect(out.quizzes).toEqual({ 'py-01': 3 });
   });
 
+  it('leva os treinos resolvidos e aceita códigos antigos sem treinos', async () => {
+    const code = await progress.encodeProgressCode({}, {}, {}, null, ['sql-10-medias-moveis-rfm:2']);
+    expect((await progress.decodeProgressCode(code)).practice).toEqual(['sql-10-medias-moveis-rfm:2']);
+    const antigo = await progress.encodeProgressCode({}, {}, {}, null);
+    expect((await progress.decodeProgressCode(antigo)).practice).toEqual([]);
+  });
+
+  it('o backup .json leva os treinos', () => {
+    const json = progress.exportProgressJson({}, {}, {}, ['py-01-sintaxe:1']);
+    expect(progress.importProgressJson(json).practice).toEqual(['py-01-sintaxe:1']);
+    expect(progress.importProgressJson('{"progress": {}}').practice).toEqual([]);
+  });
+
   it('recusa códigos sem prefixo válido', async () => {
     await expect(progress.decodeProgressCode('abc')).rejects.toThrow();
   });

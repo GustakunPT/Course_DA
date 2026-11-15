@@ -299,7 +299,7 @@ export const statsBiTrack: Track = {
   id: 'bi',
   shortTitle: '5. Estatística & BI',
   fullTitle: 'Estatística, Excel/DAX e Power BI para Analistas',
-  summary: 'Medidas estatísticas robustas, deteção de outliers, Curva ABC (Pareto), Star Schema, DAX e visualização honesta.',
+  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B, correlação, intervalos de confiança e prática guiada de Excel e Power BI.',
   engineLabel: 'Python + SQLite Analítico',
   lessons: [
     {
@@ -900,6 +900,235 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
         ],
         correctIndex: 2,
         explanation: 'p ≥ 0.05 não prova igualdade; só diz que uma diferença deste tamanho aparece com frequência por acaso. Para decidir com mais confiança, junta mais dados.',
+      },
+    },
+    {
+      id: 'bi-09-correlacao-confianca',
+      code: '09',
+      title: 'Correlação, amostras e intervalos de confiança',
+      lede: 'Mede se duas variáveis andam juntas com a correlação de Pearson, percebe porque é que correlação não prova causa, e calcula um intervalo de confiança a 95% para dizer "quanto vale a média, mais ou menos".',
+      analogyTitle: 'Provar a sopa com uma colher',
+      analogyBody: 'Para saber se a sopa está salgada não bebes a panela inteira: provas uma colher (a amostra). Se mexeste bem, a colher diz muito sobre a panela, mas não tudo. O intervalo de confiança é a margem honesta dessa prova: "a média está entre 5,14 € e 5,45 €". Uma colher pequena dá uma margem larga; uma concha dá uma margem estreita.',
+      concepts: [
+        'A correlação de Pearson (r) vai de -1 a 1: perto de 1 as variáveis sobem juntas, perto de -1 uma sobe quando a outra desce, perto de 0 não há relação linear.',
+        'Correlação não é causa: clientes que vêm mais vezes gastam mais (r ≈ 0,8), mas pode haver uma terceira causa (morar perto, ter família grande).',
+        'Uma amostra aleatória (df.sample(n, random_state=42)) representa a população, com uma margem de erro que encolhe à medida que n cresce.',
+        'Erro padrão da média = desvio padrão / raiz de n. O intervalo de confiança a 95% é média ± 1,96 × erro padrão.',
+        'Ler bem o IC: se repetíssemos a recolha muitas vezes, 95% dos intervalos calculados assim apanhariam a média verdadeira.',
+      ],
+      beginnerSteps: [
+        'Agrupa por cliente: df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum")).',
+        'Calcula r com por_cliente["visitas"].corr(por_cliente["gasto"]).',
+        'Repete com df["preco"].corr(df["quantidade"]) e vê como um r perto de 0 fica.',
+        'Para o IC: media = df["sub"].mean(), erro_padrao = df["sub"].std() / math.sqrt(len(df)), e soma/subtrai 1.96 * erro_padrao.',
+        'Tira uma amostra de 200 linhas e repete o IC: a margem fica mais larga.',
+      ],
+      proPractice: 'Num relatório, nunca escrevas só "o ticket médio é 5,30 €". Escreve "5,30 € (IC 95%: 5,14 € a 5,45 €)". O decisor percebe logo quanta confiança pode ter no número.',
+      commonPitfall: 'Ver uma correlação forte e concluir "fazer X causa Y". Para provar causa precisas de uma experiência controlada (como o teste A/B da etapa anterior), não só de dados observados.',
+      referenceTitle: 'Correlação e intervalos de confiança em pandas',
+      referenceRows: [
+        { syntax: 'df["a"].corr(df["b"])', meaning: 'Correlação de Pearson entre duas colunas', example: 'r = 0.8 é uma relação forte' },
+        { syntax: 'df[["a", "b", "c"]].corr()', meaning: 'Matriz de correlações', example: 'Ver todas as relações de uma vez' },
+        { syntax: 'df.sample(200, random_state=42)', meaning: 'Amostra aleatória reprodutível', example: 'Simular um inquérito a 200 linhas' },
+        { syntax: 's.std() / math.sqrt(len(s))', meaning: 'Erro padrão da média', example: 'Quanto a média "abana"' },
+        { syntax: 'media ± 1.96 * erro_padrao', meaning: 'Intervalo de confiança a 95%', example: '5,14 € a 5,45 €' },
+      ],
+      engine: 'python',
+      exampleCode: `import math
+import pandas as pd
+
+# Exemplo com vendas_sazonais.csv: correlações entre totais diários
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_dia = df.groupby("data").agg(linhas=("sub", "size"), faturacao=("sub", "sum"), clientes=("cliente_id", "nunique"))
+print(por_dia.corr().round(2))
+
+# Intervalo de confiança a 95% para a faturação média diária
+media = por_dia["faturacao"].mean()
+erro_padrao = por_dia["faturacao"].std() / math.sqrt(len(por_dia))
+print(f"Faturação média diária: {media:.2f} € (IC 95%: {media - 1.96 * erro_padrao:.2f} € a {media + 1.96 * erro_padrao:.2f} €)")`,
+      pythonChallenge: {
+        description: 'Em vendas.csv (sub = quantidade * preco): (1) cria por_cliente com visitas (dias diferentes) e gasto (soma de sub) e guarda r_visitas_gasto; (2) guarda r_preco_quantidade entre as colunas preco e quantidade; (3) calcula media, erro_padrao, ic_inferior e ic_superior (95%) do sub em todas as linhas; (4) tira amostra = df.sample(200, random_state=42) e calcula ic_amostra_inferior e ic_amostra_superior da mesma forma; (5) causa_provada = True ou False: a correlação entre visitas e gasto prova que mais visitas causam mais gasto?',
+        starterCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+# 1) Correlação entre visitas e gasto por cliente
+por_cliente = None
+r_visitas_gasto = None
+
+# 2) Correlação entre preço e quantidade em cada linha
+r_preco_quantidade = None
+
+# 3) Intervalo de confiança a 95% com todas as linhas
+media = None
+erro_padrao = None
+ic_inferior = None
+ic_superior = None
+
+# 4) O mesmo com uma amostra de 200 linhas
+amostra = None
+ic_amostra_inferior = None
+ic_amostra_superior = None
+
+# 5) A correlação prova a causa?
+causa_provada = None
+print(r_visitas_gasto, r_preco_quantidade, ic_inferior, ic_superior)`,
+        solutionCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+# 1) Correlação entre visitas e gasto por cliente
+por_cliente = df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum"))
+r_visitas_gasto = por_cliente["visitas"].corr(por_cliente["gasto"])
+
+# 2) Correlação entre preço e quantidade em cada linha
+r_preco_quantidade = df["preco"].corr(df["quantidade"])
+
+# 3) Intervalo de confiança a 95% com todas as linhas
+media = df["sub"].mean()
+erro_padrao = df["sub"].std() / math.sqrt(len(df))
+ic_inferior = media - 1.96 * erro_padrao
+ic_superior = media + 1.96 * erro_padrao
+
+# 4) O mesmo com uma amostra de 200 linhas
+amostra = df.sample(200, random_state=42)
+erro_amostra = amostra["sub"].std() / math.sqrt(len(amostra))
+ic_amostra_inferior = amostra["sub"].mean() - 1.96 * erro_amostra
+ic_amostra_superior = amostra["sub"].mean() + 1.96 * erro_amostra
+
+# 5) A correlação prova a causa?
+causa_provada = False
+print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3))
+print(f"IC 95% (todas): {ic_inferior:.2f} € a {ic_superior:.2f} €")
+print(f"IC 95% (amostra de 200): {ic_amostra_inferior:.2f} € a {ic_amostra_superior:.2f} €")`,
+        checks: [
+          { label: 'por_cliente tem uma linha por cliente (120) e r_visitas_gasto ≈ 0.80', expr: 'len(por_cliente) == 120 and abs(float(r_visitas_gasto) - 0.800) < 0.005', actualExpr: '(len(por_cliente), r_visitas_gasto)', hint: 'por_cliente = df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum")) e depois por_cliente["visitas"].corr(por_cliente["gasto"]).' },
+          { label: 'r_preco_quantidade ≈ 0 (sem relação linear)', expr: 'abs(float(r_preco_quantidade)) < 0.01', actualExpr: 'r_preco_quantidade', hint: 'df["preco"].corr(df["quantidade"]).' },
+          { label: 'media (5.30 €) e erro_padrao (0.080)', expr: 'abs(float(media) - 5.2979) < 0.001 and abs(float(erro_padrao) - 0.07958) < 0.0005', actualExpr: '(media, erro_padrao)', hint: 'erro_padrao = df["sub"].std() / math.sqrt(len(df)).' },
+          { label: 'IC 95% com todas as linhas: 5.14 € a 5.45 €', expr: 'abs(float(ic_inferior) - 5.1420) < 0.002 and abs(float(ic_superior) - 5.4539) < 0.002', actualExpr: '(ic_inferior, ic_superior)', hint: 'ic_inferior = media - 1.96 * erro_padrao e ic_superior = media + 1.96 * erro_padrao.' },
+          { label: 'Amostra de 200 linhas com o IC calculado da mesma forma', expr: 'len(amostra) == 200 and abs(float(ic_amostra_inferior) - (amostra["sub"].mean() - 1.96 * amostra["sub"].std() / 200 ** 0.5)) < 0.001 and abs(float(ic_amostra_superior) - (amostra["sub"].mean() + 1.96 * amostra["sub"].std() / 200 ** 0.5)) < 0.001', actualExpr: '(len(amostra), ic_amostra_inferior, ic_amostra_superior)', hint: 'amostra = df.sample(200, random_state=42) e repete as contas com amostra["sub"].' },
+          { label: 'A margem da amostra é mais larga do que a de todas as linhas', expr: '(ic_amostra_superior - ic_amostra_inferior) > (ic_superior - ic_inferior) * 3', actualExpr: '(ic_amostra_superior - ic_amostra_inferior, ic_superior - ic_inferior)', hint: 'Com 200 linhas em vez de 5 078, o erro padrão é cerca de 5 vezes maior.' },
+          { label: 'Correlação não prova causa', expr: 'causa_provada is False', actualExpr: 'causa_provada', hint: 'Dados observados mostram que as variáveis andam juntas, não qual causa qual. Para provar causa precisas de uma experiência.' },
+        ],
+      },
+      quiz: {
+        question: 'Nas lojas com mais funcionários a faturação é maior (r = 0,85). O que podes concluir?',
+        options: [
+          'Contratar mais funcionários vai aumentar a faturação.',
+          'As duas variáveis andam juntas, mas os dados não dizem qual causa qual.',
+          'A relação é fraca porque r é menor do que 1.',
+          'Mais faturação obriga sempre a contratar mais funcionários.',
+        ],
+        correctIndex: 1,
+        explanation: 'Lojas maiores têm mais clientes e mais funcionários: a dimensão da loja explica as duas coisas. Correlação forte mostra uma relação, não a direção da causa.',
+      },
+    },
+    {
+      id: 'bi-10-pratica-excel-powerbi',
+      code: '10',
+      title: 'Prática guiada: Excel e Power BI com os dados da Mercearia',
+      lede: 'Abre o Excel e o Power BI no teu computador e segue os passos com vendas.csv, produtos.csv e clientes.csv. No fim, escreve os números que encontraste na folha de respostas da bancada: a app diz-te quais estão certos.',
+      analogyTitle: 'A mesma conta em três calculadoras',
+      analogyBody: 'Já fizeste estas contas em SQL e em pandas. Agora fazes as mesmas no Excel e no Power BI, que é onde muitas equipas de negócio trabalham. Se os números baterem certo nas três ferramentas, sabes que percebeste a lógica e não só a sintaxe.',
+      concepts: [
+        'Excel: importa o CSV com Dados > Obter Dados > De Texto/CSV e converte o intervalo em Tabela (Ctrl + T) para as fórmulas usarem nomes de colunas.',
+        'Excel: SOMA.SE.S (SUMIFS) soma com condições e PROCX (XLOOKUP) vai buscar um valor a outra tabela, como um JOIN.',
+        'Excel: uma Tabela Dinâmica (PivotTable) faz o GROUP BY sem fórmulas.',
+        'Power BI: importa os 3 CSV, liga-os na vista Modelo (vendas.produto_id → produtos.id e vendas.cliente_id → clientes.id) e cria medidas DAX.',
+        'DAX: SUMX percorre a tabela linha a linha (como quantidade * preco em pandas) e DISTINCTCOUNT conta valores únicos.',
+      ],
+      beginnerSteps: [
+        'Excel 1: em vendas, cria a coluna Subtotal = [@quantidade]*[@preco] e soma-a toda com =SOMA(Vendas[Subtotal]).',
+        'Excel 2: =SOMA.SE.S(Vendas[Subtotal]; Vendas[produto]; "Pão") dá a faturação do Pão.',
+        'Excel 3: em vendas, cria a coluna Categoria com =PROCX([@produto_id]; Produtos[id]; Produtos[categoria]) e soma a Charcutaria com SOMA.SE.S.',
+        'Excel 4: cria a coluna Mes = TEXTO([@data]; "aaaa-mm") (em inglês: TEXT([@data], "yyyy-mm")), insere uma Tabela Dinâmica com Mes nas linhas e Soma de Subtotal nos valores, e ordena do maior para o menor.',
+        'Power BI 1: cria as medidas Faturação = SUMX(vendas, vendas[quantidade] * vendas[preco]) e Clientes Ativos = DISTINCTCOUNT(vendas[cliente_id]).',
+        'Power BI 2: cria Gasto por Cliente = DIVIDE([Faturação], [Clientes Ativos]) e mostra-a num cartão.',
+        'Power BI 3: põe um visual Matriz com clientes[cidade] nas linhas e [Faturação] nos valores, e ordena pela faturação.',
+        'Escreve os 8 números na folha de respostas da bancada e carrega em Correr.',
+      ],
+      proPractice: 'Antes de publicar um relatório, as equipas fazem um "reconciliar": a mesma métrica calculada em duas ferramentas (por exemplo, SQL e Power BI) tem de bater ao cêntimo. Se não bater, há um filtro, uma relação ou um arredondamento errado.',
+      commonPitfall: 'No Excel em português os argumentos separam-se com ponto e vírgula (;) e as funções têm nomes em português (SOMA.SE.S, PROCX). Se copiares uma fórmula em inglês com vírgulas, o Excel não a aceita.',
+      referenceTitle: 'Excel (PT / EN) e DAX, lado a lado com SQL',
+      referenceRows: [
+        { syntax: 'SOMA.SE.S / SUMIFS', meaning: 'Soma com condições', example: 'SUM(...) WHERE produto = \'Pão\'' },
+        { syntax: 'PROCX / XLOOKUP', meaning: 'Vai buscar um valor a outra tabela', example: 'JOIN produtos ON id' },
+        { syntax: 'Tabela Dinâmica / PivotTable', meaning: 'Agrupar e resumir', example: 'GROUP BY mes' },
+        { syntax: 'SUMX(vendas, vendas[quantidade] * vendas[preco])', meaning: 'Medida DAX linha a linha', example: 'SUM(quantidade * preco)' },
+        { syntax: 'DISTINCTCOUNT(vendas[cliente_id])', meaning: 'Contar valores únicos', example: 'COUNT(DISTINCT cliente_id)' },
+        { syntax: 'DIVIDE([Faturação], [Clientes Ativos])', meaning: 'Divisão segura (sem erro com zero)', example: 'Gasto médio por cliente' },
+      ],
+      engine: 'python',
+      exampleCode: `# Exemplo: a conta do passo "Excel 2" para outro produto, feita em pandas.
+# Usa isto para perceberes a lógica; os números da folha de respostas vêm do Excel e do Power BI.
+import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+vendas["Subtotal"] = vendas["quantidade"] * vendas["preco"]
+
+# =SOMA.SE.S(Vendas[Subtotal]; Vendas[produto]; "Leite")
+faturacao_leite = vendas.loc[vendas["produto"] == "Leite", "Subtotal"].sum()
+print(f"Faturação do Leite: {faturacao_leite:.2f} €")`,
+      pythonChallenge: {
+        description: 'Folha de respostas: segue os 7 passos de Excel e Power BI (à esquerda, em "Passo a passo") e escreve aqui os números que obtiveste, com 2 casas decimais quando forem euros. O guia completo está em licoes/pratica_excel_powerbi.md.',
+        starterCode: `# Folha de respostas da prática guiada de Excel e Power BI.
+# Substitui cada None pelo valor que encontraste (ex.: 1234.56 ou "Porto").
+
+# Excel
+total_faturacao = None          # Excel 1: soma da coluna Subtotal
+faturacao_pao = None            # Excel 2: SOMA.SE.S do Pão
+faturacao_charcutaria = None    # Excel 3: PROCX + SOMA.SE.S da Charcutaria
+mes_top = None                  # Excel 4: mês com mais faturação, no formato "2025-01"
+faturacao_mes_top = None        # Excel 4: faturação desse mês
+
+# Power BI
+clientes_ativos = None          # Power BI 1: medida Clientes Ativos
+gasto_por_cliente = None        # Power BI 2: medida Gasto por Cliente
+cidade_top = None               # Power BI 3: cidade no topo da matriz
+
+print(total_faturacao, faturacao_pao, faturacao_charcutaria, mes_top, faturacao_mes_top)
+print(clientes_ativos, gasto_por_cliente, cidade_top)`,
+        solutionCode: `# Folha de respostas da prática guiada de Excel e Power BI.
+
+# Excel
+total_faturacao = 26902.89
+faturacao_pao = 205.50
+faturacao_charcutaria = 6756.00
+mes_top = "2025-09"
+faturacao_mes_top = 2462.82
+
+# Power BI
+clientes_ativos = 120
+gasto_por_cliente = 224.19
+cidade_top = "Lisboa"
+
+print(total_faturacao, faturacao_pao, faturacao_charcutaria, mes_top, faturacao_mes_top)
+print(clientes_ativos, gasto_por_cliente, cidade_top)`,
+        checks: [
+          { label: 'Excel 1: total da faturação', expr: 'abs(float(total_faturacao) - 26902.89) < 0.01', actualExpr: 'total_faturacao', hint: 'Confirma que a coluna Subtotal multiplica quantidade por preco em todas as 5 078 linhas e que a SOMA apanha a coluna inteira.' },
+          { label: 'Excel 2: faturação do Pão com SOMA.SE.S', expr: 'abs(float(faturacao_pao) - 205.50) < 0.01', actualExpr: 'faturacao_pao', hint: 'O primeiro argumento é a coluna a somar (Subtotal); depois vem a coluna do critério (produto) e o critério ("Pão").' },
+          { label: 'Excel 3: faturação da Charcutaria com PROCX', expr: 'abs(float(faturacao_charcutaria) - 6756.00) < 0.01', actualExpr: 'faturacao_charcutaria', hint: 'PROCX procura vendas[produto_id] na coluna produtos[id] e devolve produtos[categoria]. Depois soma com SOMA.SE.S pela nova coluna Categoria.' },
+          { label: 'Excel 4: mês com mais faturação e o seu valor', expr: 'str(mes_top).strip() == "2025-09" and abs(float(faturacao_mes_top) - 2462.82) < 0.01', actualExpr: '(mes_top, faturacao_mes_top)', hint: 'Na Tabela Dinâmica ordena a Soma de Subtotal do maior para o menor. Escreve o mês como texto, com aspas: "2025-01".' },
+          { label: 'Power BI 1: Clientes Ativos', expr: 'int(clientes_ativos) == 120', actualExpr: 'clientes_ativos', hint: 'DISTINCTCOUNT(vendas[cliente_id]) conta cada cliente uma vez; COUNT contaria linhas de venda.' },
+          { label: 'Power BI 2: Gasto por Cliente', expr: 'abs(float(gasto_por_cliente) - 224.19) < 0.01', actualExpr: 'gasto_por_cliente', hint: 'DIVIDE([Faturação], [Clientes Ativos]). Arredonda a 2 casas.' },
+          { label: 'Power BI 3: cidade com mais faturação', expr: 'str(cidade_top).strip().lower() == "lisboa"', actualExpr: 'cidade_top', hint: 'Sem a relação vendas[cliente_id] → clientes[id] na vista Modelo, a matriz repete o total em todas as cidades.' },
+        ],
+      },
+      quiz: {
+        question: 'No Power BI, a matriz por cidade mostra o mesmo valor de faturação em todas as linhas. Qual é a causa mais provável?',
+        options: [
+          'A medida devia usar SUM em vez de SUMX.',
+          'Falta a relação entre vendas e clientes na vista Modelo.',
+          'Os dados de clientes têm cidades repetidas.',
+          'O visual Matriz não suporta medidas DAX.',
+        ],
+        correctIndex: 1,
+        explanation: 'Sem relação, o filtro da cidade não chega à tabela vendas e a medida devolve o total geral em cada linha. É o erro mais comum de quem começa no Power BI.',
       },
     },
   ],

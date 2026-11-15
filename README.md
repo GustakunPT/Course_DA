@@ -17,12 +17,12 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
-- **6 Trilhas de Analista de Dados (50 etapas do Zero Absoluto ao Nível Profissional):**
-  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada)
-  2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais)
+- **6 Trilhas de Analista de Dados (53 etapas do Zero Absoluto ao Nível Profissional):**
+  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada e a etapa 11 é uma revisão geral de todos os conceitos)
+  2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais; cada etapa tem pelo menos um treino extra e a etapa 10 treina a matriz RFM)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser)
   4. **Git, GitHub e Portfólio** (Simulador interativo de terminal Git)
-  5. **Estatística Descritiva, Excel/DAX e Power BI** (Média vs Mediana, IQR/Outliers, Curva ABC, Star Schema, gráficos matplotlib desenhados no browser e teste A/B)
+  5. **Estatística Descritiva, Excel/DAX e Power BI** (Média vs Mediana, IQR/Outliers, Curva ABC, Star Schema, gráficos matplotlib desenhados no browser, teste A/B, correlação e intervalos de confiança, e prática guiada de Excel e Power BI com folha de respostas corrigida na app)
   6. **Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista Técnica** (Arquitetura Medalhão Bronze/Silver/Gold, Data Contracts/Testes de Qualidade, Retenção/Coortes/LTV, Performance SQL & Índices, Desafio Clássico de Entrevista `RANK`/`LAG` Caso Executivo 360º e Projeto Final guiado: SQL + pandas + gráfico + recomendação)
 - **Painéis 100% Redimensionáveis na Página:** divisórias verticais e horizontais arrastáveis (índice lateral, lição vs editor e altura do editor vs consola), modos rápidos (*Recolher índice*, *Foco leitura*, *Divisão 50/50*, *Foco código* e *Repor painéis*) com memória no navegador.
 - **Explorador Analítico CSV & Auditoria de Qualidade** (`26 902,89 €` em 5 078 vendas, filtros por cidade e categoria e diagnóstico de `vendas_sujas.csv`).
@@ -90,7 +90,7 @@ Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os
 ```bash
 pip install -r requirements-dev.txt
 pytest tests                       # Python: gerador, auditoria e gráficos
-cd web && npm test                 # Web: motores, API de sync e as 50 etapas e os treinos
+cd web && npm test                 # Web: motores, API de sync e as 53 etapas e os treinos
 ```
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
@@ -98,7 +98,7 @@ na própria correção automática e que o código inicial ainda não passa. Os 
 mesmo Pyodide 0.26.4 do browser (pacote npm `pyodide`); na primeira vez descarregam o pandas, por isso
 precisam de internet.
 
-## Cadernos de pandas (Academia Interativa, etapas 13 a 16)
+## Cadernos de pandas (um por tema da trilha Pandas da Academia)
 
 A trilha 3 da app já corre pandas no browser. Para prática mais longa, usa os cadernos da pasta `cadernos/`:
 
@@ -113,10 +113,10 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python 
 
 | Caderno | Tema |
 | --- | --- |
-| `etapa13_pandas_dataframes.ipynb` | DataFrames, colunas, contas e contagens |
-| `etapa14_pandas_filtros.ipynb` | Filtrar, ordenar e trabalhar com texto |
-| `etapa15_pandas_groupby_merge.ipynb` | Agrupar (`groupby`) e juntar tabelas (`merge`) |
-| `etapa16_pandas_limpeza.ipynb` | Limpar dados: vazios, duplicados, texto, números e datas (usa `dados/vendas_sujas.csv`) |
+| `pandas01_dataframes.ipynb` (etapa 01) | DataFrames, colunas, contas e contagens |
+| `pandas02_filtros.ipynb` (etapas 02 a 04) | Filtrar, ordenar e trabalhar com texto |
+| `pandas05_groupby_merge.ipynb` (etapa 05) | Agrupar (`groupby`) e juntar tabelas (`merge`) |
+| `pandas06_limpeza.ipynb` (etapa 06) | Limpar dados: vazios, duplicados, texto, números e datas (usa `dados/vendas_sujas.csv`) |
 
 ## Como estudar cada semana
 
@@ -131,7 +131,7 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python 
 ```
 mercearia-do-bairro/
 ├── dados/         # CSVs gerados (produtos, clientes, vendas)
-├── licoes/        # lições com analogias (semanas 1-2 a 12)
+├── licoes/        # lições com analogias (semanas 1-2 a 12) e guia de Excel e Power BI
 ├── exercicios/    # exercícios para completar
 ├── verificar.py   # verificador automático dos exercícios
 ├── src/           # scripts Python (gerador, auditoria, gráficos)
@@ -153,7 +153,7 @@ mercearia-do-bairro/
 - `clientes.csv`: id, nome, cidade (120 clientes em 6 cidades)
 - `vendas.csv`: base uniforme de reconciliação (5 078 vendas, `26 902,89 €`)
 - `vendas_sazonais.csv`: série com sazonalidade e tendências reais de negócio (7 031 vendas, `37 426,47 €` — crescimento mensal de coortes de clientes de 53 para 112 ativos, pico de verão em bebidas/fruta, Páscoa, Natal, efeito dia de salário e fim de semana)
-- `vendas_sujas.csv`: lote com anomalias para oficina de limpeza (Etapa 16)
+- `vendas_sujas.csv`: lote com anomalias para oficina de limpeza (etapa 06 da trilha Pandas)
 
 ## Relatórios, Excel e Power BI (`relatorios/`)
 

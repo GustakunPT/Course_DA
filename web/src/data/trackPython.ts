@@ -803,5 +803,125 @@ print(f"Média por linha: {media_linha:.2f} €")`,
         explanation: 'O Leite lidera em quantidade (960 unidades), mas o Azeite (a 7,50 € cada) lidera destacadamente em faturação!',
       },
     },
+    {
+      id: 'py-11-revisao',
+      code: '11',
+      title: 'Revisão geral: o talão de compra completo',
+      lede: 'Antes de passares ao SQL e ao pandas, volta a usar tudo o que aprendeste num só problema: variáveis, texto formatado, condições, ciclos, listas, dicionários e funções. A correção testa o teu código com outros carrinhos, por isso tem de funcionar para qualquer compra.',
+      analogyTitle: 'O teste de condução depois das aulas',
+      analogyBody: 'Nas aulas treinaste cada manobra em separado: arrancar, travar, estacionar. No exame fazes tudo seguido, numa rua que não conheces. Esta etapa é esse exame: nenhum conceito é novo, mas tens de decidir sozinho qual usar em cada passo.',
+      concepts: [
+        'Funções (py-09): linha_talao recebe produto, quantidade e preço e devolve o texto da linha.',
+        'Formatação (py-03): f"{preco:.2f}" mostra sempre 2 casas decimais.',
+        'Ciclo for com acumulador (py-05): somar o subtotal percorrendo o carrinho.',
+        'if / elif / else (py-04): escolher o desconto pelo valor da compra.',
+        'Dicionário acumulador com .get() (py-08): somar unidades por categoria.',
+        'Listas (py-07): juntar os nomes dos produtos caros com .append().',
+      ],
+      beginnerSteps: [
+        'Escreve a função linha_talao(produto, quantidade, preco) que devolve f"{produto} x{quantidade} = {quantidade * preco:.2f} €".',
+        'Percorre o carrinho com for produto, quantidade, preco in carrinho: e soma quantidade * preco em subtotal.',
+        'No mesmo ciclo, soma as unidades por categoria: unidades_por_categoria[cat] = unidades_por_categoria.get(cat, 0) + quantidade.',
+        'Ainda no ciclo, se preco > 2, acrescenta o produto a produtos_caros.',
+        'Depois do ciclo, escolhe desconto_pct: 10 se subtotal >= 50, 5 se subtotal >= 20, senão 0.',
+        'Calcula total = round(subtotal * (1 - desconto_pct / 100), 2).',
+      ],
+      proPractice: 'Um bom programa não depende dos dados de exemplo. Antes de entregares, muda o carrinho à mão (um só produto, um carrinho grande) e confirma que tudo continua a fazer sentido.',
+      commonPitfall: 'Escrever o resultado à mão (por exemplo total = 23.05) ou começar o subtotal dentro do ciclo. A correção usa outros carrinhos e apanha as duas coisas.',
+      referenceTitle: 'Tudo o que precisas, numa tabela',
+      referenceRows: [
+        { syntax: 'def f(a, b):\n    return ...', meaning: 'Definir uma função', example: 'def linha_talao(produto, quantidade, preco):' },
+        { syntax: 'for a, b, c in lista:', meaning: 'Desempacotar tuplos num ciclo', example: 'for produto, quantidade, preco in carrinho:' },
+        { syntax: 'd[k] = d.get(k, 0) + x', meaning: 'Acumular num dicionário', example: 'unidades_por_categoria[cat] = ...' },
+        { syntax: 'if / elif / else', meaning: 'Escolher entre várias faixas', example: 'desconto_pct = 10 / 5 / 0' },
+        { syntax: 'lista.append(x)', meaning: 'Acrescentar a uma lista', example: 'produtos_caros.append(produto)' },
+      ],
+      engine: 'python',
+      exampleCode: `# Aquecimento: um ciclo, um if e um dicionário no mesmo bloco
+cesto = [("Maçãs (kg)", 2, 1.80), ("Iogurte", 4, 0.55), ("Arroz", 1, 1.20)]
+
+total = 0
+contagem = {}
+for nome, qtd, preco in cesto:
+    total += qtd * preco
+    tipo = "fruta" if "kg" in nome else "outro"
+    contagem[tipo] = contagem.get(tipo, 0) + qtd
+    print(f"{nome:<12} {qtd} x {preco:.2f} €")
+
+print(f"Total: {total:.2f} €", contagem)`,
+      pythonChallenge: {
+        description: 'Completa o talão: (1) a função linha_talao(produto, quantidade, preco) devolve, por exemplo, "Pão x6 = 1.50 €"; (2) subtotal é a soma de quantidade × preço do carrinho; (3) desconto_pct é 10 se subtotal ≥ 50, 5 se subtotal ≥ 20, senão 0; (4) total = subtotal com desconto, arredondado a 2 casas; (5) unidades_por_categoria soma as unidades por categoria (usa o dicionário categorias); (6) produtos_caros lista os produtos com preço acima de 2 €, pela ordem do carrinho.',
+        starterCode: `carrinho = [("Pão", 6, 0.25), ("Leite", 4, 0.89), ("Azeite", 1, 7.50), ("Café", 2, 3.40), ("Queijo", 1, 4.90)]
+categorias = {"Pão": "Padaria", "Leite": "Laticínios", "Azeite": "Mercearia", "Café": "Mercearia", "Queijo": "Charcutaria"}
+
+
+def linha_talao(produto, quantidade, preco):
+    return ""  # devolve algo como "Pão x6 = 1.50 €"
+
+
+subtotal = 0
+unidades_por_categoria = {}
+produtos_caros = []
+# Percorre o carrinho aqui
+
+
+desconto_pct = None
+total = None
+
+for produto, quantidade, preco in carrinho:
+    print(linha_talao(produto, quantidade, preco))
+print("Subtotal:", subtotal, "| Desconto:", desconto_pct, "% | Total:", total)
+print(unidades_por_categoria, produtos_caros)`,
+        solutionCode: `carrinho = [("Pão", 6, 0.25), ("Leite", 4, 0.89), ("Azeite", 1, 7.50), ("Café", 2, 3.40), ("Queijo", 1, 4.90)]
+categorias = {"Pão": "Padaria", "Leite": "Laticínios", "Azeite": "Mercearia", "Café": "Mercearia", "Queijo": "Charcutaria"}
+
+
+def linha_talao(produto, quantidade, preco):
+    return f"{produto} x{quantidade} = {quantidade * preco:.2f} €"
+
+
+subtotal = 0
+unidades_por_categoria = {}
+produtos_caros = []
+for produto, quantidade, preco in carrinho:
+    subtotal += quantidade * preco
+    categoria = categorias[produto]
+    unidades_por_categoria[categoria] = unidades_por_categoria.get(categoria, 0) + quantidade
+    if preco > 2:
+        produtos_caros.append(produto)
+
+if subtotal >= 50:
+    desconto_pct = 10
+elif subtotal >= 20:
+    desconto_pct = 5
+else:
+    desconto_pct = 0
+total = round(subtotal * (1 - desconto_pct / 100), 2)
+
+for produto, quantidade, preco in carrinho:
+    print(linha_talao(produto, quantidade, preco))
+print("Subtotal:", round(subtotal, 2), "| Desconto:", desconto_pct, "% | Total:", total)
+print(unidades_por_categoria, produtos_caros)`,
+        checks: [
+          { label: 'linha_talao formata a linha com 2 casas decimais', expr: 'linha_talao("Pão", 6, 0.25) == "Pão x6 = 1.50 €" and linha_talao("Azeite", 2, 7.5) == "Azeite x2 = 15.00 €"', actualExpr: 'linha_talao("Pão", 6, 0.25)', hint: 'return f"{produto} x{quantidade} = {quantidade * preco:.2f} €"' },
+          { label: 'subtotal (24.26 €) somado no ciclo', expr: 'abs(subtotal - 24.26) < 0.001 and abs(correr_com(carrinho=[("Pão", 2, 0.25)])["subtotal"] - 0.5) < 0.001', actualExpr: 'subtotal', hint: 'Começa com subtotal = 0 antes do ciclo e faz subtotal += quantidade * preco dentro dele.' },
+          { label: 'desconto_pct e total (5% → 23.05 €)', expr: 'desconto_pct == 5 and total == 23.05', actualExpr: '(desconto_pct, total)', hint: 'if subtotal >= 50 / elif subtotal >= 20 / else, e total = round(subtotal * (1 - desconto_pct / 100), 2).' },
+          { label: 'As três faixas de desconto funcionam com outros carrinhos', expr: '(lambda a, b: a["desconto_pct"] == 10 and a["total"] == 54.0 and b["desconto_pct"] == 0 and b["total"] == 0.5)(correr_com(carrinho=[("Azeite", 8, 7.50)]), correr_com(carrinho=[("Pão", 2, 0.25)]))', actualExpr: '(correr_com(carrinho=[("Azeite", 8, 7.50)]).get("total"), correr_com(carrinho=[("Pão", 2, 0.25)]).get("total"))', hint: 'Um carrinho de 60 € tem 10% de desconto e um de 0,50 € não tem nenhum. Calcula o desconto a partir do subtotal, não à mão.' },
+          { label: 'unidades_por_categoria acumulado com o dicionário categorias', expr: 'unidades_por_categoria == {"Padaria": 6, "Laticínios": 4, "Mercearia": 3, "Charcutaria": 1} and correr_com(carrinho=[("Café", 3, 3.40), ("Azeite", 2, 7.5)])["unidades_por_categoria"] == {"Mercearia": 5}', actualExpr: 'unidades_por_categoria', hint: 'categoria = categorias[produto] e unidades_por_categoria[categoria] = unidades_por_categoria.get(categoria, 0) + quantidade.' },
+          { label: 'produtos_caros (preço acima de 2 €)', expr: 'produtos_caros == ["Azeite", "Café", "Queijo"] and correr_com(carrinho=[("Leite", 1, 0.89), ("Queijo", 1, 4.90)])["produtos_caros"] == ["Queijo"]', actualExpr: 'produtos_caros', hint: 'Dentro do ciclo: if preco > 2: produtos_caros.append(produto).' },
+        ],
+      },
+      quiz: {
+        question: 'O teu código passa com o carrinho de exemplo mas falha com outro carrinho. Qual é a causa mais provável?',
+        options: [
+          'O Python arredonda de forma diferente consoante o carrinho.',
+          'Algum valor foi escrito à mão em vez de calculado a partir dos dados.',
+          'O carrinho novo tem demasiados produtos para um ciclo for.',
+          'Os dicionários perdem a ordem quando o carrinho muda.',
+        ],
+        correctIndex: 1,
+        explanation: 'Se um resultado está escrito à mão (total = 23.05), só acerta no exemplo. Calcular tudo a partir de carrinho faz o código funcionar com quaisquer dados.',
+      },
+    },
   ],
 };

@@ -23,6 +23,8 @@ export interface ExportableProgress {
   progress: UserProgressMap;
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
+  /** Treinos resolvidos ("etapa:n"); opcional para aceitar backups antigos. */
+  practice?: string[];
 }
 
 const STORAGE_V1_KEY = 'mercearia_academia_done_v1';
@@ -31,6 +33,29 @@ const STORAGE_DRAFTS_KEY = 'mercearia_academia_drafts_v1';
 const STORAGE_QUIZ_KEY = 'mercearia_academia_quiz_v1';
 const STORAGE_LAST_LOC_KEY = 'mercearia_academia_last_loc_v1';
 const STORAGE_SYNC_CODE_KEY = 'mercearia_academia_sync_code_v1';
+const STORAGE_PRACTICE_KEY = 'mercearia-treinos-v1';
+
+/** Aceita só listas de texto curtas (ids de treinos como "py-04-condicoes:2"). */
+export function sanitizePractice(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === 'string' && x.length <= 80).slice(0, 500);
+}
+
+export function loadSavedPractice(): string[] {
+  try {
+    return sanitizePractice(JSON.parse(localStorage.getItem(STORAGE_PRACTICE_KEY) ?? '[]'));
+  } catch {
+    return [];
+  }
+}
+
+export function savePractice(ids: Iterable<string>): void {
+  try {
+    localStorage.setItem(STORAGE_PRACTICE_KEY, JSON.stringify([...ids]));
+  } catch {
+    // Sem localStorage (modo privado): os treinos ficam só nesta sessão.
+  }
+}
 
 export function loadSavedProgress(): UserProgressMap {
   try {
@@ -156,6 +181,7 @@ export function clearAllUserProgress(): void {
     localStorage.removeItem(STORAGE_QUIZ_KEY);
     localStorage.removeItem(STORAGE_LAST_LOC_KEY);
     localStorage.removeItem(STORAGE_SYNC_CODE_KEY);
+    localStorage.removeItem(STORAGE_PRACTICE_KEY);
   } catch {
     // Ignorar
   }
@@ -165,6 +191,7 @@ export function exportProgressJson(
   progress: UserProgressMap,
   drafts: Record<string, string>,
   quizzes: Record<string, number>,
+  practice: string[] = [],
 ): string {
   const data: ExportableProgress = {
     version: 2,
@@ -172,6 +199,7 @@ export function exportProgressJson(
     progress,
     drafts,
     quizzes,
+    practice,
   };
   return JSON.stringify(data, null, 2);
 }
@@ -180,6 +208,7 @@ export function importProgressJson(jsonStr: string): {
   progress: UserProgressMap;
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
+  practice: string[];
 } {
   const parsed = JSON.parse(jsonStr);
   if (!parsed || typeof parsed !== 'object') {
@@ -196,8 +225,10 @@ export function importProgressJson(jsonStr: string): {
   saveProgress(progress);
   saveDrafts(drafts, true);
   saveQuizzes(quizzes);
+  const practice = sanitizePractice(parsed.practice);
+  savePractice(practice);
 
-  return { progress, drafts, quizzes };
+  return { progress, drafts, quizzes, practice };
 }
 
 export function generatePortfolioMarkdown(
@@ -294,6 +325,8 @@ export interface CompactProgressPayload {
   p: Record<string, ['a' | 'h', number?]>;
   q: Record<string, number>;
   d: Record<string, string>;
+  /** Treinos resolvidos (opcional). */
+  t?: string[];
   l?: { t: string; l: string; v: 'academia' | 'explorador' | 'referencia' };
 }
 
@@ -302,6 +335,7 @@ export async function encodeProgressCode(
   drafts: Record<string, string>,
   quizzes: Record<string, number>,
   lastLoc: LastVisitedLocation | null,
+  practice: string[] = [],
 ): Promise<string> {
   const compactP: Record<string, ['a' | 'h', number?]> = {};
   for (const [id, rec] of Object.entries(progress)) {
@@ -312,6 +346,7 @@ export async function encodeProgressCode(
     p: compactP,
     q: quizzes,
     d: drafts,
+    ...(practice.length ? { t: practice } : {}),
     ...(lastLoc ? { l: { t: lastLoc.trackId, l: lastLoc.lessonId, v: lastLoc.view } } : {}),
   };
   const jsonBytes = new TextEncoder().encode(JSON.stringify(payload));
@@ -332,6 +367,7 @@ export async function decodeProgressCode(rawCode: string): Promise<{
   progress: UserProgressMap;
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
+  practice: string[];
   lastLocation: LastVisitedLocation | null;
 }> {
   const code = rawCode.trim();
@@ -387,8 +423,10 @@ export async function decodeProgressCode(rawCode: string): Promise<{
   saveDrafts(drafts, true);
   saveQuizzes(quizzes);
   if (lastLocation) saveLastLocation(lastLocation);
+  const practice = sanitizePractice(parsed.t);
+  savePractice(practice);
 
-  return { progress, drafts, quizzes, lastLocation };
+  return { progress, drafts, quizzes, practice, lastLocation };
 }
 
 // Aceita códigos novos (3 blocos) e antigos (2 blocos).
@@ -467,6 +505,7 @@ export interface CloudSyncPayload {
   progress: UserProgressMap;
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
+  practice: string[];
   lastLocation: LastVisitedLocation | null;
 }
 
@@ -475,6 +514,7 @@ export async function pushCloudSync(payload: {
   progress: UserProgressMap;
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
+  practice?: string[];
   lastLocation: LastVisitedLocation | null;
 }): Promise<{ code: string; updatedAt: string }> {
   const res = await fetch('/api/sync', {
@@ -485,6 +525,7 @@ export async function pushCloudSync(payload: {
       progress: payload.progress,
       drafts: payload.drafts,
       quizzes: payload.quizzes,
+      practice: payload.practice ?? [],
       lastLocation: payload.lastLocation,
     }),
   });
@@ -515,6 +556,7 @@ export async function pullCloudSync(code: string): Promise<CloudSyncPayload> {
     progress: data.progress && typeof data.progress === 'object' ? data.progress : {},
     drafts: data.drafts && typeof data.drafts === 'object' ? data.drafts : {},
     quizzes: data.quizzes && typeof data.quizzes === 'object' ? data.quizzes : {},
+    practice: sanitizePractice(data.practice),
     lastLocation: data.lastLocation ?? null,
   };
 }

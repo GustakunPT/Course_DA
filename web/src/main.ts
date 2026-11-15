@@ -1,6 +1,6 @@
 import './styles/app.css';
 import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
-import type { EngineKind, Lesson, PythonChallengeSpec, Track } from './data/types';
+import type { EngineKind, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
 import { runPythonCode } from './engines/pythonEngine';
@@ -25,6 +25,8 @@ import {
   mergeProgressRecords,
   pullCloudSync,
   pushCloudSync,
+  loadSavedPractice,
+  savePractice,
   saveDrafts,
   saveLastLocation,
   saveProgress,
@@ -45,7 +47,7 @@ const state: AppState = {
   lessonId: allTracks[0].lessons[0].id,
   wbTab: 'challenge',
   practiceIdx: 0,
-  practiceDone: loadPracticeDone(),
+  practiceDone: new Set(loadSavedPractice()),
   editorDrafts: loadSavedDrafts(),
   quizSelection: loadSavedQuizzes(),
   completedLessons: loadSavedProgress(),
@@ -87,29 +89,21 @@ function currentLesson(): Lesson {
   return track.lessons.find((l) => l.id === state.lessonId) ?? track.lessons[0];
 }
 
-const PRACTICE_KEY = 'mercearia-treinos-v1';
-
-function loadPracticeDone(): Set<string> {
-  try {
-    const raw = JSON.parse(localStorage.getItem(PRACTICE_KEY) ?? '[]');
-    return new Set(Array.isArray(raw) ? raw.filter((x) => typeof x === 'string') : []);
-  } catch {
-    return new Set();
-  }
-}
-
 function savePracticeDone(): void {
-  try {
-    localStorage.setItem(PRACTICE_KEY, JSON.stringify([...state.practiceDone]));
-  } catch {
-    // Sem localStorage (modo privado): o treino fica só nesta sessão.
-  }
+  savePractice(state.practiceDone);
+  scheduleCloudSync();
 }
 
 /** Desafio Python ativo na bancada: o principal ou um dos treinos. */
 function activePythonChallenge(lesson: Lesson): PythonChallengeSpec | undefined {
   if (state.practiceIdx > 0) return lesson.practice?.[state.practiceIdx - 1] ?? lesson.pythonChallenge;
   return lesson.pythonChallenge;
+}
+
+/** Desafio SQL ativo na bancada: o principal ou um dos treinos. */
+function activeSqlChallenge(lesson: Lesson): SqlChallengeSpec | undefined {
+  if (state.practiceIdx > 0) return lesson.practiceSql?.[state.practiceIdx - 1] ?? lesson.sqlChallenge;
+  return lesson.sqlChallenge;
 }
 
 function draftKey(lesson: Lesson, tab: WorkbenchTab): string {
@@ -126,7 +120,8 @@ function defaultEditorCode(lesson: Lesson, tab: WorkbenchTab): string {
   }
   const py = activePythonChallenge(lesson);
   if (py) return py.starterCode;
-  if (lesson.sqlChallenge) return lesson.sqlChallenge.starterSql;
+  const sq = activeSqlChallenge(lesson);
+  if (sq) return sq.starterSql;
   if (lesson.gitChallenge) return lesson.gitChallenge.starterCommands;
   return lesson.exampleCode;
 }
@@ -233,6 +228,7 @@ function scheduleCloudSync(): void {
       progress: state.completedLessons,
       drafts: state.editorDrafts,
       quizzes: state.quizSelection,
+      practice: [...state.practiceDone],
       lastLocation: {
         trackId: state.trackId,
         lessonId: state.lessonId,
@@ -253,11 +249,11 @@ function scheduleCloudSync(): void {
 }
 
 function renderPracticeSwitcher(lesson: Lesson): string {
-  const treinos = lesson.practice ?? [];
+  const treinos: { title?: string }[] = lesson.practice ?? lesson.practiceSql ?? [];
   if (!treinos.length) return '';
   const feito = (i: number) =>
     i === 0 ? Boolean(state.completedLessons[lesson.id]) : state.practiceDone.has(`${lesson.id}:${i}`);
-  const botoes = [lesson.pythonChallenge, ...treinos].map((ch, i) => {
+  const botoes = [lesson.pythonChallenge ?? lesson.sqlChallenge, ...treinos].map((ch, i) => {
     const nome = i === 0 ? 'Desafio' : `Treino ${i}`;
     const dica = i === 0 ? 'Desafio principal da etapa (conta para o progresso)' : ch?.title ?? nome;
     return `<button type="button" class="mode-btn" aria-pressed="${state.practiceIdx === i}" data-practice-idx="${i}" title="${escapeHtml(dica)}">${nome}${feito(i) ? ' ✓' : ''}</button>`;
@@ -282,7 +278,7 @@ function renderAcademyWorkspace(): string {
       : state.wbTab === 'example'
         ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
         : activePythonChallenge(lesson)?.description ??
-          lesson.sqlChallenge?.description ??
+          activeSqlChallenge(lesson)?.description ??
           lesson.gitChallenge?.description ??
           'Execute o código abaixo para validar esta etapa.';
 
@@ -601,7 +597,7 @@ function renderAcademyWorkspace(): string {
           <strong>${
             state.wbTab === 'challenge'
               ? state.practiceIdx > 0
-                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? '')}`
+                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? activeSqlChallenge(lesson)?.title ?? '')}`
                 : 'Enunciado do desafio'
               : state.wbTab === 'example'
                 ? 'Laboratório Experimenta'
@@ -684,7 +680,7 @@ function renderAcademyWorkspace(): string {
           state.wbTab === 'challenge' && state.hintLevel > 0
             ? (() => {
                 const hint1 =
-                  lesson.sqlChallenge?.hint ??
+                  activeSqlChallenge(lesson)?.hint ??
                   lesson.gitChallenge?.hint ??
                   activePythonChallenge(lesson)?.checks[0]?.hint ??
                   lesson.beginnerSteps?.[0] ??
@@ -855,9 +851,13 @@ async function executeWorkbench(): Promise<void> {
       return;
     }
 
-    if (state.wbTab === 'challenge' && lesson.sqlChallenge) {
-      const check = lesson.sqlChallenge.validate(res.columns, res.rows);
-      if (check.passed) {
+    const sqlChallenge = state.wbTab === 'challenge' ? activeSqlChallenge(lesson) : undefined;
+    if (sqlChallenge) {
+      const check = sqlChallenge.validate(res.columns, res.rows);
+      if (check.passed && state.practiceIdx > 0) {
+        state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
+        savePracticeDone();
+      } else if (check.passed) {
         markLessonCompleted(lesson);
       }
       state.output = {
@@ -865,12 +865,16 @@ async function executeWorkbench(): Promise<void> {
         elapsedMs: res.elapsedMs,
         table: { columns: res.columns, rows: res.rows },
         bannerOk: check.passed,
-        bannerText: check.passed ? 'Desafio SQL validado' : 'Query executada: revê o requisito',
+        bannerText: check.passed
+          ? state.practiceIdx > 0
+            ? 'Treino resolvido!'
+            : 'Desafio SQL validado'
+          : 'Query executada: revê o requisito',
         checks: [
           {
             label: check.message,
             passed: check.passed,
-            hint: check.passed ? undefined : lesson.sqlChallenge.hint,
+            hint: check.passed ? undefined : sqlChallenge.hint,
           },
         ],
       };
@@ -1280,7 +1284,7 @@ function attachDomListeners(): void {
         const l = currentLesson();
         const sol =
           activePythonChallenge(l)?.solutionCode ??
-          l.sqlChallenge?.solutionSql ??
+          activeSqlChallenge(l)?.solutionSql ??
           l.gitChallenge?.solutionCommands ??
           l.exampleCode;
         state.editorDrafts[draftKey(l, 'challenge')] = sol;
@@ -1314,6 +1318,7 @@ function attachDomListeners(): void {
                 view: state.view,
                 timestamp: new Date().toISOString(),
               },
+              [...state.practiceDone],
             );
             state.generatedProgressCode = code;
             if (navigator.clipboard?.writeText) {
@@ -1346,6 +1351,7 @@ function attachDomListeners(): void {
               progress: state.completedLessons,
               drafts: state.editorDrafts,
               quizzes: state.quizSelection,
+              practice: [...state.practiceDone],
               lastLocation: {
                 trackId: state.trackId,
                 lessonId: state.lessonId,
@@ -1414,6 +1420,7 @@ function attachDomListeners(): void {
               progress: state.completedLessons,
               drafts: state.editorDrafts,
               quizzes: state.quizSelection,
+              practice: [...state.practiceDone],
               lastLocation: {
                 trackId: state.trackId,
                 lessonId: state.lessonId,
@@ -1466,6 +1473,8 @@ function attachDomListeners(): void {
               state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
               state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
               state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
+              state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
+              savePractice(state.practiceDone);
               saveProgress(state.completedLessons);
               saveDrafts(state.editorDrafts, true);
               saveQuizzes(state.quizSelection);
@@ -1506,6 +1515,7 @@ function attachDomListeners(): void {
             state.completedLessons = restored.progress;
             state.editorDrafts = restored.drafts;
             state.quizSelection = restored.quizzes;
+            state.practiceDone = new Set(restored.practice);
             if (restored.lastLocation) {
               const tr = allTracks.find((t) => t.id === restored.lastLocation!.trackId);
               if (tr) {
@@ -1535,7 +1545,7 @@ function attachDomListeners(): void {
         state.progressModalFeedback = { ok: true, text: 'Portfólio (.md) descarregado com sucesso.' };
         renderApp();
       } else if (act === 'export-progress-json') {
-        const json = exportProgressJson(state.completedLessons, state.editorDrafts, state.quizSelection);
+        const json = exportProgressJson(state.completedLessons, state.editorDrafts, state.quizSelection, [...state.practiceDone]);
         downloadTextFile('mercearia_progresso_backup.json', json, 'application/json;charset=utf-8');
         state.progressModalFeedback = { ok: true, text: 'Backup (.json) descarregado com sucesso.' };
         renderApp();
@@ -1552,6 +1562,7 @@ function attachDomListeners(): void {
         state.completedLessons = {};
         state.editorDrafts = {};
         state.quizSelection = {};
+        state.practiceDone = new Set();
         state.helpedInSession.clear();
         state.generatedProgressCode = '';
         state.confirmClearProgress = false;
@@ -1592,6 +1603,7 @@ function attachDomListeners(): void {
           state.completedLessons = imported.progress;
           state.editorDrafts = imported.drafts;
           state.quizSelection = imported.quizzes;
+          state.practiceDone = new Set(imported.practice);
           state.progressModalFeedback = {
             ok: true,
             text: `Backup importado! (${Object.keys(imported.progress).length} etapas concluídas).`,
@@ -1785,6 +1797,8 @@ async function bootstrapCloudSync(): Promise<void> {
     state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
     state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
     state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
+    state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
+    savePractice(state.practiceDone);
     saveProgress(state.completedLessons);
     saveDrafts(state.editorDrafts, true);
     saveQuizzes(state.quizSelection);

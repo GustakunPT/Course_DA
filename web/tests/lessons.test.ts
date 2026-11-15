@@ -1,4 +1,4 @@
-// Verifica o conteúdo das 47 etapas: estrutura coerente e, para SQL e Git,
+// Verifica o conteúdo das etapas: estrutura coerente e, para SQL e Git,
 // que a solução oficial passa na própria correção automática.
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 6 trilhas e 50 etapas', () => {
+  it('tem 6 trilhas e 53 etapas', () => {
     expect(allTracks).toHaveLength(6);
-    expect(totalLessonsCount).toBe(50);
+    expect(totalLessonsCount).toBe(53);
   });
 
   it('os ids das etapas são únicos', () => {
@@ -67,6 +67,23 @@ describe('soluções SQL passam na correção', () => {
     const res = await runSqlQuery(l.sqlChallenge!.starterSql);
     const verdict = res.error ? { passed: false } : l.sqlChallenge!.validate(res.columns, res.rows);
     expect(verdict.passed).toBe(false);
+  });
+});
+
+const treinosSql = todas.flatMap((l) => (l.practiceSql ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
+describe('treinos SQL', () => {
+  it('cada etapa de SQL tem pelo menos um treino e a sql-10 treina o RFM', () => {
+    for (const l of sqlLessons.filter((x) => x.trilha === 'sql')) expect(l.practiceSql?.length ?? 0, l.id).toBeGreaterThanOrEqual(1);
+    expect(todas.find((l) => l.id === 'sql-10-medias-moveis-rfm')!.practiceSql!.map((t) => t.title).join(' ')).toContain('RFM');
+  });
+
+  it.each(treinosSql)('%s: a solução passa e o código inicial não', async (_nome, ch) => {
+    const certo = await runSqlQuery(ch.solutionSql);
+    expect(certo.error).toBeUndefined();
+    const veredito = ch.validate(certo.columns, certo.rows);
+    expect(veredito.passed, veredito.message).toBe(true);
+    const inicial = await runSqlQuery(ch.starterSql);
+    expect(inicial.error ? false : ch.validate(inicial.columns, inicial.rows).passed).toBe(false);
   });
 });
 

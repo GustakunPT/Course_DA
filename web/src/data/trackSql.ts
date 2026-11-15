@@ -611,7 +611,7 @@ ORDER BY preco DESC;`,
       id: 'sql-10-medias-moveis-rfm',
       code: '10',
       title: 'Médias Móveis (ROWS BETWEEN) e Matriz RFM de Clientes',
-      lede: 'Calcula médias móveis de 3 meses em SQL usando frames de janela e constrói uma tabela RFM (Recência, Frequência, Valor Monetário).',
+      lede: 'Calcula médias móveis de 3 meses em SQL usando frames de janela no desafio e, nos dois treinos, constrói e segmenta a tabela RFM (Recência, Frequência, Valor Monetário).',
       analogyTitle: 'Suavizar os altos e baixos da caixa e classificar a carteira de clientes',
       analogyBody: 'Uma média móvel de 3 meses junta o mês atual aos 2 meses anteriores para mostrar a tendência limpa sem o ruído de uma semana atípica. Já o RFM mede para cada cliente: quando veio pela última vez (Recência), quantas vezes veio (Frequência) e quanto gastou (Monetário).',
       concepts: [
