@@ -25,7 +25,7 @@ cd web
 npm install
 npm run dev      # servidor local em http://localhost:4173
 npm run build    # sincroniza CSVs + WASM e gera build de produção em web/dist
-vercel --prod    # publica na Vercel
+git push         # publica na Vercel (deploy automático a partir do ramo main)
 ```
 
 ## O que é este projeto
