@@ -299,7 +299,7 @@ export const statsBiTrack: Track = {
   id: 'bi',
   shortTitle: '5. Estatística & BI',
   fullTitle: 'Estatística, Excel/DAX e Power BI para Analistas',
-  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B, correlação, intervalos de confiança e prática guiada de Excel e Power BI.',
+  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B (médias e proporções), tamanho de amostra, correlação, intervalos de confiança, probabilidade, regressão, perguntas de entrevista e prática guiada de Excel e Power BI.',
   engineLabel: 'Python + SQLite Analítico',
   lessons: [
     {
@@ -1129,6 +1129,482 @@ print(clientes_ativos, gasto_por_cliente, cidade_top)`,
         ],
         correctIndex: 1,
         explanation: 'Sem relação, o filtro da cidade não chega à tabela vendas e a medida devolve o total geral em cada linha. É o erro mais comum de quem começa no Power BI.',
+      },
+    },
+    {
+      id: 'bi-11-ab-proporcoes',
+      code: '11',
+      title: 'Teste A/B de proporções e tamanho de amostra',
+      lede: 'A pergunta mais comum em entrevistas de produto: "a taxa de conversão subiu de verdade?". Comparas duas proporções com o teste z e calculas quantos dados precisas antes de começar um teste.',
+      analogyTitle: 'Contar cestos com Queijo em vez de euros',
+      analogyBody: 'No teste A/B da etapa 08 comparaste médias em euros. Muitas vezes a métrica é um sim ou não: o cliente comprou? clicou? voltou? Aí comparas percentagens. E antes de testares, tens de saber se a loja tem clientes suficientes para ver a diferença que procuras: senão o teste nunca vai dar resposta, por muito tempo que esperes.',
+      concepts: [
+        'Uma proporção é a média de uma coluna de True e False: cestos["tem_queijo"].mean() dá a taxa.',
+        'Teste z de duas proporções: junta os dois grupos para a proporção conjunta p, erro padrão = raiz de p(1 - p)(1/n_A + 1/n_B), e z = (p_A - p_B) / erro padrão.',
+        'p-valor = math.erfc(abs(z) / math.sqrt(2)), como na etapa 08.',
+        'Diferença em pontos percentuais (pp) não é o mesmo que variação percentual: de 13,4% para 18,4% são +5,1 pp, mas +38% em termos relativos.',
+        'Tamanho de amostra por grupo para 5% de significância e 80% de poder: n = (1.96 + 0.84)² × (p1(1 - p1) + p2(1 - p2)) / (p2 - p1)².',
+        'Poder estatístico (80%) é a probabilidade de o teste detetar a diferença se ela existir de facto.',
+      ],
+      beginnerSteps: [
+        'Cria uma coluna True/False: df["queijo"] = df["produto"] == "Queijo".',
+        'Junta as linhas em cestos (um por cliente e dia): df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index().',
+        'Marca o fim de semana nos cestos e separa os dois grupos a e b.',
+        'Calcula p_fds e p_semana com .mean(), a proporção conjunta e o erro padrão.',
+        'Calcula z, o p-valor e decide a 5%.',
+        'No fim calcula n_por_grupo para detetar uma subida de 1 pp a partir de p_semana e arredonda para cima com math.ceil.',
+      ],
+      proPractice: 'Em empresas digitais, o tamanho de amostra calcula-se ANTES de lançar o teste e fixa a duração. Ferramentas como statsmodels (proportions_ztest, NormalIndPower) fazem estas contas; em entrevista pedem-te o raciocínio.',
+      commonPitfall: 'Dizer "subiu 5%" quando subiu 5 pontos percentuais. De 13,4% para 18,4% é +5,1 pp, mas +38% em termos relativos: confundir os dois muda a decisão.',
+      referenceTitle: 'Teste z de duas proporções',
+      referenceRows: [
+        { syntax: 'serie_booleana.mean()', meaning: 'Proporção de True', example: '0.184 = 18,4% dos cestos' },
+        { syntax: '(a.sum() + b.sum()) / (len(a) + len(b))', meaning: 'Proporção conjunta (com H0 verdadeira)', example: 'p = 0.153' },
+        { syntax: 'math.sqrt(p * (1 - p) * (1 / len(a) + 1 / len(b)))', meaning: 'Erro padrão da diferença', example: '0.0137' },
+        { syntax: 'z = (p_a - p_b) / erro_padrao', meaning: 'Estatística z', example: '|z| > 1.96 é significativo a 5%' },
+        { syntax: '(1.96 + 0.84) ** 2 * (p1*(1-p1) + p2*(1-p2)) / (p2 - p1) ** 2', meaning: 'Tamanho de amostra por grupo', example: 'Arredondar com math.ceil' },
+      ],
+      engine: 'python',
+      exampleCode: `import math
+
+# Exemplo clássico de entrevista: um botão novo no site.
+# A: 500 compras em 10 000 visitas | B: 560 compras em 10 000 visitas
+conv_a, n_a = 500, 10_000
+conv_b, n_b = 560, 10_000
+p_a, p_b = conv_a / n_a, conv_b / n_b
+p = (conv_a + conv_b) / (n_a + n_b)
+erro_padrao = math.sqrt(p * (1 - p) * (1 / n_a + 1 / n_b))
+z = (p_b - p_a) / erro_padrao
+p_valor = math.erfc(abs(z) / math.sqrt(2))
+print(f"A: {p_a:.1%} | B: {p_b:.1%} | +{(p_b - p_a) * 100:.1f} pp ({p_b / p_a - 1:+.0%} relativo)")
+print(f"z = {z:.2f} | p-valor = {p_valor:.3f} | significativo? {p_valor < 0.05}")
+
+# Quantas visitas por grupo para detetar 5,0% -> 5,6% com 80% de poder?
+n = math.ceil((1.96 + 0.84) ** 2 * (p_a * (1 - p_a) + p_b * (1 - p_b)) / (p_b - p_a) ** 2)
+print("Visitas necessárias por grupo:", n)`,
+      pythonChallenge: {
+        description: 'Em vendas_sazonais.csv, um cesto é o conjunto de linhas do mesmo cliente no mesmo dia. Ao fim de semana há mais cestos com Queijo? Guarda p_fds e p_semana (proporção de cestos com Queijo), diferenca_pp (em pontos percentuais), erro_padrao (com a proporção conjunta), z, p_valor, significativo (p < 0.05) e n_por_grupo: quantos cestos por grupo seriam precisos para detetar uma subida de apenas 1 pp a partir de p_semana (z de 1.96 e 0.84, arredondado para cima).',
+        starterCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["queijo"] = df["produto"] == "Queijo"
+
+# Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
+cestos = None
+
+p_fds = None
+p_semana = None
+diferenca_pp = None
+erro_padrao = None
+z = None
+p_valor = None
+significativo = None
+n_por_grupo = None
+print(p_fds, p_semana, z, p_valor, n_por_grupo)`,
+        solutionCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["queijo"] = df["produto"] == "Queijo"
+
+# Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
+cestos = df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index()
+cestos["fim_de_semana"] = pd.to_datetime(cestos["data"]).dt.day_of_week >= 5
+a = cestos[cestos["fim_de_semana"]]["tem_queijo"]
+b = cestos[~cestos["fim_de_semana"]]["tem_queijo"]
+
+p_fds = a.mean()
+p_semana = b.mean()
+diferenca_pp = (p_fds - p_semana) * 100
+p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b))
+erro_padrao = math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b)))
+z = (p_fds - p_semana) / erro_padrao
+p_valor = math.erfc(abs(z) / math.sqrt(2))
+significativo = p_valor < 0.05
+
+p1, p2 = p_semana, p_semana + 0.01
+n_por_grupo = math.ceil((1.96 + 0.84) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2)
+print(f"Fim de semana {p_fds:.1%} vs dias úteis {p_semana:.1%} (+{diferenca_pp:.1f} pp)")
+print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")
+print("Cestos por grupo para detetar +1 pp:", n_por_grupo)`,
+        checks: [
+          { label: 'cestos: um por cliente e dia (2 910)', expr: 'len(cestos) == 2910', actualExpr: 'len(cestos) if cestos is not None else None', hint: 'df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index().' },
+          { label: 'p_fds (18.4%) e p_semana (13.4%)', expr: 'abs(float(p_fds) - 0.18445) < 0.0005 and abs(float(p_semana) - 0.13359) < 0.0005', actualExpr: '(p_fds, p_semana)', hint: 'Marca o fim de semana nos cestos (day_of_week >= 5) e faz .mean() de tem_queijo em cada grupo.' },
+          { label: 'diferenca_pp em pontos percentuais (+5.09)', expr: 'abs(float(diferenca_pp) - 5.086) < 0.01', actualExpr: 'diferenca_pp', hint: 'diferenca_pp = (p_fds - p_semana) * 100. Não dividas por p_semana: isso seria a variação relativa.' },
+          { label: 'erro_padrao com a proporção conjunta (0.0137)', expr: 'abs(float(erro_padrao) - 0.013745) < 0.0001', actualExpr: 'erro_padrao', hint: 'p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b)) e math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b))).' },
+          { label: 'z (3.70), p_valor (0.0002) e decisão: significativo', expr: 'abs(float(z) - 3.700) < 0.01 and abs(float(p_valor) - 0.000216) < 0.00002 and bool(significativo) is True', actualExpr: '(z, p_valor, significativo)', hint: 'z = (p_fds - p_semana) / erro_padrao e p_valor = math.erfc(abs(z) / math.sqrt(2)).' },
+          { label: 'n_por_grupo para detetar +1 pp (cerca de 18 700 cestos)', expr: 'int(n_por_grupo) == 18716', actualExpr: 'n_por_grupo', hint: 'p1 = p_semana, p2 = p_semana + 0.01 e math.ceil((1.96 + 0.84) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2).' },
+        ],
+      },
+      quiz: {
+        question: 'A taxa de conversão passou de 4% para 5%. Como descreves a mudança num relatório?',
+        options: [
+          'Subiu 1%, porque 5 - 4 = 1.',
+          'Subiu 25%, e isso é o mesmo que 1 ponto.',
+          'Subiu 20%, porque 1 / 5 = 0,20.',
+          'Subiu 1 ponto percentual, ou seja, +25% em termos relativos.',
+        ],
+        correctIndex: 3,
+        explanation: 'A diferença absoluta mede-se em pontos percentuais (5% - 4% = 1 pp). A variação relativa é 1 / 4 = +25%. Dizer só "subiu 1%" é ambíguo e costuma ser apanhado em entrevista.',
+      },
+    },
+    {
+      id: 'bi-12-probabilidade-simpson',
+      code: '12',
+      title: 'Probabilidade condicional, Bayes e o paradoxo de Simpson',
+      lede: 'Três perguntas de quadro branco que aparecem em quase todas as entrevistas: "quem compra X também compra Y?", "um alerta disparou: qual a probabilidade de ser mesmo fraude?" e "como é que alguém pode ser melhor em todos os grupos e pior no total?".',
+      analogyTitle: 'O alarme da loja que toca demasiadas vezes',
+      analogyBody: 'Um alarme que apanha 95% dos ladrões parece ótimo. Mas se só 1 em cada 100 pessoas que passam na porta for ladrão, a maioria dos toques são falsos alarmes: há muito mais clientes honestos do que ladrões. A regra de Bayes faz esta conta: junta a qualidade do alarme com a raridade do que procuras.',
+      concepts: [
+        'Probabilidade condicional: P(Café | Leite) = cestos com Café e Leite / cestos com Leite. Em pandas: cestos[cestos["leite"]]["cafe"].mean().',
+        'Lift = P(Café | Leite) / P(Café). Acima de 1 os produtos atraem-se (bom para promoções conjuntas); abaixo de 1 afastam-se.',
+        'Regra de Bayes: P(fraude | alerta) = P(alerta | fraude) × P(fraude) / P(alerta), com P(alerta) = sensibilidade × prevalência + falsos positivos × (1 - prevalência).',
+        'Quando o evento é raro, mesmo um bom teste dá muitos falsos positivos. Esta é a pergunta-armadilha mais clássica de probabilidade.',
+        'Paradoxo de Simpson: uma tendência que aparece em todos os grupos pode inverter-se no total, quando os grupos têm tamanhos muito diferentes.',
+      ],
+      beginnerSteps: [
+        'Cria colunas True/False para Café e Leite em vendas.csv e junta-as por cesto com .agg(..., "max").',
+        'p_cafe é a média da coluna cafe; p_cafe_dado_leite é a média de cafe só nos cestos com leite.',
+        'lift = p_cafe_dado_leite / p_cafe. Se for menor do que 1, juntar os produtos na prateleira não ajuda.',
+        'Para o Bayes, calcula primeiro p_alerta e depois divide sensibilidade × prevalência por p_alerta.',
+        'Para o Simpson, agrupa a tabela por funcionário e turno, e depois só por funcionário: compara as taxas.',
+      ],
+      proPractice: 'A análise de cesto (market basket) com suporte, confiança e lift é usada em retalho para decidir promoções e a disposição da loja. Bibliotecas como mlxtend fazem isto em escala; a lógica é esta.',
+      commonPitfall: 'Comparar só totais. Antes de dizer que a Ana é pior, vê se as duas pessoas trabalham nas mesmas condições: o turno da noite é mais difícil e a Ana faz quase só noites.',
+      referenceTitle: 'Probabilidade em pandas',
+      referenceRows: [
+        { syntax: 'df["col"].mean()', meaning: 'P(evento) numa coluna True/False', example: 'P(Café) = 0.126' },
+        { syntax: 'df[df["b"]]["a"].mean()', meaning: 'P(A | B)', example: 'P(Café | Leite) = 0.093' },
+        { syntax: 'p_a_dado_b / p_a', meaning: 'Lift', example: '0.74: afastam-se' },
+        { syntax: 'sens * prev / (sens * prev + fp * (1 - prev))', meaning: 'Regra de Bayes', example: 'P(fraude | alerta) = 16%' },
+        { syntax: 'df.groupby(["a", "b"])[["x", "n"]].sum()', meaning: 'Taxas por subgrupo (Simpson)', example: 'Somar antes de dividir' },
+      ],
+      engine: 'python',
+      exampleCode: `# Bayes com números redondos: um teste de diagnóstico.
+# 1 em cada 1 000 pessoas tem a doença; o teste apanha 99% dos casos e dá 2% de falsos positivos.
+prevalencia = 0.001
+sensibilidade = 0.99
+falsos_positivos = 0.02
+
+p_positivo = sensibilidade * prevalencia + falsos_positivos * (1 - prevalencia)
+p_doenca_dado_positivo = sensibilidade * prevalencia / p_positivo
+print(f"P(positivo) = {p_positivo:.4f}")
+print(f"P(doença | positivo) = {p_doenca_dado_positivo:.1%}")  # cerca de 5%!
+
+# Em 100 000 pessoas: 100 doentes (99 positivos) e 99 900 saudáveis (1 998 positivos)
+print(f"Verdadeiros positivos: {99}, falsos positivos: {round(0.02 * 99_900)}")`,
+      pythonChallenge: {
+        description: 'Três perguntas de entrevista. (1) Em vendas.csv, com cestos = cliente + dia: p_cafe, p_cafe_dado_leite, lift e juntar_na_prateleira (True se lift > 1). (2) Um alerta de fraude apanha 95% das fraudes (sensibilidade), dispara em 5% das compras normais (taxa_falsos_positivos) e 1% das compras são fraude (prevalencia): calcula p_alerta e p_fraude_dado_alerta. (3) Na tabela adesao (cartões de cliente propostos e aceites por funcionário e turno), calcula taxa_total_ana e taxa_total_rui, e diz quem é melhor_em_cada_turno e quem é melhor_no_total ("Ana" ou "Rui").',
+        starterCode: `import pandas as pd
+
+# (1) Quem leva Leite também leva Café?
+df = pd.read_csv("dados/vendas.csv")
+df["cafe"] = df["produto"] == "Café"
+df["leite"] = df["produto"] == "Leite"
+cestos = None
+p_cafe = None
+p_cafe_dado_leite = None
+lift = None
+juntar_na_prateleira = None
+
+# (2) Bayes: o alerta disparou. Qual a probabilidade de ser fraude?
+prevalencia = 0.01
+sensibilidade = 0.95
+taxa_falsos_positivos = 0.05
+p_alerta = None
+p_fraude_dado_alerta = None
+
+# (3) Paradoxo de Simpson: adesão ao cartão de cliente
+adesao = pd.DataFrame({
+    "funcionario": ["Ana", "Ana", "Rui", "Rui"],
+    "turno": ["manhã", "noite", "manhã", "noite"],
+    "propostas": [20, 300, 300, 20],
+    "aceites": [18, 120, 240, 6],
+})
+taxa_total_ana = None
+taxa_total_rui = None
+melhor_em_cada_turno = None
+melhor_no_total = None
+print(p_cafe, p_cafe_dado_leite, lift, p_fraude_dado_alerta, taxa_total_ana, taxa_total_rui)`,
+        solutionCode: `import pandas as pd
+
+# (1) Quem leva Leite também leva Café?
+df = pd.read_csv("dados/vendas.csv")
+df["cafe"] = df["produto"] == "Café"
+df["leite"] = df["produto"] == "Leite"
+cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max"))
+p_cafe = cestos["cafe"].mean()
+p_cafe_dado_leite = cestos[cestos["leite"]]["cafe"].mean()
+lift = p_cafe_dado_leite / p_cafe
+juntar_na_prateleira = lift > 1
+
+# (2) Bayes: o alerta disparou. Qual a probabilidade de ser fraude?
+prevalencia = 0.01
+sensibilidade = 0.95
+taxa_falsos_positivos = 0.05
+p_alerta = sensibilidade * prevalencia + taxa_falsos_positivos * (1 - prevalencia)
+p_fraude_dado_alerta = sensibilidade * prevalencia / p_alerta
+
+# (3) Paradoxo de Simpson: adesão ao cartão de cliente
+adesao = pd.DataFrame({
+    "funcionario": ["Ana", "Ana", "Rui", "Rui"],
+    "turno": ["manhã", "noite", "manhã", "noite"],
+    "propostas": [20, 300, 300, 20],
+    "aceites": [18, 120, 240, 6],
+})
+adesao["taxa"] = adesao["aceites"] / adesao["propostas"]
+print(adesao)
+total = adesao.groupby("funcionario")[["aceites", "propostas"]].sum()
+taxa_total_ana = total.loc["Ana", "aceites"] / total.loc["Ana", "propostas"]
+taxa_total_rui = total.loc["Rui", "aceites"] / total.loc["Rui", "propostas"]
+melhor_em_cada_turno = "Ana"
+melhor_no_total = "Rui"
+print(f"Lift Café|Leite: {lift:.2f} | P(fraude | alerta): {p_fraude_dado_alerta:.1%}")
+print(f"Total: Ana {taxa_total_ana:.1%} vs Rui {taxa_total_rui:.1%}")`,
+        checks: [
+          { label: 'Cestos (2 447) e p_cafe (12.6%)', expr: 'len(cestos) == 2447 and abs(float(p_cafe) - 0.12628) < 0.0005', actualExpr: '(len(cestos) if cestos is not None else None, p_cafe)', hint: 'cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max")) e p_cafe = cestos["cafe"].mean().' },
+          { label: 'p_cafe_dado_leite (9.3%), lift (0.74) e decisão de prateleira', expr: 'abs(float(p_cafe_dado_leite) - 0.09315) < 0.0005 and abs(float(lift) - 0.7377) < 0.002 and bool(juntar_na_prateleira) is False', actualExpr: '(p_cafe_dado_leite, lift, juntar_na_prateleira)', hint: 'Filtra só os cestos com leite: cestos[cestos["leite"]]["cafe"].mean(). lift = p_cafe_dado_leite / p_cafe.' },
+          { label: 'p_alerta (5.9%) e p_fraude_dado_alerta (16.1%)', expr: 'abs(float(p_alerta) - 0.059) < 0.0001 and abs(float(p_fraude_dado_alerta) - 0.16102) < 0.0005', actualExpr: '(p_alerta, p_fraude_dado_alerta)', hint: 'p_alerta = sensibilidade * prevalencia + taxa_falsos_positivos * (1 - prevalencia); depois sensibilidade * prevalencia / p_alerta.' },
+          { label: 'O Bayes usa as variáveis (com 10% de fraudes dá 67.9%)', expr: 'abs(correr_com(prevalencia=0.10)["p_fraude_dado_alerta"] - 0.678571) < 0.0005', actualExpr: 'correr_com(prevalencia=0.10).get("p_fraude_dado_alerta")', hint: 'Escreve a fórmula com prevalencia, sensibilidade e taxa_falsos_positivos, não o número final.' },
+          { label: 'Taxas totais: Ana 43.1%, Rui 76.9%', expr: 'abs(float(taxa_total_ana) - 0.43125) < 0.0001 and abs(float(taxa_total_rui) - 0.76875) < 0.0001', actualExpr: '(taxa_total_ana, taxa_total_rui)', hint: 'Soma aceites e propostas por funcionário e só depois divide. A média das duas taxas dá outro número (errado).' },
+          { label: 'Paradoxo de Simpson identificado', expr: 'melhor_em_cada_turno == "Ana" and melhor_no_total == "Rui"', actualExpr: '(melhor_em_cada_turno, melhor_no_total)', hint: 'De manhã: Ana 90% vs Rui 80%. À noite: Ana 40% vs Rui 30%. No total o Rui ganha, porque a Ana faz quase só noites.' },
+        ],
+      },
+      quiz: {
+        question: 'Um teste apanha 99% dos casos e tem 1% de falsos positivos. A doença afeta 1 em 10 000 pessoas. Um resultado positivo significa que a pessoa:',
+        options: [
+          'tem a doença com probabilidade abaixo de 1%, porque quase todos os positivos são falsos.',
+          'tem a doença com probabilidade de 99%, porque o teste é muito bom.',
+          'tem a doença com probabilidade de 50%, porque ou tem ou não tem.',
+          'tem a doença com probabilidade de 1%, porque é a taxa de falsos positivos.',
+        ],
+        correctIndex: 0,
+        explanation: 'Em 1 000 000 de pessoas há 100 doentes (99 positivos) e 999 900 saudáveis (cerca de 9 999 falsos positivos). P(doença | positivo) = 99 / 10 098 ≈ 1%. Com eventos raros, a prevalência manda.',
+      },
+    },
+    {
+      id: 'bi-13-regressao-linear',
+      code: '13',
+      title: 'Desvio padrão, z-score e regressão linear simples',
+      lede: 'Mede a dispersão com variância e desvio padrão, deteta dias anómalos com o z-score e ajusta uma reta de regressão: quanto vale, em euros, cada cliente a mais na loja?',
+      analogyTitle: 'A régua que atravessa a nuvem de pontos',
+      analogyBody: 'Marca num gráfico cada dia do ano: clientes no eixo horizontal, faturação no vertical. Fica uma nuvem a subir. A regressão encontra a régua que passa mais perto de todos os pontos. A inclinação da régua diz quanto sobe a faturação por cada cliente a mais; o R² diz quão apertada está a nuvem à volta da régua.',
+      concepts: [
+        'Variância: média dos desvios ao quadrado. Desvio padrão: a raiz da variância, na mesma unidade dos dados (€). O pandas usa n - 1 (desvio padrão amostral).',
+        'z-score = (valor - média) / desvio padrão: quantos desvios padrão um valor está acima ou abaixo da média. |z| > 3 é muito raro numa distribuição normal.',
+        'Regressão linear y = ordenada + declive × x. O declive é cov(x, y) / var(x) e a ordenada é média(y) - declive × média(x).',
+        'R² (com uma só variável é r ao quadrado): a fração da variação de y explicada por x. R² = 0,64 quer dizer que 64% das diferenças entre dias vêm do número de clientes.',
+        'Extrapolar para fora do intervalo observado é perigoso: a reta só foi validada entre o mínimo e o máximo de x.',
+      ],
+      beginnerSteps: [
+        'Agrupa vendas_sazonais por data: clientes = ("cliente_id", "nunique") e faturacao = ("sub", "sum").',
+        'Calcula variancia e desvio_padrao da faturação com .var() e .std().',
+        'Encontra o melhor dia e o seu z_melhor_dia.',
+        'declive = x.cov(y) / x.var(), ordenada = y.mean() - declive * x.mean() e r2 = x.corr(y) ** 2.',
+        'Usa a reta para prever 10 clientes e decide se prever 30 clientes é seguro (vê o máximo de clientes observado).',
+      ],
+      proPractice: 'Em Python profissional usa-se numpy.polyfit(x, y, 1), scipy.stats.linregress ou statsmodels (que dá também intervalos de confiança para o declive). No Excel, as funções DECLIVE e INTERCETAR fazem o mesmo.',
+      commonPitfall: 'Ler o declive como causa: "cada cliente traz 16,69 €" é uma associação média. E usar a reta para valores nunca vistos (30 clientes num dia, quando o recorde é 19) dá números sem fundamento.',
+      referenceTitle: 'Dispersão e regressão em pandas',
+      referenceRows: [
+        { syntax: 's.var() / s.std()', meaning: 'Variância e desvio padrão (amostrais, n - 1)', example: '3 522.96 e 59.35 €' },
+        { syntax: '(s - s.mean()) / s.std()', meaning: 'z-score de cada valor', example: '5.05 no dia 26 de dezembro' },
+        { syntax: 'x.cov(y) / x.var()', meaning: 'Declive da reta de regressão', example: '16.69 € por cliente' },
+        { syntax: 'y.mean() - declive * x.mean()', meaning: 'Ordenada na origem', example: '-30.51 €' },
+        { syntax: 'x.corr(y) ** 2', meaning: 'R² da regressão simples', example: '0.64' },
+      ],
+      engine: 'python',
+      exampleCode: `import pandas as pd
+
+# Exemplo com vendas.csv: dispersão e z-score da faturação diária
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_dia = df.groupby("data")["sub"].sum()
+
+media, dp = por_dia.mean(), por_dia.std()
+z = (por_dia - media) / dp
+print(f"Média {media:.2f} € | desvio padrão {dp:.2f} € | variância {por_dia.var():.1f} €²")
+print("Dias com |z| > 3:")
+print(z[z.abs() > 3].round(2))`,
+      pythonChallenge: {
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes (clientes diferentes) e faturacao (soma de sub) por data. Guarda variancia e desvio_padrao da faturação diária, melhor_dia (data com mais faturação) e z_melhor_dia. Depois ajusta a reta faturacao = ordenada + declive × clientes e guarda declive, ordenada, r2, previsao_10 (faturação prevista para um dia com 10 clientes) e extrapolacao_30_segura (True ou False: é seguro usar a reta para um dia com 30 clientes?).',
+        starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = None
+
+variancia = None
+desvio_padrao = None
+melhor_dia = None
+z_melhor_dia = None
+
+declive = None
+ordenada = None
+r2 = None
+previsao_10 = None
+extrapolacao_30_segura = None
+print(desvio_padrao, melhor_dia, z_melhor_dia, declive, ordenada, r2)`,
+        solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum"))
+x = por_dia["clientes"]
+y = por_dia["faturacao"]
+
+variancia = y.var()
+desvio_padrao = y.std()
+melhor_dia = y.idxmax()
+z_melhor_dia = (y.max() - y.mean()) / desvio_padrao
+
+declive = x.cov(y) / x.var()
+ordenada = y.mean() - declive * x.mean()
+r2 = x.corr(y) ** 2
+previsao_10 = ordenada + declive * 10
+extrapolacao_30_segura = 30 <= x.max()
+
+print(f"Desvio padrão diário: {desvio_padrao:.2f} € | melhor dia {melhor_dia} (z = {z_melhor_dia:.2f})")
+print(f"faturação = {ordenada:.2f} + {declive:.2f} × clientes | R² = {r2:.2f}")
+print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {x.max()} clientes")`,
+        checks: [
+          { label: 'por_dia: 365 dias com clientes e faturacao', expr: 'len(por_dia) == 365 and {"clientes", "faturacao"} <= set(por_dia.columns)', actualExpr: '(len(por_dia), list(por_dia.columns)) if por_dia is not None else None', hint: 'df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).' },
+          { label: 'variancia (3 522.96) e desvio_padrao (59.35 €)', expr: 'abs(float(variancia) - 3522.96) < 0.1 and abs(float(desvio_padrao) - 59.3546) < 0.01', actualExpr: '(variancia, desvio_padrao)', hint: 'por_dia["faturacao"].var() e .std(). O desvio padrão é a raiz da variância.' },
+          { label: 'melhor_dia (2025-12-26) com z ≈ 5.05', expr: 'melhor_dia == "2025-12-26" and abs(float(z_melhor_dia) - 5.0546) < 0.005', actualExpr: '(melhor_dia, z_melhor_dia)', hint: 'melhor_dia = y.idxmax() e z_melhor_dia = (y.max() - y.mean()) / desvio_padrao.' },
+          { label: 'Reta: declive (16.69 €/cliente) e ordenada (-30.51 €)', expr: 'abs(float(declive) - 16.6885) < 0.005 and abs(float(ordenada) - (-30.5127)) < 0.05', actualExpr: '(declive, ordenada)', hint: 'declive = x.cov(y) / x.var() e ordenada = y.mean() - declive * x.mean().' },
+          { label: 'r2 (0.64) e previsao_10 (136.37 €)', expr: 'abs(float(r2) - 0.63585) < 0.001 and abs(float(previsao_10) - 136.37) < 0.05', actualExpr: '(r2, previsao_10)', hint: 'r2 = x.corr(y) ** 2 e previsao_10 = ordenada + declive * 10.' },
+          { label: 'Extrapolar para 30 clientes não é seguro', expr: 'bool(extrapolacao_30_segura) is False', actualExpr: 'extrapolacao_30_segura', hint: 'O máximo observado é x.max() = 19 clientes num dia: 30 está fora do intervalo onde a reta foi ajustada.' },
+        ],
+      },
+      quiz: {
+        question: 'Uma regressão da faturação diária contra o número de clientes dá declive 16,7 e R² = 0,64. Qual é a leitura correta?',
+        options: [
+          'Cada cliente novo causa exatamente 16,7 € de faturação extra.',
+          '64% dos clientes gastam 16,7 €.',
+          'Em média, cada cliente a mais está associado a +16,7 € por dia, e os clientes explicam 64% da variação diária.',
+          'A reta acerta em 64% dos dias.',
+        ],
+        correctIndex: 2,
+        explanation: 'O declive é uma associação média, não uma causa garantida. O R² mede a fração da variação de y explicada pela reta, não a percentagem de acertos.',
+      },
+    },
+    {
+      id: 'bi-14-perguntas-entrevista',
+      code: '14',
+      title: 'Perguntas rápidas de entrevista: enviesamentos, percentis e valor esperado',
+      lede: 'Uma bateria de perguntas curtas, do género das que se fazem nos primeiros 15 minutos de uma entrevista técnica: testes múltiplos, assimetria e percentis, valor esperado de uma campanha e dois enviesamentos que estragam análises.',
+      analogyTitle: 'Os aviões que voltaram da guerra',
+      analogyBody: 'Na Segunda Guerra, quiseram reforçar os aviões nas zonas com mais buracos de bala. Um estatístico, Abraham Wald, avisou: esses são os aviões que voltaram. Os buracos que importam estão nos aviões que caíram. Na mercearia é igual: se só inquirires os clientes que ainda vêm, nunca vais saber porque é que os outros deixaram de vir.',
+      concepts: [
+        'Testes múltiplos: com 20 testes a 5%, a probabilidade de pelo menos um falso positivo é 1 - 0.95^20 ≈ 64%. A correção de Bonferroni usa alfa / número de testes.',
+        'Espreitar (peeking): parar um teste A/B no primeiro dia em que p < 0.05 aumenta muito os falsos positivos. A duração fixa-se antes.',
+        'Assimetria: quando a média está bem acima da mediana, a distribuição tem cauda à direita (poucos cestos muito grandes).',
+        'Percentil 90: 90% dos valores estão abaixo dele. Em pandas: s.quantile(0.9).',
+        'Valor esperado = soma de (probabilidade × resultado). Uma campanha vale a pena se o valor esperado por cliente for positivo.',
+        'Viés de sobrevivência: analisar só quem "sobreviveu" (clientes que ficaram, lojas que não fecharam) e tirar conclusões sobre todos.',
+      ],
+      beginnerSteps: [
+        'prob_falso_positivo_20 = 1 - 0.95 ** 20 e alfa_bonferroni = 0.05 / 20.',
+        'Em vendas.csv soma sub por cesto (data e cliente_id) e calcula a média, a mediana e o percentil 90.',
+        'Compara a média com a mediana para escolher a assimetria: "direita" ou "esquerda".',
+        'valor_esperado = prob_uso * margem_por_uso - custo_vale.',
+        'Responde às duas perguntas de enviesamento com True ou False.',
+      ],
+      proPractice: 'Numa entrevista, explica sempre o raciocínio em voz alta antes do número: "há 20 testes, cada um com 5% de falso positivo, por isso a probabilidade de nenhum falhar é 0,95 elevado a 20…". O entrevistador avalia o método mais do que a conta.',
+      commonPitfall: 'Responder que a probabilidade de um falso positivo em 20 testes é 20 × 5% = 100%. As probabilidades não se somam assim: calcula a probabilidade de nenhum falhar e subtrai a 1.',
+      referenceTitle: 'Cábula de entrevista',
+      referenceRows: [
+        { syntax: '1 - (1 - alfa) ** k', meaning: 'P(pelo menos 1 falso positivo em k testes)', example: 'k = 20 dá 64%' },
+        { syntax: 'alfa / k', meaning: 'Correção de Bonferroni', example: '0.05 / 20 = 0.0025' },
+        { syntax: 's.quantile(0.9)', meaning: 'Percentil 90', example: '23.88 € por cesto' },
+        { syntax: 'media > mediana', meaning: 'Cauda à direita', example: '10.99 € > 8.40 €' },
+        { syntax: 'p * ganho - custo', meaning: 'Valor esperado', example: '0.3 × 10 - 2 = 1 €' },
+      ],
+      engine: 'python',
+      exampleCode: `# Valor esperado com vários resultados possíveis: uma raspadinha de 1 €
+premios = {0: 0.80, 1: 0.15, 5: 0.04, 20: 0.01}  # prémio: probabilidade
+valor_esperado = sum(premio * prob for premio, prob in premios.items()) - 1
+print(f"Valor esperado por raspadinha: {valor_esperado:+.2f} €")
+
+# Quantos testes até ser quase certo ter um falso positivo?
+for k in [1, 5, 10, 20, 50]:
+    print(f"{k:>2} testes: {1 - 0.95 ** k:.0%} de hipótese de pelo menos um falso positivo")`,
+      pythonChallenge: {
+        description: 'Responde em código. (1) prob_falso_positivo_20: probabilidade de pelo menos um falso positivo em 20 testes a 5%; alfa_bonferroni para esses 20 testes. (2) Em vendas.csv (sub = quantidade * preco), soma sub por cesto (data e cliente_id) e guarda media_cesto, mediana_cesto, p90_cesto e assimetria ("direita" ou "esquerda"). (3) Um vale custa custo_vale = 2 €, é usado com probabilidade prob_uso = 0.3 e cada uso dá margem_por_uso = 10 €: guarda valor_esperado por vale. (4) vies_sobrevivencia: inquirir só os clientes que ainda compram para perceber porque é que os clientes saem tem viés de sobrevivência? (True/False). (5) parar_no_primeiro_p_baixo: é correto parar um teste A/B no primeiro dia em que p < 0.05? (True/False).',
+        starterCode: `import pandas as pd
+
+# (1) Testes múltiplos
+prob_falso_positivo_20 = None
+alfa_bonferroni = None
+
+# (2) Assimetria e percentis do valor por cesto
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_cesto = None
+media_cesto = None
+mediana_cesto = None
+p90_cesto = None
+assimetria = None
+
+# (3) Valor esperado de um vale de desconto
+custo_vale = 2
+prob_uso = 0.3
+margem_por_uso = 10
+valor_esperado = None
+
+# (4) e (5) Enviesamentos
+vies_sobrevivencia = None
+parar_no_primeiro_p_baixo = None
+print(prob_falso_positivo_20, media_cesto, mediana_cesto, p90_cesto, valor_esperado)`,
+        solutionCode: `import pandas as pd
+
+# (1) Testes múltiplos
+prob_falso_positivo_20 = 1 - 0.95 ** 20
+alfa_bonferroni = 0.05 / 20
+
+# (2) Assimetria e percentis do valor por cesto
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum()
+media_cesto = por_cesto.mean()
+mediana_cesto = por_cesto.median()
+p90_cesto = por_cesto.quantile(0.9)
+assimetria = "direita" if media_cesto > mediana_cesto else "esquerda"
+
+# (3) Valor esperado de um vale de desconto
+custo_vale = 2
+prob_uso = 0.3
+margem_por_uso = 10
+valor_esperado = prob_uso * margem_por_uso - custo_vale
+
+# (4) e (5) Enviesamentos
+vies_sobrevivencia = True
+parar_no_primeiro_p_baixo = False
+print(f"P(≥1 falso positivo em 20 testes) = {prob_falso_positivo_20:.0%} | Bonferroni: {alfa_bonferroni}")
+print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P90 {p90_cesto:.2f} € → cauda à {assimetria}")
+print(f"Valor esperado por vale: {valor_esperado:+.2f} €")`,
+        checks: [
+          { label: 'Testes múltiplos: 64% e Bonferroni 0.0025', expr: 'abs(float(prob_falso_positivo_20) - 0.64151) < 0.0005 and abs(float(alfa_bonferroni) - 0.0025) < 1e-9', actualExpr: '(prob_falso_positivo_20, alfa_bonferroni)', hint: 'Probabilidade de nenhum falhar: 0.95 ** 20. A de pelo menos um falhar é 1 menos isso. Bonferroni: 0.05 / 20.' },
+          { label: 'Cesto médio (10.99 €) e mediano (8.40 €)', expr: 'len(por_cesto) == 2447 and abs(float(media_cesto) - 10.9942) < 0.005 and abs(float(mediana_cesto) - 8.40) < 0.005', actualExpr: '(len(por_cesto) if por_cesto is not None else None, media_cesto, mediana_cesto)', hint: 'por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum(), depois .mean() e .median().' },
+          { label: 'Percentil 90 (23.88 €) e assimetria à direita', expr: 'abs(float(p90_cesto) - 23.876) < 0.01 and assimetria == "direita"', actualExpr: '(p90_cesto, assimetria)', hint: 'por_cesto.quantile(0.9). A média acima da mediana indica poucos cestos muito grandes: cauda à direita.' },
+          { label: 'Valor esperado do vale (+1 €) calculado das variáveis', expr: 'abs(float(valor_esperado) - 1.0) < 1e-9 and abs(correr_com(prob_uso=0.1)["valor_esperado"] - (-1.0)) < 1e-9', actualExpr: 'valor_esperado', hint: 'valor_esperado = prob_uso * margem_por_uso - custo_vale. Com 10% de uso a campanha dá prejuízo.' },
+          { label: 'Viés de sobrevivência reconhecido', expr: 'vies_sobrevivencia is True', actualExpr: 'vies_sobrevivencia', hint: 'Os clientes que saíram são exatamente os que ficam de fora do inquérito.' },
+          { label: 'Não se para um teste ao primeiro p baixo', expr: 'parar_no_primeiro_p_baixo is False', actualExpr: 'parar_no_primeiro_p_baixo', hint: 'Espreitar todos os dias e parar ao primeiro p < 0.05 multiplica os falsos positivos. A duração fixa-se antes, com o tamanho de amostra.' },
+        ],
+      },
+      quiz: {
+        question: 'Fizeste 20 testes A/B independentes, todos sem efeito real, com alfa de 5%. Qual é a probabilidade de pelo menos um dar "significativo"?',
+        options: [
+          'Cerca de 64%.',
+          '5%, porque cada teste tem 5% de erro.',
+          '100%, porque 20 × 5% = 100%.',
+          '0,25%, pela correção de Bonferroni.',
+        ],
+        correctIndex: 0,
+        explanation: 'A probabilidade de nenhum dar falso positivo é 0,95^20 ≈ 36%, por isso a de pelo menos um é ≈ 64%. É por isso que se corrige o alfa (Bonferroni: 0,05 / 20) quando se fazem muitos testes.',
       },
     },
   ],
