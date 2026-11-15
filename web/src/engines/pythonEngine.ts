@@ -28,8 +28,25 @@ declare global {
   }
 }
 
+const PYODIDE_INDEX_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+
 let pyodidePromise: Promise<any> | null = null;
 let pandasLoaded = false;
+
+type PyodideLoader = () => Promise<any>;
+
+// No browser o Pyodide vem da CDN; nos testes (Node) é trocado pelo pacote npm "pyodide".
+let pyodideLoader: PyodideLoader = async () => {
+  await loadPyodideScript();
+  return window.loadPyodide!({ indexURL: PYODIDE_INDEX_URL });
+};
+
+/** Só para testes: usa outro carregador do Pyodide e recomeça do zero. */
+export function setPyodideLoaderForTests(loader: PyodideLoader): void {
+  pyodideLoader = loader;
+  pyodidePromise = null;
+  pandasLoaded = false;
+}
 
 function loadPyodideScript(): Promise<void> {
   if (window.loadPyodide) return Promise.resolve();
@@ -58,11 +75,7 @@ export async function getPyodideEngine(onStatus?: (msg: string) => void): Promis
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
       onStatus?.('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');
-      await loadPyodideScript();
-      const [pyodide, dataset] = await Promise.all([
-        window.loadPyodide!({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/' }),
-        loadMerceariaDataset(),
-      ]);
+      const [pyodide, dataset] = await Promise.all([pyodideLoader(), loadMerceariaDataset()]);
 
       pyodide.FS.mkdirTree('/home/pyodide/dados');
       pyodide.FS.mkdirTree('/home/dados');
@@ -90,12 +103,17 @@ export async function runPythonCode(
       await pyodide.loadPackage('pandas');
       pandasLoaded = true;
     }
+    // Módulos que o Pyodide não traz por omissão (ex.: sqlite3) são carregados a partir dos imports.
+    await pyodide.loadPackagesFromImports(code);
 
     pyodide.globals.set('__user_code__', code);
     pyodide.globals.set('__checks_json__', JSON.stringify(checks ?? []));
 
     const rawJson: string = await pyodide.runPythonAsync(`
-import io, json, math, sys, traceback
+import io, json, math, sys, traceback, warnings
+
+# O pandas do Pyodide avisa que vai exigir Pyarrow no futuro; para quem aprende é só ruído.
+warnings.filterwarnings("ignore", message=r"(?s).*Pyarrow will become a required dependency")
 
 _buf = io.StringIO()
 _old_out, _old_err = sys.stdout, sys.stderr

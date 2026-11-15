@@ -90,6 +90,18 @@ export async function getSqlDatabase(forceReset = false): Promise<Database> {
       insSuj.free();
       db.run('COMMIT;');
 
+      // Mesma vista do esquema normalizado (sql/01_esquema.sql). A tabela vendas da bancada
+      // mantém a coluna "produto" para as primeiras lições não precisarem de JOIN.
+      db.run(`
+        CREATE VIEW vendas_detalhe AS
+        SELECT v.id, v.data, v.cliente_id, c.nome AS cliente, c.cidade,
+               v.produto_id, p.nome AS produto, p.categoria,
+               v.quantidade, v.preco, v.quantidade * v.preco AS subtotal
+        FROM vendas v
+        INNER JOIN produtos p ON p.id = v.produto_id
+        INNER JOIN clientes c ON c.id = v.cliente_id;
+      `);
+
       return db;
     })();
   }

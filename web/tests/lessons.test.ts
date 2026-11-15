@@ -78,3 +78,15 @@ describe('soluções Git passam na correção', () => {
     expect(verdict.passed, verdict.message).toBe(true);
   });
 });
+
+describe('base SQL da bancada', () => {
+  it('tem a vista vendas_detalhe igual à do esquema normalizado', async () => {
+    const res = await runSqlQuery(
+      "SELECT COUNT(*), ROUND(SUM(subtotal), 2) FROM vendas_detalhe WHERE produto = 'Pão' AND categoria = 'Padaria'",
+    );
+    expect(res.error).toBeUndefined();
+    expect(Number(res.rows[0][0])).toBeGreaterThan(0);
+    const total = await runSqlQuery('SELECT ROUND(SUM(subtotal), 2) FROM vendas_detalhe');
+    expect(total.rows[0][0]).toBe(26902.89);
+  });
+});

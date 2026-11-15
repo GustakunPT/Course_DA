@@ -339,6 +339,7 @@ function renderAcademyWorkspace(): string {
             <li class="schema-row"><span>clientes</span><span class="lesson-step-id">120</span></li>
             <li class="schema-row"><span>produtos</span><span class="lesson-step-id">15</span></li>
             <li class="schema-row"><span>vendas_sujas</span><span class="lesson-step-id">12</span></li>
+            <li class="schema-row" title="Vista: vendas já juntas com produtos e clientes"><span>vendas_detalhe (vista)</span><span class="lesson-step-id">5078</span></li>
           </ul>
         </div>
       </nav>

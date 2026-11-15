@@ -93,8 +93,10 @@ pytest tests                       # Python: gerador, auditoria e gráficos
 cd web && npm test                 # Web: motores, API de sync e as 47 etapas
 ```
 
-Os testes da web confirmam, por exemplo, que a solução oficial de cada desafio SQL e Git passa na
-própria correção automática e que o código inicial ainda não passa.
+Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
+na própria correção automática e que o código inicial ainda não passa. Os desafios Python correm no
+mesmo Pyodide 0.26.4 do browser (pacote npm `pyodide`); na primeira vez descarregam o pandas, por isso
+precisam de internet.
 
 ## Cadernos de pandas (Academia Interativa, etapas 13 a 16)
 
