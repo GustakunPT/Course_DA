@@ -299,7 +299,7 @@ export const statsBiTrack: Track = {
   id: 'bi',
   shortTitle: '5. Estatística & BI',
   fullTitle: 'Estatística, Excel/DAX e Power BI para Analistas',
-  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B (médias e proporções), tamanho de amostra, correlação, intervalos de confiança, probabilidade, regressão, perguntas de entrevista e prática guiada de Excel e Power BI.',
+  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B (médias e proporções), tamanho de amostra, correlação, intervalos de confiança, probabilidade, qui-quadrado, ANOVA, regressão simples e múltipla, perguntas de entrevista e prática guiada de Excel e Power BI.',
   engineLabel: 'Python + SQLite Analítico',
   lessons: [
     {
@@ -1605,6 +1605,291 @@ print(f"Valor esperado por vale: {valor_esperado:+.2f} €")`,
         ],
         correctIndex: 0,
         explanation: 'A probabilidade de nenhum dar falso positivo é 0,95^20 ≈ 36%, por isso a de pelo menos um é ≈ 64%. É por isso que se corrige o alfa (Bonferroni: 0,05 / 20) quando se fazem muitos testes.',
+      },
+    },
+    {
+      id: 'bi-15-qui-quadrado-anova',
+      code: '15',
+      title: 'Mais de dois grupos: qui-quadrado e ANOVA',
+      lede: 'O teste A/B compara dois grupos. Quando há mais (6 categorias, 4 trimestres), usa-se o qui-quadrado para contagens e a ANOVA para médias. Constróis os dois à mão e lês o resultado como numa entrevista.',
+      analogyTitle: 'O cabaz que muda com as estações',
+      analogyBody: 'Se o que se compra não dependesse da altura do ano, cada trimestre teria a mesma mistura de categorias: as mesmas percentagens de Bebidas, Charcutaria, Fruta… O qui-quadrado mede o quanto a realidade se afasta dessa mistura "sem efeito". A ANOVA faz o mesmo para médias: compara a variação entre trimestres com a variação normal dentro de cada trimestre.',
+      concepts: [
+        'Qui-quadrado de independência: parte de uma tabela de contagens (pd.crosstab). Se as variáveis fossem independentes, cada célula esperaria total_linha × total_coluna / total.',
+        'Estatística qui² = soma de (observado - esperado)² / esperado em todas as células. Graus de liberdade = (linhas - 1) × (colunas - 1).',
+        'O resíduo padronizado (observado - esperado) / raiz(esperado) mostra que células explicam o resultado: acima de 2 ou abaixo de -2 merece atenção.',
+        'ANOVA a um fator: F = variância entre grupos / variância dentro dos grupos. F grande quer dizer que as médias dos grupos diferem mais do que o ruído explica.',
+        'Um qui² ou uma ANOVA significativos dizem que há diferenças, mas não quais: para isso olha para os resíduos ou faz comparações par a par (com correção para testes múltiplos).',
+      ],
+      beginnerSteps: [
+        'Junta a categoria às vendas com merge (produto_id com o id de produtos).',
+        'Escreve a função qui_quadrado(tabela): calcula os esperados com np.outer(totais das linhas, totais das colunas) / total e devolve (qui2, gl).',
+        'Aplica-a à tabela fim de semana × categoria de vendas.csv e calcula o p-valor com a função p_valor_qui2 já dada.',
+        'Repete para trimestre × categoria em vendas_sazonais.csv e procura a célula com maior resíduo padronizado.',
+        'Para a ANOVA, agrupa a faturação diária por trimestre e calcula a variação entre grupos e dentro dos grupos.',
+      ],
+      proPractice: 'No dia a dia usa-se scipy.stats.chi2_contingency(tabela) e scipy.stats.f_oneway(*grupos), que devolvem a estatística e o p-valor numa linha. Em entrevista pedem-te para explicar o que estas funções calculam, por isso aqui fazes as contas à mão.',
+      commonPitfall: 'Usar o qui-quadrado com percentagens em vez de contagens, ou com células com esperados muito pequenos (menos de 5). E concluir "o T3 é diferente" só porque o teste global deu significativo, sem olhar para os resíduos.',
+      referenceTitle: 'Qui-quadrado e ANOVA à mão',
+      referenceRows: [
+        { syntax: 'pd.crosstab(df["a"], df["b"])', meaning: 'Tabela de contagens', example: 'trimestre × categoria' },
+        { syntax: 'np.outer(t.sum(axis=1), t.sum(axis=0)) / t.values.sum()', meaning: 'Contagens esperadas sem efeito', example: 'Mesma tabela, mesma forma' },
+        { syntax: '((t - esp) ** 2 / esp).values.sum()', meaning: 'Estatística qui²', example: '228.3 com 15 gl' },
+        { syntax: '(t - esp) / np.sqrt(esp)', meaning: 'Resíduos padronizados', example: '+7.1 em Bebidas no T3' },
+        { syntax: '(SS_entre / (k - 1)) / (SS_dentro / (N - k))', meaning: 'Estatística F da ANOVA', example: '24.4 contra 2.63 crítico' },
+      ],
+      engine: 'python',
+      exampleCode: `import numpy as np
+import pandas as pd
+
+# Exemplo pequeno: a preferência de café muda com a cidade?
+tabela = pd.DataFrame(
+    {"expresso": [40, 30, 20], "galão": [20, 30, 40]},
+    index=["Porto", "Braga", "Lisboa"],
+)
+esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum()
+esperados = pd.DataFrame(esperados, index=tabela.index, columns=tabela.columns)
+qui2 = ((tabela - esperados) ** 2 / esperados).values.sum()
+gl = (tabela.shape[0] - 1) * (tabela.shape[1] - 1)
+print(esperados)
+print(f"qui² = {qui2:.2f} com {gl} graus de liberdade (crítico a 5%: 5.99)")
+print(((tabela - esperados) / np.sqrt(esperados)).round(2))`,
+      pythonChallenge: {
+        description: '(1) Completa qui_quadrado(tabela), que devolve (qui2, gl). (2) Em vendas.csv, com a categoria vinda de produtos.csv: a mistura de categorias muda ao fim de semana? Guarda qui2_fds, gl_fds, p_fds e independente_fds (True se p ≥ 0.05). (3) Em vendas_sazonais.csv, faz o mesmo para trimestre × categoria (qui2_trim, gl_trim, p_trim) e guarda celula_maior_desvio = (trimestre, categoria) com o maior resíduo padronizado. (4) ANOVA: a faturação diária média muda entre trimestres? Calcula f_anova e diferenca_trimestres (True se f_anova > f_critico).',
+        starterCode: `import math
+import numpy as np
+import pandas as pd
+
+
+def p_valor_qui2(x, gl):
+    """P(qui² >= x) com gl graus de liberdade (série da função gama incompleta)."""
+    a, z = gl / 2, x / 2
+    termo = soma = 1 / a
+    n = 1
+    while termo > 1e-15 * soma:
+        termo *= z / (a + n)
+        soma += termo
+        n += 1
+    return max(0.0, 1 - math.exp(-z + a * math.log(z) - math.lgamma(a)) * soma)
+
+
+def qui_quadrado(tabela):
+    """Devolve (qui2, gl) de uma tabela de contagens."""
+    return None, None
+
+
+produtos = pd.read_csv("dados/produtos.csv")[["id", "categoria"]].rename(columns={"id": "produto_id"})
+
+# (2) Fim de semana × categoria em vendas.csv
+vendas = pd.read_csv("dados/vendas.csv").merge(produtos, on="produto_id")
+vendas["fim_de_semana"] = pd.to_datetime(vendas["data"]).dt.day_of_week >= 5
+qui2_fds, gl_fds = None, None
+p_fds = None
+independente_fds = None
+
+# (3) Trimestre × categoria em vendas_sazonais.csv
+saz = pd.read_csv("dados/vendas_sazonais.csv").merge(produtos, on="produto_id")
+saz["trimestre"] = "T" + ((saz["data"].str[5:7].astype(int) - 1) // 3 + 1).astype(str)
+qui2_trim, gl_trim = None, None
+p_trim = None
+celula_maior_desvio = None
+
+# (4) ANOVA da faturação diária por trimestre
+saz["sub"] = saz["quantidade"] * saz["preco"]
+por_dia = saz.groupby(["data", "trimestre"])["sub"].sum().reset_index()
+f_critico = 2.63  # tabela F a 5% com 3 e 361 graus de liberdade
+f_anova = None
+diferenca_trimestres = None
+print(qui2_fds, p_fds, qui2_trim, celula_maior_desvio, f_anova)`,
+        solutionCode: `import math
+import numpy as np
+import pandas as pd
+
+
+def p_valor_qui2(x, gl):
+    """P(qui² >= x) com gl graus de liberdade (série da função gama incompleta)."""
+    a, z = gl / 2, x / 2
+    termo = soma = 1 / a
+    n = 1
+    while termo > 1e-15 * soma:
+        termo *= z / (a + n)
+        soma += termo
+        n += 1
+    return max(0.0, 1 - math.exp(-z + a * math.log(z) - math.lgamma(a)) * soma)
+
+
+def qui_quadrado(tabela):
+    """Devolve (qui2, gl) de uma tabela de contagens."""
+    esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum()
+    qui2 = ((tabela.values - esperados) ** 2 / esperados).sum()
+    gl = (tabela.shape[0] - 1) * (tabela.shape[1] - 1)
+    return qui2, gl
+
+
+produtos = pd.read_csv("dados/produtos.csv")[["id", "categoria"]].rename(columns={"id": "produto_id"})
+
+# (2) Fim de semana × categoria em vendas.csv
+vendas = pd.read_csv("dados/vendas.csv").merge(produtos, on="produto_id")
+vendas["fim_de_semana"] = pd.to_datetime(vendas["data"]).dt.day_of_week >= 5
+qui2_fds, gl_fds = qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"]))
+p_fds = p_valor_qui2(qui2_fds, gl_fds)
+independente_fds = p_fds >= 0.05
+
+# (3) Trimestre × categoria em vendas_sazonais.csv
+saz = pd.read_csv("dados/vendas_sazonais.csv").merge(produtos, on="produto_id")
+saz["trimestre"] = "T" + ((saz["data"].str[5:7].astype(int) - 1) // 3 + 1).astype(str)
+tabela = pd.crosstab(saz["trimestre"], saz["categoria"])
+qui2_trim, gl_trim = qui_quadrado(tabela)
+p_trim = p_valor_qui2(qui2_trim, gl_trim)
+esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum()
+residuos = (tabela - esperados) / np.sqrt(esperados)
+celula_maior_desvio = residuos.stack().idxmax()
+
+# (4) ANOVA da faturação diária por trimestre
+saz["sub"] = saz["quantidade"] * saz["preco"]
+por_dia = saz.groupby(["data", "trimestre"])["sub"].sum().reset_index()
+f_critico = 2.63  # tabela F a 5% com 3 e 361 graus de liberdade
+media_geral = por_dia["sub"].mean()
+grupos = por_dia.groupby("trimestre")["sub"]
+ss_entre = (grupos.count() * (grupos.mean() - media_geral) ** 2).sum()
+ss_dentro = ((por_dia["sub"] - grupos.transform("mean")) ** 2).sum()
+k, n = grupos.ngroups, len(por_dia)
+f_anova = (ss_entre / (k - 1)) / (ss_dentro / (n - k))
+diferenca_trimestres = f_anova > f_critico
+
+print(f"Fim de semana: qui² = {qui2_fds:.2f} ({gl_fds} gl), p = {p_fds:.3f}")
+print(f"Trimestres: qui² = {qui2_trim:.1f} ({gl_trim} gl), p < 0.001 | maior desvio: {celula_maior_desvio}")
+print(residuos.round(1))
+print(f"ANOVA: F = {f_anova:.1f} (crítico {f_critico})")`,
+        checks: [
+          { label: 'qui_quadrado funciona numa tabela 2 × 2 (6.67 com 1 gl)', expr: '(lambda r: abs(float(r[0]) - 6.6667) < 0.001 and int(r[1]) == 1)(qui_quadrado(pd.DataFrame([[10, 20], [20, 10]])))', actualExpr: 'qui_quadrado(pd.DataFrame([[10, 20], [20, 10]]))', hint: 'esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum(); qui2 = soma de (observado - esperado) ** 2 / esperado; gl = (linhas - 1) * (colunas - 1).' },
+          { label: 'Fim de semana: qui² 2.22 com 5 gl, p = 0.82, independente', expr: 'abs(float(qui2_fds) - 2.219) < 0.01 and int(gl_fds) == 5 and abs(float(p_fds) - 0.818) < 0.005 and bool(independente_fds) is True', actualExpr: '(qui2_fds, gl_fds, p_fds, independente_fds)', hint: 'qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"])) e depois p_valor_qui2(qui2_fds, gl_fds).' },
+          { label: 'Trimestres: qui² 228.3 com 15 gl e p < 0.001', expr: 'abs(float(qui2_trim) - 228.29) < 0.05 and int(gl_trim) == 15 and float(p_trim) < 0.001', actualExpr: '(qui2_trim, gl_trim, p_trim)', hint: 'tabela = pd.crosstab(saz["trimestre"], saz["categoria"]) e qui_quadrado(tabela).' },
+          { label: 'Célula com maior desvio: Bebidas no 3.º trimestre', expr: 'tuple(celula_maior_desvio) == ("T3", "Bebidas")', actualExpr: 'celula_maior_desvio', hint: 'residuos = (tabela - esperados) / np.sqrt(esperados) e residuos.stack().idxmax().' },
+          { label: 'ANOVA: F = 24.4, acima do valor crítico', expr: 'abs(float(f_anova) - 24.411) < 0.01 and bool(diferenca_trimestres) is True', actualExpr: '(f_anova, diferenca_trimestres)', hint: 'ss_entre = soma de n_grupo × (média_grupo - média_geral)²; ss_dentro = soma de (valor - média do seu grupo)²; F = (ss_entre / (k - 1)) / (ss_dentro / (n - k)).' },
+        ],
+      },
+      quiz: {
+        question: 'Uma ANOVA às vendas de 5 lojas dá p = 0,001. O que podes concluir?',
+        options: [
+          'Todas as lojas têm médias diferentes umas das outras.',
+          'Pelo menos uma loja tem média diferente; falta ver quais.',
+          'A loja com maior média é significativamente melhor do que todas.',
+          'As lojas são iguais, porque o p-valor é muito pequeno.',
+        ],
+        correctIndex: 1,
+        explanation: 'A ANOVA testa se todas as médias são iguais. Rejeitar isso só diz que há pelo menos uma diferença. Para saber quais lojas diferem, fazem-se comparações par a par (por exemplo, Tukey) com correção para testes múltiplos.',
+      },
+    },
+    {
+      id: 'bi-16-regressao-multipla',
+      code: '16',
+      title: 'Regressão linear múltipla: separar efeitos',
+      lede: 'Na etapa 13 cada cliente valia 16,69 € por dia. Mas dezembro tem mais clientes E cestos maiores: parte desse valor era o Natal. A regressão múltipla separa os efeitos e mede cada um "mantendo o resto constante".',
+      analogyTitle: 'Quem ganhou o jogo: o avançado ou a equipa?',
+      analogyBody: 'Um avançado que joga sempre na melhor equipa marca muitos golos. Parte é mérito dele, parte é a equipa. Para separar, comparas jogos em que só uma coisa muda. A regressão múltipla faz isso com contas: estima o efeito dos clientes, do fim de semana e de dezembro ao mesmo tempo, para que nenhum fique com o mérito dos outros.',
+      concepts: [
+        'Modelo: faturação = b0 + b1 × clientes + b2 × fim_de_semana + b3 × dezembro. As variáveis sim/não entram como 0 ou 1 (variáveis dummy).',
+        'Cada coeficiente lê-se "mantendo as outras variáveis constantes": b3 é quanto um dia de dezembro fatura a mais do que um dia normal com os mesmos clientes e o mesmo dia da semana.',
+        'Variável omitida: se deixares de fora uma variável que mexe com x e com y (dezembro), o coeficiente de x fica inflacionado. Foi o que aconteceu ao declive de 16,69 €.',
+        'Mínimos quadrados com numpy: np.linalg.lstsq(X, y, rcond=None)[0], onde X tem uma coluna de 1 (para b0) e uma coluna por variável.',
+        'R² ajustado = 1 - (1 - R²) × (n - 1) / (n - p - 1): penaliza variáveis a mais. Acrescentar variáveis nunca baixa o R² normal, mesmo que sejam inúteis.',
+      ],
+      beginnerSteps: [
+        'Agrupa vendas_sazonais por data: clientes diferentes e faturação.',
+        'Cria fim_de_semana e dezembro como 0 ou 1 com .astype(int).',
+        'Monta X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e resolve com np.linalg.lstsq.',
+        'Calcula as previsões X @ coef, o R² e o R² ajustado.',
+        'Compara b_clientes com o declive simples da etapa 13 e usa o modelo para prever um sábado de dezembro com 10 clientes.',
+      ],
+      proPractice: 'Em análise profissional usa-se statsmodels (smf.ols("faturacao ~ clientes + fim_de_semana + dezembro", data=df).fit().summary()), que mostra também erros padrão e p-valores de cada coeficiente. Em scikit-learn usa-se LinearRegression quando o objetivo é prever.',
+      commonPitfall: 'Ler o coeficiente da regressão simples como "o efeito" de uma variável quando há outra escondida a mexer nas duas. Pergunta sempre: o que mais muda ao mesmo tempo que x?',
+      referenceTitle: 'Regressão múltipla com numpy',
+      referenceRows: [
+        { syntax: 'serie.astype(int)', meaning: 'Variável dummy 0/1', example: 'dezembro = 1 em dezembro' },
+        { syntax: 'np.column_stack([np.ones(n), x1, x2])', meaning: 'Matriz X com coluna de 1', example: 'O 1 dá a ordenada b0' },
+        { syntax: 'np.linalg.lstsq(X, y, rcond=None)[0]', meaning: 'Coeficientes por mínimos quadrados', example: '[b0, b1, b2, b3]' },
+        { syntax: '1 - ((y - prev) ** 2).sum() / ((y - y.mean()) ** 2).sum()', meaning: 'R²', example: '0.73' },
+        { syntax: '1 - (1 - r2) * (n - 1) / (n - p - 1)', meaning: 'R² ajustado (p variáveis)', example: '0.73' },
+      ],
+      engine: 'python',
+      exampleCode: `import numpy as np
+
+# Exemplo com dados inventados: preço de uma casa (milhares de €) por área e por ter garagem.
+area = np.array([60, 80, 100, 120, 70, 90, 110, 130])
+garagem = np.array([0, 0, 0, 0, 1, 1, 1, 1])
+preco = np.array([150, 190, 230, 270, 185, 225, 265, 305])
+
+X = np.column_stack([np.ones(len(area)), area, garagem])
+b0, b_area, b_garagem = np.linalg.lstsq(X, preco, rcond=None)[0]
+print(f"preço = {b0:.1f} + {b_area:.2f} × área + {b_garagem:.1f} × garagem")
+print(f"Com a mesma área, ter garagem vale +{b_garagem:.0f} mil €")`,
+      pythonChallenge: {
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes e faturacao por data, e as colunas fim_de_semana e dezembro (0 ou 1). Ajusta faturacao = b0 + b_clientes × clientes + b_fds × fim_de_semana + b_dezembro × dezembro com np.linalg.lstsq. Guarda os 4 coeficientes, r2, r2_ajustado, declive_simples (o declive só com clientes, como na etapa 13), previsao_sabado_dezembro (10 clientes, fim de semana, dezembro) e dezembro_inflacionava (True se declive_simples > b_clientes).',
+        starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = None
+
+b0 = None
+b_clientes = None
+b_fds = None
+b_dezembro = None
+r2 = None
+r2_ajustado = None
+
+declive_simples = None
+previsao_sabado_dezembro = None
+dezembro_inflacionava = None
+print(b0, b_clientes, b_fds, b_dezembro, r2)`,
+        solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).reset_index()
+por_dia["fim_de_semana"] = (pd.to_datetime(por_dia["data"]).dt.day_of_week >= 5).astype(int)
+por_dia["dezembro"] = (por_dia["data"].str[5:7] == "12").astype(int)
+
+n = len(por_dia)
+y = por_dia["faturacao"].to_numpy()
+X = np.column_stack([np.ones(n), por_dia["clientes"], por_dia["fim_de_semana"], por_dia["dezembro"]])
+b0, b_clientes, b_fds, b_dezembro = np.linalg.lstsq(X, y, rcond=None)[0]
+
+previsoes = X @ np.array([b0, b_clientes, b_fds, b_dezembro])
+r2 = 1 - ((y - previsoes) ** 2).sum() / ((y - y.mean()) ** 2).sum()
+r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - 3 - 1)
+
+declive_simples = por_dia["clientes"].cov(por_dia["faturacao"]) / por_dia["clientes"].var()
+previsao_sabado_dezembro = b0 + b_clientes * 10 + b_fds * 1 + b_dezembro * 1
+dezembro_inflacionava = declive_simples > b_clientes
+
+print(f"faturação = {b0:.2f} + {b_clientes:.2f} × clientes + {b_fds:.2f} × fds + {b_dezembro:.2f} × dezembro")
+print(f"R² = {r2:.3f} | R² ajustado = {r2_ajustado:.3f}")
+print(f"Declive simples {declive_simples:.2f} € vs múltiplo {b_clientes:.2f} € por cliente")
+print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €")`,
+        checks: [
+          { label: 'por_dia com 365 dias e colunas 0/1', expr: 'len(por_dia) == 365 and set(por_dia["dezembro"].unique()) == {0, 1} and int(por_dia["dezembro"].sum()) == 31 and int(por_dia["fim_de_semana"].sum()) == 104', actualExpr: '(len(por_dia), int(por_dia["dezembro"].sum()), int(por_dia["fim_de_semana"].sum())) if por_dia is not None else None', hint: 'Usa .astype(int) para transformar True/False em 1/0.' },
+          { label: 'Coeficientes: b0 -8.07, clientes 12.29, fim de semana 22.92, dezembro 71.98', expr: 'abs(float(b0) - (-8.0707)) < 0.01 and abs(float(b_clientes) - 12.2878) < 0.001 and abs(float(b_fds) - 22.9175) < 0.01 and abs(float(b_dezembro) - 71.9818) < 0.01', actualExpr: '(b0, b_clientes, b_fds, b_dezembro)', hint: 'X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e np.linalg.lstsq(X, y, rcond=None)[0]. A ordem das colunas define a ordem dos coeficientes.' },
+          { label: 'r2 (0.735) e r2_ajustado (0.732)', expr: 'abs(float(r2) - 0.73457) < 0.0005 and abs(float(r2_ajustado) - 0.73236) < 0.0005', actualExpr: '(r2, r2_ajustado)', hint: 'r2 = 1 - soma dos resíduos² / soma de (y - média)²; r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - 3 - 1).' },
+          { label: 'Declive simples (16.69) maior do que o múltiplo: dezembro inflacionava', expr: 'abs(float(declive_simples) - 16.6885) < 0.005 and bool(dezembro_inflacionava) is True', actualExpr: '(declive_simples, dezembro_inflacionava)', hint: 'declive_simples = clientes.cov(faturacao) / clientes.var(), como na etapa 13.' },
+          { label: 'Previsão para um sábado de dezembro com 10 clientes (209.71 €)', expr: 'abs(float(previsao_sabado_dezembro) - 209.706) < 0.05', actualExpr: 'previsao_sabado_dezembro', hint: 'b0 + b_clientes * 10 + b_fds * 1 + b_dezembro * 1.' },
+        ],
+      },
+      quiz: {
+        question: 'Numa regressão múltipla, o coeficiente de "dezembro" é 72 €. Como o lês?',
+        options: [
+          'Dezembro fatura 72 € por mês a mais do que os outros meses.',
+          'Cada cliente de dezembro gasta mais 72 €.',
+          'Um dia de dezembro fatura, em média, mais 72 € do que um dia normal com os mesmos clientes e o mesmo tipo de dia.',
+          'Dezembro explica 72% da faturação.',
+        ],
+        correctIndex: 2,
+        explanation: 'Os coeficientes de uma regressão múltipla medem o efeito de uma variável mantendo as outras constantes. Aqui a unidade é o dia, porque o modelo foi ajustado com dados diários.',
       },
     },
   ],
