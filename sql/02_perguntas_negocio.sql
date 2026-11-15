@@ -6,9 +6,11 @@ SELECT ROUND(SUM(quantidade * preco), 2) AS faturacao_total_eur
 FROM vendas;
 
 -- 2. Produto mais vendido em unidades (esperado: Leite com 960 unidades)
-SELECT produto, SUM(quantidade) AS total_unidades
-FROM vendas
-GROUP BY produto
+-- O nome vem de produtos (JOIN), porque o esquema normalizado não o repete em vendas.
+SELECT p.nome AS produto, SUM(v.quantidade) AS total_unidades
+FROM vendas v
+INNER JOIN produtos p ON p.id = v.produto_id
+GROUP BY p.nome
 ORDER BY total_unidades DESC
 LIMIT 1;
 

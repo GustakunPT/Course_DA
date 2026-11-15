@@ -65,7 +65,10 @@ python verificar.py 3      # só a semana 3
 # 3. (Fase 1, semanas 11 e 12) quando tiver escrito a Caixa Registadora
 python src/caixa.py
 
-# 4. (Fase 4) gráficos de estatística em relatorios/graficos/
+# 4. (Fase 2) base SQLite normalizada para correr sql/02_perguntas_negocio.sql
+python src/carregar_base.py   # cria mercearia.db
+
+# 5. (Fase 4) gráficos de estatística em relatorios/graficos/
 pip install -r requirements.txt
 python src/graficos.py
 ```
