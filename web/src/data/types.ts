@@ -29,6 +29,8 @@ export interface PythonChallengeSpec {
 }
 
 export interface GitChallengeSpec {
+  /** Nome curto do exercício de treino; o desafio principal não precisa. */
+  title?: string;
   description: string;
   starterCommands: string;
   solutionCommands: string;
@@ -63,6 +65,8 @@ export interface Lesson {
   practice?: PythonChallengeSpec[];
   /** Exercícios de treino SQL extra (não contam para o progresso). */
   practiceSql?: SqlChallengeSpec[];
+  /** Exercícios de treino Git extra (não contam para o progresso). */
+  practiceGit?: GitChallengeSpec[];
   sqlChallenge?: SqlChallengeSpec;
   gitChallenge?: GitChallengeSpec;
   quiz: QuizSpec;

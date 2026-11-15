@@ -17,13 +17,13 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
-- **7 Trilhas de Analista de Dados (60 etapas do Zero Absoluto ao Nível Profissional):**
+- **7 Trilhas de Analista de Dados (61 etapas do Zero Absoluto ao Nível Profissional):**
   1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada, a etapa 10 é uma revisão geral de todos os conceitos e a 11 é o projeto da Caixa Registadora)
   2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais; cada etapa tem pelo menos um treino extra e a etapa 10 treina a matriz RFM)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser; 2 treinos por etapa e uma etapa 08 com NumPy, `pd.crosstab`, quantis e datas, as ferramentas que a trilha de Estatística usa)
-  4. **Git, GitHub e Portfólio** (Simulador interativo de terminal Git)
+  4. **Git, GitHub e Portfólio** (Simulador interativo de terminal Git, com um treino por etapa)
   5. **Visualização, Excel/DAX e Power BI** (Curva ABC, relatório executivo, gráficos matplotlib desenhados no browser, Star Schema, DAX e prática guiada de Excel e Power BI com folha de respostas corrigida na app)
-  6. **Estatística para Analistas** (média vs mediana, IQR/outliers, probabilidade condicional e Bayes, paradoxo de Simpson, correlação, intervalos de confiança, testes A/B de médias e de proporções, tamanho de amostra, qui-quadrado e ANOVA, regressão linear simples e múltipla e perguntas rápidas de entrevista; cada etapa tem um desafio curto e treinos para as partes seguintes)
+  6. **Estatística para Analistas** (média vs mediana, IQR/outliers, probabilidade condicional e Bayes, paradoxo de Simpson, correlação, intervalos de confiança, simulação e bootstrap com histogramas, teste de permutação, testes A/B de médias e de proporções, tamanho de amostra, qui-quadrado e ANOVA, regressão linear simples e múltipla e perguntas rápidas de entrevista; cada etapa tem um desafio curto e treinos para as partes seguintes)
   7. **Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista Técnica** (Arquitetura Medalhão Bronze/Silver/Gold, Data Contracts/Testes de Qualidade, Retenção/Coortes/LTV, Performance SQL & Índices, Desafio Clássico de Entrevista `RANK`/`LAG` Caso Executivo 360º e Projeto Final guiado: SQL + pandas + gráfico + recomendação)
 - **Painéis 100% Redimensionáveis na Página:** divisórias verticais e horizontais arrastáveis (índice lateral, lição vs editor e altura do editor vs consola), modos rápidos (*Recolher índice*, *Foco leitura*, *Divisão 50/50*, *Foco código* e *Repor painéis*) com memória no navegador.
 - **Explorador Analítico CSV & Auditoria de Qualidade** (`26 902,89 €` em 5 078 vendas, filtros por cidade e categoria e diagnóstico de `vendas_sujas.csv`).
@@ -91,7 +91,7 @@ Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os
 ```bash
 pip install -r requirements-dev.txt
 pytest tests                       # Python: gerador, auditoria e gráficos
-cd web && npm test                 # Web: motores, API de sync e as 60 etapas e os treinos
+cd web && npm test                 # Web: motores, API de sync e as 61 etapas e os treinos
 ```
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
@@ -123,7 +123,7 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python 
 
 O projeto tem dois percursos que se completam:
 
-- **A app** (`web/`, publicada na Vercel) é o percurso principal: 60 etapas com desafios corrigidos e treinos.
+- **A app** (`web/`, publicada na Vercel) é o percurso principal: 61 etapas com desafios corrigidos e treinos.
 - **O curso local** (`licoes/`, `exercicios/` e `cadernos/`) dá mais leitura e prática no teu computador, com o
   VS Code, o terminal e o Git a sério.
 

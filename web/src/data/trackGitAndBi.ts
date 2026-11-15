@@ -1784,6 +1784,125 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
         explanation: 'Os coeficientes de uma regressão múltipla medem o efeito de uma variável mantendo as outras constantes. Aqui a unidade é o dia, porque o modelo foi ajustado com dados diários.',
       },
     },
+    {
+      id: 'bi-17-simulacao-bootstrap',
+      code: '17',
+      title: 'Ver a incerteza: simulação, bootstrap e testes de permutação',
+      lede: 'Em vez de confiar em fórmulas, deixa o computador repetir a experiência mil vezes. Vês a curva das médias a formar-se num histograma, confirmas o erro padrão da etapa anterior e aprendes o bootstrap e o teste de permutação, que também aparecem em entrevistas.',
+      analogyTitle: 'Provar a sopa mil vezes',
+      analogyBody: 'Uma colher de sopa dá uma ideia do sal, mas cada colher é um pouco diferente. Se provares mil colheres e marcares o resultado de cada uma, as marcas formam um monte à volta do sal verdadeiro. A largura desse monte é o erro padrão. O bootstrap faz isto quando só tens uma panela pequena: volta a tirar colheres da mesma amostra, com reposição.',
+      concepts: [
+        'Distribuição amostral: se repetires a amostragem muitas vezes, as médias das amostras formam uma curva em sino centrada na média verdadeira, mesmo que os dados originais sejam assimétricos (Teorema do Limite Central).',
+        'O desvio padrão dessas médias é o erro padrão: a simulação deve dar quase o mesmo que a fórmula desvio padrão / raiz de n.',
+        'Bootstrap: reamostrar a própria amostra com reposição (rng.choice(amostra, size=len(amostra))) muitas vezes; os percentis 2,5 e 97,5 das estatísticas dão um intervalo de confiança, mesmo para a mediana, onde não há fórmula simples.',
+        'Teste de permutação: baralha os rótulos dos grupos (fim de semana / dia útil) muitas vezes; o p-valor é a fração de baralhações com uma diferença tão grande como a observada.',
+        'np.random.default_rng(42) fixa a semente: os resultados repetem-se sempre que corres o código.',
+      ],
+      beginnerSteps: [
+        'Converte o sub numa coluna NumPy com .to_numpy() e cria rng = np.random.default_rng(42).',
+        'Repete 1000 vezes: tira 50 valores com rng.choice(sub, size=50) e guarda a média.',
+        'Compara o desvio padrão das 1000 médias com sub.std(ddof=1) / math.sqrt(50).',
+        'Conta a percentagem de médias que ficam a menos de 1.96 erros padrão da média verdadeira.',
+        'Desenha o histograma das médias com ax.hist(medias_amostra, bins=30) e marca a média verdadeira com ax.axvline.',
+      ],
+      proPractice: 'Em entrevistas para analista é comum perguntarem "como calculavas um intervalo de confiança para a mediana?" ou "e se os dados não forem normais?". A resposta curta é: bootstrap. Em Python profissional usa-se scipy.stats.bootstrap e scipy.stats.permutation_test.',
+      commonPitfall: 'Reamostrar sem reposição no bootstrap: rng.choice(amostra, size=len(amostra), replace=False) devolve sempre a mesma amostra baralhada e o intervalo fica com largura zero.',
+      referenceTitle: 'Simulação com NumPy',
+      referenceRows: [
+        { syntax: 'rng = np.random.default_rng(42)', meaning: 'Gerador aleatório com semente fixa', example: 'Resultados reprodutíveis' },
+        { syntax: 'rng.choice(x, size=50)', meaning: 'Amostra de 50 valores com reposição', example: 'Uma "colher" da sopa' },
+        { syntax: 'np.percentile(boot, [2.5, 97.5])', meaning: 'Intervalo de confiança por bootstrap', example: 'IC da mediana' },
+        { syntax: 'rng.permutation(rotulos)', meaning: 'Baralha os rótulos dos grupos', example: 'Teste de permutação' },
+        { syntax: 'ax.hist(valores, bins=30)', meaning: 'Histograma', example: 'A curva das médias' },
+      ],
+      engine: 'python',
+      exampleCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Os dados originais são muito assimétricos (um dado viciado que dá muitos 1)...
+rng = np.random.default_rng(7)
+dado = np.array([1, 1, 1, 1, 2, 6])
+print("Média verdadeira:", dado.mean())
+
+# ...mas a média de 30 lançamentos, repetida 2000 vezes, forma um sino.
+medias = [rng.choice(dado, size=30).mean() for _ in range(2000)]
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.hist(medias, bins=30)
+ax.axvline(dado.mean(), color="black")
+ax.set_title("As médias formam um sino, mesmo com dados assimétricos")
+fig.tight_layout()`,
+      pythonChallenge: {
+        description: 'Em vendas.csv (sub = quantidade * preco, como array NumPy), com rng = np.random.default_rng(42):\n1) medias_amostra: array com a média de 1000 amostras de 50 linhas (rng.choice com reposição).\n2) media_das_medias, erro_simulado (desvio padrão das médias, ddof=1) e erro_teorico (sub.std(ddof=1) / raiz de 50).\n3) pct_dentro: percentagem de médias a menos de 1.96 × erro_teorico da média verdadeira.\n4) Histograma das médias (bins=30) com um título que diga a conclusão.\nO bootstrap está no treino 1 e o teste de permutação no treino 2.',
+        starterCode: `import math
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("dados/vendas.csv")
+sub = (df["quantidade"] * df["preco"]).to_numpy()
+rng = np.random.default_rng(42)
+
+# 1) 1000 amostras de 50 linhas
+medias_amostra = None
+
+# 2) Erro padrão simulado vs teórico
+media_das_medias = None
+erro_simulado = None
+erro_teorico = None
+
+# 3) Quantas médias ficam dentro de ±1.96 erros padrão?
+pct_dentro = None
+
+# 4) Histograma
+fig, ax = plt.subplots(figsize=(7, 3.5))
+print(media_das_medias, erro_simulado, erro_teorico, pct_dentro)`,
+        solutionCode: `import math
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("dados/vendas.csv")
+sub = (df["quantidade"] * df["preco"]).to_numpy()
+rng = np.random.default_rng(42)
+
+# 1) 1000 amostras de 50 linhas
+medias_amostra = np.array([rng.choice(sub, size=50).mean() for _ in range(1000)])
+
+# 2) Erro padrão simulado vs teórico
+media_das_medias = medias_amostra.mean()
+erro_simulado = medias_amostra.std(ddof=1)
+erro_teorico = sub.std(ddof=1) / math.sqrt(50)
+
+# 3) Quantas médias ficam dentro de ±1.96 erros padrão?
+pct_dentro = (np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100
+
+# 4) Histograma
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.hist(medias_amostra, bins=30)
+ax.axvline(sub.mean(), color="black")
+ax.set_title("As médias de 50 linhas formam um sino à volta de 5,30 €")
+ax.set_xlabel("Média de uma amostra de 50 linhas (€)")
+fig.tight_layout()
+print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} € | {pct_dentro:.1f}% dentro de ±1.96 EP")`,
+        checks: [
+          { label: '1000 médias centradas na média verdadeira (5.30 €)', expr: 'len(medias_amostra) == 1000 and abs(float(media_das_medias) - 5.2979) < 0.2 and abs(float(media_das_medias) - float(np.mean(medias_amostra))) < 1e-9', actualExpr: '(len(medias_amostra) if medias_amostra is not None else None, media_das_medias)', hint: 'medias_amostra = np.array([rng.choice(sub, size=50).mean() for _ in range(1000)]).' },
+          { label: 'Erro simulado ≈ erro teórico (0.80 €)', expr: 'abs(float(erro_teorico) - 0.80195) < 0.001 and abs(float(erro_simulado) - float(np.std(medias_amostra, ddof=1))) < 1e-9 and 0.9 < float(erro_simulado) / float(erro_teorico) < 1.1', actualExpr: '(erro_simulado, erro_teorico)', hint: 'erro_simulado = medias_amostra.std(ddof=1) e erro_teorico = sub.std(ddof=1) / math.sqrt(50).' },
+          { label: 'Cerca de 95% das médias dentro de ±1.96 erros padrão', expr: '92 <= float(pct_dentro) <= 98 and abs(float(pct_dentro) - float((np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100)) < 1e-9', actualExpr: 'pct_dentro', hint: '(np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100.' },
+          { label: 'Histograma das médias com título', expr: 'len(ax.patches) >= 10 and len(ax.get_title().strip()) >= 15', actualExpr: '(len(ax.patches), ax.get_title())', hint: 'ax.hist(medias_amostra, bins=30) e ax.set_title("...").' },
+        ],
+      },
+      quiz: {
+        question: 'Tens uma amostra de 200 cestos e queres um intervalo de confiança para a mediana. O que fazes no bootstrap?',
+        options: [
+          'Calculas mediana ± 1.96 × desvio padrão / raiz de 200.',
+          'Reamostras os 200 cestos com reposição muitas vezes e usas os percentis 2,5 e 97,5 das medianas.',
+          'Divides a amostra em 2 metades e comparas as medianas.',
+          'Reamostras sem reposição, para não repetir cestos.',
+        ],
+        correctIndex: 1,
+        explanation: 'O bootstrap trata a amostra como se fosse a população e repete a amostragem com reposição. Sem reposição, todas as reamostras seriam iguais à original.',
+      },
+    },
   ],
 };
 

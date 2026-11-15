@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 7 trilhas e 60 etapas', () => {
+  it('tem 7 trilhas e 61 etapas', () => {
     expect(allTracks).toHaveLength(7);
-    expect(totalLessonsCount).toBe(60);
+    expect(totalLessonsCount).toBe(61);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
@@ -45,9 +45,9 @@ describe('estrutura do currículo', () => {
     expect(allTracks.find((t) => t.id === 'estatistica')!.lessons[0].id).toBe('bi-01-media-mediana');
   });
 
-  it('todas as etapas fora do Git têm pelo menos um treino, exceto a introdução e o projeto da trilha Python', () => {
+  it('todas as etapas têm pelo menos um treino, exceto a introdução e o projeto da trilha Python', () => {
     const semTreino = todas
-      .filter((l) => l.trilha !== 'git' && !(l.practice?.length || l.practiceSql?.length))
+      .filter((l) => !(l.practice?.length || l.practiceSql?.length || l.practiceGit?.length))
       .map((l) => l.id);
     expect(semTreino).toEqual(['py-00-pensamento', 'py-11-revisao', 'py-10-caixa-csv']);
   });
@@ -124,6 +124,21 @@ describe('sql-02 recusa respostas incompletas', () => {
 });
 
 const gitLessons = todas.filter((l) => l.gitChallenge);
+const treinosGit = todas.flatMap((l) => (l.practiceGit ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
+describe('treinos Git', () => {
+  it('cada etapa Git tem um treino', () => {
+    expect(treinosGit).toHaveLength(5);
+  });
+
+  it.each(treinosGit)('%s: a solução passa e o código inicial não', (_nome, ch) => {
+    const certo = runGitSimulator(createInitialGitState(), ch.solutionCommands);
+    const veredito = ch.validate(certo.nextState, certo.output);
+    expect(veredito.passed, veredito.message).toBe(true);
+    const inicial = runGitSimulator(createInitialGitState(), ch.starterCommands);
+    expect(ch.validate(inicial.nextState, inicial.output).passed).toBe(false);
+  });
+});
+
 describe('soluções Git passam na correção', () => {
   it.each(gitLessons.map((l) => [l.id, l] as const))('%s', (_id, l) => {
     const { nextState, output } = runGitSimulator(createInitialGitState(), l.gitChallenge!.solutionCommands);

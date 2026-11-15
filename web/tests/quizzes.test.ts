@@ -26,9 +26,10 @@ describe('quizzes', () => {
     for (const l of licoes) {
       contagem[quizDisplayOrder(l.id, 4).indexOf(l.quiz.correctIndex)]++;
     }
+    // Cada posição deve ter entre 10% e 30% das respostas certas (o ideal são 25%).
     for (const n of contagem) {
-      expect(n).toBeGreaterThanOrEqual(6);
-      expect(n).toBeLessThanOrEqual(18);
+      expect(n).toBeGreaterThanOrEqual(Math.floor(licoes.length * 0.1));
+      expect(n).toBeLessThanOrEqual(Math.ceil(licoes.length * 0.3));
     }
   });
 

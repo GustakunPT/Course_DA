@@ -438,4 +438,84 @@ print(f"Com dia_par: R² {r2_com:.4f}, ajustado {r2_aj_com:.4f}")`,
       ],
     },
   ],
+  'bi-17-simulacao-bootstrap': [
+    {
+      title: 'Bootstrap: IC da mediana do cesto',
+      description: 'Tens só uma amostra de 200 cestos (amostra, já preparada). Com rng = np.random.default_rng(1), faz 2000 reamostras com reposição do mesmo tamanho e guarda a mediana de cada uma em boot. Guarda mediana_amostra, ic_inferior e ic_superior (percentis 2.5 e 97.5 de boot) e mediana_real_dentro (True se a mediana de todos os cestos, 8.40 €, ficar dentro do intervalo).',
+      starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum()
+amostra = por_cesto.sample(200, random_state=7).to_numpy()
+rng = np.random.default_rng(1)
+
+boot = None
+mediana_amostra = None
+ic_inferior = None
+ic_superior = None
+mediana_real_dentro = None
+print(mediana_amostra, ic_inferior, ic_superior, mediana_real_dentro)`,
+      solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum()
+amostra = por_cesto.sample(200, random_state=7).to_numpy()
+rng = np.random.default_rng(1)
+
+boot = np.array([np.median(rng.choice(amostra, size=len(amostra))) for _ in range(2000)])
+mediana_amostra = np.median(amostra)
+ic_inferior, ic_superior = np.percentile(boot, [2.5, 97.5])
+mediana_real_dentro = ic_inferior <= por_cesto.median() <= ic_superior
+print(f"Mediana da amostra {mediana_amostra:.2f} € | IC 95% bootstrap: {ic_inferior:.2f} € a {ic_superior:.2f} €")
+print("A mediana real (8.40 €) está dentro?", mediana_real_dentro)`,
+      checks: [
+        { label: '2000 medianas de bootstrap e mediana_amostra (8.97 €)', expr: 'len(boot) == 2000 and abs(float(mediana_amostra) - 8.97) < 0.001', actualExpr: '(len(boot) if boot is not None else None, mediana_amostra)', hint: 'boot = np.array([np.median(rng.choice(amostra, size=len(amostra))) for _ in range(2000)]).' },
+        { label: 'IC pelos percentis 2.5 e 97.5 de boot, à volta da mediana', expr: '(lambda q: abs(float(ic_inferior) - q[0]) < 1e-9 and abs(float(ic_superior) - q[1]) < 1e-9)(np.percentile(boot, [2.5, 97.5])) and float(ic_inferior) < float(mediana_amostra) < float(ic_superior) and float(ic_superior) - float(ic_inferior) > 0.5', actualExpr: '(ic_inferior, ic_superior)', hint: 'ic_inferior, ic_superior = np.percentile(boot, [2.5, 97.5]). Se a largura for zero, esqueceste a reposição.' },
+        { label: 'A mediana real fica dentro do intervalo', expr: 'bool(mediana_real_dentro) is True', actualExpr: 'mediana_real_dentro', hint: 'ic_inferior <= por_cesto.median() <= ic_superior.' },
+      ],
+    },
+    {
+      title: 'Teste de permutação: o fim de semana outra vez',
+      description: 'Repete o teste A/B do fim de semana sem fórmulas. diferenca_observada = média do sub ao fim de semana menos nos dias úteis. Com rng = np.random.default_rng(0), baralha os rótulos fds 2000 vezes (rng.permutation) e guarda a diferença de cada baralhação em diferencas. p_valor_perm = fração de |diferencas| ≥ |diferenca_observada|; significativo se for menor do que 0.05.',
+      starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+sub = (df["quantidade"] * df["preco"]).to_numpy()
+fds = (pd.to_datetime(df["data"]).dt.day_of_week >= 5).to_numpy()
+rng = np.random.default_rng(0)
+
+diferenca_observada = None
+diferencas = None
+p_valor_perm = None
+significativo = None
+print(diferenca_observada, p_valor_perm, significativo)`,
+      solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+sub = (df["quantidade"] * df["preco"]).to_numpy()
+fds = (pd.to_datetime(df["data"]).dt.day_of_week >= 5).to_numpy()
+rng = np.random.default_rng(0)
+
+diferenca_observada = sub[fds].mean() - sub[~fds].mean()
+diferencas = []
+for _ in range(2000):
+    baralhado = rng.permutation(fds)
+    diferencas.append(sub[baralhado].mean() - sub[~baralhado].mean())
+diferencas = np.array(diferencas)
+p_valor_perm = (np.abs(diferencas) >= abs(diferenca_observada)).mean()
+significativo = p_valor_perm < 0.05
+print(f"Diferença observada {diferenca_observada:.3f} € | p (permutação) = {p_valor_perm:.3f} | significativo? {significativo}")`,
+      checks: [
+        { label: 'diferenca_observada (-0.28 €)', expr: 'abs(float(diferenca_observada) - (-0.2776)) < 0.001', actualExpr: 'diferenca_observada', hint: 'sub[fds].mean() - sub[~fds].mean().' },
+        { label: '2000 baralhações e p-valor perto do teste t (0.083)', expr: 'len(diferencas) == 2000 and abs(float(p_valor_perm) - float((np.abs(diferencas) >= abs(diferenca_observada)).mean())) < 1e-9 and 0.05 <= float(p_valor_perm) <= 0.13', actualExpr: '(len(diferencas) if diferencas is not None else None, p_valor_perm)', hint: 'Em cada volta: baralhado = rng.permutation(fds) e guarda sub[baralhado].mean() - sub[~baralhado].mean().' },
+        { label: 'Mesma conclusão: não é significativo', expr: 'bool(significativo) is False', actualExpr: 'significativo', hint: 'significativo = p_valor_perm < 0.05.' },
+      ],
+    },
+  ],
 };

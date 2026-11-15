@@ -1,6 +1,6 @@
 import './styles/app.css';
 import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
-import type { EngineKind, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
+import type { EngineKind, GitChallengeSpec, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
 import { runPythonCode } from './engines/pythonEngine';
@@ -106,6 +106,12 @@ function activeSqlChallenge(lesson: Lesson): SqlChallengeSpec | undefined {
   return lesson.sqlChallenge;
 }
 
+/** Desafio Git ativo na bancada: o principal ou um dos treinos. */
+function activeGitChallenge(lesson: Lesson): GitChallengeSpec | undefined {
+  if (state.practiceIdx > 0) return lesson.practiceGit?.[state.practiceIdx - 1] ?? lesson.gitChallenge;
+  return lesson.gitChallenge;
+}
+
 function draftKey(lesson: Lesson, tab: WorkbenchTab): string {
   if (tab === 'challenge' && state.practiceIdx > 0) return `${lesson.id}:treino${state.practiceIdx}`;
   return `${lesson.id}:${tab}`;
@@ -122,7 +128,8 @@ function defaultEditorCode(lesson: Lesson, tab: WorkbenchTab): string {
   if (py) return py.starterCode;
   const sq = activeSqlChallenge(lesson);
   if (sq) return sq.starterSql;
-  if (lesson.gitChallenge) return lesson.gitChallenge.starterCommands;
+  const gc = activeGitChallenge(lesson);
+  if (gc) return gc.starterCommands;
   return lesson.exampleCode;
 }
 
@@ -260,11 +267,11 @@ function scheduleCloudSync(): void {
 }
 
 function renderPracticeSwitcher(lesson: Lesson): string {
-  const treinos: { title?: string }[] = lesson.practice ?? lesson.practiceSql ?? [];
+  const treinos: { title?: string }[] = lesson.practice ?? lesson.practiceSql ?? lesson.practiceGit ?? [];
   if (!treinos.length) return '';
   const feito = (i: number) =>
     i === 0 ? Boolean(state.completedLessons[lesson.id]) : state.practiceDone.has(`${lesson.id}:${i}`);
-  const botoes = [lesson.pythonChallenge ?? lesson.sqlChallenge, ...treinos].map((ch, i) => {
+  const botoes = [lesson.pythonChallenge ?? lesson.sqlChallenge ?? lesson.gitChallenge, ...treinos].map((ch, i) => {
     const nome = i === 0 ? 'Desafio' : `Treino ${i}`;
     const dica = i === 0 ? 'Desafio principal da etapa (conta para o progresso)' : ch?.title ?? nome;
     return `<button type="button" class="mode-btn" aria-pressed="${state.practiceIdx === i}" data-practice-idx="${i}" title="${escapeHtml(dica)}">${nome}${feito(i) ? ' ✓' : ''}</button>`;
@@ -290,7 +297,7 @@ function renderAcademyWorkspace(): string {
         ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
         : activePythonChallenge(lesson)?.description ??
           activeSqlChallenge(lesson)?.description ??
-          lesson.gitChallenge?.description ??
+          activeGitChallenge(lesson)?.description ??
           'Execute o código abaixo para validar esta etapa.';
 
   const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
@@ -608,7 +615,7 @@ function renderAcademyWorkspace(): string {
           <strong>${
             state.wbTab === 'challenge'
               ? state.practiceIdx > 0
-                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? activeSqlChallenge(lesson)?.title ?? '')}`
+                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? activeSqlChallenge(lesson)?.title ?? activeGitChallenge(lesson)?.title ?? '')}`
                 : 'Enunciado do desafio'
               : state.wbTab === 'example'
                 ? 'Laboratório Experimenta'
@@ -692,7 +699,7 @@ function renderAcademyWorkspace(): string {
             ? (() => {
                 const hint1 =
                   activeSqlChallenge(lesson)?.hint ??
-                  lesson.gitChallenge?.hint ??
+                  activeGitChallenge(lesson)?.hint ??
                   activePythonChallenge(lesson)?.checks[0]?.hint ??
                   lesson.beginnerSteps?.[0] ??
                   'Revê a sintaxe na tabela de referência à esquerda.';
@@ -906,9 +913,13 @@ async function executeWorkbench(): Promise<void> {
     const { output, nextState } = runGitSimulator(freshBase, code);
     state.gitState = nextState;
 
-    if (state.wbTab === 'challenge' && lesson.gitChallenge) {
-      const check = lesson.gitChallenge.validate(nextState, output);
-      if (check.passed) {
+    const gitChallenge = state.wbTab === 'challenge' ? activeGitChallenge(lesson) : undefined;
+    if (gitChallenge) {
+      const check = gitChallenge.validate(nextState, output);
+      if (check.passed && state.practiceIdx > 0) {
+        state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
+        savePracticeDone();
+      } else if (check.passed) {
         markLessonCompleted(lesson);
       }
       state.output = {
@@ -916,12 +927,16 @@ async function executeWorkbench(): Promise<void> {
         elapsedMs: 1.2,
         stdout: output || 'Nenhum comando executado.',
         bannerOk: check.passed,
-        bannerText: check.passed ? 'Desafio Git concluído' : 'Comandos executados: falta um passo',
+        bannerText: check.passed
+          ? state.practiceIdx > 0
+            ? 'Treino resolvido!'
+            : 'Desafio Git concluído'
+          : 'Comandos executados: falta um passo',
         checks: [
           {
             label: check.message,
             passed: check.passed,
-            hint: check.passed ? undefined : lesson.gitChallenge.hint,
+            hint: check.passed ? undefined : gitChallenge.hint,
           },
         ],
       };
@@ -1296,7 +1311,7 @@ function attachDomListeners(): void {
         const sol =
           activePythonChallenge(l)?.solutionCode ??
           activeSqlChallenge(l)?.solutionSql ??
-          l.gitChallenge?.solutionCommands ??
+          activeGitChallenge(l)?.solutionCommands ??
           l.exampleCode;
         state.editorDrafts[draftKey(l, 'challenge')] = sol;
         saveDrafts(state.editorDrafts, true);

@@ -8,6 +8,7 @@ import { sqlPractice } from './practiceSql';
 import { pandasPractice } from './practicePandas';
 import { statsPractice } from './practiceStats';
 import { biProPractice, biProSqlPractice } from './practiceBiPro';
+import { gitPractice } from './practiceGit';
 import type { Lesson, PythonChallengeSpec, Track } from './types';
 
 // Os exercícios de treino ficam num ficheiro à parte e juntam-se aqui à etapa respetiva.
@@ -24,6 +25,11 @@ const sqlTrackComTreinos: Track = {
 const pandasTrackComTreinos: Track = {
   ...pandasTrack,
   lessons: pandasTrack.lessons.map((l) => (pandasPractice[l.id] ? { ...l, practice: pandasPractice[l.id] } : l)),
+};
+
+const gitTrackComTreinos: Track = {
+  ...gitTrack,
+  lessons: gitTrack.lessons.map((l) => (gitPractice[l.id] ? { ...l, practiceGit: gitPractice[l.id] } : l)),
 };
 
 /** Junta os treinos Python e SQL que existirem para a etapa. */
@@ -67,13 +73,14 @@ const estatisticaTrack = montarTrilha(
     id: 'estatistica',
     shortTitle: '6. Estatística',
     fullTitle: 'Estatística para Analistas: do descritivo às perguntas de entrevista',
-    summary: 'Média e mediana, quartis, probabilidade e Bayes, correlação e intervalos de confiança, testes A/B, qui-quadrado e ANOVA, regressão simples e múltipla, e perguntas rápidas de entrevista.',
+    summary: 'Média e mediana, quartis, probabilidade e Bayes, correlação e intervalos de confiança, simulação e bootstrap, testes A/B, qui-quadrado e ANOVA, regressão simples e múltipla, e perguntas rápidas de entrevista.',
   },
   [
     'bi-01-media-mediana',
     'bi-02-quartis-outliers',
     'bi-12-probabilidade-simpson',
     'bi-09-correlacao-confianca',
+    'bi-17-simulacao-bootstrap',
     'bi-08-teste-ab',
     'bi-11-ab-proporcoes',
     'bi-15-qui-quadrado-anova',
@@ -87,7 +94,7 @@ export const allTracks: Track[] = enrichTracksWithPedagogy([
   pythonTrackComTreinos,
   sqlTrackComTreinos,
   pandasTrackComTreinos,
-  gitTrack,
+  gitTrackComTreinos,
   visualBiTrack,
   estatisticaTrack,
   careerProComTreinos,
