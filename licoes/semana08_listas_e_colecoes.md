@@ -36,10 +36,10 @@ precos_com_iva = [round(p * 1.23, 2) for p in precos_sem_iva]
 acima_de_dois = [p for p in precos_sem_iva if p >= 2.00]
 ```
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Numa lista com 3 elementos, tente ler `cesto[3]`. Leia o `IndexError: list index out of range`: se começa no 0, as posições válidas são 0, 1 e 2.
-2. Compare `nova = lista.sort()` com `nova = sorted(lista)`. Porque é que a primeira guarda `None`? (Porque `.sort()` arruma a lista no próprio lugar e não devolve nada!)
+1. Numa lista com 3 elementos, tenta ler `cesto[3]`. Lê o `IndexError: list index out of range`: se começa no 0, as posições válidas são 0, 1 e 2.
+2. Compara `nova = lista.sort()` com `nova = sorted(lista)`. Porque é que a primeira guarda `None`? (Porque `.sort()` arruma a lista no próprio lugar e não devolve nada!)
 
 ## Ligação ao SQL e ao pandas
 
@@ -48,4 +48,4 @@ acima_de_dois = [p for p in precos_sem_iva if p >= 2.00]
 
 ## Exercícios
 
-Complete `exercicios/semana08_listas.py` e corra `python verificar.py 8`.
+Completa `exercicios/semana08_listas.py` e corre `python verificar.py 8`.

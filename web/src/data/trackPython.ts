@@ -83,7 +83,7 @@ print("Receita estimada:", receita_dia)`,
       title: 'Sintaxe, print() e comentários',
       lede: 'Em Python cada linha é uma instrução direta e a indentação (espaços à esquerda) define os blocos de código.',
       analogyTitle: 'A lista de abertura da loja',
-      analogyBody: 'O Python lê o teu ficheiro de cima para baixo como o funcionário que abre a mercearia: acende as luzes, abre a caixa e imprime o talão de teste. Tudo o que começa por cardinal (#) é uma nota a lápis na margem que o computador ignora.',
+      analogyBody: 'O Python lê o teu ficheiro de cima para baixo como o funcionário que abre a mercearia: acende as luzes, abre a caixa e imprime o talão de testa. Tudo o que começa por cardinal (#) é uma nota a lápis na margem que o computador ignora.',
       concepts: [
         'print() envia texto ou resultados de contas diretamente para o ecrã.',
         'Comentários começam por # e servem para explicar o porquê de uma regra de negócio.',
@@ -101,8 +101,8 @@ print("Mercearia do Bairro")
 print("Artigos no catálogo:", 15)
 print("2 pães a 0.25 EUR:", 2 * 0.25)`,
       pythonChallenge: {
-        description: 'Guarde na variável saudacao o texto exato "Bem-vindo à Mercearia" e na variável dobro_quinze o resultado de 15 * 2.',
-        starterCode: `# Complete as duas variáveis abaixo
+        description: 'Guarda na variável saudacao o texto exato "Bem-vindo à Mercearia" e na variável dobro_quinze o resultado de 15 * 2.',
+        starterCode: `# Completa as duas variáveis abaixo
 saudacao = None
 dobro_quinze = None
 
@@ -112,8 +112,8 @@ dobro_quinze = 15 * 2
 
 print(saudacao, dobro_quinze)`,
         checks: [
-          { label: 'saudacao', expr: 'saudacao == "Bem-vindo à Mercearia"', actualExpr: 'saudacao', hint: 'Escreva o texto exato entre aspas.' },
-          { label: 'dobro_quinze', expr: 'dobro_quinze == 30 and isinstance(dobro_quinze, int)', actualExpr: 'dobro_quinze', hint: 'Multiplique 15 * 2.' },
+          { label: 'saudacao', expr: 'saudacao == "Bem-vindo à Mercearia"', actualExpr: 'saudacao', hint: 'Escreve o texto exato entre aspas.' },
+          { label: 'dobro_quinze', expr: 'dobro_quinze == 30 and isinstance(dobro_quinze, int)', actualExpr: 'dobro_quinze', hint: 'Multiplica 15 * 2.' },
         ],
       },
       quiz: {
@@ -131,7 +131,7 @@ print(saudacao, dobro_quinze)`,
     {
       id: 'py-02-variaveis',
       code: '02',
-      title: 'Variáveis e tipos de dados (Semana 3)',
+      title: 'Variáveis e tipos de dados',
       lede: 'Uma variável guarda um valor com nome e tipo bem definidos: inteiros, decimais, texto ou booleanos.',
       analogyTitle: 'Frascos etiquetados na despensa',
       analogyBody: 'Uma variável é um frasco transparente com um rótulo colado fora. O sinal = não significa igualdade matemática: significa guardar o valor da direita dentro do frasco da esquerda.',
@@ -156,7 +156,7 @@ print("Total:", total, "| Tipo:", type(total).__name__)
 print("Texto colado:", "2" + "2")
 print("Número somado:", int("2") + 2)`,
       pythonChallenge: {
-        description: 'Resolva o exercício oficial da Semana 3: preco_pao (0.25), quantidade (10), total (usando as variáveis), colado ("22"), somado (4) e nome_loja ("Mercearia do Bairro").',
+        description: 'Cria as variáveis preco_pao (0.25), quantidade (10), total (usando as variáveis), colado ("22"), somado (4) e nome_loja ("Mercearia do Bairro").',
         starterCode: `preco_pao = None
 quantidade = None
 total = None
@@ -175,10 +175,10 @@ nome_loja = "Mercearia do Bairro"
 print(preco_pao, quantidade, total, colado, somado, nome_loja)`,
         checks: [
           { label: 'preco_pao', expr: 'isinstance(preco_pao, (int, float)) and math.isclose(preco_pao, 0.25, abs_tol=0.005)', actualExpr: 'preco_pao', hint: '25 cêntimos escrevem-se 0.25.' },
-          { label: 'quantidade', expr: 'quantidade == 10 and isinstance(quantidade, int)', actualExpr: 'quantidade', hint: 'Use o inteiro 10 sem aspas.' },
-          { label: 'total', expr: 'isinstance(total, (int, float)) and math.isclose(total, 2.5, abs_tol=0.005)', actualExpr: 'total', hint: 'Multiplique preco_pao * quantidade.' },
-          { label: 'colado', expr: 'colado == "22"', actualExpr: 'colado', hint: 'Some os textos "2" + "2".' },
-          { label: 'somado', expr: 'somado == 4 and isinstance(somado, int)', actualExpr: 'somado', hint: 'Converta com int("2") + int("2").' },
+          { label: 'quantidade', expr: 'quantidade == 10 and isinstance(quantidade, int)', actualExpr: 'quantidade', hint: 'Usa o inteiro 10 sem aspas.' },
+          { label: 'total', expr: 'isinstance(total, (int, float)) and math.isclose(total, 2.5, abs_tol=0.005)', actualExpr: 'total', hint: 'Multiplica preco_pao * quantidade.' },
+          { label: 'colado', expr: 'colado == "22"', actualExpr: 'colado', hint: 'Soma os textos "2" + "2".' },
+          { label: 'somado', expr: 'somado == 4 and isinstance(somado, int)', actualExpr: 'somado', hint: 'Converte com int("2") + int("2").' },
           { label: 'nome_loja', expr: 'nome_loja == "Mercearia do Bairro"', actualExpr: 'nome_loja', hint: 'Respeite maiúsculas e espaços.' },
         ],
       },
@@ -197,7 +197,7 @@ print(preco_pao, quantidade, total, colado, somado, nome_loja)`,
     {
       id: 'py-03-strings-conversoes',
       code: '03',
-      title: 'Texto, limpeza, conversões e f-strings (Semana 4)',
+      title: 'Texto, limpeza, conversões e f-strings',
       lede: 'Dados reais chegam como texto com espaços a mais ou casas decimais compridas; limpar e formatar texto é pão nosso do analista.',
       analogyTitle: 'O leitor de código de barras e a impressora de talões',
       analogyBody: 'O teclado e os ficheiros CSV entregam etiquetas de papel (str). Para calcular o troco transformas papel em moedas com float(); para imprimir o talão formatado a duas casas decimais usas uma f-string com :.2f.',
@@ -221,7 +221,7 @@ nome_limpo = produto_sujo.strip().title()
 preco_num = float(preco_texto.replace(",", "."))
 print(f"Artigo: {nome_limpo} | Preço: {preco_num:.2f} €")`,
       pythonChallenge: {
-        description: 'Complete o exercício da Semana 4: converta valor_pago_texto ("20") em número, calcule o troco para total_compra = 13.75, crie mensagem ("Troco: 6.25 €") e mensagem_divisao ("Preço por pessoa: 4.58 €").',
+        description: 'Converte valor_pago_texto ("20") em número, calcula o troco para total_compra = 13.75, cria mensagem ("Troco: 6.25 €") e mensagem_divisao ("Preço por pessoa: 4.58 €").',
         starterCode: `total_compra = 13.75
 valor_pago_texto = "20"
 
@@ -243,10 +243,11 @@ mensagem_divisao = f"Preço por pessoa: {total_compra / 3:.2f} €"
 print(mensagem)
 print(mensagem_divisao)`,
         checks: [
-          { label: 'valor_pago', expr: 'isinstance(valor_pago, (int, float)) and math.isclose(valor_pago, 20.0)', actualExpr: 'valor_pago', hint: 'Use float(valor_pago_texto).' },
-          { label: 'troco', expr: 'isinstance(troco, (int, float)) and math.isclose(troco, 6.25)', actualExpr: 'troco', hint: 'Subtraia valor_pago - total_compra.' },
-          { label: 'mensagem', expr: 'mensagem == "Troco: 6.25 €"', actualExpr: 'mensagem', hint: 'Use f"Troco: {troco} €" ou {troco:.2f}.' },
-          { label: 'mensagem_divisao', expr: 'mensagem_divisao == "Preço por pessoa: 4.58 €"', actualExpr: 'mensagem_divisao', hint: 'Use {total_compra / 3:.2f} dentro da f-string.' },
+          { label: 'valor_pago', expr: 'isinstance(valor_pago, (int, float)) and math.isclose(valor_pago, 20.0)', actualExpr: 'valor_pago', hint: 'Usa float(valor_pago_texto).' },
+          { label: 'troco', expr: 'isinstance(troco, (int, float)) and math.isclose(troco, 6.25)', actualExpr: 'troco', hint: 'Subtrai valor_pago - total_compra.' },
+          { label: 'mensagem', expr: 'mensagem == "Troco: 6.25 €"', actualExpr: 'mensagem', hint: 'Usa f"Troco: {troco} €" ou {troco:.2f}.' },
+          { label: 'mensagem_divisao', expr: 'mensagem_divisao == "Preço por pessoa: 4.58 €"', actualExpr: 'mensagem_divisao', hint: 'Usa {total_compra / 3:.2f} dentro da f-string.' },
+          { label: 'A lógica funciona com outra compra (12.40 € pagos com 15 €)', expr: 'correr_com(total_compra=12.40, valor_pago_texto="15")["mensagem"] == "Troco: 2.60 €"', actualExpr: 'correr_com(total_compra=12.40, valor_pago_texto="15").get("mensagem")', hint: 'Calcula o troco a partir das variáveis (float(valor_pago_texto) - total_compra), em vez de escrever o resultado à mão.' },
         ],
       },
       quiz: {
@@ -264,12 +265,12 @@ print(mensagem_divisao)`,
     {
       id: 'py-04-condicoes',
       code: '04',
-      title: 'Comparações e condições if / elif / else (Semana 5)',
+      title: 'Comparações e condições if / elif / else',
       lede: 'As estruturas condicionais permitem aplicar escalões de desconto, regras de entrega e validações de qualidade.',
       analogyTitle: 'O tapete separador de fruta',
       analogyBody: 'As maçãs descem por uma calha com cancelas por tamanho: se passa na primeira abertura cai logo no cesto pequeno; só o que não caiu segue para o elif seguinte, e o resto acaba no else.',
       concepts: [
-        'Use == para comparar igualdade (dois sinais de igual) e != para diferente.',
+        'Usa == para comparar igualdade (dois sinais de igual) e != para diferente.',
         'Combine regras de negócio com and (ambas verdadeiras) e or (basta uma verdadeira).',
         'Assim que um ramo if ou elif é verdadeiro, o Python ignora todos os restantes ramos desse bloco.',
       ],
@@ -293,7 +294,7 @@ else:
 
 print(f"Escalão: {desconto}% | Entrega grátis: {total > 30 and cidade == 'Porto'}")`,
       pythonChallenge: {
-        description: 'Resolva a Semana 5: escalão desconto_pct (até 20 -> 0, até 50 -> 5, acima -> 10) para total = 37.5, total_final após desconto, pode_entrar (idade 17 >= 18) e entrega_gratis (total > 30 e cidade == "Porto").',
+        description: 'Calcula o escalão desconto_pct (até 20 -> 0, até 50 -> 5, acima -> 10) para total = 37.5, total_final após desconto, pode_entrar (idade 17 >= 18) e entrega_gratis (total > 30 e cidade == "Porto").',
         starterCode: `total = 37.5
 desconto_pct = None
 
@@ -325,9 +326,11 @@ entrega_gratis = total > 30 and cidade == "Porto"
 print(desconto_pct, total_final, pode_entrar, entrega_gratis)`,
         checks: [
           { label: 'desconto_pct', expr: 'desconto_pct == 5', actualExpr: 'desconto_pct', hint: '37.5 fica entre 20 e 50, logo recebe 5.' },
-          { label: 'total_final', expr: 'isinstance(total_final, (int, float)) and math.isclose(total_final, 35.625, abs_tol=0.005)', actualExpr: 'total_final', hint: 'Calcule total - total * desconto_pct / 100.' },
+          { label: 'total_final', expr: 'isinstance(total_final, (int, float)) and math.isclose(total_final, 35.625, abs_tol=0.005)', actualExpr: 'total_final', hint: 'Calcula total - total * desconto_pct / 100.' },
           { label: 'pode_entrar', expr: 'pode_entrar is False', actualExpr: 'pode_entrar', hint: 'idade >= 18 devolve False para 17.' },
-          { label: 'entrega_gratis', expr: 'entrega_gratis is True', actualExpr: 'entrega_gratis', hint: 'Use total > 30 and cidade == "Porto".' },
+          { label: 'entrega_gratis', expr: 'entrega_gratis is True', actualExpr: 'entrega_gratis', hint: 'Usa total > 30 and cidade == "Porto".' },
+          { label: 'O escalão funciona para outros totais (15, 20, 50 e 80 €)', expr: '[correr_com(total=t)["desconto_pct"] for t in (15, 20, 50, 80)] == [0, 0, 5, 10]', actualExpr: '[correr_com(total=t).get("desconto_pct") for t in (15, 20, 50, 80)]', hint: 'Usa if / elif / else sobre a variável total, com <= 20 e <= 50, em vez de escrever o desconto à mão.' },
+          { label: 'pode_entrar e entrega_gratis seguem os dados (idade 18, cidade Lisboa)', expr: 'correr_com(idade=18)["pode_entrar"] is True and correr_com(cidade="Lisboa")["entrega_gratis"] is False', actualExpr: '(correr_com(idade=18).get("pode_entrar"), correr_com(cidade="Lisboa").get("entrega_gratis"))', hint: 'Calcula com comparações: idade >= 18 e total > 30 and cidade == "Porto".' },
         ],
       },
       quiz: {
@@ -345,7 +348,7 @@ print(desconto_pct, total_final, pode_entrar, entrega_gratis)`,
     {
       id: 'py-05-ciclo-for',
       code: '05',
-      title: 'Ciclo for e range() (Semana 6)',
+      title: 'Ciclo for e range()',
       lede: 'O ciclo for percorre cada artigo de uma lista ou intervalo numérico sem repetir linhas de código.',
       analogyTitle: 'Passar artigo a artigo no tapete da caixa',
       analogyBody: 'Não constróis uma caixa registadora diferente para um cesto de 3 ou de 50 artigos: passas um artigo de cada vez pelo mesmo leitor até o tapete ficar vazio.',
@@ -369,7 +372,7 @@ for v in vendas:
 
 print("Vendas superiores a 100 EUR:", acima_100)`,
       pythonChallenge: {
-        description: 'Resolva a Semana 6 com ciclos for: soma_1_a_100 (1 a 100 inclusive), quantas_acima_100, maior_venda em vendas = [120, 80, 250, 40, 100, 310] e lista descontos para totais = [15, 37.5, 80].',
+        description: 'Com ciclos for, calcula soma_1_a_100 (1 a 100 inclusive), quantas_acima_100, maior_venda em vendas = [120, 80, 250, 40, 100, 310] e lista descontos para totais = [15, 37.5, 80].',
         starterCode: `vendas = [120, 80, 250, 40, 100, 310]
 
 soma_1_a_100 = 0
@@ -408,10 +411,12 @@ for t in totais:
 
 print(soma_1_a_100, quantas_acima_100, maior_venda, descontos)`,
         checks: [
-          { label: 'soma_1_a_100', expr: 'soma_1_a_100 == 5050', actualExpr: 'soma_1_a_100', hint: 'Use range(1, 101) para incluir o 100.' },
-          { label: 'quantas_acima_100', expr: 'quantas_acima_100 == 3', actualExpr: 'quantas_acima_100', hint: 'Use v > 100 (120, 250 e 310).' },
-          { label: 'maior_venda', expr: 'maior_venda == 310', actualExpr: 'maior_venda', hint: 'Se v > maior_venda, atualize maior_venda = v.' },
-          { label: 'descontos', expr: 'descontos == [0, 5, 10]', actualExpr: 'descontos', hint: 'Use descontos.append(...) para cada valor de totais.' },
+          { label: 'soma_1_a_100', expr: 'soma_1_a_100 == 5050', actualExpr: 'soma_1_a_100', hint: 'Usa range(1, 101) para incluir o 100.' },
+          { label: 'quantas_acima_100', expr: 'quantas_acima_100 == 3', actualExpr: 'quantas_acima_100', hint: 'Usa v > 100 (120, 250 e 310).' },
+          { label: 'maior_venda', expr: 'maior_venda == 310', actualExpr: 'maior_venda', hint: 'Se v > maior_venda, atualiza maior_venda = v.' },
+          { label: 'descontos', expr: 'descontos == [0, 5, 10]', actualExpr: 'descontos', hint: 'Usa descontos.append(...) para cada valor de totais.' },
+          { label: 'Os ciclos funcionam com outra lista de vendas', expr: '(lambda r: (r["quantas_acima_100"], r["maior_venda"]))(correr_com(vendas=[50, 400, 101, 99])) == (2, 400)', actualExpr: '(lambda r: (r.get("quantas_acima_100"), r.get("maior_venda")))(correr_com(vendas=[50, 400, 101, 99]))', hint: 'Percorre a lista vendas com for em vez de contar à mão; começa maior_venda em vendas[0].' },
+          { label: 'Os descontos funcionam com outros totais (20, 50 e 51 €)', expr: 'correr_com(totais=[20, 50, 51])["descontos"] == [0, 5, 10]', actualExpr: 'correr_com(totais=[20, 50, 51]).get("descontos")', hint: 'Para cada t em totais, usa if / elif / else e .append() na lista descontos.' },
         ],
       },
       quiz: {
@@ -429,7 +434,7 @@ print(soma_1_a_100, quantas_acima_100, maior_venda, descontos)`,
     {
       id: 'py-06-while',
       code: '06',
-      title: 'Ciclo while e acumuladores (Semana 7)',
+      title: 'Ciclo while e acumuladores',
       lede: 'Quando não sabemos à partida quantas voltas serão precisas até atingir uma meta, usamos while.',
       analogyTitle: 'O mealheiro semanal da mercearia',
       analogyBody: 'O ciclo for sabe quantas faturas há na gaveta; o ciclo while continua a juntar moedas todas as semanas enquanto o saldo for inferior a 500 euros.',
@@ -455,7 +460,7 @@ while saldo < meta:
 
 print(f"Atingiu {saldo} € ao fim de {semanas} semanas.")`,
       pythonChallenge: {
-        description: 'Resolva a Semana 7: calcule total_vendas e media_vendas para [120, 80, 250, 40, 100, 310], e com while conte quantas semanas demora um saldo inicial de 100 € (poupando 35 €/semana) a chegar a 500 € ou mais, guardando saldo_final.',
+        description: 'Calcula total_vendas e media_vendas para [120, 80, 250, 40, 100, 310], e com while conta quantas semanas demora um saldo inicial de 100 € (poupando 35 €/semana) a chegar a 500 € ou mais, guardando saldo_final.',
         starterCode: `vendas = [120, 80, 250, 40, 100, 310]
 total_vendas = 0
 media_vendas = None
@@ -480,10 +485,12 @@ saldo_final = saldo
 
 print(total_vendas, media_vendas, semanas, saldo_final)`,
         checks: [
-          { label: 'total_vendas', expr: 'math.isclose(total_vendas, 900)', actualExpr: 'total_vendas', hint: 'Some cada venda num acumulador.' },
-          { label: 'media_vendas', expr: 'isinstance(media_vendas, (int, float)) and math.isclose(media_vendas, 150)', actualExpr: 'media_vendas', hint: 'Divida total_vendas por len(vendas).' },
-          { label: 'semanas', expr: 'semanas == 12', actualExpr: 'semanas', hint: 'Enquanto saldo < 500, some 35 ao saldo e 1 às semanas.' },
-          { label: 'saldo_final', expr: 'isinstance(saldo_final, (int, float)) and math.isclose(saldo_final, 520)', actualExpr: 'saldo_final', hint: 'Guarde saldo_final = saldo após o ciclo.' },
+          { label: 'total_vendas', expr: 'math.isclose(total_vendas, 900)', actualExpr: 'total_vendas', hint: 'Soma cada venda num acumulador.' },
+          { label: 'media_vendas', expr: 'isinstance(media_vendas, (int, float)) and math.isclose(media_vendas, 150)', actualExpr: 'media_vendas', hint: 'Divide total_vendas por len(vendas).' },
+          { label: 'semanas', expr: 'semanas == 12', actualExpr: 'semanas', hint: 'Enquanto saldo < 500, soma 35 ao saldo e 1 às semanas.' },
+          { label: 'saldo_final', expr: 'isinstance(saldo_final, (int, float)) and math.isclose(saldo_final, 520)', actualExpr: 'saldo_final', hint: 'Guarda saldo_final = saldo após o ciclo.' },
+          { label: 'Total e média funcionam com outra lista (10, 20, 30)', expr: '(lambda r: (r["total_vendas"], r["media_vendas"]))(correr_com(vendas=[10, 20, 30])) == (60, 20)', actualExpr: '(lambda r: (r.get("total_vendas"), r.get("media_vendas")))(correr_com(vendas=[10, 20, 30]))', hint: 'Acumula com um ciclo e divide por len(vendas), em vez de escrever 900 e 150.' },
+          { label: 'O while funciona com outro saldo inicial (480 €)', expr: '(lambda r: (r["semanas"], r["saldo_final"]))(correr_com(saldo=480)) == (1, 515)', actualExpr: '(lambda r: (r.get("semanas"), r.get("saldo_final")))(correr_com(saldo=480))', hint: 'Enquanto saldo < 500, soma 35 ao saldo e 1 às semanas.' },
         ],
       },
       quiz: {
@@ -501,7 +508,7 @@ print(total_vendas, media_vendas, semanas, saldo_final)`,
     {
       id: 'py-07-listas-colecoes',
       code: '07',
-      title: 'Listas, fatias e compreensão de listas (Semana 8)',
+      title: 'Listas, fatias e compreensão de listas',
       lede: 'Domina indexação, slicing, ordenação e list comprehensions para transformar colunas inteiras numa linha.',
       analogyTitle: 'As prateleiras numeradas a partir do zero',
       analogyBody: 'Em Python a primeira prateleira é a posição 0 e a última pode ser lida diretamente com -1. Podes recortar uma fatia inteira da prateleira com lista[inicio:fim].',
@@ -524,7 +531,7 @@ precos = [0.25, 0.89, 2.35, 1.20, 7.50, 3.40]
 print("Top 3 mais caros:", sorted(precos, reverse=True)[:3])
 print("Com IVA 6%:", [round(p * 1.06, 2) for p in precos])`,
       pythonChallenge: {
-        description: 'Complete a Semana 8: primeiro produto, ultimo produto, fatia tres_primeiros, precos_caros (> 1.50 €) e precos_desc ordenados do maior para o menor.',
+        description: 'Guarda em primeiro e ultimo o primeiro e o último produto, a fatia tres_primeiros, precos_caros (> 1.50 €) e precos_desc ordenados do maior para o menor.',
         starterCode: `produtos = ["Pão", "Leite", "Ovos (dúzia)", "Arroz", "Azeite", "Café"]
 precos = [0.25, 0.89, 2.35, 1.20, 7.50, 3.40]
 
@@ -546,11 +553,12 @@ precos_desc = sorted(precos, reverse=True)
 
 print(primeiro, ultimo, tres_primeiros, precos_caros, precos_desc)`,
         checks: [
-          { label: 'primeiro', expr: 'primeiro == "Pão"', actualExpr: 'primeiro', hint: 'Use produtos[0].' },
-          { label: 'ultimo', expr: 'ultimo == "Café"', actualExpr: 'ultimo', hint: 'Use produtos[-1].' },
-          { label: 'tres_primeiros', expr: 'tres_primeiros == ["Pão", "Leite", "Ovos (dúzia)"]', actualExpr: 'tres_primeiros', hint: 'Use produtos[:3].' },
-          { label: 'precos_caros', expr: 'precos_caros == [2.35, 7.5, 3.4]', actualExpr: 'precos_caros', hint: 'Filtre com [p for p in precos if p > 1.50].' },
-          { label: 'precos_desc', expr: 'precos_desc == [7.5, 3.4, 2.35, 1.2, 0.89, 0.25]', actualExpr: 'precos_desc', hint: 'Use sorted(precos, reverse=True).' },
+          { label: 'primeiro', expr: 'primeiro == "Pão"', actualExpr: 'primeiro', hint: 'Usa produtos[0].' },
+          { label: 'ultimo', expr: 'ultimo == "Café"', actualExpr: 'ultimo', hint: 'Usa produtos[-1].' },
+          { label: 'tres_primeiros', expr: 'tres_primeiros == ["Pão", "Leite", "Ovos (dúzia)"]', actualExpr: 'tres_primeiros', hint: 'Usa produtos[:3].' },
+          { label: 'precos_caros', expr: 'precos_caros == [2.35, 7.5, 3.4]', actualExpr: 'precos_caros', hint: 'Filtra com [p for p in precos if p > 1.50].' },
+          { label: 'precos_desc', expr: 'precos_desc == [7.5, 3.4, 2.35, 1.2, 0.89, 0.25]', actualExpr: 'precos_desc', hint: 'Usa sorted(precos, reverse=True).' },
+          { label: 'Índices, fatias e filtros funcionam com outras listas', expr: '(lambda r: (r["primeiro"], r["ultimo"], r["tres_primeiros"], r["precos_caros"], r["precos_desc"]))(correr_com(produtos=["A", "B", "C", "D"], precos=[1.0, 2.0, 5.0])) == ("A", "D", ["A", "B", "C"], [2.0, 5.0], [5.0, 2.0, 1.0])', actualExpr: '(lambda r: (r.get("primeiro"), r.get("ultimo"), r.get("tres_primeiros"), r.get("precos_caros"), r.get("precos_desc")))(correr_com(produtos=["A", "B", "C", "D"], precos=[1.0, 2.0, 5.0]))', hint: 'Usa produtos[0], produtos[-1], produtos[:3], uma list comprehension com p > 1.50 e sorted(..., reverse=True).' },
         ],
       },
       quiz: {
@@ -568,7 +576,7 @@ print(primeiro, ultimo, tres_primeiros, precos_caros, precos_desc)`,
     {
       id: 'py-08-dicionarios',
       code: '08',
-      title: 'Dicionários e agrupamento por chave (Semana 9)',
+      title: 'Dicionários e agrupamento por chave',
       lede: 'Os dicionários associam chaves únicas a valores, funcionando como tabelas de consulta rápida e acumuladores por categoria.',
       analogyTitle: 'O preçário afixado na parede',
       analogyBody: 'Em vez de procurar a posição numérica de cada artigo, apontas para a etiqueta "Azeite" e lês imediatamente 7.50. E com .get(chave, 0) somas vendas por artigo sem erro na primeira ocorrência.',
@@ -593,7 +601,7 @@ for prod, qtd in vendas_amostra:
 print("Contagem:", unidades)
 print("Mais vendido:", max(unidades, key=unidades.get))`,
       pythonChallenge: {
-        description: 'Resolva a Semana 9: obtenha preco_azeite, use .get() para preco_chocolate (0.0), acumule unidades_por_produto e calcule total_talao.',
+        description: 'Obtém preco_azeite, usa .get() para preco_chocolate (0.0), acumula unidades_por_produto e calcula total_talao.',
         starterCode: `precos = {"Pão": 0.25, "Leite": 0.89, "Azeite": 7.50, "Café": 3.40}
 talao = [("Pão", 4), ("Leite", 2), ("Café", 1), ("Pão", 2), ("Azeite", 1)]
 
@@ -618,9 +626,10 @@ for prod, qtd in talao:
 print(preco_azeite, preco_chocolate, unidades_por_produto, round(total_talao, 2))`,
         checks: [
           { label: 'preco_azeite', expr: 'preco_azeite == 7.5', actualExpr: 'preco_azeite', hint: 'Consulte precos["Azeite"].' },
-          { label: 'preco_chocolate', expr: 'preco_chocolate == 0.0', actualExpr: 'preco_chocolate', hint: 'Use precos.get("Chocolate", 0.0).' },
-          { label: 'unidades_por_produto', expr: 'unidades_por_produto == {"Pão": 6, "Leite": 2, "Café": 1, "Azeite": 1}', actualExpr: 'unidades_por_produto', hint: 'Some qtd por chave com .get(prod, 0).' },
-          { label: 'total_talao', expr: 'math.isclose(total_talao, 14.18, abs_tol=0.005)', actualExpr: 'total_talao', hint: 'Some qtd * precos[prod] em cada linha.' },
+          { label: 'preco_chocolate', expr: 'preco_chocolate == 0.0', actualExpr: 'preco_chocolate', hint: 'Usa precos.get("Chocolate", 0.0).' },
+          { label: 'unidades_por_produto', expr: 'unidades_por_produto == {"Pão": 6, "Leite": 2, "Café": 1, "Azeite": 1}', actualExpr: 'unidades_por_produto', hint: 'Soma qtd por chave com .get(prod, 0).' },
+          { label: 'total_talao', expr: 'math.isclose(total_talao, 14.18, abs_tol=0.005)', actualExpr: 'total_talao', hint: 'Soma qtd * precos[prod] em cada linha.' },
+          { label: 'O agrupamento funciona com outro talão', expr: '(lambda r: (r["unidades_por_produto"], round(r["total_talao"], 2)))(correr_com(talao=[("Leite", 3), ("Leite", 1)])) == ({"Leite": 4}, 3.56)', actualExpr: '(lambda r: (r.get("unidades_por_produto"), r.get("total_talao")))(correr_com(talao=[("Leite", 3), ("Leite", 1)]))', hint: 'Percorre o talão com for prod, qtd in talao e acumula com .get(prod, 0) + qtd.' },
         ],
       },
       quiz: {
@@ -638,7 +647,7 @@ print(preco_azeite, preco_chocolate, unidades_por_produto, round(total_talao, 2)
     {
       id: 'py-09-funcoes',
       code: '09',
-      title: 'Funções reutilizáveis e return (Semana 10)',
+      title: 'Funções reutilizáveis e return',
       lede: 'Organizar cálculos e limpezas em funções torna os scripts testáveis, legíveis e livres de código duplicado.',
       analogyTitle: 'As teclas rápidas da balança',
       analogyBody: 'Quando programas uma função com def, ensinas uma receita nova ao Python. Sempre que chamas a função com ingredientes novos, o return entrega o resultado calculado.',
@@ -661,7 +670,7 @@ print(preco_azeite, preco_chocolate, unidades_por_produto, round(total_talao, 2)
 amostras = ["0.25", " 2,35 ", "-1.00"]
 print([limpar_preco(x) for x in amostras])`,
       pythonChallenge: {
-        description: 'Implemente as 3 funções da Semana 10: calcular_subtotal(quantidade, preco), limpar_nome_produto(texto) e aplicar_iva(valor, taxa=0.23).',
+        description: 'Implementa 3 funções: calcular_subtotal(quantidade, preco), limpar_nome_produto(texto) e aplicar_iva(valor, taxa=0.23).',
         starterCode: `def calcular_subtotal(quantidade, preco):
     pass
 
@@ -683,9 +692,10 @@ def aplicar_iva(valor, taxa=0.23):
 
 print(calcular_subtotal(3, 0.89), limpar_nome_produto("  pão "), aplicar_iva(10.0))`,
         checks: [
-          { label: 'calcular_subtotal(3, 0.89)', expr: 'callable(calcular_subtotal) and calcular_subtotal(3, 0.89) == 2.67', actualExpr: 'calcular_subtotal(3, 0.89)', hint: 'Devolva round(quantidade * preco, 2).' },
-          { label: 'limpar_nome_produto("  pão ")', expr: 'callable(limpar_nome_produto) and limpar_nome_produto("  pão ") == "Pão"', actualExpr: 'limpar_nome_produto("  pão ")', hint: 'Use texto.strip().capitalize().' },
-          { label: 'aplicar_iva(10.0)', expr: 'callable(aplicar_iva) and aplicar_iva(10.0) == 12.3 and aplicar_iva(10.0, 0.06) == 10.6', actualExpr: 'aplicar_iva(10.0)', hint: 'Devolva round(valor * (1 + taxa), 2).' },
+          { label: 'calcular_subtotal(3, 0.89)', expr: 'callable(calcular_subtotal) and calcular_subtotal(3, 0.89) == 2.67', actualExpr: 'calcular_subtotal(3, 0.89)', hint: 'Devolve round(quantidade * preco, 2).' },
+          { label: 'limpar_nome_produto("  pão ")', expr: 'callable(limpar_nome_produto) and limpar_nome_produto("  pão ") == "Pão"', actualExpr: 'limpar_nome_produto("  pão ")', hint: 'Usa texto.strip().capitalize().' },
+          { label: 'aplicar_iva(10.0)', expr: 'callable(aplicar_iva) and aplicar_iva(10.0) == 12.3 and aplicar_iva(10.0, 0.06) == 10.6', actualExpr: 'aplicar_iva(10.0)', hint: 'Devolve round(valor * (1 + taxa), 2).' },
+          { label: 'As funções funcionam com outros argumentos', expr: 'calcular_subtotal(2, 7.5) == 15.0 and limpar_nome_produto(" AZEITE ") == "Azeite" and aplicar_iva(100) == 123.0', actualExpr: '(calcular_subtotal(2, 7.5), limpar_nome_produto(" AZEITE "), aplicar_iva(100))', hint: 'Usa os parâmetros dentro da função (quantidade * preco, texto.strip().capitalize(), valor * (1 + taxa)).' },
         ],
       },
       quiz: {
@@ -703,7 +713,7 @@ print(calcular_subtotal(3, 0.89), limpar_nome_produto("  pão "), aplicar_iva(10
     {
       id: 'py-10-caixa-csv',
       code: '10',
-      title: 'Projeto Caixa Registadora sobre vendas.csv (Semanas 11 e 12)',
+      title: 'Projeto Caixa Registadora sobre vendas.csv',
       lede: 'Chegou o momento de juntar tudo: ler as 5 078 linhas reais de dados/vendas.csv em Python puro e responder às 4 perguntas da gerência.',
       analogyTitle: 'O fecho anual de contas da Mercearia',
       analogyBody: 'Os ficheiros CSV reais do projeto já estão montados nesta bancada em dados/vendas.csv. Com csv.DictReader, int(), float() e dicionários acumuladores, vais obter os números exatos que depois confirmarás em SQL!',
@@ -727,7 +737,7 @@ with open("dados/vendas.csv", encoding="utf-8") as f:
 print("Total de linhas carregadas:", len(vendas))
 print("Primeira venda:", vendas[0])`,
       pythonChallenge: {
-        description: 'Implemente a Caixa Registadora completa (src/caixa.py): calcule faturacao_total, produto_campeao (em unidades), melhor_dia (data com maior faturação) e media_linha sobre dados/vendas.csv.',
+        description: 'Implementa a Caixa Registadora completa (src/caixa.py): calcula faturacao_total, produto_campeao (em unidades), melhor_dia (data com maior faturação) e media_linha sobre dados/vendas.csv.',
         starterCode: `import csv
 
 with open("dados/vendas.csv", encoding="utf-8") as f:
@@ -737,7 +747,7 @@ faturacao_total = 0.0
 unidades_por_produto = {}
 faturacao_por_dia = {}
 
-# Percorra vendas e acumule os valores pedidos:
+# Percorre vendas e acumula os valores pedidos:
 
 
 produto_campeao = None
@@ -775,10 +785,10 @@ print("Mais vendido (un.):", produto_campeao)
 print("Dia recorde:", melhor_dia)
 print(f"Média por linha: {media_linha:.2f} €")`,
         checks: [
-          { label: 'faturacao_total (26902.89 €)', expr: 'math.isclose(faturacao_total, 26902.89, abs_tol=0.02)', actualExpr: 'round(faturacao_total, 2)', hint: 'Some int(v["quantidade"]) * float(v["preco"]).' },
-          { label: 'produto_campeao ("Leite")', expr: 'produto_campeao == "Leite"', actualExpr: 'produto_campeao', hint: 'Some a quantidade por produto e tire max(..., key=....get).' },
-          { label: 'melhor_dia ("2025-09-14")', expr: 'melhor_dia == "2025-09-14"', actualExpr: 'melhor_dia', hint: 'Some a faturação por v["data"] e obtenha a data com maior soma.' },
-          { label: 'media_linha (~5.30 €)', expr: 'isinstance(media_linha, (int, float)) and math.isclose(media_linha, 26902.89 / 5078, abs_tol=0.01)', actualExpr: 'round(media_linha, 4) if media_linha else None', hint: 'Divida faturacao_total por len(vendas).' },
+          { label: 'faturacao_total (26902.89 €)', expr: 'math.isclose(faturacao_total, 26902.89, abs_tol=0.02)', actualExpr: 'round(faturacao_total, 2)', hint: 'Soma int(v["quantidade"]) * float(v["preco"]).' },
+          { label: 'produto_campeao ("Leite")', expr: 'produto_campeao == "Leite"', actualExpr: 'produto_campeao', hint: 'Soma a quantidade por produto e tira max(..., key=....get).' },
+          { label: 'melhor_dia ("2025-09-14")', expr: 'melhor_dia == "2025-09-14"', actualExpr: 'melhor_dia', hint: 'Soma a faturação por v["data"] e obtém a data com maior soma.' },
+          { label: 'media_linha (~5.30 €)', expr: 'isinstance(media_linha, (int, float)) and math.isclose(media_linha, 26902.89 / 5078, abs_tol=0.01)', actualExpr: 'round(media_linha, 4) if media_linha else None', hint: 'Divide faturacao_total por len(vendas).' },
         ],
       },
       quiz: {

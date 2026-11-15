@@ -1,6 +1,6 @@
-"""Semana 11: ficheiros e módulo csv. Leia licoes/semana11_ficheiros_e_csv.md
+"""Semana 11: ficheiros e módulo csv. Lê licoes/semana11_ficheiros_e_csv.md
 
-Leia dados/produtos.csv com csv.DictReader e corra:  python verificar.py 11
+Lê dados/produtos.csv com csv.DictReader e corre:  python verificar.py 11
 """
 
 import csv
@@ -8,7 +8,7 @@ from pathlib import Path
 
 CAMINHO_PRODUTOS = Path(__file__).resolve().parent.parent / "dados" / "produtos.csv"
 
-# 1. Abra CAMINHO_PRODUTOS com encoding="utf-8" e guarde todas as linhas (dicionários) numa lista.
+# 1. Abre CAMINHO_PRODUTOS com encoding="utf-8" e guarda todas as linhas (dicionários) numa lista.
 lista_produtos = None
 
 # 2. Quantos produtos existem no catálogo?

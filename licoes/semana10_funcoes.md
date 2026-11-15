@@ -41,4 +41,4 @@ print(normalizar_produto("  pão "))   # "Pão"
 
 ## Exercícios
 
-Complete `exercicios/semana10_funcoes.py` e corra `python verificar.py 10`.
+Completa `exercicios/semana10_funcoes.py` e corre `python verificar.py 10`.

@@ -48,6 +48,17 @@ describe('desafios Python e pandas', () => {
     120_000,
   );
 
+  it.each([
+    ['py-04-condicoes', 'total = 37.5\ndesconto_pct = 5\ntotal_final = 35.625\nidade = 17\npode_entrar = False\ncidade = "Porto"\nentrega_gratis = True'],
+    ['py-06-while', 'vendas = [120, 80, 250, 40, 100, 310]\ntotal_vendas = 900\nmedia_vendas = 150\nsaldo = 100\nsemanas = 12\nsaldo_final = 520'],
+    ['py-09-funcoes', 'def calcular_subtotal(quantidade, preco):\n    return 2.67\ndef limpar_nome_produto(texto):\n    return "Pão"\ndef aplicar_iva(valor, taxa=0.23):\n    return round(valor * (1 + taxa), 2)'],
+  ])('%s: resultados escritos à mão não passam', async (id, codigo) => {
+    const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
+    const res = await runPythonCode(codigo, ch.checks);
+    expect(res.error).toBeUndefined();
+    expect(res.checks!.some((c) => !c.passed)).toBe(true);
+  }, 120_000);
+
   it.each(licoes.map((l) => [l.id, l] as const))(
     '%s: o código inicial ainda não passa',
     async (_id, l) => {

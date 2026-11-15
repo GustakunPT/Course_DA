@@ -100,16 +100,16 @@ precisam de internet.
 
 ## Cadernos de pandas (Academia Interativa, etapas 13 a 16)
 
-A trilha 3 da app já corre pandas no browser. Para prática mais longa, use os cadernos da pasta `cadernos/`:
+A trilha 3 da app já corre pandas no browser. Para prática mais longa, usa os cadernos da pasta `cadernos/`:
 
 ```bash
 pip install -r requirements.txt  # uma só vez
-jupyter notebook                 # abra o ficheiro da pasta cadernos/
+jupyter notebook                 # abre o ficheiro da pasta cadernos/
 ```
 
 No VS Code, basta abrir o ficheiro `.ipynb`. Cada caderno tem 16 tarefas em quatro níveis (aquecimento, treino,
 desafio e chefe final) sobre as 5 078 vendas de `dados/vendas.csv`. A última célula diz quantas estão certas, sem
-mostrar as respostas. Se a pasta `dados/` estiver vazia, corra primeiro `python src/gerar_dados.py`.
+mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python src/gerar_dados.py`.
 
 | Caderno | Tema |
 | --- | --- |
@@ -120,11 +120,11 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corra primeiro `python 
 
 ## Como estudar cada semana
 
-1. Leia a lição em `licoes/` (começa pela analogia).
-2. Faça a secção "Experimente partir": errar de propósito é a forma mais rápida de perceber.
-3. Complete o ficheiro correspondente em `exercicios/`.
-4. Corra `python verificar.py N` até estar tudo certo.
-5. Faça um commit com uma mensagem clara.
+1. Lê a lição em `licoes/` (começa pela analogia).
+2. Faz a secção "Experimenta partir": errar de propósito é a forma mais rápida de perceber.
+3. Completa o ficheiro correspondente em `exercicios/`.
+4. Corre `python verificar.py N` até estar tudo certo.
+5. Faz um commit com uma mensagem clara.
 
 ## Estrutura
 

@@ -31,13 +31,13 @@ ls
 git init
 git status`,
       gitChallenge: {
-        description: 'Inicialize o repositório da Mercearia com git init e verifique de seguida o estado dos ficheiros com git status.',
-        starterCommands: `# Escreva os comandos um por linha
+        description: 'Inicializa o repositório da Mercearia com git init e verifica de seguida o estado dos ficheiros com git status.',
+        starterCommands: `# Escreve os comandos um por linha
 pwd
 `,
         solutionCommands: `git init
 git status`,
-        hint: 'Execute git init numa linha e git status na linha seguinte.',
+        hint: 'Executa git init numa linha e git status na linha seguinte.',
         validate: (state, output) => {
           const ok = state.initialized && output.includes('No ramo main');
           return {
@@ -86,15 +86,15 @@ git add exercicios/semana03_variaveis.py
 git commit -m "Resolve exercicios de variaveis da semana 3"
 git log`,
       gitChallenge: {
-        description: 'Inicialize o repositório (se ainda não estiver), adicione todos os ficheiros válidos com git add . e crie um commit com git commit -m "...".',
+        description: 'Inicializa o repositório (se ainda não estiver), adiciona todos os ficheiros válidos com git add . e cria um commit com git commit -m "...".',
         starterCommands: `git init
-# Prepare os ficheiros e faça um commit com mensagem clara
+# Prepara os ficheiros e faz um commit com mensagem clara
 `,
         solutionCommands: `git init
 git add .
 git commit -m "Estrutura inicial de Python e SQL da Mercearia"
 git log`,
-        hint: 'Use git add . seguido de git commit -m "Sua mensagem".',
+        hint: 'Usa git add . seguido de git commit -m "A tua mensagem".',
         validate: (state) => {
           const ok = state.initialized && state.commits.length >= 1;
           return {
@@ -141,14 +141,14 @@ git init
 git add .env
 git status`,
       gitChallenge: {
-        description: 'Inspecione o ficheiro .gitignore com cat .gitignore, adicione uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirme com cat .gitignore.',
+        description: 'Inspecione o ficheiro .gitignore com cat .gitignore, adiciona uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirma com cat .gitignore.',
         starterCommands: `cat .gitignore
-# Acrescente a regra *.bak ao .gitignore
+# Acrescenta a regra *.bak ao .gitignore
 `,
         solutionCommands: `cat .gitignore
 echo "*.bak" >> .gitignore
 cat .gitignore`,
-        hint: 'Escreva echo "*.bak" >> .gitignore',
+        hint: 'Escreve echo "*.bak" >> .gitignore',
         validate: (state) => {
           const ok = state.gitignore.includes('*.bak');
           return {
@@ -198,9 +198,9 @@ git switch -c feature-relatorio
 git switch main
 git merge feature-relatorio`,
       gitChallenge: {
-        description: 'Inicialize o repo, crie um novo ramo chamado "limpeza-pandas" com git switch -c limpeza-pandas, faça git add . e um commit nesse ramo, volte a main e faça git merge limpeza-pandas.',
+        description: 'Inicializa o repo, cria um novo ramo chamado "limpeza-pandas" com git switch -c limpeza-pandas, faz git add . e um commit nesse ramo, volta a main e faz git merge limpeza-pandas.',
         starterCommands: `git init
-# Crie o ramo limpeza-pandas, faça commit, volte a main e faça merge
+# Cria o ramo limpeza-pandas, faz commit, volta a main e faz merge
 `,
         solutionCommands: `git init
 git switch -c limpeza-pandas
@@ -260,16 +260,16 @@ git commit -m "Publica portfolio completo Mercearia do Bairro"
 git remote add origin https://github.com/analista/mercearia-do-bairro.git
 git push -u origin main`,
       gitChallenge: {
-        description: 'Faça o percurso completo de publicação: git init, git add ., git commit -m "...", configure um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
+        description: 'Faz o percurso completo de publicação: git init, git add ., git commit -m "...", configure um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
         starterCommands: `git init
-# Faça add, commit, remote add e push para main
+# Faz add, commit, remote add e push para main
 `,
         solutionCommands: `git init
 git add .
-git commit -m "Versao 1.0 do portfolio de analise de dados"
+git commit -m "Versao 1.0 do portfolio de analisa de dados"
 git remote add origin https://github.com/analista/mercearia.git
 git push -u origin main`,
-        hint: 'Termine com git push -u origin main após ter pelo menos 1 commit.',
+        hint: 'Termina com git push -u origin main após ter pelo menos 1 commit.',
         validate: (state) => {
           const ok = state.pushedBranches.includes('main') && Boolean(state.remoteUrl);
           return {
@@ -329,7 +329,7 @@ with open("dados/vendas.csv", encoding="utf-8") as f:
 print(f"Média real (5078 vendas):   {statistics.mean(subtotais):.2f} €")
 print(f"Mediana real (5078 vendas): {statistics.median(subtotais):.2f} €")`,
       pythonChallenge: {
-        description: 'Resolva o exercício da Semana 12 sobre taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]: calcule media, mediana, desvio_padrao (arredondado a 2 casas) e amplitude (max - min).',
+        description: 'Sobre taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]: calcula media, mediana, desvio_padrao (arredondado a 2 casas) e amplitude (max - min).',
         starterCode: `import statistics
 
 taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]
@@ -351,10 +351,10 @@ amplitude = max(taloes_amostra) - min(taloes_amostra)
 
 print(round(media, 2), mediana, desvio_padrao, amplitude)`,
         checks: [
-          { label: 'media (~9.48)', expr: 'isinstance(media, (int, float)) and math.isclose(media, 9.4778, abs_tol=0.01)', actualExpr: 'media', hint: 'Use statistics.mean(taloes_amostra).' },
-          { label: 'mediana (4.80)', expr: 'isinstance(mediana, (int, float)) and math.isclose(mediana, 4.80, abs_tol=0.01)', actualExpr: 'mediana', hint: 'Use statistics.median(taloes_amostra).' },
-          { label: 'desvio_padrao (14.66)', expr: 'isinstance(desvio_padrao, (int, float)) and math.isclose(desvio_padrao, 14.66, abs_tol=0.02)', actualExpr: 'desvio_padrao', hint: 'Use round(statistics.stdev(taloes_amostra), 2).' },
-          { label: 'amplitude (46.80)', expr: 'isinstance(amplitude, (int, float)) and math.isclose(amplitude, 46.80, abs_tol=0.01)', actualExpr: 'amplitude', hint: 'Calcule max(taloes_amostra) - min(taloes_amostra).' },
+          { label: 'media (~9.48)', expr: 'isinstance(media, (int, float)) and math.isclose(media, 9.4778, abs_tol=0.01)', actualExpr: 'media', hint: 'Usa statistics.mean(taloes_amostra).' },
+          { label: 'mediana (4.80)', expr: 'isinstance(mediana, (int, float)) and math.isclose(mediana, 4.80, abs_tol=0.01)', actualExpr: 'mediana', hint: 'Usa statistics.median(taloes_amostra).' },
+          { label: 'desvio_padrao (14.66)', expr: 'isinstance(desvio_padrao, (int, float)) and math.isclose(desvio_padrao, 14.66, abs_tol=0.02)', actualExpr: 'desvio_padrao', hint: 'Usa round(statistics.stdev(taloes_amostra), 2).' },
+          { label: 'amplitude (46.80)', expr: 'isinstance(amplitude, (int, float)) and math.isclose(amplitude, 46.80, abs_tol=0.01)', actualExpr: 'amplitude', hint: 'Calcula max(taloes_amostra) - min(taloes_amostra).' },
         ],
       },
       quiz: {
@@ -400,7 +400,7 @@ limite = q3 + 1.5 * iqr
 print(f"Q1={q1:.2f} € | Q3={q3:.2f} € | IQR={iqr:.2f} € | Limite outlier={limite:.2f} €")
 print("Linhas acima do limiar:", int((df["sub"] > limite).sum()))`,
       pythonChallenge: {
-        description: 'Sobre dados/vendas.csv (subtotal = quantidade * preco), calcule iqr (Q3 - Q1 arredondado a 2 casas) e num_outliers (quantas vendas têm subtotal estritamente acima de Q3 + 1.5 * (Q3 - Q1)).',
+        description: 'Sobre dados/vendas.csv (subtotal = quantidade * preco), calcula iqr (Q3 - Q1 arredondado a 2 casas) e num_outliers (quantas vendas têm subtotal estritamente acima de Q3 + 1.5 * (Q3 - Q1)).',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -423,8 +423,8 @@ num_outliers = int((sub > (q3 + 1.5 * iqr_raw)).sum())
 
 print(iqr, num_outliers)`,
         checks: [
-          { label: 'iqr calculado corretamente (5.22)', expr: 'iqr is not None and math.isclose(float(iqr), 5.22, abs_tol=0.01)', actualExpr: 'iqr', hint: 'Calcule sub.quantile(0.75) - sub.quantile(0.25) (esperado ~5.22).' },
-          { label: 'num_outliers acima do limite superior (348)', expr: 'num_outliers is not None and int(num_outliers) == 348', actualExpr: 'num_outliers', hint: 'Conte int((sub > (q3 + 1.5 * (q3 - q1))).sum()).' },
+          { label: 'iqr calculado corretamente (5.22)', expr: 'iqr is not None and math.isclose(float(iqr), 5.22, abs_tol=0.01)', actualExpr: 'iqr', hint: 'Calcula sub.quantile(0.75) - sub.quantile(0.25) (esperado ~5.22).' },
+          { label: 'num_outliers acima do limite superior (348)', expr: 'num_outliers is not None and int(num_outliers) == 348', actualExpr: 'num_outliers', hint: 'Conta int((sub > (q3 + 1.5 * (q3 - q1))).sum()).' },
         ],
       },
       quiz: {
@@ -466,7 +466,7 @@ abc["quota_pct"] = (abc["sub"] / abc["sub"].sum() * 100).round(2)
 abc["acumulado_pct"] = abc["quota_pct"].cumsum().round(2)
 abc.head(8)`,
       pythonChallenge: {
-        description: 'Ordene os produtos por faturação decrescente e guarde em quota_top2_pct a percentagem conjunta representada pelos 2 primeiros produtos (Azeite e Queijo) sobre o total da Mercearia, arredondada a 2 casas.',
+        description: 'Ordena os produtos por faturação decrescente e guarda em quota_top2_pct a percentagem conjunta representada pelos 2 primeiros produtos (Azeite e Queijo) sobre o total da Mercearia, arredondada a 2 casas.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -525,13 +525,13 @@ FROM vendas v
 LEFT JOIN produtos p ON p.id = v.produto_id
 LEFT JOIN clientes c ON c.id = v.cliente_id;`,
       sqlChallenge: {
-        description: 'Construa uma vista agregada para um cartão matriz de Power BI cruzando categoria (de produtos) e cidade (de clientes): mostre categoria, cidade e faturacao arredondada a 2 casas, ordenada por categoria ASC e faturacao DESC.',
+        description: 'Constrói uma vista agregada para um cartão matriz de Power BI cruzando categoria (de produtos) e cidade (de clientes): mostra categoria, cidade e faturacao arredondada a 2 casas, ordenada por categoria ASC e faturacao DESC.',
         starterSql: `SELECT
   p.categoria,
   c.cidade,
   ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao
 FROM vendas v
--- Ligue produtos e clientes, agrupe e ordene
+-- Liga produtos e clientes, agrupa e ordena
 `,
         solutionSql: `SELECT
   p.categoria,
@@ -542,7 +542,7 @@ INNER JOIN produtos p ON p.id = v.produto_id
 INNER JOIN clientes c ON c.id = v.cliente_id
 GROUP BY p.categoria, c.cidade
 ORDER BY p.categoria ASC, faturacao DESC;`,
-        hint: 'Junte produtos e clientes com dois INNER JOIN e faça GROUP BY p.categoria, c.cidade.',
+        hint: 'Junta produtos e clientes com dois INNER JOIN e faz GROUP BY p.categoria, c.cidade.',
         validate: (cols, rows) => {
           const ok = rows.length === 36 && cols.length === 3 && rows[0][0] === 'Bebidas';
           return {
@@ -595,11 +595,11 @@ GROUP BY produto
 ORDER BY quota_all_pct DESC
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Valide em SQL a medida DAX "Gasto Médio por Cliente Ativo" em cada cidade: devolva cidade, clientes_ativos (COUNT(DISTINCT c.id)) e gasto_medio_cliente (faturação da cidade a dividir pelos seus clientes ativos, arredondado a 2 casas), ordenado por gasto_medio_cliente DESC.',
+        description: 'Valida em SQL a medida DAX "Gasto Médio por Cliente Ativo" em cada cidade: devolve cidade, clientes_ativos (COUNT(DISTINCT c.id)) e gasto_medio_cliente (faturação da cidade a dividir pelos seus clientes ativos, arredondado a 2 casas), ordenado por gasto_medio_cliente DESC.',
         starterSql: `SELECT
   c.cidade,
   COUNT(DISTINCT c.id) AS clientes_ativos
-  -- Calcule gasto_medio_cliente
+  -- Calcula gasto_medio_cliente
 FROM vendas v
 INNER JOIN clientes c ON c.id = v.cliente_id
 GROUP BY c.cidade;`,
@@ -611,7 +611,7 @@ FROM vendas v
 INNER JOIN clientes c ON c.id = v.cliente_id
 GROUP BY c.cidade
 ORDER BY gasto_medio_cliente DESC;`,
-        hint: 'Use ROUND(SUM(v.quantidade * v.preco) / COUNT(DISTINCT c.id), 2) AS gasto_medio_cliente e ordene DESC.',
+        hint: 'Usa ROUND(SUM(v.quantidade * v.preco) / COUNT(DISTINCT c.id), 2) AS gasto_medio_cliente e ordena DESC.',
         validate: (cols, rows) => {
           const ok = rows.length === 6 && cols.length === 3 && Number(rows[0][2]) >= Number(rows[5][2]);
           return {
@@ -646,7 +646,7 @@ ORDER BY gasto_medio_cliente DESC;`,
         'Comparação de categorias ou cidades: barras horizontais ordenadas (nunca uses gráfico circular com mais de 3 ou 4 fatias!).',
         'Regra da honestidade visual: qualquer gráfico de barras tem obrigatoriamente de começar o eixo no zero (0).',
       ],
-      referenceTitle: 'Guia rápido de escolha de gráficos',
+      referenceTitle: 'Guia rápido de escolhe de gráficos',
       referenceRows: [
         { syntax: 'Série temporal (Jan a Dez)', meaning: 'Gráfico de linha', example: 'Pico em setembro (2 462,82 €)' },
         { syntax: 'Ranking de 15 produtos', meaning: 'Barras horizontais ordenadas do maior ao menor', example: 'Nomes leem-se sem rodar o pescoço' },
@@ -664,27 +664,30 @@ pior = mensal.loc[mensal["sub"].idxmin()]
 
 print(f"Síntese executiva: Melhor mês {melhor['mes']} ({melhor['sub']} €) | Mês mais fraco {pior['mes']} ({pior['sub']} €)")
 mensal`,
-      pythonChallenge: {
-        description: 'Gere os dados finais de resumo executivo sobre vendas.csv: guarde em variacao_pico_vale a diferença em euros (arredondada a 2 casas) entre o mês com maior faturação e o mês com menor faturação de 2025.',
+            pythonChallenge: {
+        description: 'Prepara os dados de um gráfico de barras honesto e do resumo executivo sobre vendas.csv: guarda em ranking_meses a faturação de cada mês de 2025 ordenada do maior para o menor (é a ordem certa para barras horizontais) e em variacao_pico_vale a diferença em euros (arredondada a 2 casas) entre o primeiro e o último mês desse ranking.',
         starterCode: `import pandas as pd
 
 vendas = pd.read_csv("dados/vendas.csv")
 vendas["mes"] = vendas["data"].str.slice(0, 7)
 vendas["sub"] = vendas["quantidade"] * vendas["preco"]
 
+ranking_meses = None
 variacao_pico_vale = None
-print(variacao_pico_vale)`,
+print(ranking_meses, variacao_pico_vale)`,
         solutionCode: `import pandas as pd
 
 vendas = pd.read_csv("dados/vendas.csv")
 vendas["mes"] = vendas["data"].str.slice(0, 7)
 vendas["sub"] = vendas["quantidade"] * vendas["preco"]
-por_mes = vendas.groupby("mes")["sub"].sum()
 
-variacao_pico_vale = round(float(por_mes.max() - por_mes.min()), 2)
-print(variacao_pico_vale)`,
+ranking_meses = vendas.groupby("mes")["sub"].sum().sort_values(ascending=False)
+variacao_pico_vale = round(float(ranking_meses.iloc[0] - ranking_meses.iloc[-1]), 2)
+print(variacao_pico_vale)
+ranking_meses`,
         checks: [
-          { label: 'variacao_pico_vale (493.83 €)', expr: 'variacao_pico_vale is not None and math.isclose(float(variacao_pico_vale), 2462.82 - 1968.99, abs_tol=0.05)', actualExpr: 'variacao_pico_vale', hint: 'Subtraia por_mes.max() (setembro: 2462.82) menos por_mes.min() (fevereiro: 1968.99).' },
+          { label: 'ranking_meses tem os 12 meses do maior para o menor', expr: 'hasattr(ranking_meses, "is_monotonic_decreasing") and len(ranking_meses) == 12 and ranking_meses.is_monotonic_decreasing and str(ranking_meses.index[0]) == "2025-09"', actualExpr: 'list(ranking_meses.index) if hasattr(ranking_meses, "index") else ranking_meses', hint: 'Agrupa por mes, soma sub e usa .sort_values(ascending=False).' },
+          { label: 'variacao_pico_vale (493.83 €)', expr: 'variacao_pico_vale is not None and math.isclose(float(variacao_pico_vale), 493.83, abs_tol=0.01)', actualExpr: 'variacao_pico_vale', hint: 'Subtrai o último valor do ranking ao primeiro (.iloc[0] - .iloc[-1]).' },
         ],
       },
       quiz: {

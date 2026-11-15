@@ -9,7 +9,7 @@ idade = 17
 if idade >= 18:
     print("Pode entrar")
 else:
-    print("Volte daqui a uns anos")
+    print("Volta daqui a uns anos")
 ```
 
 O que está **dentro** do `if` é o que está indentado (4 espaços). A indentação é a porta:
@@ -40,11 +40,11 @@ else:
 | `or` | basta uma ser verdade |
 | `not` | o contrário |
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Troque a ordem dos escalões (ponha `total <= 50` primeiro). Com `total = 15`, o que acontece? Porquê?
-2. Escreva `if total = 20:` (um só `=`). Leia o erro.
-3. Tire a indentação de uma linha dentro do `if`. O que muda?
+1. Troca a ordem dos escalões (põe `total <= 50` primeiro). Com `total = 15`, o que acontece? Porquê?
+2. Escreve `if total = 20:` (um só `=`). Lê o erro.
+3. Tira a indentação de uma linha dentro do `if`. O que muda?
 
 ## Ligação ao SQL
 
@@ -53,4 +53,4 @@ else:
 
 ## Exercícios
 
-Complete `exercicios/semana05_condicoes.py` e corra `python verificar.py 5`.
+Completa `exercicios/semana05_condicoes.py` e corre `python verificar.py 5`.

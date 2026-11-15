@@ -22,10 +22,10 @@ print(f"{produto}: {preco} €")        # Leite: 0.89 €
 print(f"Total: {preco * 3:.2f} €")    # Total: 2.67 €  (:.2f = 2 casas decimais)
 ```
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Faça `troco = input("Pagou: ") - 13.75`. Leia o erro. O que falta?
-2. Escreva `print(f"Total: {10 / 3}")` e depois com `:.2f`. Qual a diferença?
+1. Faz `troco = input("Pagou: ") - 13.75`. Lê o erro. O que falta?
+2. Escreve `print(f"Total: {10 / 3}")` e depois com `:.2f`. Qual a diferença?
 3. O que dá `int("12.5")`? E `float("12.5")`? E `int(float("12.5"))`?
 
 ## Ligação ao SQL
@@ -35,6 +35,6 @@ print(f"Total: {preco * 3:.2f} €")    # Total: 2.67 €  (:.2f = 2 casas decim
 
 ## Exercícios
 
-1. Complete `exercicios/semana04_conversoes.py` e corra `python verificar.py 4`.
-2. Desafio livre (não é verificado): crie `exercicios/calculadora_troco.py` que pergunta
+1. Completa `exercicios/semana04_conversoes.py` e corre `python verificar.py 4`.
+2. Desafio livre (não é verificado): cria `exercicios/calculadora_troco.py` que pergunta
    o total e o valor pago com `input()` e mostra o troco com 2 casas decimais.

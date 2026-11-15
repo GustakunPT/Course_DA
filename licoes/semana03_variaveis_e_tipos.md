@@ -31,13 +31,13 @@ print("2" + "2")      # 22
 print(int("2") + 2)   # 4  -> int() transforma o papel em dinheiro
 ```
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Escreva `preco = 0,25` (com vírgula) e faça `print(preco)` e `print(type(preco))`.
+1. Escreve `preco = 0,25` (com vírgula) e faz `print(preco)` e `print(type(preco))`.
    Não dá erro, e é isso que surpreende: o Python lê a vírgula como separador e cria um par de
    valores, `(0, 25)`. Por isso os decimais usam ponto.
-2. Escreva `print("2" + 2)`. Leia a última linha do erro: o que lhe está a dizer?
-3. Use `print(type(0.25))` e `print(type("0.25"))` para ver o tipo de cada coisa.
+2. Escreve `print("2" + 2)`. Lê a última linha do erro: o que lhe está a dizer?
+3. Usa `print(type(0.25))` e `print(type("0.25"))` para ver o tipo de cada coisa.
 
 ## Ligação ao que já sabe de SQL
 
@@ -46,7 +46,7 @@ Uma coluna `preco NUMERIC` e uma coluna `nome VARCHAR` são exatamente isto: tip
 
 ## Exercícios
 
-Abra `exercicios/semana03_variaveis.py`, complete e corra:
+Abre `exercicios/semana03_variaveis.py`, completa e corre:
 
 ```bash
 python verificar.py 3

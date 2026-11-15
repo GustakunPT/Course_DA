@@ -1,15 +1,15 @@
-"""Semana 5: condições. Leia licoes/semana05_condicoes.md
+"""Semana 5: condições. Lê licoes/semana05_condicoes.md
 
-Escreva o código pedido por baixo de cada enunciado e corra:  python verificar.py 5
+Escreve o código pedido por baixo de cada enunciado e corre:  python verificar.py 5
 """
 
 # 1. Escalões de desconto: até 20 € -> 0 %, até 50 € -> 5 %, acima de 50 € -> 10 %.
-#    Use if / elif / else para guardar em desconto_pct a percentagem certa.
+#    Usa if / elif / else para guardar em desconto_pct a percentagem certa.
 total = 37.5
 desconto_pct = None
 
 
-# 2. Calcule o total depois do desconto (use as variáveis total e desconto_pct).
+# 2. Calcula o total depois do desconto (usa as variáveis total e desconto_pct).
 total_final = None
 
 
@@ -19,7 +19,7 @@ pode_entrar = None
 
 
 # 4. Entrega grátis só se o total for superior a 30 € E a cidade for "Porto".
-#    Guarde True ou False em entrega_gratis.
+#    Guarda True ou False em entrega_gratis.
 cidade = "Porto"
 entrega_gratis = None
 

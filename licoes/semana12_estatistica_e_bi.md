@@ -27,4 +27,4 @@ Quando levas os dados da Mercearia para o Power BI (Fase 4):
 
 ## Exercícios
 
-Complete `exercicios/semana12_estatistica.py` e corra `python verificar.py 12`.
+Completa `exercicios/semana12_estatistica.py` e corre `python verificar.py 12`.

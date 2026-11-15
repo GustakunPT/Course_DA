@@ -30,14 +30,14 @@ export const sqlTrack: Track = {
 FROM produtos
 LIMIT 8;`,
       sqlChallenge: {
-        description: 'Liste as categorias únicas existentes na tabela produtos (uma coluna chamada categoria), ordenadas alfabeticamente.',
-        starterSql: `-- Devolva as categorias únicas da tabela produtos por ordem alfabética
+        description: 'Lista as categorias únicas existentes na tabela produtos (uma coluna chamada categoria), ordenadas alfabeticamente.',
+        starterSql: `-- Devolve as categorias únicas da tabela produtos por ordem alfabética
 SELECT categoria
 FROM produtos;`,
         solutionSql: `SELECT DISTINCT categoria
 FROM produtos
 ORDER BY categoria ASC;`,
-        hint: 'Use SELECT DISTINCT categoria FROM produtos ORDER BY categoria;',
+        hint: 'Usa SELECT DISTINCT categoria FROM produtos ORDER BY categoria;',
         validate: (cols, rows) => {
           const ok = rows.length === 6 && cols.length === 1 && rows[0][0] === 'Bebidas';
           return {
@@ -83,7 +83,7 @@ ORDER BY categoria ASC;`,
 FROM produtos
 WHERE categoria = 'Mercearia' AND preco >= 1.20;`,
       sqlChallenge: {
-        description: 'Selecione id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termine em "Santos".',
+        description: 'Seleciona id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termina em "Santos".',
         starterSql: `SELECT id, nome, cidade
 FROM clientes
 WHERE cidade IN ('Porto', 'Matosinhos');`,
@@ -91,7 +91,7 @@ WHERE cidade IN ('Porto', 'Matosinhos');`,
 FROM clientes
 WHERE cidade IN ('Porto', 'Matosinhos')
   AND nome LIKE '%Santos';`,
-        hint: "Junte AND nome LIKE '%Santos' à condição WHERE.",
+        hint: "Junta AND nome LIKE '%Santos' à condição WHERE.",
         validate: (_cols, rows) => {
           const certas = rows.every((r) => ['Porto', 'Matosinhos'].includes(String(r[2])) && String(r[1]).endsWith('Santos'));
           const cidades = new Set(rows.map((r) => String(r[2])));
@@ -144,7 +144,7 @@ FROM vendas
 ORDER BY subtotal DESC, data ASC
 LIMIT 6;`,
       sqlChallenge: {
-        description: 'Liste os 5 produtos mais caros da tabela produtos mostrando nome, preco e preco_com_iva (preco * 1.23 arredondado a 2 casas com ROUND), do mais caro para o mais barato.',
+        description: 'Lista os 5 produtos mais caros da tabela produtos mostrando nome, preco e preco_com_iva (preco * 1.23 arredondado a 2 casas com ROUND), do mais caro para o mais barato.',
         starterSql: `SELECT
   nome,
   preco
@@ -156,7 +156,7 @@ FROM produtos;`,
 FROM produtos
 ORDER BY preco DESC
 LIMIT 5;`,
-        hint: 'Calcule ROUND(preco * 1.23, 2) AS preco_com_iva e termine com ORDER BY preco DESC LIMIT 5.',
+        hint: 'Calcula ROUND(preco * 1.23, 2) AS preco_com_iva e termina com ORDER BY preco DESC LIMIT 5.',
         validate: (cols, rows) => {
           const ok = rows.length === 5 && cols.length === 3 && rows[0][0] === 'Azeite' && Math.abs(Number(rows[0][2]) - 9.23) < 0.02;
           return {
@@ -208,12 +208,12 @@ GROUP BY produto
 ORDER BY faturacao_eur DESC
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Descubra os 3 dias com maior faturação em 2025: devolva as colunas data e faturacao_dia (arredondada a 2 casas), ordenadas da maior para a menor.',
+        description: 'Descobre os 3 dias com maior faturação em 2025: devolve as colunas data e faturacao_dia (arredondada a 2 casas), ordenadas da maior para a menor.',
         starterSql: `SELECT
   data,
   ROUND(SUM(quantidade * preco), 2) AS faturacao_dia
 FROM vendas
--- Agrupe por data, ordene e limite a 3 linhas
+-- Agrupa por data, ordena e limite a 3 linhas
 `,
         solutionSql: `SELECT
   data,
@@ -222,7 +222,7 @@ FROM vendas
 GROUP BY data
 ORDER BY faturacao_dia DESC
 LIMIT 3;`,
-        hint: 'Adicione GROUP BY data ORDER BY faturacao_dia DESC LIMIT 3;',
+        hint: 'Adiciona GROUP BY data ORDER BY faturacao_dia DESC LIMIT 3;',
         validate: (_cols, rows) => {
           const ok = rows.length === 3 && rows[0][0] === '2025-09-14' && Math.abs(Number(rows[0][1]) - 217.97) < 0.02;
           return {
@@ -273,7 +273,7 @@ GROUP BY produto
 HAVING SUM(quantidade * preco) > 2000
 ORDER BY faturacao DESC;`,
       sqlChallenge: {
-        description: 'Encontre todos os produtos que venderam mais de 880 unidades no total do ano: mostre produto e unidades, ordenados por unidades DESC.',
+        description: 'Encontra todos os produtos que venderam mais de 880 unidades no total do ano: mostra produto e unidades, ordenados por unidades DESC.',
         starterSql: `SELECT
   produto,
   SUM(quantidade) AS unidades
@@ -286,7 +286,7 @@ FROM vendas
 GROUP BY produto
 HAVING SUM(quantidade) > 880
 ORDER BY unidades DESC;`,
-        hint: 'Use HAVING SUM(quantidade) > 880 seguido de ORDER BY unidades DESC.',
+        hint: 'Usa HAVING SUM(quantidade) > 880 seguido de ORDER BY unidades DESC.',
         validate: (_cols, rows) => {
           const ok = rows.length === 4 && rows[0][0] === 'Leite' && Number(rows[0][1]) === 960;
           return {
@@ -337,12 +337,12 @@ INNER JOIN produtos p ON p.id = v.produto_id
 GROUP BY p.categoria
 ORDER BY faturacao_eur DESC;`,
       sqlChallenge: {
-        description: 'Cruze vendas com clientes para calcular a faturação total por cidade: devolva cidade e faturacao_eur (arredondada a 2 casas), ordenadas da maior faturação para a menor.',
+        description: 'Cruza vendas com clientes para calcular a faturação total por cidade: devolve cidade e faturacao_eur (arredondada a 2 casas), ordenadas da maior faturação para a menor.',
         starterSql: `SELECT
   c.cidade,
   ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao_eur
 FROM vendas v
--- Junte a tabela clientes e agrupe por cidade
+-- Junta a tabela clientes e agrupa por cidade
 `,
         solutionSql: `SELECT
   c.cidade,
@@ -401,7 +401,7 @@ ORDER BY faturacao_eur DESC;`,
   REPLACE(preco, ',', '.') AS preco_ponto
 FROM vendas_sujas;`,
       sqlChallenge: {
-        description: 'Classifique os 15 artigos de produtos nas faixas "Económico" (preco < 1.00), "Intermédio" (preco <= 3.00) e "Premium" (acima de 3.00): conte quantos produtos há em cada faixa (colunas faixa e qtd_produtos, ordenadas por qtd_produtos DESC).',
+        description: 'Classifica os 15 artigos de produtos nas faixas "Económico" (preco < 1.00), "Intermédio" (preco <= 3.00) e "Premium" (acima de 3.00): conta quantos produtos há em cada faixa (colunas faixa e qtd_produtos, ordenadas por qtd_produtos DESC).',
         starterSql: `SELECT
   CASE
     WHEN preco < 1.00 THEN 'Económico'
@@ -410,7 +410,7 @@ FROM vendas_sujas;`,
   END AS faixa,
   COUNT(*) AS qtd_produtos
 FROM produtos
--- Agrupe pela faixa e ordene
+-- Agrupa pela faixa e ordena
 `,
         solutionSql: `SELECT
   CASE
@@ -422,7 +422,7 @@ FROM produtos
 FROM produtos
 GROUP BY faixa
 ORDER BY qtd_produtos DESC;`,
-        hint: 'Acrescente GROUP BY faixa ORDER BY qtd_produtos DESC;',
+        hint: 'Acrescenta GROUP BY faixa ORDER BY qtd_produtos DESC;',
         validate: (_cols, rows) => {
           const sum = rows.reduce((a, r) => a + Number(r[1]), 0);
           const ok = rows.length === 3 && sum === 15 && Number(rows[0][1]) >= Number(rows[2][1]);
@@ -482,7 +482,7 @@ SELECT
 FROM por_produto
 ORDER BY categoria, pos_na_categoria;`,
       sqlChallenge: {
-        description: 'Calcule a faturação mensal de 2025 (SUBSTR(data, 1, 7) AS mes) e o acumulado anual mês a mês: devolva 12 linhas com mes, faturacao_mes e acumulado_ano.',
+        description: 'Calcula a faturação mensal de 2025 (SUBSTR(data, 1, 7) AS mes) e o acumulado anual mês a mês: devolve 12 linhas com mes, faturacao_mes e acumulado_ano.',
         starterSql: `WITH mensal AS (
   SELECT
     SUBSTR(data, 1, 7) AS mes,
@@ -493,7 +493,7 @@ ORDER BY categoria, pos_na_categoria;`,
 SELECT
   mes,
   faturacao_mes
-  -- Acrescente a coluna acumulado_ano usando SUM(...) OVER (ORDER BY mes)
+  -- Acrescenta a coluna acumulado_ano usando SUM(...) OVER (ORDER BY mes)
 FROM mensal
 ORDER BY mes;`,
         solutionSql: `WITH mensal AS (
@@ -509,7 +509,7 @@ SELECT
   ROUND(SUM(faturacao_mes) OVER (ORDER BY mes), 2) AS acumulado_ano
 FROM mensal
 ORDER BY mes;`,
-        hint: 'Use ROUND(SUM(faturacao_mes) OVER (ORDER BY mes), 2) AS acumulado_ano.',
+        hint: 'Usa ROUND(SUM(faturacao_mes) OVER (ORDER BY mes), 2) AS acumulado_ano.',
         validate: (cols, rows) => {
           const ok =
             rows.length === 12 &&
@@ -569,13 +569,13 @@ UNION ALL
 SELECT 'Sazonal Realista' AS serie, COUNT(*) AS linhas, ROUND(SUM(quantidade * preco), 2) AS faturacao
 FROM vendas_sazonais;`,
       sqlChallenge: {
-        description: 'Usando uma subquery no WHERE, selecione nome, categoria e preco de todos os produtos cujo preco seja estritamente superior ao preço médio de todos os produtos da tabela produtos, ordenados por preco DESC.',
+        description: 'Usando uma subquery no WHERE, seleciona nome, categoria e preco de todos os produtos cujo preco seja estritamente superior ao preço médio de todos os produtos da tabela produtos, ordenados por preco DESC.',
         starterSql: `SELECT
   nome,
   categoria,
   preco
 FROM produtos
--- Filtre onde preco > (subquery com a média de preco de produtos) e ordene por preco DESC
+-- Filtra onde preco > (subquery com a média de preco de produtos) e ordena por preco DESC
 `,
         solutionSql: `SELECT
   nome,
@@ -584,7 +584,7 @@ FROM produtos
 FROM produtos
 WHERE preco > (SELECT AVG(preco) FROM produtos)
 ORDER BY preco DESC;`,
-        hint: 'Use WHERE preco > (SELECT AVG(preco) FROM produtos) ORDER BY preco DESC;',
+        hint: 'Usa WHERE preco > (SELECT AVG(preco) FROM produtos) ORDER BY preco DESC;',
         validate: (cols, rows) => {
           const ok = rows.length === 5 && cols.length === 3 && rows[0][0] === 'Azeite' && rows[4][0] === 'Ovos (dúzia)';
           return {
@@ -646,7 +646,7 @@ GROUP BY c.id, c.nome
 ORDER BY valor_monetario_eur DESC
 LIMIT 6;`,
       sqlChallenge: {
-        description: 'Sobre a tabela vendas_sazonais, calcule para os 12 meses de 2025: mes, faturacao_mes e media_movel_3m (média móvel do mês atual e dos 2 meses anteriores usando ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, arredondada a 2 casas).',
+        description: 'Sobre a tabela vendas_sazonais, calcula para os 12 meses de 2025: mes, faturacao_mes e media_movel_3m (média móvel do mês atual e dos 2 meses anteriores usando ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, arredondada a 2 casas).',
         starterSql: `WITH mensal_saz AS (
   SELECT
     SUBSTR(data, 1, 7) AS mes,
@@ -657,7 +657,7 @@ LIMIT 6;`,
 SELECT
   mes,
   faturacao_mes
-  -- Acrescente media_movel_3m usando AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+  -- Acrescenta media_movel_3m usando AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
 FROM mensal_saz
 ORDER BY mes;`,
         solutionSql: `WITH mensal_saz AS (
@@ -673,14 +673,17 @@ SELECT
   ROUND(AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS media_movel_3m
 FROM mensal_saz
 ORDER BY mes;`,
-        hint: 'Use ROUND(AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS media_movel_3m.',
+        hint: 'Usa ROUND(AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS media_movel_3m.',
         validate: (cols, rows) => {
-          const ok = rows.length === 12 && cols.length === 3 && Number(rows[11][2]) > 4000;
+          const formaCerta = rows.length === 12 && cols.length === 3;
+          const valoresCertos = formaCerta && [[0, 2185.21], [1, 1889.22], [11, 4267.66]].every(([i, v]) => Math.abs(Number(rows[i][2]) - v) < 0.011);
           return {
-            passed: ok,
-            message: ok
+            passed: valoresCertos,
+            message: valoresCertos
               ? 'Domínio total de Window Frames! A média móvel do 4.º trimestre mostra claramente a aceleração de Natal.'
-              : 'Confirma que tens 3 colunas (mes, faturacao_mes, media_movel_3m) para os 12 meses de vendas_sazonais.',
+              : !formaCerta
+                ? 'Confirma que tens 3 colunas (mes, faturacao_mes, media_movel_3m) para os 12 meses de vendas_sazonais.'
+                : 'A forma está certa, mas a média móvel não: confirma ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, ORDER BY mes e ROUND(..., 2).',
           };
         },
       },

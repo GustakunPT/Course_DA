@@ -49,4 +49,4 @@ Acumular num dicionário por `produto` faz em Python puro exatamente o mesmo tra
 
 ## Exercícios
 
-Complete `exercicios/semana09_dicionarios.py` e corra `python verificar.py 9`.
+Completa `exercicios/semana09_dicionarios.py` e corre `python verificar.py 9`.

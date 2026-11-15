@@ -42,11 +42,11 @@ for venda in vendas:
     dobros.append(venda * 2)  # append = acrescentar ao fim da fila
 ```
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Ponha `contador = 0` **dentro** do ciclo. O que acontece ao resultado? Porquê?
-2. Faça `for i in range(1, 100)` e some tudo. Porque não dá 5050?
-3. Tire a indentação do `print` para ele ficar fora do ciclo. Quantas vezes imprime?
+1. Põe `contador = 0` **dentro** do ciclo. O que acontece ao resultado? Porquê?
+2. Faz `for i in range(1, 100)` e soma tudo. Porque não dá 5050?
+3. Tira a indentação do `print` para ele ficar fora do ciclo. Quantas vezes imprime?
 
 ## Ligação ao SQL
 
@@ -55,4 +55,4 @@ O SQL faz o ciclo por si; em Python escreve-o à mão, e é por isso que o perce
 
 ## Exercícios
 
-Complete `exercicios/semana06_ciclo_for.py` e corra `python verificar.py 6`.
+Completa `exercicios/semana06_ciclo_for.py` e corre `python verificar.py 6`.

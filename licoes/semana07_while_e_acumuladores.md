@@ -29,18 +29,18 @@ media = total / len(vendas)   # len = quantos elementos tem a lista
 
 ## for ou while?
 
-| Situação | Use |
+| Situação | Usa |
 | --- | --- |
 | "Para cada venda da lista..." | `for` |
 | "Repetir 10 vezes" | `for` com `range(10)` |
 | "Até o saldo chegar a 500 €" | `while` |
 | "Perguntar até a resposta ser válida" | `while` |
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. No exemplo da sopa, apague a linha que aumenta a temperatura. Corra e pare com `Ctrl + C`.
-2. Troque `<` por `<=` na condição. O resultado muda? Em que caso mudaria?
-3. Calcule a média de uma lista vazia `[]`. Leia o erro: que divisão está a acontecer?
+1. No exemplo da sopa, apaga a linha que aumenta a temperatura. Corre e para com `Ctrl + C`.
+2. Troca `<` por `<=` na condição. O resultado muda? Em que caso mudaria?
+3. Calcula a média de uma lista vazia `[]`. Lê o erro: que divisão está a acontecer?
 
 ## Ligação ao SQL
 
@@ -49,5 +49,5 @@ Um total acumulado com `SUM(...) OVER (ORDER BY data)` é o mealheiro visto linh
 
 ## Exercícios
 
-Complete `exercicios/semana07_while.py` e corra `python verificar.py 7`.
-Quando as 5 semanas estiverem a verde, faça um commit: `Completa exercícios das semanas 3 a 7`.
+Completa `exercicios/semana07_while.py` e corre `python verificar.py 7`.
+Quando as 5 semanas estiverem a verde, faz um commit: `Completa exercícios das semanas 3 a 7`.

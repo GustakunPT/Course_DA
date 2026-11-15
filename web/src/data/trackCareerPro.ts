@@ -166,7 +166,7 @@ export const lessonPedagogyMap: Record<string, PedagogicalNotes> = {
       'Na query final, usa SUM(coluna) OVER (ORDER BY mes) para somar acumulados sem perder linhas.',
       'Usa RANK() OVER (PARTITION BY categoria ORDER BY faturacao DESC) para numerar o ranking dentro de cada categoria.',
     ],
-    proPractice: 'CTEs e Window Functions são o tema número 1 em testes técnicos para vagas de Analista de Dados Pleno e Sénior.',
+    proPractice: 'CTEs e Window Functions são o tema número 1 em testes técnicos para vagas de Analista de Dados Intermédio e Sénior.',
     commonPitfall: 'Pôr ponto e vírgula dentro do parênteses da CTE em vez de apenas no final da query principal.',
   },
   'pd-01-dataframes': {
@@ -402,12 +402,12 @@ brutas, limpas, gold_df = pipeline_mercearia("dados/vendas_sujas.csv")
 print(f"Bronze: {brutas} linhas -> Silver: {limpas} linhas")
 gold_df`,
       pythonChallenge: {
-        description: 'Construa o relatório de auditoria do pipeline sobre dados/vendas_sujas.csv: guarde em linhas_bronze o total inicial (12), em linhas_rejeitadas quantas linhas foram descartadas na passagem para Silver (5) e em taxa_aproveitamento_pct a percentagem de linhas válidas arredondada a 2 casas (7 / 12 * 100).',
+        description: 'Constrói o relatório de auditoria do pipeline sobre dados/vendas_sujas.csv: guarda em linhas_bronze o total inicial (12), em linhas_rejeitadas quantas linhas foram descartadas na passagem para Silver (5) e em taxa_aproveitamento_pct a percentagem de linhas válidas arredondada a 2 casas (7 / 12 * 100).',
         starterCode: `import pandas as pd
 
 bronze = pd.read_csv("dados/vendas_sujas.csv")
 
-# Calcule linhas_bronze, linhas_rejeitadas e taxa_aproveitamento_pct:
+# Calcula linhas_bronze, linhas_rejeitadas e taxa_aproveitamento_pct:
 linhas_bronze = None
 linhas_rejeitadas = None
 taxa_aproveitamento_pct = None
@@ -450,7 +450,7 @@ print(linhas_bronze, linhas_rejeitadas, taxa_aproveitamento_pct)`,
       id: 'pro-02-data-quality-tests',
       code: '02',
       title: 'Testes Automáticos de Qualidade de Dados (Data Contracts)',
-      lede: 'Um profissional não espera que o diretor descubra um número errado no dashboard: escreve testes automáticos que validam chaves únicas, nulos, intervalos e integridade referencial.',
+      lede: 'Um profissional não espera que o diretor descobre um número errado no dashboard: escreve testes automáticos que validam chaves únicas, nulos, intervalos e integridade referencial.',
       analogyTitle: 'O controlo de qualidade antes de abrir as portas da loja',
       analogyBody: 'Antes de atualizar o painel da administração às 8h00, o script verifica automaticamente: há algum preço negativo? Há algum produto_id em vendas que não exista em produtos.csv? Se houver, trava e avisa.',
       concepts: [
@@ -483,7 +483,7 @@ print("IDs produtos únicos:", produtos["id"].is_unique)
 print("Sem nulos em vendas:", int(vendas.isna().sum().sum()) == 0)
 print("FK clientes íntegra:", bool(vendas["cliente_id"].isin(clientes["id"]).all()))`,
       pythonChallenge: {
-        description: 'Escreva uma bateria de 3 verificações sobre os CSVs oficiais: guarde True/False em catalogo_unico (se produtos["id"] não tem repetidos), precos_consistentes (se em todas as linhas de vendas o preco coincide com o preço oficial desse produto_id em produtos.csv) e zero_orfaos (se todos os produto_id de vendas existem em produtos["id"]).',
+        description: 'Escreve uma bateria de 3 verificações sobre os CSVs oficiais: guarda True/False em catalogo_unico (se produtos["id"] não tem repetidos), precos_consistentes (se em todas as linhas de vendas o preco coincide com o preço oficial desse produto_id em produtos.csv) e zero_orfaos (se todos os produto_id de vendas existem em produtos["id"]).',
         starterCode: `import pandas as pd
 
 produtos = pd.read_csv("dados/produtos.csv")
@@ -508,9 +508,9 @@ precos_consistentes = bool((vendas["preco"] == precos_esperados).all())
 
 print(catalogo_unico, zero_orfaos, precos_consistentes)`,
         checks: [
-          { label: 'catalogo_unico is True', expr: 'catalogo_unico is True', actualExpr: 'catalogo_unico', hint: 'Use bool(produtos["id"].is_unique).' },
-          { label: 'zero_orfaos is True', expr: 'zero_orfaos is True', actualExpr: 'zero_orfaos', hint: 'Use bool(vendas["produto_id"].isin(produtos["id"]).all()).' },
-          { label: 'precos_consistentes is True', expr: 'precos_consistentes is True', actualExpr: 'precos_consistentes', hint: 'Mapeie o preço de produtos por produto_id e compare com vendas["preco"].' },
+          { label: 'catalogo_unico is True', expr: 'catalogo_unico is True', actualExpr: 'catalogo_unico', hint: 'Usa bool(produtos["id"].is_unique).' },
+          { label: 'zero_orfaos is True', expr: 'zero_orfaos is True', actualExpr: 'zero_orfaos', hint: 'Usa bool(vendas["produto_id"].isin(produtos["id"]).all()).' },
+          { label: 'precos_consistentes is True', expr: 'precos_consistentes is True', actualExpr: 'precos_consistentes', hint: 'Mapeie o preço de produtos por produto_id e compara com vendas["preco"].' },
         ],
       },
       quiz: {
@@ -564,7 +564,7 @@ GROUP BY c.id, c.nome, c.cidade
 ORDER BY ltv_2025_eur DESC
 LIMIT 8;`,
       sqlChallenge: {
-        description: 'Identifique os clientes hiper-fiéis que fizeram compras nos 12 meses do ano (COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12): devolva cliente_id, nome e ltv_eur (faturação anual arredondada a 2 casas), ordenados por ltv_eur DESC.',
+        description: 'Identifica os clientes hiper-fiéis que fizeram compras nos 12 meses do ano (COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12): devolve cliente_id, nome e ltv_eur (faturação anual arredondada a 2 casas), ordenados por ltv_eur DESC.',
         starterSql: `SELECT
   c.id AS cliente_id,
   c.nome,
@@ -572,7 +572,7 @@ LIMIT 8;`,
 FROM vendas v
 INNER JOIN clientes c ON c.id = v.cliente_id
 GROUP BY c.id, c.nome
--- Filtre com HAVING apenas quem esteve ativo nos 12 meses e ordene por ltv_eur DESC
+-- Filtra com HAVING apenas quem esteve ativo nos 12 meses e ordena por ltv_eur DESC
 `,
         solutionSql: `SELECT
   c.id AS cliente_id,
@@ -583,7 +583,7 @@ INNER JOIN clientes c ON c.id = v.cliente_id
 GROUP BY c.id, c.nome
 HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12
 ORDER BY ltv_eur DESC;`,
-        hint: 'Adicione HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12 ORDER BY ltv_eur DESC;',
+        hint: 'Adiciona HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12 ORDER BY ltv_eur DESC;',
         validate: (cols, rows) => {
           // Nos dados de 2025 há exatamente 12 clientes (de 120) com compras em todos os meses.
           const ordenado = rows.every((r, i) => i === 0 || Number(rows[i - 1][2]) >= Number(r[2]));
@@ -647,13 +647,13 @@ GROUP BY produto
 ORDER BY faturacao_setembro DESC
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Escreva uma query otimizada (usando intervalo direto em data) para o 3.º trimestre de 2025 (de "2025-07-01" a "2025-09-30"): devolva a categoria do produto (de produtos) e a faturacao_q3 arredondada a 2 casas, ordenada por faturacao_q3 DESC.',
+        description: 'Escreve uma query otimizada (usando intervalo direto em data) para o 3.º trimestre de 2025 (de "2025-07-01" a "2025-09-30"): devolve a categoria do produto (de produtos) e a faturacao_q3 arredondada a 2 casas, ordenada por faturacao_q3 DESC.',
         starterSql: `SELECT
   p.categoria,
   ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao_q3
 FROM vendas v
 INNER JOIN produtos p ON p.id = v.produto_id
--- Filtre o 3.º trimestre (2025-07-01 a 2025-09-30), agrupe e ordene
+-- Filtra o 3.º trimestre (2025-07-01 a 2025-09-30), agrupa e ordena
 `,
         solutionSql: `SELECT
   p.categoria,
@@ -663,7 +663,7 @@ INNER JOIN produtos p ON p.id = v.produto_id
 WHERE v.data >= '2025-07-01' AND v.data <= '2025-09-30'
 GROUP BY p.categoria
 ORDER BY faturacao_q3 DESC;`,
-        hint: "Use WHERE v.data BETWEEN '2025-07-01' AND '2025-09-30' GROUP BY p.categoria ORDER BY faturacao_q3 DESC;",
+        hint: "Usa WHERE v.data BETWEEN '2025-07-01' AND '2025-09-30' GROUP BY p.categoria ORDER BY faturacao_q3 DESC;",
         validate: (cols, rows) => {
           const ok = rows.length === 6 && cols.length === 2 && rows[0][0] === 'Mercearia' && Number(rows[0][1]) > 3500;
           return {
@@ -727,7 +727,7 @@ SELECT
 FROM mensal
 ORDER BY mes;`,
       sqlChallenge: {
-        description: 'Resolva o problema clássico de entrevista "Top 1 de cada categoria": usando uma CTE, descubra qual é o produto campeão de faturação dentro de cada uma das 6 categorias. Devolva categoria, produto e faturacao (6 linhas ordenadas por faturacao DESC).',
+        description: 'Resolve o problema clássico de entrevista "Top 1 de cada categoria": usando uma CTE, descobre qual é o produto campeão de faturação dentro de cada uma das 6 categorias. Devolve categoria, produto e faturacao (6 linhas ordenadas por faturacao DESC).',
         starterSql: `WITH ranking_cat AS (
   SELECT
     p.categoria,
@@ -738,7 +738,7 @@ ORDER BY mes;`,
   INNER JOIN produtos p ON p.id = v.produto_id
   GROUP BY p.categoria, p.nome
 )
--- Selecione categoria, produto e faturacao apenas para o 1.º classificado de cada categoria:
+-- Seleciona categoria, produto e faturacao apenas para o 1.º classificado de cada categoria:
 SELECT categoria, produto, faturacao
 FROM ranking_cat;`,
         solutionSql: `WITH ranking_cat AS (
@@ -755,7 +755,7 @@ SELECT categoria, produto, faturacao
 FROM ranking_cat
 WHERE pos = 1
 ORDER BY faturacao DESC;`,
-        hint: 'Adicione WHERE pos = 1 ORDER BY faturacao DESC na consulta final.',
+        hint: 'Adiciona WHERE pos = 1 ORDER BY faturacao DESC na consulta final.',
         validate: (cols, rows) => {
           const ok = rows.length === 6 && cols.length === 3 && rows[0][1] === 'Azeite' && rows[1][1] === 'Queijo';
           return {
@@ -788,7 +788,7 @@ ORDER BY faturacao DESC;`,
       concepts: [
         'Um analista profissional cruza múltiplas tabelas (vendas, produtos, clientes) para responder a perguntas estratégicas.',
         'Validação cruzada: confirmar que os resultados do teu script batem ao cêntimo com o SQL.',
-        'Com estas 6 trilhas concluídas, dominas o ciclo real de trabalho de um Analista de Dados Júnior/Pleno.',
+        'Com estas 6 trilhas concluídas, dominas o ciclo real de trabalho de um Analista de Dados Júnior a Intermédio.',
       ],
       beginnerSteps: [
         'Carrega os 3 ficheiros CSV oficiais com pd.read_csv().',
@@ -816,7 +816,7 @@ completo = vendas.merge(produtos[["id", "categoria"]], left_on="produto_id", rig
 completo = completo.merge(clientes[["id", "cidade"]], left_on="cliente_id", right_on="id")
 completo.head(5)`,
       pythonChallenge: {
-        description: 'Feche o diagnóstico executivo 360º: guarde em receita_anual (26902.89), ticket_mediano (mediana de quantidade * preco arredondada a 2 casas), quota_mercearia_pct (peso percentual da categoria "Mercearia" na receita total arredondado a 2 casas) e cidade_maior_ltv (nome da cidade com maior gasto médio por cliente ativo).',
+        description: 'Fecha o diagnóstico executivo 360º: guarda em receita_anual (26902.89), ticket_mediano (mediana de quantidade * preco arredondada a 2 casas), quota_mercearia_pct (peso percentual da categoria "Mercearia" na receita total arredondado a 2 casas) e cidade_maior_ltv (nome da cidade com maior gasto médio por cliente ativo).',
         starterCode: `import pandas as pd
 
 vendas = pd.read_csv("dados/vendas.csv")
@@ -854,7 +854,7 @@ print(receita_anual, ticket_mediano, quota_mercearia_pct, cidade_maior_ltv)`,
           { label: 'receita_anual (26902.89)', expr: 'math.isclose(float(receita_anual), 26902.89, abs_tol=0.05)', actualExpr: 'receita_anual', hint: 'round(float(vendas["subtotal"].sum()), 2).' },
           { label: 'ticket_mediano (3.50)', expr: 'math.isclose(float(ticket_mediano), 3.50, abs_tol=0.02)', actualExpr: 'ticket_mediano', hint: 'round(float(vendas["subtotal"].median()), 2).' },
           { label: 'quota_mercearia_pct (51.59%)', expr: 'math.isclose(float(quota_mercearia_pct), 51.59, abs_tol=0.05)', actualExpr: 'quota_mercearia_pct', hint: 'Faturação da categoria Mercearia a dividir pela faturação total * 100.' },
-          { label: 'cidade_maior_ltv ("Braga")', expr: 'cidade_maior_ltv == "Braga"', actualExpr: 'cidade_maior_ltv', hint: 'Divida a soma de subtotal pelo nunique de cliente_id em cada cidade (Braga tem 254.18 € / cliente).' },
+          { label: 'cidade_maior_ltv ("Braga")', expr: 'cidade_maior_ltv == "Braga"', actualExpr: 'cidade_maior_ltv', hint: 'Divide a soma de subtotal pelo nunique de cliente_id em cada cidade (Braga tem 254.18 € / cliente).' },
         ],
       },
       quiz: {
@@ -920,7 +920,7 @@ for item in dados["lote"]:
 
 print(f"Fornecedor: {dados['fornecedor']} | Custo válido: {total_custo:.2f} € | Registos c/ erro: {erros}")`,
       pythonChallenge: {
-        description: 'Processe o JSON entregas_json usando json.loads e um bloco try / except ValueError: some em valor_valido o total (unidades * preco) apenas dos artigos válidos e conte em registos_invalidos quantos artigos deram erro de conversão.',
+        description: 'Processe o JSON entregas_json usando json.loads e um bloco try / except ValueError: soma em valor_valido o total (unidades * preco) apenas dos artigos válidos e conta em registos_invalidos quantos artigos deram erro de conversão.',
         starterCode: `import json
 
 entregas_json = '''
@@ -935,7 +935,7 @@ entregas_json = '''
 valor_valido = 0.0
 registos_invalidos = 0
 
-# Converta entregas_json com json.loads e processe com try / except ValueError:
+# Converte entregas_json com json.loads e processe com try / except ValueError:
 
 
 print(valor_valido, registos_invalidos)`,
@@ -995,7 +995,7 @@ print(valor_valido, registos_invalidos)`,
         'Executa consultas seguras com pd.read_sql_query("SELECT ... WHERE produto = ?", con, params=["Azeite"]).',
       ],
       proPractice: 'No dia a dia empresarial, este é o fluxo mais usado do mundo: o SQL faz os filtros e JOINs pesados dentro do servidor de base de dados e entrega apenas o resultado agregado ao Python/Pandas.',
-      commonPitfall: 'Escrever f"SELECT * FROM vendas WHERE produto = \'{input_utilizador}\'" — vulnerabilidade grave de segurança (SQL Injection)!',
+      commonPitfall: 'Escrever f"SELECT * FROM vendas WHERE produto = \'{input_utilizador}\'" — vulnerabilidade grava de segurança (SQL Injection)!',
       referenceTitle: 'Integração Python + SQL (DB-API 2.0 & Pandas)',
       referenceRows: [
         { syntax: 'con = sqlite3.connect(":memory:")', meaning: 'Abre ligação SQLite em Python', example: 'Motor relacional embutido' },
@@ -1022,7 +1022,7 @@ LIMIT 5
 resultado = pd.read_sql_query(query, con, params=["2025-11-01", 2])
 resultado`,
       pythonChallenge: {
-        description: 'Usando sqlite3 e pandas: carregue dados/vendas.csv para uma tabela SQL "vendas" numa ligação em memória e use pd.read_sql_query com parâmetros seguros (?) para calcular em faturacao_queijo_q4 a faturação total (ROUND(SUM(quantidade * preco), 2)) do produto "Queijo" no 4.º trimestre (data >= "2025-10-01").',
+        description: 'Usando sqlite3 e pandas: carrega dados/vendas.csv para uma tabela SQL "vendas" numa ligação em memória e usa pd.read_sql_query com parâmetros seguros (?) para calcular em faturacao_queijo_q4 a faturação total (ROUND(SUM(quantidade * preco), 2)) do produto "Queijo" no 4.º trimestre (data >= "2025-10-01").',
         starterCode: `import sqlite3
 import pandas as pd
 
@@ -1030,7 +1030,7 @@ con = sqlite3.connect(":memory:")
 df = pd.read_csv("dados/vendas.csv")
 df.to_sql("vendas", con, index=False)
 
-# Execute uma query parametrizada (?) para obter a faturação de "Queijo" com data >= "2025-10-01":
+# Executa uma query parametrizada (?) para obter a faturação de "Queijo" com data >= "2025-10-01":
 faturacao_queijo_q4 = None
 
 print(faturacao_queijo_q4)`,
@@ -1051,7 +1051,7 @@ faturacao_queijo_q4 = float(res["total"].iloc[0])
 
 print(faturacao_queijo_q4)`,
         checks: [
-          { label: 'faturacao_queijo_q4 calculada via SQL + Python', expr: 'faturacao_queijo_q4 is not None and math.isclose(float(faturacao_queijo_q4), float(pd.read_csv("dados/vendas.csv").query("produto == \'Queijo\' and data >= \'2025-10-01\'").eval("quantidade * preco").sum()), abs_tol=0.05)', actualExpr: 'faturacao_queijo_q4', hint: 'Filtre WHERE produto = ? AND data >= ? com params=["Queijo", "2025-10-01"].' },
+          { label: 'faturacao_queijo_q4 calculada via SQL + Python', expr: 'faturacao_queijo_q4 is not None and math.isclose(float(faturacao_queijo_q4), float(pd.read_csv("dados/vendas.csv").query("produto == \'Queijo\' and data >= \'2025-10-01\'").eval("quantidade * preco").sum()), abs_tol=0.05)', actualExpr: 'faturacao_queijo_q4', hint: 'Filtra WHERE produto = ? AND data >= ? com params=["Queijo", "2025-10-01"].' },
         ],
       },
       quiz: {

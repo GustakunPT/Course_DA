@@ -152,6 +152,28 @@ try:
 
     _specs = json.loads(__checks_json__)
     _ns["math"] = math
+
+    # correr_com(total=80) volta a correr o código do aluno com outros dados de entrada:
+    # as atribuições de topo a essas variáveis passam a usar os novos valores. Assim as
+    # verificações testam a lógica e não apenas o valor final (que se podia escrever à mão).
+    def correr_com(**novos):
+        _arvore = ast.parse(__user_code__, mode="exec")
+        for _no in _arvore.body:
+            if isinstance(_no, ast.Assign) and any(isinstance(_t, ast.Name) and _t.id in novos for _t in _no.targets):
+                _nome = next(_t.id for _t in _no.targets if isinstance(_t, ast.Name) and _t.id in novos)
+                _no.value = ast.Name(id="__novo_" + _nome, ctx=ast.Load())
+        ast.fix_missing_locations(_arvore)
+        _ns2 = {"__name__": "__main__"}
+        _ns2.update({"__novo_" + _k: _v for _k, _v in novos.items()})
+        _antes = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            exec(compile(_arvore, "<bancada>", "exec"), _ns2)
+        finally:
+            sys.stdout = _antes
+        return _ns2
+
+    _ns["correr_com"] = correr_com
     for _sp in _specs:
         try:
             _actual = eval(_sp["actualExpr"], _ns)

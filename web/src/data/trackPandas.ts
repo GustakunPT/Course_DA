@@ -4,7 +4,7 @@ export const pandasTrack: Track = {
   id: 'pandas',
   shortTitle: '3. Pandas',
   fullTitle: 'Pandas e Oficina de Limpeza de Dados',
-  summary: 'Os cadernos das Etapas 13 a 16 agora correm diretamente no browser: DataFrames, filtros, groupby, merge e limpeza de vendas_sujas.csv.',
+  summary: 'DataFrames, filtros, texto e datas, groupby, merge e limpeza de vendas_sujas.csv, praticados aqui no browser. Para treinar mais, cada tema tem um caderno Jupyter com 16 tarefas na pasta cadernos/ do projeto.',
   engineLabel: 'Python + pandas (WebAssembly)',
   lessons: [
     {
@@ -34,7 +34,7 @@ df["subtotal"] = df["quantidade"] * df["preco"]
 print("Formato:", df.shape, "| Faturação:", round(df["subtotal"].sum(), 2))
 df.head(5)`,
       pythonChallenge: {
-        description: 'Sobre dados/vendas.csv: guarde em linhas o número de linhas, em colunas a lista de nomes de colunas, em primeiro_produto o produto da linha 0 e em faturacao_total a soma arredondada a 2 casas de quantidade * preco.',
+        description: 'Sobre dados/vendas.csv: guarda em linhas o número de linhas, em colunas a lista de nomes de colunas, em primeiro_produto o produto da linha 0 e em faturacao_total a soma arredondada a 2 casas de quantidade * preco.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -56,10 +56,10 @@ faturacao_total = round(float((df["quantidade"] * df["preco"]).sum()), 2)
 
 print(linhas, primeiro_produto, faturacao_total)`,
         checks: [
-          { label: 'linhas (5078)', expr: 'int(linhas) == 5078', actualExpr: 'linhas', hint: 'Use len(df).' },
-          { label: 'colunas', expr: 'colunas == ["data", "cliente_id", "produto_id", "produto", "quantidade", "preco"]', actualExpr: 'colunas', hint: 'Use list(df.columns).' },
-          { label: 'primeiro_produto ("Pão")', expr: 'primeiro_produto == "Pão"', actualExpr: 'primeiro_produto', hint: 'Use df["produto"].iloc[0].' },
-          { label: 'faturacao_total (26902.89)', expr: 'math.isclose(float(faturacao_total), 26902.89, abs_tol=0.02)', actualExpr: 'faturacao_total', hint: 'Calcule round((df["quantidade"] * df["preco"]).sum(), 2).' },
+          { label: 'linhas (5078)', expr: 'int(linhas) == 5078', actualExpr: 'linhas', hint: 'Usa len(df).' },
+          { label: 'colunas', expr: 'colunas == ["data", "cliente_id", "produto_id", "produto", "quantidade", "preco"]', actualExpr: 'colunas', hint: 'Usa list(df.columns).' },
+          { label: 'primeiro_produto ("Pão")', expr: 'primeiro_produto == "Pão"', actualExpr: 'primeiro_produto', hint: 'Usa df["produto"].iloc[0].' },
+          { label: 'faturacao_total (26902.89)', expr: 'math.isclose(float(faturacao_total), 26902.89, abs_tol=0.02)', actualExpr: 'faturacao_total', hint: 'Calcula round((df["quantidade"] * df["preco"]).sum(), 2).' },
         ],
       },
       quiz: {
@@ -100,7 +100,7 @@ azeite_grande = df[(df["produto"] == "Azeite") & (df["quantidade"] >= 4)]
 print("Vendas grandes de Azeite:", len(azeite_grande))
 azeite_grande.head(5)`,
       pythonChallenge: {
-        description: 'Filtre dados/vendas.csv: conte em qtd_vendas_cafe quantas linhas são do produto "Café" e calcule em unidades_dezembro a soma de quantidade das vendas ocorridas em dezembro de 2025 (data >= "2025-12-01").',
+        description: 'Filtra dados/vendas.csv: conta em qtd_vendas_cafe quantas linhas são do produto "Café" e calcula em unidades_dezembro a soma de quantidade das vendas ocorridas em dezembro de 2025 (data >= "2025-12-01").',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -118,8 +118,8 @@ unidades_dezembro = int(df[df["data"] >= "2025-12-01"]["quantidade"].sum())
 
 print(qtd_vendas_cafe, unidades_dezembro)`,
         checks: [
-          { label: 'qtd_vendas_cafe', expr: 'int(qtd_vendas_cafe) == int((pd.read_csv("dados/vendas.csv")["produto"] == "Café").sum())', actualExpr: 'qtd_vendas_cafe', hint: 'Use len(df[df["produto"] == "Café"]).' },
-          { label: 'unidades_dezembro', expr: 'int(unidades_dezembro) == int(pd.read_csv("dados/vendas.csv").query("data >= \'2025-12-01\'")["quantidade"].sum())', actualExpr: 'unidades_dezembro', hint: 'Filtre df[df["data"] >= "2025-12-01"]["quantidade"].sum().' },
+          { label: 'qtd_vendas_cafe', expr: 'int(qtd_vendas_cafe) == int((pd.read_csv("dados/vendas.csv")["produto"] == "Café").sum())', actualExpr: 'qtd_vendas_cafe', hint: 'Usa len(df[df["produto"] == "Café"]).' },
+          { label: 'unidades_dezembro', expr: 'int(unidades_dezembro) == int(pd.read_csv("dados/vendas.csv").query("data >= \'2025-12-01\'")["quantidade"].sum())', actualExpr: 'unidades_dezembro', hint: 'Filtra df[df["data"] >= "2025-12-01"]["quantidade"].sum().' },
         ],
       },
       quiz: {
@@ -162,7 +162,7 @@ df["subtotal"] = df["quantidade"] * df["preco"]
 
 df.groupby("mes", as_index=False)["subtotal"].sum().round(2).head(6)`,
       pythonChallenge: {
-        description: 'Em dados/produtos.csv, conte em produtos_ao_quilo quantos produtos têm "(kg)" no nome (use .str.contains("(kg)", regex=False)) e guarde em mes_pico o número do mês (1 a 12) com maior faturação em vendas.csv.',
+        description: 'Em dados/produtos.csv, conta em produtos_ao_quilo quantos produtos têm "(kg)" no nome (usa .str.contains("(kg)", regex=False)) e guarda em mes_pico o número do mês (1 a 12) com maior faturação em vendas.csv.',
         starterCode: `import pandas as pd
 
 produtos = pd.read_csv("dados/produtos.csv")
@@ -184,7 +184,7 @@ mes_pico = int(vendas.groupby("mes")["sub"].sum().idxmax())
 
 print(produtos_ao_quilo, mes_pico)`,
         checks: [
-          { label: 'produtos_ao_quilo (2)', expr: 'int(produtos_ao_quilo) == 2', actualExpr: 'produtos_ao_quilo', hint: 'Maçãs (kg) e Bananas (kg): use produtos["nome"].str.contains("(kg)", regex=False).sum().' },
+          { label: 'produtos_ao_quilo (2)', expr: 'int(produtos_ao_quilo) == 2', actualExpr: 'produtos_ao_quilo', hint: 'Maçãs (kg) e Bananas (kg): usa produtos["nome"].str.contains("(kg)", regex=False).sum().' },
           { label: 'mes_pico (9 - setembro)', expr: 'int(mes_pico) == 9', actualExpr: 'mes_pico', hint: 'Setembro (mês 9) lidera com 2 462,82 €.' },
         ],
       },
@@ -209,13 +209,13 @@ print(produtos_ao_quilo, mes_pico)`,
       analogyBody: 'value_counts() é o atalho favorito dos analistas em exploração inicial: conta ocorrências e ordena automaticamente do mais frequente para o mais raro.',
       concepts: [
         'df["cidade"].value_counts() conta quantos clientes existem em cada cidade.',
-        'value_counts(normalize=True) devolve logo a proporção relativa (entre 0 e 1).',
+        'value_counts(normaliza=True) devolve logo a proporção relativa (entre 0 e 1).',
         'df.sort_values(by="preco", ascending=False) ordena do maior para o menor.',
       ],
       referenceTitle: 'Rankings e frequências',
       referenceRows: [
         { syntax: 's.value_counts()', meaning: 'Frequência absoluta ordenada', example: 'clientes["cidade"].value_counts()' },
-        { syntax: 's.value_counts(normalize=True)', meaning: 'Frequência relativa (quota)', example: '(s.value_counts(normalize=True) * 100).round(1)' },
+        { syntax: 's.value_counts(normaliza=True)', meaning: 'Frequência relativa (quota)', example: '(s.value_counts(normaliza=True) * 100).round(1)' },
         { syntax: 'df.sort_values("col", ascending=False)', meaning: 'Ordena DataFrame decrescente', example: 'produtos.sort_values("preco", ascending=False)' },
       ],
       engine: 'python',
@@ -225,7 +225,7 @@ clientes = pd.read_csv("dados/clientes.csv")
 resumo = clientes["cidade"].value_counts().rename_axis("cidade").reset_index(name="num_clientes")
 resumo`,
       pythonChallenge: {
-        description: 'A partir de dados/clientes.csv, guarde em cidade_mais_clientes o nome da cidade com mais fichas de cliente (use .value_counts().index[0]) e em qtd_nessa_cidade o número de clientes dessa cidade.',
+        description: 'A partir de dados/clientes.csv, guarda em cidade_mais_clientes o nome da cidade com mais fichas de cliente (usa .value_counts().index[0]) e em qtd_nessa_cidade o número de clientes dessa cidade.',
         starterCode: `import pandas as pd
 
 clientes = pd.read_csv("dados/clientes.csv")
@@ -244,20 +244,20 @@ qtd_nessa_cidade = int(contagem.iloc[0])
 
 print(cidade_mais_clientes, qtd_nessa_cidade)`,
         checks: [
-          { label: 'cidade_mais_clientes', expr: 'cidade_mais_clientes == str(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().index[0])', actualExpr: 'cidade_mais_clientes', hint: 'Use clientes["cidade"].value_counts().index[0].' },
-          { label: 'qtd_nessa_cidade', expr: 'int(qtd_nessa_cidade) == int(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().iloc[0])', actualExpr: 'qtd_nessa_cidade', hint: 'Use clientes["cidade"].value_counts().iloc[0].' },
+          { label: 'cidade_mais_clientes', expr: 'cidade_mais_clientes == str(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().index[0])', actualExpr: 'cidade_mais_clientes', hint: 'Usa clientes["cidade"].value_counts().index[0].' },
+          { label: 'qtd_nessa_cidade', expr: 'int(qtd_nessa_cidade) == int(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().iloc[0])', actualExpr: 'qtd_nessa_cidade', hint: 'Usa clientes["cidade"].value_counts().iloc[0].' },
         ],
       },
       quiz: {
         question: 'Que parâmetro de value_counts() devolve percentagens/proporções em vez de contagens absolutas?',
         options: [
           'percent=True',
-          'normalize=True',
+          'normaliza=True',
           'ratio=True',
           'proportion=True',
         ],
         correctIndex: 1,
-        explanation: 'normalize=True divide cada contagem pelo total de elementos válidos.',
+        explanation: 'normaliza=True divide cada contagem pelo total de elementos válidos.',
       },
     },
     {
@@ -291,7 +291,7 @@ cruzado.groupby("categoria", as_index=False).agg(
     faturacao=("subtotal", "sum")
 ).sort_values("faturacao", ascending=False).round(2)`,
       pythonChallenge: {
-        description: 'Cruze vendas.csv com produtos.csv e guarde em categoria_lider o nome da categoria com maior faturação total e em faturacao_mercearia o valor faturado pela categoria "Mercearia" arredondado a 2 casas.',
+        description: 'Cruza vendas.csv com produtos.csv e guarda em categoria_lider o nome da categoria com maior faturação total e em faturacao_mercearia o valor faturado pela categoria "Mercearia" arredondado a 2 casas.',
         starterCode: `import pandas as pd
 
 vendas = pd.read_csv("dados/vendas.csv")
@@ -317,7 +317,7 @@ faturacao_mercearia = round(float(por_cat["Mercearia"]), 2)
 print(categoria_lider, faturacao_mercearia)`,
         checks: [
           { label: 'categoria_lider ("Mercearia")', expr: 'categoria_lider == "Mercearia"', actualExpr: 'categoria_lider', hint: 'A categoria Mercearia inclui Azeite, Café e Ovos.' },
-          { label: 'faturacao_mercearia (13879.84)', expr: 'math.isclose(float(faturacao_mercearia), 13879.84, abs_tol=0.5)', actualExpr: 'faturacao_mercearia', hint: 'Some subtotal para a categoria "Mercearia" e arredonde a 2 casas (esperado: 13 879,84 €).' },
+          { label: 'faturacao_mercearia (13879.84)', expr: 'math.isclose(float(faturacao_mercearia), 13879.84, abs_tol=0.5)', actualExpr: 'faturacao_mercearia', hint: 'Soma subtotal para a categoria "Mercearia" e arredonda a 2 casas (esperado: 13 879,84 €).' },
         ],
       },
       quiz: {
@@ -336,7 +336,7 @@ print(categoria_lider, faturacao_mercearia)`,
       id: 'pd-06-limpeza-sujas',
       code: '16',
       title: 'Oficina de Limpeza: vendas_sujas.csv (Etapa 16)',
-      lede: 'Na vida real 70% do tempo de um analista é gasto a limpar dados: células vazias, linhas duplicadas, vírgulas decimais, espaços e preços impossíveis.',
+      lede: 'Na vida real, limpar dados ocupa grande parte do tempo de um analista: células vazias, linhas duplicadas, vírgulas decimais, espaços e preços impossíveis.',
       analogyTitle: 'Escolher o feijão antes de o pôr na panela',
       analogyBody: 'O ficheiro dados/vendas_sujas.csv tem 12 linhas com todas as armadilhas reais de um ficheiro vindo de fora: " Pão ", "pão", "2,35", preços negativos (-1.00), vazios e duplicados exatos.',
       concepts: [
@@ -358,12 +358,12 @@ sujas = pd.read_csv("dados/vendas_sujas.csv")
 print("Linhas brutas:", len(sujas), "| Vazios totais:", int(sujas.isna().sum().sum()))
 sujas`,
       pythonChallenge: {
-        description: 'Limpe dados/vendas_sujas.csv passo a passo: 1) limpe espaços e faça .str.capitalize() em produto (mantendo NaN onde está vazio); 2) converta preco trocando "," por "."; 3) remova duplicados exatos; 4) descarte linhas com valores nulos ou preco <= 0. Guarde o DataFrame final em limpas e a faturação limpa arredondada em total_limpo.',
+        description: 'Limpa dados/vendas_sujas.csv passo a passo: 1) limpa espaços e faz .str.capitalize() em produto (mantendo NaN onde está vazio); 2) converte preco trocando "," por "."; 3) remove duplicados exatos; 4) descarte linhas com valores nulos ou preco <= 0. Guarda o DataFrame final em limpas e a faturação limpa arredondada em total_limpo.',
         starterCode: `import pandas as pd
 
 sujas = pd.read_csv("dados/vendas_sujas.csv")
 
-# Escreva aqui o pipeline de limpeza para criar limpas e total_limpo:
+# Escreve aqui o pipeline de limpeza para criar limpas e total_limpo:
 limpas = None
 total_limpo = None
 
@@ -384,7 +384,7 @@ print("Linhas válidas:", len(limpas), "| Total:", total_limpo)
 limpas`,
         checks: [
           { label: 'len(limpas) == 7 linhas válidas', expr: 'limpas is not None and len(limpas) == 7', actualExpr: 'len(limpas) if limpas is not None else None', hint: 'Das 12 linhas saem 2 duplicadas, 2 com nulos e 1 com preço -1.00, restando 7.' },
-          { label: 'total_limpo == 18.18 €', expr: 'total_limpo is not None and math.isclose(float(total_limpo), 18.18, abs_tol=0.02)', actualExpr: 'total_limpo', hint: 'Some quantidade * preco das 7 linhas limpas (0.50 + 0.75 + 2.35 + 7.50 + 1.78 + 4.80 + 0.50 = 18.18).' },
+          { label: 'total_limpo == 18.18 €', expr: 'total_limpo is not None and math.isclose(float(total_limpo), 18.18, abs_tol=0.02)', actualExpr: 'total_limpo', hint: 'Soma quantidade * preco das 7 linhas limpas (0.50 + 0.75 + 2.35 + 7.50 + 1.78 + 4.80 + 0.50 = 18.18).' },
         ],
       },
       quiz: {
@@ -437,27 +437,38 @@ df = df.merge(clientes[["id", "cidade"]], left_on="cliente_id", right_on="id")
 
 matriz = df.pivot_table(values="sub", index="cidade", columns="categoria", aggfunc="sum", fill_value=0).round(2)
 matriz.reset_index()`,
-      pythonChallenge: {
-        description: 'Sobre dados/vendas.csv (sub = quantidade * preco), use .groupby("data")["sub"].transform("sum") para criar uma coluna total_do_dia e guarde em maior_quota_no_dia_pct a maior percentagem (arredondada a 2 casas) que uma única linha de venda representou no total do seu próprio dia.',
+            pythonChallenge: {
+        description: 'Sobre dados/vendas.csv (sub = quantidade * preco): 1) com .groupby("data")["sub"].transform("sum") cria a coluna total_do_dia e guarda em maior_quota_no_dia_pct a maior percentagem (arredondada a 2 casas) que uma linha representou no total do seu dia; 2) com pivot_table cria matriz, com um produto por linha, um mês ("01" a "12") por coluna e a soma de sub em cada célula, e guarda em azeite_dezembro o valor da célula Azeite × "12".',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
+df["mes"] = df["data"].str.slice(5, 7)   # "01" a "12"
 
-# Calcule total_do_dia com .transform("sum") e a percentagem máxima (sub / total_do_dia * 100):
+# 1) total_do_dia com .transform("sum") e a percentagem máxima (sub / total_do_dia * 100)
 maior_quota_no_dia_pct = None
-print(maior_quota_no_dia_pct)`,
+
+# 2) matriz produto x mês com pivot_table e a célula Azeite / "12"
+matriz = None
+azeite_dezembro = None
+print(maior_quota_no_dia_pct, azeite_dezembro)`,
         solutionCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
+df["mes"] = df["data"].str.slice(5, 7)
+
 df["total_do_dia"] = df.groupby("data")["sub"].transform("sum")
 df["quota_dia_pct"] = df["sub"] / df["total_do_dia"] * 100
-
 maior_quota_no_dia_pct = round(float(df["quota_dia_pct"].max()), 2)
-print(maior_quota_no_dia_pct)`,
+
+matriz = df.pivot_table(values="sub", index="produto", columns="mes", aggfunc="sum", fill_value=0)
+azeite_dezembro = round(float(matriz.loc["Azeite", "12"]), 2)
+print(maior_quota_no_dia_pct, azeite_dezembro)`,
         checks: [
-          { label: 'maior_quota_no_dia_pct calculada com .transform() (66.06)', expr: 'maior_quota_no_dia_pct is not None and math.isclose(float(maior_quota_no_dia_pct), 66.06, abs_tol=0.01)', actualExpr: 'maior_quota_no_dia_pct', hint: 'Use round(float((df["sub"] / df.groupby("data")["sub"].transform("sum") * 100).max()), 2).' },
+          { label: 'maior_quota_no_dia_pct calculada com .transform() (66.06)', expr: 'maior_quota_no_dia_pct is not None and math.isclose(float(maior_quota_no_dia_pct), 66.06, abs_tol=0.01)', actualExpr: 'maior_quota_no_dia_pct', hint: 'Divide df["sub"] pelo total do dia obtido com .transform("sum"), multiplica por 100 e tira o .max().' },
+          { label: 'matriz tem 15 produtos x 12 meses', expr: 'hasattr(matriz, "shape") and tuple(matriz.shape) == (15, 12)', actualExpr: 'getattr(matriz, "shape", matriz)', hint: 'Usa df.pivot_table(values="sub", index="produto", columns="mes", aggfunc="sum").' },
+          { label: 'azeite_dezembro lido da matriz (562.5)', expr: 'azeite_dezembro is not None and math.isclose(float(azeite_dezembro), 562.5, abs_tol=0.01)', actualExpr: 'azeite_dezembro', hint: 'Lê a célula com matriz.loc["Azeite", "12"].' },
         ],
       },
       quiz: {

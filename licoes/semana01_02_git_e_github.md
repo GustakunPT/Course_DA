@@ -58,7 +58,7 @@ git merge limpeza-vendas-sujas
 - **Dados sensíveis ou gigantescos** (`.parquet` de milhões de linhas ou dados reais de clientes) ficam no `.gitignore`; sobe apenas amostras sintéticas ou o script `src/gerar_dados.py`.
 - Pastas temporárias como `__pycache__/`, `.venv/` e `node_modules/` nunca entram num commit.
 
-## Experimente partir (5 minutos)
+## Experimenta partir (5 minutos)
 
-1. Corra `git status` numa pasta com ficheiros alterados e leia as duas cores/secções: *Changes not staged for commit* vs *Changes to be committed*.
-2. Escreva `git diff` antes de fazer `git add`: veja linha a linha o que acrescentou (`+`) e o que apagou (`-`).
+1. Corre `git status` numa pasta com ficheiros alterados e lê as duas cores/secções: *Changes not staged for commit* vs *Changes to be committed*.
+2. Escreve `git diff` antes de fazer `git add`: vê linha a linha o que acrescentou (`+`) e o que apagou (`-`).
