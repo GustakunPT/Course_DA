@@ -30,9 +30,26 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 6 trilhas e 59 etapas', () => {
-    expect(allTracks).toHaveLength(6);
-    expect(totalLessonsCount).toBe(59);
+  it('tem 7 trilhas e 60 etapas', () => {
+    expect(allTracks).toHaveLength(7);
+    expect(totalLessonsCount).toBe(60);
+  });
+
+  it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
+    const ids = allTracks.map((t) => t.id);
+    expect(ids).toEqual(['python', 'sql', 'pandas', 'git', 'bi', 'estatistica', 'carreira']);
+    for (const id of ['bi', 'estatistica']) {
+      const t = allTracks.find((x) => x.id === id)!;
+      expect(t.lessons.map((l) => l.code)).toEqual(t.lessons.map((_, i) => String(i + 1).padStart(2, '0')));
+    }
+    expect(allTracks.find((t) => t.id === 'estatistica')!.lessons[0].id).toBe('bi-01-media-mediana');
+  });
+
+  it('a trilha Pandas tem 2 treinos por etapa e os desafios de estatística ficaram curtos', () => {
+    for (const l of allTracks.find((t) => t.id === 'pandas')!.lessons) expect(l.practice?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
+    for (const l of allTracks.find((t) => t.id === 'estatistica')!.lessons) {
+      expect(l.pythonChallenge!.checks.length, l.id).toBeLessThanOrEqual(5);
+    }
   });
 
   it('os ids das etapas são únicos', () => {

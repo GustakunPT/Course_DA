@@ -60,6 +60,7 @@ print(linhas, primeiro_produto, faturacao_total)`,
           { label: 'colunas', expr: 'colunas == ["data", "cliente_id", "produto_id", "produto", "quantidade", "preco"]', actualExpr: 'colunas', hint: 'Usa list(df.columns).' },
           { label: 'primeiro_produto ("Pão")', expr: 'primeiro_produto == "Pão"', actualExpr: 'primeiro_produto', hint: 'Usa df["produto"].iloc[0].' },
           { label: 'faturacao_total (26902.89)', expr: 'math.isclose(float(faturacao_total), 26902.89, abs_tol=0.02)', actualExpr: 'faturacao_total', hint: 'Calcula round((df["quantidade"] * df["preco"]).sum(), 2).' },
+          { label: 'O código funciona com outra tabela de vendas', expr: '(lambda r: int(r["linhas"]) == 1 and r["primeiro_produto"] == "Leite" and abs(float(r["faturacao_total"]) - 1.5) < 0.001)(correr_com(df=pd.DataFrame({"data": ["2025-01-01"], "cliente_id": [1], "produto_id": [2], "produto": ["Leite"], "quantidade": [3], "preco": [0.5]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-01-01"], "cliente_id": [1], "produto_id": [2], "produto": ["Leite"], "quantidade": [3], "preco": [0.5]})).get("faturacao_total")', hint: 'Calcula tudo a partir de df (len, .iloc[0], soma de quantidade × preco), sem escrever os números à mão.' },
         ],
       },
       quiz: {
@@ -120,6 +121,7 @@ print(qtd_vendas_cafe, unidades_dezembro)`,
         checks: [
           { label: 'qtd_vendas_cafe', expr: 'int(qtd_vendas_cafe) == int((pd.read_csv("dados/vendas.csv")["produto"] == "Café").sum())', actualExpr: 'qtd_vendas_cafe', hint: 'Usa len(df[df["produto"] == "Café"]).' },
           { label: 'unidades_dezembro', expr: 'int(unidades_dezembro) == int(pd.read_csv("dados/vendas.csv").query("data >= \'2025-12-01\'")["quantidade"].sum())', actualExpr: 'unidades_dezembro', hint: 'Filtra df[df["data"] >= "2025-12-01"]["quantidade"].sum().' },
+          { label: 'Os filtros funcionam com outra tabela', expr: '(lambda r: int(r["qtd_vendas_cafe"]) == 2 and int(r["unidades_dezembro"]) == 6)(correr_com(df=pd.DataFrame({"data": ["2025-12-05", "2025-11-30", "2025-12-20"], "produto": ["Café", "Café", "Pão"], "quantidade": [2, 5, 4]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-12-05", "2025-11-30", "2025-12-20"], "produto": ["Café", "Café", "Pão"], "quantidade": [2, 5, 4]})).get("unidades_dezembro")', hint: 'Usa máscaras sobre df: df[df["produto"] == "Café"] e df[df["data"] >= "2025-12-01"].' },
         ],
       },
       quiz: {
@@ -186,6 +188,7 @@ print(produtos_ao_quilo, mes_pico)`,
         checks: [
           { label: 'produtos_ao_quilo (2)', expr: 'int(produtos_ao_quilo) == 2', actualExpr: 'produtos_ao_quilo', hint: 'Maçãs (kg) e Bananas (kg): usa produtos["nome"].str.contains("(kg)", regex=False).sum().' },
           { label: 'mes_pico (9 - setembro)', expr: 'int(mes_pico) == 9', actualExpr: 'mes_pico', hint: 'Setembro (mês 9) lidera com 2 462,82 €.' },
+          { label: 'Funciona com outros produtos e vendas', expr: '(lambda r: int(r["produtos_ao_quilo"]) == 1 and int(r["mes_pico"]) == 7)(correr_com(produtos=pd.DataFrame({"nome": ["Uvas (kg)", "Pão"]}), vendas=pd.DataFrame({"data": ["2025-03-01", "2025-07-02", "2025-07-09"], "quantidade": [1, 2, 2], "preco": [1.0, 3.0, 1.0]})))', actualExpr: 'correr_com(produtos=pd.DataFrame({"nome": ["Uvas (kg)", "Pão"]}), vendas=pd.DataFrame({"data": ["2025-03-01", "2025-07-02", "2025-07-09"], "quantidade": [1, 2, 2], "preco": [1.0, 3.0, 1.0]})).get("mes_pico")', hint: 'Conta com .str.contains("(kg)", regex=False) e encontra o mês com .dt.month e .idxmax().' },
         ],
       },
       quiz: {
@@ -246,6 +249,7 @@ print(cidade_mais_clientes, qtd_nessa_cidade)`,
         checks: [
           { label: 'cidade_mais_clientes', expr: 'cidade_mais_clientes == str(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().index[0])', actualExpr: 'cidade_mais_clientes', hint: 'Usa clientes["cidade"].value_counts().index[0].' },
           { label: 'qtd_nessa_cidade', expr: 'int(qtd_nessa_cidade) == int(pd.read_csv("dados/clientes.csv")["cidade"].value_counts().iloc[0])', actualExpr: 'qtd_nessa_cidade', hint: 'Usa clientes["cidade"].value_counts().iloc[0].' },
+          { label: 'Funciona com outra tabela de clientes', expr: '(lambda r: r["cidade_mais_clientes"] == "Faro" and int(r["qtd_nessa_cidade"]) == 2)(correr_com(clientes=pd.DataFrame({"cidade": ["Faro", "Porto", "Faro"]})))', actualExpr: 'correr_com(clientes=pd.DataFrame({"cidade": ["Faro", "Porto", "Faro"]})).get("cidade_mais_clientes")', hint: 'Lê a resposta de clientes["cidade"].value_counts(): .index[0] e .iloc[0].' },
         ],
       },
       quiz: {
@@ -318,6 +322,7 @@ print(categoria_lider, faturacao_mercearia)`,
         checks: [
           { label: 'categoria_lider ("Mercearia")', expr: 'categoria_lider == "Mercearia"', actualExpr: 'categoria_lider', hint: 'A categoria Mercearia inclui Azeite, Café e Ovos.' },
           { label: 'faturacao_mercearia (13879.84)', expr: 'math.isclose(float(faturacao_mercearia), 13879.84, abs_tol=0.5)', actualExpr: 'faturacao_mercearia', hint: 'Soma subtotal para a categoria "Mercearia" e arredonda a 2 casas (esperado: 13 879,84 €).' },
+          { label: 'O merge e o groupby funcionam com outras tabelas', expr: '(lambda r: r["categoria_lider"] == "Bebidas" and abs(float(r["faturacao_mercearia"]) - 5.0) < 0.001)(correr_com(vendas=pd.DataFrame({"produto_id": [1, 2], "quantidade": [1, 10], "preco": [5.0, 1.0]}), produtos=pd.DataFrame({"id": [1, 2], "categoria": ["Mercearia", "Bebidas"]})))', actualExpr: 'correr_com(vendas=pd.DataFrame({"produto_id": [1, 2], "quantidade": [1, 10], "preco": [5.0, 1.0]}), produtos=pd.DataFrame({"id": [1, 2], "categoria": ["Mercearia", "Bebidas"]})).get("categoria_lider")', hint: 'Junta com pd.merge(vendas, produtos, left_on="produto_id", right_on="id") e soma por categoria.' },
         ],
       },
       quiz: {
@@ -385,6 +390,7 @@ limpas`,
         checks: [
           { label: 'len(limpas) == 7 linhas válidas', expr: 'limpas is not None and len(limpas) == 7', actualExpr: 'len(limpas) if limpas is not None else None', hint: 'Das 12 linhas saem 2 duplicadas, 2 com nulos e 1 com preço -1.00, restando 7.' },
           { label: 'total_limpo == 18.18 €', expr: 'total_limpo is not None and math.isclose(float(total_limpo), 18.18, abs_tol=0.02)', actualExpr: 'total_limpo', hint: 'Soma quantidade * preco das 7 linhas limpas (0.50 + 0.75 + 2.35 + 7.50 + 1.78 + 4.80 + 0.50 = 18.18).' },
+          { label: 'A limpeza funciona com outro lote sujo', expr: '(lambda r: len(r["limpas"]) == 1 and abs(float(r["total_limpo"]) - 3.0) < 0.001)(correr_com(sujas=pd.DataFrame({"data": ["2025-01-01", "2025-01-01", "2025-01-02"], "produto": [" leite ", " leite ", "Pão"], "quantidade": [2, 2, 1], "preco": ["1,5", "1,5", "-1"]})))', actualExpr: 'correr_com(sujas=pd.DataFrame({"data": ["2025-01-01", "2025-01-01", "2025-01-02"], "produto": [" leite ", " leite ", "Pão"], "quantidade": [2, 2, 1], "preco": ["1,5", "1,5", "-1"]})).get("total_limpo")', hint: 'Normaliza texto e vírgulas, tira duplicados e preços negativos, sempre a partir de sujas.' },
         ],
       },
       quiz: {
@@ -469,6 +475,7 @@ print(maior_quota_no_dia_pct, azeite_dezembro)`,
           { label: 'maior_quota_no_dia_pct calculada com .transform() (66.06)', expr: 'maior_quota_no_dia_pct is not None and math.isclose(float(maior_quota_no_dia_pct), 66.06, abs_tol=0.01)', actualExpr: 'maior_quota_no_dia_pct', hint: 'Divide df["sub"] pelo total do dia obtido com .transform("sum"), multiplica por 100 e tira o .max().' },
           { label: 'matriz tem 15 produtos x 12 meses', expr: 'hasattr(matriz, "shape") and tuple(matriz.shape) == (15, 12)', actualExpr: 'getattr(matriz, "shape", matriz)', hint: 'Usa df.pivot_table(values="sub", index="produto", columns="mes", aggfunc="sum").' },
           { label: 'azeite_dezembro lido da matriz (562.5)', expr: 'azeite_dezembro is not None and math.isclose(float(azeite_dezembro), 562.5, abs_tol=0.01)', actualExpr: 'azeite_dezembro', hint: 'Lê a célula com matriz.loc["Azeite", "12"].' },
+          { label: '.transform e pivot_table funcionam com outra tabela', expr: '(lambda r: abs(float(r["maior_quota_no_dia_pct"]) - 75.0) < 0.01 and abs(float(r["azeite_dezembro"]) - 3.0) < 0.001)(correr_com(df=pd.DataFrame({"data": ["2025-12-01", "2025-12-01"], "produto": ["Azeite", "Pão"], "quantidade": [1, 1], "preco": [3.0, 1.0]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-12-01", "2025-12-01"], "produto": ["Azeite", "Pão"], "quantidade": [1, 1], "preco": [3.0, 1.0]})).get("maior_quota_no_dia_pct")', hint: 'Usa groupby("data")["sub"].transform("sum") e lê o Azeite da matriz com .loc.' },
         ],
       },
       quiz: {
@@ -481,6 +488,125 @@ print(maior_quota_no_dia_pct, azeite_dezembro)`,
         ],
         correctIndex: 1,
         explanation: '.sum() reduz a tabela a 365 linhas; .transform("sum") repete o total do dia em cada uma das 5 078 linhas. É o equivalente às Window Functions OVER (PARTITION BY ...) do SQL.',
+      },
+    },
+    {
+      id: 'pd-08-numpy-estatistica',
+      code: '08',
+      title: 'NumPy e as ferramentas de pandas para estatística',
+      lede: 'Antes da trilha de Estatística, aprende as peças que ela usa: arrays NumPy, agregações com nome, cestos por cliente e dia, quantis, dias da semana, tabelas cruzadas (pd.crosstab) e matrizes para regressão.',
+      analogyTitle: 'Arrumar a bancada antes de cozinhar',
+      analogyBody: 'Um cozinheiro não aprende a receita e a faca ao mesmo tempo. Aqui afias as facas: cada ferramenta desta etapa vai aparecer nas etapas de estatística, onde a atenção deve ir para o raciocínio e não para a sintaxe.',
+      concepts: [
+        'Um array NumPy (np.array, serie.to_numpy()) faz contas com a coluna inteira de uma vez: np.round(precos * 1.23, 2) aplica o IVA a todos os preços.',
+        'df.groupby(["data", "cliente_id"]).agg(linhas=("produto", "size"), total=("sub", "sum")) cria uma tabela por cesto com colunas de nome escolhido.',
+        's.quantile(0.75) dá o percentil 75 (o 3.º quartil); s.quantile(0.5) é a mediana.',
+        'pd.to_datetime(df["data"]).dt.day_of_week dá o dia da semana (0 = segunda, 6 = domingo). Fim de semana: >= 5.',
+        'pd.crosstab(linhas, colunas) conta quantas vezes aparece cada combinação: é a tabela de contagens dos testes de qui-quadrado.',
+        'np.column_stack([np.ones(n), x]) junta colunas numa matriz; np.outer(a, b) multiplica cada valor de a por cada valor de b.',
+      ],
+      beginnerSteps: [
+        'Converte a coluna preco de produtos com .to_numpy() e aplica o IVA a todos de uma vez.',
+        'Cria a coluna sub e agrupa por data e cliente_id com .agg(linhas=..., total=...).',
+        'Calcula o percentil 75 do total por cesto com .quantile(0.75).',
+        'Cria a coluna fim_de_semana e usa pd.crosstab(df["fim_de_semana"], df["produto"]).',
+        'Agrupa por data para contar clientes por dia e monta X com np.column_stack.',
+      ],
+      proPractice: 'O pandas está construído por cima do NumPy: cada coluna é um array. Quando uma conta fica lenta num ciclo for, passa-a para operações de array inteiro (vetorização): costuma ficar 10 a 100 vezes mais rápida.',
+      commonPitfall: 'Confundir np.ones(n) com uma coluna de dados: ela serve para a ordenada da regressão. E esquecer que .dt.day_of_week começa em 0 (segunda-feira), não em 1.',
+      referenceTitle: 'Ferramentas usadas na trilha de Estatística',
+      referenceRows: [
+        { syntax: 'serie.to_numpy()', meaning: 'Coluna como array NumPy', example: 'precos = produtos["preco"].to_numpy()' },
+        { syntax: '.agg(nome=("coluna", "função"))', meaning: 'Agregação com nome', example: 'total=("sub", "sum")' },
+        { syntax: 's.quantile(0.75)', meaning: 'Percentil 75', example: '14.71 € por cesto' },
+        { syntax: '.dt.day_of_week', meaning: 'Dia da semana (0 a 6)', example: '>= 5 é fim de semana' },
+        { syntax: 'pd.crosstab(a, b)', meaning: 'Tabela de contagens', example: 'fim de semana × produto' },
+        { syntax: 'np.column_stack([np.ones(n), x])', meaning: 'Matriz para regressão', example: 'forma (365, 2)' },
+      ],
+      engine: 'python',
+      exampleCode: `import numpy as np
+import pandas as pd
+
+# Arrays: contas com a coluna inteira
+precos = np.array([0.25, 0.89, 7.50])
+print(precos * 2, precos.mean(), np.sqrt(precos))
+
+# Agregações com nome, por cesto
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+cestos = df.groupby(["data", "cliente_id"]).agg(linhas=("produto", "size"), total=("sub", "sum"))
+print(cestos.head())
+
+# Tabela cruzada
+df["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5
+print(pd.crosstab(df["fim_de_semana"], df["produto"]).iloc[:, :5])`,
+      pythonChallenge: {
+        description: '1) precos_com_iva: array com os preços de produtos.csv × 1.23, arredondados a 2 casas (np.round), e iva_maximo. 2) cestos: em vendas.csv, uma linha por data e cliente_id com as colunas linhas (número de linhas) e total (soma de sub). 3) p75_cesto: percentil 75 de total. 4) tabela = pd.crosstab(fim_de_semana, produto) e cafe_fim_de_semana. 5) X: matriz com uma coluna de 1 e a coluna de clientes diferentes por dia.',
+        starterCode: `import numpy as np
+import pandas as pd
+
+produtos = pd.read_csv("dados/produtos.csv")
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+# 1) Arrays NumPy
+precos_com_iva = None
+iva_maximo = None
+
+# 2) e 3) Cestos e percentil 75
+cestos = None
+p75_cesto = None
+
+# 4) Tabela cruzada
+tabela = None
+cafe_fim_de_semana = None
+
+# 5) Matriz para regressão
+X = None
+print(iva_maximo, p75_cesto, cafe_fim_de_semana)`,
+        solutionCode: `import numpy as np
+import pandas as pd
+
+produtos = pd.read_csv("dados/produtos.csv")
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+# 1) Arrays NumPy
+precos_com_iva = np.round(produtos["preco"].to_numpy() * 1.23, 2)
+iva_maximo = precos_com_iva.max()
+
+# 2) e 3) Cestos e percentil 75
+cestos = df.groupby(["data", "cliente_id"]).agg(linhas=("produto", "size"), total=("sub", "sum"))
+p75_cesto = cestos["total"].quantile(0.75)
+
+# 4) Tabela cruzada
+df["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5
+tabela = pd.crosstab(df["fim_de_semana"], df["produto"])
+cafe_fim_de_semana = int(tabela.loc[True, "Café"])
+
+# 5) Matriz para regressão
+por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"))
+X = np.column_stack([np.ones(len(por_dia)), por_dia["clientes"]])
+print(iva_maximo, round(p75_cesto, 2), cafe_fim_de_semana, X.shape)`,
+        checks: [
+          { label: 'precos_com_iva é um array com 15 preços (máximo 9.22 €)', expr: 'isinstance(precos_com_iva, np.ndarray) and len(precos_com_iva) == 15 and abs(float(iva_maximo) - 9.22) < 1e-9 and abs(float(precos_com_iva.sum()) - 38.72) < 0.001', actualExpr: '(type(precos_com_iva).__name__, iva_maximo)', hint: 'np.round(produtos["preco"].to_numpy() * 1.23, 2) e depois .max().' },
+          { label: 'cestos: 2 447 cestos com as colunas linhas e total', expr: 'len(cestos) == 2447 and {"linhas", "total"} <= set(cestos.columns) and abs(float(cestos["linhas"].mean()) - 2.0752) < 0.001', actualExpr: '(len(cestos), list(cestos.columns)) if cestos is not None else None', hint: 'df.groupby(["data", "cliente_id"]).agg(linhas=("produto", "size"), total=("sub", "sum")).' },
+          { label: 'p75_cesto (14.71 €)', expr: 'abs(float(p75_cesto) - 14.71) < 0.001', actualExpr: 'p75_cesto', hint: 'cestos["total"].quantile(0.75).' },
+          { label: 'tabela 2 × 15 e cafe_fim_de_semana (129)', expr: 'tuple(tabela.shape) == (2, 15) and int(cafe_fim_de_semana) == 129', actualExpr: '(getattr(tabela, "shape", None), cafe_fim_de_semana)', hint: 'df["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5 e tabela.loc[True, "Café"].' },
+          { label: 'X tem 365 linhas e 2 colunas, a primeira só com 1', expr: 'tuple(X.shape) == (365, 2) and bool((X[:, 0] == 1).all()) and abs(float(X[:, 1].sum()) - 2447) < 1e-9', actualExpr: 'getattr(X, "shape", X)', hint: 'np.column_stack([np.ones(len(por_dia)), por_dia["clientes"]]).' },
+          { label: 'O código funciona com outras vendas', expr: '(lambda r: len(r["cestos"]) == 2 and int(r["cafe_fim_de_semana"]) == 1)(correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-04", "2025-01-06"], "cliente_id": [1, 1, 2], "produto": ["Café", "Pão", "Café"], "quantidade": [1, 2, 1], "preco": [3.4, 0.25, 3.4]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-04", "2025-01-06"], "cliente_id": [1, 1, 2], "produto": ["Café", "Pão", "Café"], "quantidade": [1, 2, 1], "preco": [3.4, 0.25, 3.4]})).get("cafe_fim_de_semana")', hint: 'Calcula tudo a partir de df: nada de números escritos à mão.' },
+        ],
+      },
+      quiz: {
+        question: 'O que devolve pd.crosstab(df["fim_de_semana"], df["produto"])?',
+        options: [
+          'A soma da faturação de cada produto ao fim de semana.',
+          'Uma tabela com o número de linhas de cada produto, separadas por fim de semana e dias úteis.',
+          'A correlação entre o fim de semana e cada produto.',
+          'A lista de produtos vendidos só ao fim de semana.',
+        ],
+        correctIndex: 1,
+        explanation: 'pd.crosstab conta as ocorrências de cada combinação de valores. Para somar outra coluna em vez de contar, usa-se values= e aggfunc=, ou um pivot_table.',
       },
     },
   ],

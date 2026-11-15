@@ -1,6 +1,6 @@
 # Prática guiada: Excel e Power BI
 
-Já calculaste estas métricas em SQL e em pandas. Aqui vais calculá-las no Excel e no Power BI, com os mesmos dados. No fim, escreve os números na folha de respostas da etapa **BI 10** da app: a bancada diz-te quais estão certos.
+Já calculaste estas métricas em SQL e em pandas. Aqui vais calculá-las no Excel e no Power BI, com os mesmos dados. No fim, escreve os números na folha de respostas da etapa **06 da trilha Visualização & BI** da app: a bancada diz-te quais estão certos.
 
 **Precisas de:** Excel 365 ou 2021 (para o `PROCX`) e Power BI Desktop (gratuito, só para Windows). Os ficheiros estão na pasta `dados/`: `vendas.csv`, `produtos.csv` e `clientes.csv`.
 
@@ -120,6 +120,6 @@ Gasto por Cliente = DIVIDE([Faturação], [Clientes Ativos])
 
 ## Confirmar
 
-Abre a etapa **BI 10** na app, escreve os 8 valores na folha de respostas e carrega em **Correr**. Cada valor errado vem com uma dica sobre o passo onde costuma estar o erro.
+Abre a etapa **06 da trilha Visualização & BI** na app, escreve os 8 valores na folha de respostas e carrega em **Correr**. Cada valor errado vem com uma dica sobre o passo onde costuma estar o erro.
 
 Para ir mais longe, abre o modelo completo em `relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip` e compara as tuas medidas com as que lá estão.

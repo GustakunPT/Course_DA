@@ -296,6 +296,8 @@ git push -u origin main`,
 };
 
 export const statsBiTrack: Track = {
+  // As lições deste ficheiro dividem-se em duas trilhas (Estatística e Visualização & BI)
+  // em curriculum.ts, que também define a ordem e os códigos de cada etapa.
   id: 'bi',
   shortTitle: '5. Estatística & BI',
   fullTitle: 'Estatística, Excel/DAX e Power BI para Analistas',
@@ -924,7 +926,7 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
         'Tira uma amostra de 200 linhas e repete o IC: a margem fica mais larga.',
       ],
       proPractice: 'Num relatório, nunca escrevas só "o ticket médio é 5,30 €". Escreve "5,30 € (IC 95%: 5,14 € a 5,45 €)". O decisor percebe logo quanta confiança pode ter no número.',
-      commonPitfall: 'Ver uma correlação forte e concluir "fazer X causa Y". Para provar causa precisas de uma experiência controlada (como o teste A/B da etapa anterior), não só de dados observados.',
+      commonPitfall: 'Ver uma correlação forte e concluir "fazer X causa Y". Para provar causa precisas de uma experiência controlada (como os testes A/B das etapas seguintes), não só de dados observados.',
       referenceTitle: 'Correlação e intervalos de confiança em pandas',
       referenceRows: [
         { syntax: 'df["a"].corr(df["b"])', meaning: 'Correlação de Pearson entre duas colunas', example: 'r = 0.8 é uma relação forte' },
@@ -948,9 +950,8 @@ media = por_dia["faturacao"].mean()
 erro_padrao = por_dia["faturacao"].std() / math.sqrt(len(por_dia))
 print(f"Faturação média diária: {media:.2f} € (IC 95%: {media - 1.96 * erro_padrao:.2f} € a {media + 1.96 * erro_padrao:.2f} €)")`,
       pythonChallenge: {
-        description: 'Em vendas.csv (sub = quantidade * preco): (1) cria por_cliente com visitas (dias diferentes) e gasto (soma de sub) e guarda r_visitas_gasto; (2) guarda r_preco_quantidade entre as colunas preco e quantidade; (3) calcula media, erro_padrao, ic_inferior e ic_superior (95%) do sub em todas as linhas; (4) tira amostra = df.sample(200, random_state=42) e calcula ic_amostra_inferior e ic_amostra_superior da mesma forma; (5) causa_provada = True ou False: a correlação entre visitas e gasto prova que mais visitas causam mais gasto?',
-        starterCode: `import math
-import pandas as pd
+        description: 'Em vendas.csv (sub = quantidade * preco):\n1) Cria por_cliente com visitas (dias diferentes) e gasto (soma de sub) por cliente e guarda r_visitas_gasto.\n2) Guarda r_preco_quantidade entre as colunas preco e quantidade.\n3) causa_provada: a correlação entre visitas e gasto prova que mais visitas causam mais gasto? (True ou False)\nO intervalo de confiança e as amostras estão nos treinos 1 e 2.',
+        starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
@@ -962,22 +963,10 @@ r_visitas_gasto = None
 # 2) Correlação entre preço e quantidade em cada linha
 r_preco_quantidade = None
 
-# 3) Intervalo de confiança a 95% com todas as linhas
-media = None
-erro_padrao = None
-ic_inferior = None
-ic_superior = None
-
-# 4) O mesmo com uma amostra de 200 linhas
-amostra = None
-ic_amostra_inferior = None
-ic_amostra_superior = None
-
-# 5) A correlação prova a causa?
+# 3) A correlação prova a causa?
 causa_provada = None
-print(r_visitas_gasto, r_preco_quantidade, ic_inferior, ic_superior)`,
-        solutionCode: `import math
-import pandas as pd
+print(r_visitas_gasto, r_preco_quantidade, causa_provada)`,
+        solutionCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
@@ -989,30 +978,13 @@ r_visitas_gasto = por_cliente["visitas"].corr(por_cliente["gasto"])
 # 2) Correlação entre preço e quantidade em cada linha
 r_preco_quantidade = df["preco"].corr(df["quantidade"])
 
-# 3) Intervalo de confiança a 95% com todas as linhas
-media = df["sub"].mean()
-erro_padrao = df["sub"].std() / math.sqrt(len(df))
-ic_inferior = media - 1.96 * erro_padrao
-ic_superior = media + 1.96 * erro_padrao
-
-# 4) O mesmo com uma amostra de 200 linhas
-amostra = df.sample(200, random_state=42)
-erro_amostra = amostra["sub"].std() / math.sqrt(len(amostra))
-ic_amostra_inferior = amostra["sub"].mean() - 1.96 * erro_amostra
-ic_amostra_superior = amostra["sub"].mean() + 1.96 * erro_amostra
-
-# 5) A correlação prova a causa?
+# 3) A correlação prova a causa?
 causa_provada = False
-print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3))
-print(f"IC 95% (todas): {ic_inferior:.2f} € a {ic_superior:.2f} €")
-print(f"IC 95% (amostra de 200): {ic_amostra_inferior:.2f} € a {ic_amostra_superior:.2f} €")`,
+print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
         checks: [
           { label: 'por_cliente tem uma linha por cliente (120) e r_visitas_gasto ≈ 0.80', expr: 'len(por_cliente) == 120 and abs(float(r_visitas_gasto) - 0.800) < 0.005', actualExpr: '(len(por_cliente), r_visitas_gasto)', hint: 'por_cliente = df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum")) e depois por_cliente["visitas"].corr(por_cliente["gasto"]).' },
           { label: 'r_preco_quantidade ≈ 0 (sem relação linear)', expr: 'abs(float(r_preco_quantidade)) < 0.01', actualExpr: 'r_preco_quantidade', hint: 'df["preco"].corr(df["quantidade"]).' },
-          { label: 'media (5.30 €) e erro_padrao (0.080)', expr: 'abs(float(media) - 5.2979) < 0.001 and abs(float(erro_padrao) - 0.07958) < 0.0005', actualExpr: '(media, erro_padrao)', hint: 'erro_padrao = df["sub"].std() / math.sqrt(len(df)).' },
-          { label: 'IC 95% com todas as linhas: 5.14 € a 5.45 €', expr: 'abs(float(ic_inferior) - 5.1420) < 0.002 and abs(float(ic_superior) - 5.4539) < 0.002', actualExpr: '(ic_inferior, ic_superior)', hint: 'ic_inferior = media - 1.96 * erro_padrao e ic_superior = media + 1.96 * erro_padrao.' },
-          { label: 'Amostra de 200 linhas com o IC calculado da mesma forma', expr: 'len(amostra) == 200 and abs(float(ic_amostra_inferior) - (amostra["sub"].mean() - 1.96 * amostra["sub"].std() / 200 ** 0.5)) < 0.001 and abs(float(ic_amostra_superior) - (amostra["sub"].mean() + 1.96 * amostra["sub"].std() / 200 ** 0.5)) < 0.001', actualExpr: '(len(amostra), ic_amostra_inferior, ic_amostra_superior)', hint: 'amostra = df.sample(200, random_state=42) e repete as contas com amostra["sub"].' },
-          { label: 'A margem da amostra é mais larga do que a de todas as linhas', expr: '(ic_amostra_superior - ic_amostra_inferior) > (ic_superior - ic_inferior) * 3', actualExpr: '(ic_amostra_superior - ic_amostra_inferior, ic_superior - ic_inferior)', hint: 'Com 200 linhas em vez de 5 078, o erro padrão é cerca de 5 vezes maior.' },
+          { label: 'A correlação vem dos dados', expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]}))["r_visitas_gasto"]) - 1.0) < 1e-9', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]})).get("r_visitas_gasto")', hint: 'Calcula r com .corr() a partir de df, sem escrever o número à mão.' },
           { label: 'Correlação não prova causa', expr: 'causa_provada is False', actualExpr: 'causa_provada', hint: 'Dados observados mostram que as variáveis andam juntas, não qual causa qual. Para provar causa precisas de uma experiência.' },
         ],
       },
@@ -1137,11 +1109,11 @@ print(clientes_ativos, gasto_por_cliente, cidade_top)`,
       title: 'Teste A/B de proporções e tamanho de amostra',
       lede: 'A pergunta mais comum em entrevistas de produto: "a taxa de conversão subiu de verdade?". Comparas duas proporções com o teste z e calculas quantos dados precisas antes de começar um teste.',
       analogyTitle: 'Contar cestos com Queijo em vez de euros',
-      analogyBody: 'No teste A/B da etapa 08 comparaste médias em euros. Muitas vezes a métrica é um sim ou não: o cliente comprou? clicou? voltou? Aí comparas percentagens. E antes de testares, tens de saber se a loja tem clientes suficientes para ver a diferença que procuras: senão o teste nunca vai dar resposta, por muito tempo que esperes.',
+      analogyBody: 'No teste A/B da etapa anterior comparaste médias em euros. Muitas vezes a métrica é um sim ou não: o cliente comprou? clicou? voltou? Aí comparas percentagens. E antes de testares, tens de saber se a loja tem clientes suficientes para ver a diferença que procuras: senão o teste nunca vai dar resposta, por muito tempo que esperes.',
       concepts: [
         'Uma proporção é a média de uma coluna de True e False: cestos["tem_queijo"].mean() dá a taxa.',
         'Teste z de duas proporções: junta os dois grupos para a proporção conjunta p, erro padrão = raiz de p(1 - p)(1/n_A + 1/n_B), e z = (p_A - p_B) / erro padrão.',
-        'p-valor = math.erfc(abs(z) / math.sqrt(2)), como na etapa 08.',
+        'p-valor = math.erfc(abs(z) / math.sqrt(2)), como na etapa anterior.',
         'Diferença em pontos percentuais (pp) não é o mesmo que variação percentual: de 13,4% para 18,4% são +5,1 pp, mas +38% em termos relativos.',
         'Tamanho de amostra por grupo para 5% de significância e 80% de poder: n = (1.96 + 0.84)² × (p1(1 - p1) + p2(1 - p2)) / (p2 - p1)².',
         'Poder estatístico (80%) é a probabilidade de o teste detetar a diferença se ela existir de facto.',
@@ -1183,58 +1155,58 @@ print(f"z = {z:.2f} | p-valor = {p_valor:.3f} | significativo? {p_valor < 0.05}"
 n = math.ceil((1.96 + 0.84) ** 2 * (p_a * (1 - p_a) + p_b * (1 - p_b)) / (p_b - p_a) ** 2)
 print("Visitas necessárias por grupo:", n)`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv, um cesto é o conjunto de linhas do mesmo cliente no mesmo dia. Ao fim de semana há mais cestos com Queijo? Guarda p_fds e p_semana (proporção de cestos com Queijo), diferenca_pp (em pontos percentuais), erro_padrao (com a proporção conjunta), z, p_valor, significativo (p < 0.05) e n_por_grupo: quantos cestos por grupo seriam precisos para detetar uma subida de apenas 1 pp a partir de p_semana (z de 1.96 e 0.84, arredondado para cima).',
+        description: 'Em vendas_sazonais.csv, um cesto é o conjunto de linhas do mesmo cliente no mesmo dia. Ao fim de semana há mais cestos com Queijo?\n1) cestos: um por cliente e dia, com tem_queijo.\n2) p_fds e p_semana: proporção de cestos com Queijo em cada grupo, e diferenca_pp em pontos percentuais.\n3) erro_padrao (com a proporção conjunta), z, p_valor e significativo (p < 0.05).\nO cálculo do tamanho de amostra está no treino 1.',
         starterCode: `import math
 import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
 df["queijo"] = df["produto"] == "Queijo"
 
-# Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
+# 1) Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
 cestos = None
 
+# 2) Proporções
 p_fds = None
 p_semana = None
 diferenca_pp = None
+
+# 3) Teste z
 erro_padrao = None
 z = None
 p_valor = None
 significativo = None
-n_por_grupo = None
-print(p_fds, p_semana, z, p_valor, n_por_grupo)`,
+print(p_fds, p_semana, z, p_valor)`,
         solutionCode: `import math
 import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
 df["queijo"] = df["produto"] == "Queijo"
 
-# Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
+# 1) Um cesto por cliente e dia; tem_queijo é True se alguma linha do cesto for Queijo
 cestos = df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index()
 cestos["fim_de_semana"] = pd.to_datetime(cestos["data"]).dt.day_of_week >= 5
 a = cestos[cestos["fim_de_semana"]]["tem_queijo"]
 b = cestos[~cestos["fim_de_semana"]]["tem_queijo"]
 
+# 2) Proporções
 p_fds = a.mean()
 p_semana = b.mean()
 diferenca_pp = (p_fds - p_semana) * 100
+
+# 3) Teste z
 p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b))
 erro_padrao = math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b)))
 z = (p_fds - p_semana) / erro_padrao
 p_valor = math.erfc(abs(z) / math.sqrt(2))
 significativo = p_valor < 0.05
-
-p1, p2 = p_semana, p_semana + 0.01
-n_por_grupo = math.ceil((1.96 + 0.84) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2)
 print(f"Fim de semana {p_fds:.1%} vs dias úteis {p_semana:.1%} (+{diferenca_pp:.1f} pp)")
-print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")
-print("Cestos por grupo para detetar +1 pp:", n_por_grupo)`,
+print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
         checks: [
           { label: 'cestos: um por cliente e dia (2 910)', expr: 'len(cestos) == 2910', actualExpr: 'len(cestos) if cestos is not None else None', hint: 'df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index().' },
           { label: 'p_fds (18.4%) e p_semana (13.4%)', expr: 'abs(float(p_fds) - 0.18445) < 0.0005 and abs(float(p_semana) - 0.13359) < 0.0005', actualExpr: '(p_fds, p_semana)', hint: 'Marca o fim de semana nos cestos (day_of_week >= 5) e faz .mean() de tem_queijo em cada grupo.' },
           { label: 'diferenca_pp em pontos percentuais (+5.09)', expr: 'abs(float(diferenca_pp) - 5.086) < 0.01', actualExpr: 'diferenca_pp', hint: 'diferenca_pp = (p_fds - p_semana) * 100. Não dividas por p_semana: isso seria a variação relativa.' },
           { label: 'erro_padrao com a proporção conjunta (0.0137)', expr: 'abs(float(erro_padrao) - 0.013745) < 0.0001', actualExpr: 'erro_padrao', hint: 'p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b)) e math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b))).' },
           { label: 'z (3.70), p_valor (0.0002) e decisão: significativo', expr: 'abs(float(z) - 3.700) < 0.01 and abs(float(p_valor) - 0.000216) < 0.00002 and bool(significativo) is True', actualExpr: '(z, p_valor, significativo)', hint: 'z = (p_fds - p_semana) / erro_padrao e p_valor = math.erfc(abs(z) / math.sqrt(2)).' },
-          { label: 'n_por_grupo para detetar +1 pp (cerca de 18 700 cestos)', expr: 'int(n_por_grupo) == 18716', actualExpr: 'n_por_grupo', hint: 'p1 = p_semana, p2 = p_semana + 0.01 e math.ceil((1.96 + 0.84) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2).' },
         ],
       },
       quiz: {
@@ -1295,80 +1267,45 @@ print(f"P(doença | positivo) = {p_doenca_dado_positivo:.1%}")  # cerca de 5%!
 # Em 100 000 pessoas: 100 doentes (99 positivos) e 99 900 saudáveis (1 998 positivos)
 print(f"Verdadeiros positivos: {99}, falsos positivos: {round(0.02 * 99_900)}")`,
       pythonChallenge: {
-        description: 'Três perguntas de entrevista. (1) Em vendas.csv, com cestos = cliente + dia: p_cafe, p_cafe_dado_leite, lift e juntar_na_prateleira (True se lift > 1). (2) Um alerta de fraude apanha 95% das fraudes (sensibilidade), dispara em 5% das compras normais (taxa_falsos_positivos) e 1% das compras são fraude (prevalencia): calcula p_alerta e p_fraude_dado_alerta. (3) Na tabela adesao (cartões de cliente propostos e aceites por funcionário e turno), calcula taxa_total_ana e taxa_total_rui, e diz quem é melhor_em_cada_turno e quem é melhor_no_total ("Ana" ou "Rui").',
+        description: 'Quem leva Leite também leva Café? Em vendas.csv, um cesto é cliente + dia.\n1) cestos: uma linha por cesto, com as colunas cafe e leite (True se o cesto tiver o produto).\n2) p_cafe e p_cafe_dado_leite.\n3) lift e juntar_na_prateleira (True se lift > 1).\nA regra de Bayes está no treino 1 e o paradoxo de Simpson no treino 2.',
         starterCode: `import pandas as pd
 
-# (1) Quem leva Leite também leva Café?
 df = pd.read_csv("dados/vendas.csv")
 df["cafe"] = df["produto"] == "Café"
 df["leite"] = df["produto"] == "Leite"
+
+# 1) Um cesto por cliente e dia
 cestos = None
+
+# 2) Probabilidades
 p_cafe = None
 p_cafe_dado_leite = None
+
+# 3) Lift
 lift = None
 juntar_na_prateleira = None
-
-# (2) Bayes: o alerta disparou. Qual a probabilidade de ser fraude?
-prevalencia = 0.01
-sensibilidade = 0.95
-taxa_falsos_positivos = 0.05
-p_alerta = None
-p_fraude_dado_alerta = None
-
-# (3) Paradoxo de Simpson: adesão ao cartão de cliente
-adesao = pd.DataFrame({
-    "funcionario": ["Ana", "Ana", "Rui", "Rui"],
-    "turno": ["manhã", "noite", "manhã", "noite"],
-    "propostas": [20, 300, 300, 20],
-    "aceites": [18, 120, 240, 6],
-})
-taxa_total_ana = None
-taxa_total_rui = None
-melhor_em_cada_turno = None
-melhor_no_total = None
-print(p_cafe, p_cafe_dado_leite, lift, p_fraude_dado_alerta, taxa_total_ana, taxa_total_rui)`,
+print(p_cafe, p_cafe_dado_leite, lift)`,
         solutionCode: `import pandas as pd
 
-# (1) Quem leva Leite também leva Café?
 df = pd.read_csv("dados/vendas.csv")
 df["cafe"] = df["produto"] == "Café"
 df["leite"] = df["produto"] == "Leite"
+
+# 1) Um cesto por cliente e dia
 cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max"))
+
+# 2) Probabilidades
 p_cafe = cestos["cafe"].mean()
 p_cafe_dado_leite = cestos[cestos["leite"]]["cafe"].mean()
+
+# 3) Lift
 lift = p_cafe_dado_leite / p_cafe
 juntar_na_prateleira = lift > 1
-
-# (2) Bayes: o alerta disparou. Qual a probabilidade de ser fraude?
-prevalencia = 0.01
-sensibilidade = 0.95
-taxa_falsos_positivos = 0.05
-p_alerta = sensibilidade * prevalencia + taxa_falsos_positivos * (1 - prevalencia)
-p_fraude_dado_alerta = sensibilidade * prevalencia / p_alerta
-
-# (3) Paradoxo de Simpson: adesão ao cartão de cliente
-adesao = pd.DataFrame({
-    "funcionario": ["Ana", "Ana", "Rui", "Rui"],
-    "turno": ["manhã", "noite", "manhã", "noite"],
-    "propostas": [20, 300, 300, 20],
-    "aceites": [18, 120, 240, 6],
-})
-adesao["taxa"] = adesao["aceites"] / adesao["propostas"]
-print(adesao)
-total = adesao.groupby("funcionario")[["aceites", "propostas"]].sum()
-taxa_total_ana = total.loc["Ana", "aceites"] / total.loc["Ana", "propostas"]
-taxa_total_rui = total.loc["Rui", "aceites"] / total.loc["Rui", "propostas"]
-melhor_em_cada_turno = "Ana"
-melhor_no_total = "Rui"
-print(f"Lift Café|Leite: {lift:.2f} | P(fraude | alerta): {p_fraude_dado_alerta:.1%}")
-print(f"Total: Ana {taxa_total_ana:.1%} vs Rui {taxa_total_rui:.1%}")`,
+print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | lift = {lift:.2f}")`,
         checks: [
           { label: 'Cestos (2 447) e p_cafe (12.6%)', expr: 'len(cestos) == 2447 and abs(float(p_cafe) - 0.12628) < 0.0005', actualExpr: '(len(cestos) if cestos is not None else None, p_cafe)', hint: 'cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max")) e p_cafe = cestos["cafe"].mean().' },
-          { label: 'p_cafe_dado_leite (9.3%), lift (0.74) e decisão de prateleira', expr: 'abs(float(p_cafe_dado_leite) - 0.09315) < 0.0005 and abs(float(lift) - 0.7377) < 0.002 and bool(juntar_na_prateleira) is False', actualExpr: '(p_cafe_dado_leite, lift, juntar_na_prateleira)', hint: 'Filtra só os cestos com leite: cestos[cestos["leite"]]["cafe"].mean(). lift = p_cafe_dado_leite / p_cafe.' },
-          { label: 'p_alerta (5.9%) e p_fraude_dado_alerta (16.1%)', expr: 'abs(float(p_alerta) - 0.059) < 0.0001 and abs(float(p_fraude_dado_alerta) - 0.16102) < 0.0005', actualExpr: '(p_alerta, p_fraude_dado_alerta)', hint: 'p_alerta = sensibilidade * prevalencia + taxa_falsos_positivos * (1 - prevalencia); depois sensibilidade * prevalencia / p_alerta.' },
-          { label: 'O Bayes usa as variáveis (com 10% de fraudes dá 67.9%)', expr: 'abs(correr_com(prevalencia=0.10)["p_fraude_dado_alerta"] - 0.678571) < 0.0005', actualExpr: 'correr_com(prevalencia=0.10).get("p_fraude_dado_alerta")', hint: 'Escreve a fórmula com prevalencia, sensibilidade e taxa_falsos_positivos, não o número final.' },
-          { label: 'Taxas totais: Ana 43.1%, Rui 76.9%', expr: 'abs(float(taxa_total_ana) - 0.43125) < 0.0001 and abs(float(taxa_total_rui) - 0.76875) < 0.0001', actualExpr: '(taxa_total_ana, taxa_total_rui)', hint: 'Soma aceites e propostas por funcionário e só depois divide. A média das duas taxas dá outro número (errado).' },
-          { label: 'Paradoxo de Simpson identificado', expr: 'melhor_em_cada_turno == "Ana" and melhor_no_total == "Rui"', actualExpr: '(melhor_em_cada_turno, melhor_no_total)', hint: 'De manhã: Ana 90% vs Rui 80%. À noite: Ana 40% vs Rui 30%. No total o Rui ganha, porque a Ana faz quase só noites.' },
+          { label: 'p_cafe_dado_leite (9.3%) e lift (0.74)', expr: 'abs(float(p_cafe_dado_leite) - 0.09315) < 0.0005 and abs(float(lift) - 0.7377) < 0.002', actualExpr: '(p_cafe_dado_leite, lift)', hint: 'Filtra só os cestos com leite: cestos[cestos["leite"]]["cafe"].mean(). lift = p_cafe_dado_leite / p_cafe.' },
+          { label: 'Decisão de prateleira a partir do lift', expr: 'bool(juntar_na_prateleira) is False and bool(correr_com(df=pd.DataFrame({"data": ["d1", "d1", "d2"], "cliente_id": [1, 1, 2], "produto": ["Café", "Leite", "Pão"], "cafe": [True, False, False], "leite": [False, True, False]}))["juntar_na_prateleira"]) is True', actualExpr: 'juntar_na_prateleira', hint: 'juntar_na_prateleira = lift > 1, calculado a partir dos cestos.' },
         ],
       },
       quiz: {
@@ -1428,52 +1365,46 @@ print(f"Média {media:.2f} € | desvio padrão {dp:.2f} € | variância {por_d
 print("Dias com |z| > 3:")
 print(z[z.abs() > 3].round(2))`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes (clientes diferentes) e faturacao (soma de sub) por data. Guarda variancia e desvio_padrao da faturação diária, melhor_dia (data com mais faturação) e z_melhor_dia. Depois ajusta a reta faturacao = ordenada + declive × clientes e guarda declive, ordenada, r2, previsao_10 (faturação prevista para um dia com 10 clientes) e extrapolacao_30_segura (True ou False: é seguro usar a reta para um dia com 30 clientes?).',
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) por_dia: clientes (clientes diferentes) e faturacao (soma de sub) por data.\n2) A reta faturacao = ordenada + declive × clientes: guarda declive, ordenada e r2.\n3) previsao_10: faturação prevista para um dia com 10 clientes.\n4) extrapolacao_30_segura: é seguro usar a reta para um dia com 30 clientes? (True ou False)\nVariância, desvio padrão e z-score estão no treino 1.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
 df["sub"] = df["quantidade"] * df["preco"]
 
+# 1) Um registo por dia
 por_dia = None
 
-variancia = None
-desvio_padrao = None
-melhor_dia = None
-z_melhor_dia = None
-
+# 2) Reta de regressão
 declive = None
 ordenada = None
 r2 = None
+
+# 3) e 4) Previsões
 previsao_10 = None
 extrapolacao_30_segura = None
-print(desvio_padrao, melhor_dia, z_melhor_dia, declive, ordenada, r2)`,
+print(declive, ordenada, r2, previsao_10)`,
         solutionCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
 df["sub"] = df["quantidade"] * df["preco"]
 
+# 1) Um registo por dia
 por_dia = df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum"))
 x = por_dia["clientes"]
 y = por_dia["faturacao"]
 
-variancia = y.var()
-desvio_padrao = y.std()
-melhor_dia = y.idxmax()
-z_melhor_dia = (y.max() - y.mean()) / desvio_padrao
-
+# 2) Reta de regressão
 declive = x.cov(y) / x.var()
 ordenada = y.mean() - declive * x.mean()
 r2 = x.corr(y) ** 2
+
+# 3) e 4) Previsões
 previsao_10 = ordenada + declive * 10
 extrapolacao_30_segura = 30 <= x.max()
-
-print(f"Desvio padrão diário: {desvio_padrao:.2f} € | melhor dia {melhor_dia} (z = {z_melhor_dia:.2f})")
 print(f"faturação = {ordenada:.2f} + {declive:.2f} × clientes | R² = {r2:.2f}")
 print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {x.max()} clientes")`,
         checks: [
           { label: 'por_dia: 365 dias com clientes e faturacao', expr: 'len(por_dia) == 365 and {"clientes", "faturacao"} <= set(por_dia.columns)', actualExpr: '(len(por_dia), list(por_dia.columns)) if por_dia is not None else None', hint: 'df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).' },
-          { label: 'variancia (3 522.96) e desvio_padrao (59.35 €)', expr: 'abs(float(variancia) - 3522.96) < 0.1 and abs(float(desvio_padrao) - 59.3546) < 0.01', actualExpr: '(variancia, desvio_padrao)', hint: 'por_dia["faturacao"].var() e .std(). O desvio padrão é a raiz da variância.' },
-          { label: 'melhor_dia (2025-12-26) com z ≈ 5.05', expr: 'melhor_dia == "2025-12-26" and abs(float(z_melhor_dia) - 5.0546) < 0.005', actualExpr: '(melhor_dia, z_melhor_dia)', hint: 'melhor_dia = y.idxmax() e z_melhor_dia = (y.max() - y.mean()) / desvio_padrao.' },
           { label: 'Reta: declive (16.69 €/cliente) e ordenada (-30.51 €)', expr: 'abs(float(declive) - 16.6885) < 0.005 and abs(float(ordenada) - (-30.5127)) < 0.05', actualExpr: '(declive, ordenada)', hint: 'declive = x.cov(y) / x.var() e ordenada = y.mean() - declive * x.mean().' },
           { label: 'r2 (0.64) e previsao_10 (136.37 €)', expr: 'abs(float(r2) - 0.63585) < 0.001 and abs(float(previsao_10) - 136.37) < 0.05', actualExpr: '(r2, previsao_10)', hint: 'r2 = x.corr(y) ** 2 e previsao_10 = ordenada + declive * 10.' },
           { label: 'Extrapolar para 30 clientes não é seguro', expr: 'bool(extrapolacao_30_segura) is False', actualExpr: 'extrapolacao_30_segura', hint: 'O máximo observado é x.max() = 19 clientes num dia: 30 está fora do intervalo onde a reta foi ajustada.' },
@@ -1533,14 +1464,14 @@ print(f"Valor esperado por raspadinha: {valor_esperado:+.2f} €")
 for k in [1, 5, 10, 20, 50]:
     print(f"{k:>2} testes: {1 - 0.95 ** k:.0%} de hipótese de pelo menos um falso positivo")`,
       pythonChallenge: {
-        description: 'Responde em código. (1) prob_falso_positivo_20: probabilidade de pelo menos um falso positivo em 20 testes a 5%; alfa_bonferroni para esses 20 testes. (2) Em vendas.csv (sub = quantidade * preco), soma sub por cesto (data e cliente_id) e guarda media_cesto, mediana_cesto, p90_cesto e assimetria ("direita" ou "esquerda"). (3) Um vale custa custo_vale = 2 €, é usado com probabilidade prob_uso = 0.3 e cada uso dá margem_por_uso = 10 €: guarda valor_esperado por vale. (4) vies_sobrevivencia: inquirir só os clientes que ainda compram para perceber porque é que os clientes saem tem viés de sobrevivência? (True/False). (5) parar_no_primeiro_p_baixo: é correto parar um teste A/B no primeiro dia em que p < 0.05? (True/False).',
+        description: 'Duas perguntas de entrevista:\n1) prob_falso_positivo_20: probabilidade de pelo menos um falso positivo em 20 testes a 5%; alfa_bonferroni para esses 20 testes.\n2) Em vendas.csv (sub = quantidade * preco), soma sub por cesto (data e cliente_id) e guarda media_cesto, mediana_cesto, p90_cesto e assimetria ("direita" ou "esquerda").\nO valor esperado está no treino 1 e os enviesamentos no treino 2.',
         starterCode: `import pandas as pd
 
-# (1) Testes múltiplos
+# 1) Testes múltiplos
 prob_falso_positivo_20 = None
 alfa_bonferroni = None
 
-# (2) Assimetria e percentis do valor por cesto
+# 2) Assimetria e percentis do valor por cesto
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
 por_cesto = None
@@ -1548,24 +1479,14 @@ media_cesto = None
 mediana_cesto = None
 p90_cesto = None
 assimetria = None
-
-# (3) Valor esperado de um vale de desconto
-custo_vale = 2
-prob_uso = 0.3
-margem_por_uso = 10
-valor_esperado = None
-
-# (4) e (5) Enviesamentos
-vies_sobrevivencia = None
-parar_no_primeiro_p_baixo = None
-print(prob_falso_positivo_20, media_cesto, mediana_cesto, p90_cesto, valor_esperado)`,
+print(prob_falso_positivo_20, media_cesto, mediana_cesto, p90_cesto)`,
         solutionCode: `import pandas as pd
 
-# (1) Testes múltiplos
+# 1) Testes múltiplos
 prob_falso_positivo_20 = 1 - 0.95 ** 20
 alfa_bonferroni = 0.05 / 20
 
-# (2) Assimetria e percentis do valor por cesto
+# 2) Assimetria e percentis do valor por cesto
 df = pd.read_csv("dados/vendas.csv")
 df["sub"] = df["quantidade"] * df["preco"]
 por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum()
@@ -1573,26 +1494,13 @@ media_cesto = por_cesto.mean()
 mediana_cesto = por_cesto.median()
 p90_cesto = por_cesto.quantile(0.9)
 assimetria = "direita" if media_cesto > mediana_cesto else "esquerda"
-
-# (3) Valor esperado de um vale de desconto
-custo_vale = 2
-prob_uso = 0.3
-margem_por_uso = 10
-valor_esperado = prob_uso * margem_por_uso - custo_vale
-
-# (4) e (5) Enviesamentos
-vies_sobrevivencia = True
-parar_no_primeiro_p_baixo = False
 print(f"P(≥1 falso positivo em 20 testes) = {prob_falso_positivo_20:.0%} | Bonferroni: {alfa_bonferroni}")
-print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P90 {p90_cesto:.2f} € → cauda à {assimetria}")
-print(f"Valor esperado por vale: {valor_esperado:+.2f} €")`,
+print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P90 {p90_cesto:.2f} € → cauda à {assimetria}")`,
         checks: [
           { label: 'Testes múltiplos: 64% e Bonferroni 0.0025', expr: 'abs(float(prob_falso_positivo_20) - 0.64151) < 0.0005 and abs(float(alfa_bonferroni) - 0.0025) < 1e-9', actualExpr: '(prob_falso_positivo_20, alfa_bonferroni)', hint: 'Probabilidade de nenhum falhar: 0.95 ** 20. A de pelo menos um falhar é 1 menos isso. Bonferroni: 0.05 / 20.' },
           { label: 'Cesto médio (10.99 €) e mediano (8.40 €)', expr: 'len(por_cesto) == 2447 and abs(float(media_cesto) - 10.9942) < 0.005 and abs(float(mediana_cesto) - 8.40) < 0.005', actualExpr: '(len(por_cesto) if por_cesto is not None else None, media_cesto, mediana_cesto)', hint: 'por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum(), depois .mean() e .median().' },
           { label: 'Percentil 90 (23.88 €) e assimetria à direita', expr: 'abs(float(p90_cesto) - 23.876) < 0.01 and assimetria == "direita"', actualExpr: '(p90_cesto, assimetria)', hint: 'por_cesto.quantile(0.9). A média acima da mediana indica poucos cestos muito grandes: cauda à direita.' },
-          { label: 'Valor esperado do vale (+1 €) calculado das variáveis', expr: 'abs(float(valor_esperado) - 1.0) < 1e-9 and abs(correr_com(prob_uso=0.1)["valor_esperado"] - (-1.0)) < 1e-9', actualExpr: 'valor_esperado', hint: 'valor_esperado = prob_uso * margem_por_uso - custo_vale. Com 10% de uso a campanha dá prejuízo.' },
-          { label: 'Viés de sobrevivência reconhecido', expr: 'vies_sobrevivencia is True', actualExpr: 'vies_sobrevivencia', hint: 'Os clientes que saíram são exatamente os que ficam de fora do inquérito.' },
-          { label: 'Não se para um teste ao primeiro p baixo', expr: 'parar_no_primeiro_p_baixo is False', actualExpr: 'parar_no_primeiro_p_baixo', hint: 'Espreitar todos os dias e parar ao primeiro p < 0.05 multiplica os falsos positivos. A duração fixa-se antes, com o tamanho de amostra.' },
+          { label: 'A assimetria é decidida pelos dados', expr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]}))["assimetria"] == "esquerda"', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]})).get("assimetria")', hint: 'assimetria = "direita" if media_cesto > mediana_cesto else "esquerda".' },
         ],
       },
       quiz: {
@@ -1655,7 +1563,7 @@ print(esperados)
 print(f"qui² = {qui2:.2f} com {gl} graus de liberdade (crítico a 5%: 5.99)")
 print(((tabela - esperados) / np.sqrt(esperados)).round(2))`,
       pythonChallenge: {
-        description: '(1) Completa qui_quadrado(tabela), que devolve (qui2, gl). (2) Em vendas.csv, com a categoria vinda de produtos.csv: a mistura de categorias muda ao fim de semana? Guarda qui2_fds, gl_fds, p_fds e independente_fds (True se p ≥ 0.05). (3) Em vendas_sazonais.csv, faz o mesmo para trimestre × categoria (qui2_trim, gl_trim, p_trim) e guarda celula_maior_desvio = (trimestre, categoria) com o maior resíduo padronizado. (4) ANOVA: a faturação diária média muda entre trimestres? Calcula f_anova e diferenca_trimestres (True se f_anova > f_critico).',
+        description: 'Qui-quadrado de independência, passo a passo:\n1) Completa qui_quadrado(tabela), que devolve (qui2, gl).\n2) Em vendas.csv (com a categoria vinda de produtos.csv), a mistura de categorias muda ao fim de semana? Guarda qui2_fds, gl_fds, p_fds e independente_fds (True se p ≥ 0.05).\n3) Em vendas_sazonais.csv, faz o mesmo para trimestre × categoria (qui2_trim, gl_trim, p_trim) e guarda celula_maior_desvio = (trimestre, categoria) com o maior resíduo padronizado.\nA ANOVA está no treino 1.',
         starterCode: `import math
 import numpy as np
 import pandas as pd
@@ -1680,27 +1588,20 @@ def qui_quadrado(tabela):
 
 produtos = pd.read_csv("dados/produtos.csv")[["id", "categoria"]].rename(columns={"id": "produto_id"})
 
-# (2) Fim de semana × categoria em vendas.csv
+# 2) Fim de semana × categoria em vendas.csv
 vendas = pd.read_csv("dados/vendas.csv").merge(produtos, on="produto_id")
 vendas["fim_de_semana"] = pd.to_datetime(vendas["data"]).dt.day_of_week >= 5
 qui2_fds, gl_fds = None, None
 p_fds = None
 independente_fds = None
 
-# (3) Trimestre × categoria em vendas_sazonais.csv
+# 3) Trimestre × categoria em vendas_sazonais.csv
 saz = pd.read_csv("dados/vendas_sazonais.csv").merge(produtos, on="produto_id")
 saz["trimestre"] = "T" + ((saz["data"].str[5:7].astype(int) - 1) // 3 + 1).astype(str)
 qui2_trim, gl_trim = None, None
 p_trim = None
 celula_maior_desvio = None
-
-# (4) ANOVA da faturação diária por trimestre
-saz["sub"] = saz["quantidade"] * saz["preco"]
-por_dia = saz.groupby(["data", "trimestre"])["sub"].sum().reset_index()
-f_critico = 2.63  # tabela F a 5% com 3 e 361 graus de liberdade
-f_anova = None
-diferenca_trimestres = None
-print(qui2_fds, p_fds, qui2_trim, celula_maior_desvio, f_anova)`,
+print(qui2_fds, p_fds, qui2_trim, celula_maior_desvio)`,
         solutionCode: `import math
 import numpy as np
 import pandas as pd
@@ -1728,14 +1629,14 @@ def qui_quadrado(tabela):
 
 produtos = pd.read_csv("dados/produtos.csv")[["id", "categoria"]].rename(columns={"id": "produto_id"})
 
-# (2) Fim de semana × categoria em vendas.csv
+# 2) Fim de semana × categoria em vendas.csv
 vendas = pd.read_csv("dados/vendas.csv").merge(produtos, on="produto_id")
 vendas["fim_de_semana"] = pd.to_datetime(vendas["data"]).dt.day_of_week >= 5
 qui2_fds, gl_fds = qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"]))
 p_fds = p_valor_qui2(qui2_fds, gl_fds)
 independente_fds = p_fds >= 0.05
 
-# (3) Trimestre × categoria em vendas_sazonais.csv
+# 3) Trimestre × categoria em vendas_sazonais.csv
 saz = pd.read_csv("dados/vendas_sazonais.csv").merge(produtos, on="produto_id")
 saz["trimestre"] = "T" + ((saz["data"].str[5:7].astype(int) - 1) // 3 + 1).astype(str)
 tabela = pd.crosstab(saz["trimestre"], saz["categoria"])
@@ -1745,28 +1646,14 @@ esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum
 residuos = (tabela - esperados) / np.sqrt(esperados)
 celula_maior_desvio = residuos.stack().idxmax()
 
-# (4) ANOVA da faturação diária por trimestre
-saz["sub"] = saz["quantidade"] * saz["preco"]
-por_dia = saz.groupby(["data", "trimestre"])["sub"].sum().reset_index()
-f_critico = 2.63  # tabela F a 5% com 3 e 361 graus de liberdade
-media_geral = por_dia["sub"].mean()
-grupos = por_dia.groupby("trimestre")["sub"]
-ss_entre = (grupos.count() * (grupos.mean() - media_geral) ** 2).sum()
-ss_dentro = ((por_dia["sub"] - grupos.transform("mean")) ** 2).sum()
-k, n = grupos.ngroups, len(por_dia)
-f_anova = (ss_entre / (k - 1)) / (ss_dentro / (n - k))
-diferenca_trimestres = f_anova > f_critico
-
 print(f"Fim de semana: qui² = {qui2_fds:.2f} ({gl_fds} gl), p = {p_fds:.3f}")
 print(f"Trimestres: qui² = {qui2_trim:.1f} ({gl_trim} gl), p < 0.001 | maior desvio: {celula_maior_desvio}")
-print(residuos.round(1))
-print(f"ANOVA: F = {f_anova:.1f} (crítico {f_critico})")`,
+print(residuos.round(1))`,
         checks: [
           { label: 'qui_quadrado funciona numa tabela 2 × 2 (6.67 com 1 gl)', expr: '(lambda r: abs(float(r[0]) - 6.6667) < 0.001 and int(r[1]) == 1)(qui_quadrado(pd.DataFrame([[10, 20], [20, 10]])))', actualExpr: 'qui_quadrado(pd.DataFrame([[10, 20], [20, 10]]))', hint: 'esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum(); qui2 = soma de (observado - esperado) ** 2 / esperado; gl = (linhas - 1) * (colunas - 1).' },
           { label: 'Fim de semana: qui² 2.22 com 5 gl, p = 0.82, independente', expr: 'abs(float(qui2_fds) - 2.219) < 0.01 and int(gl_fds) == 5 and abs(float(p_fds) - 0.818) < 0.005 and bool(independente_fds) is True', actualExpr: '(qui2_fds, gl_fds, p_fds, independente_fds)', hint: 'qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"])) e depois p_valor_qui2(qui2_fds, gl_fds).' },
           { label: 'Trimestres: qui² 228.3 com 15 gl e p < 0.001', expr: 'abs(float(qui2_trim) - 228.29) < 0.05 and int(gl_trim) == 15 and float(p_trim) < 0.001', actualExpr: '(qui2_trim, gl_trim, p_trim)', hint: 'tabela = pd.crosstab(saz["trimestre"], saz["categoria"]) e qui_quadrado(tabela).' },
           { label: 'Célula com maior desvio: Bebidas no 3.º trimestre', expr: 'tuple(celula_maior_desvio) == ("T3", "Bebidas")', actualExpr: 'celula_maior_desvio', hint: 'residuos = (tabela - esperados) / np.sqrt(esperados) e residuos.stack().idxmax().' },
-          { label: 'ANOVA: F = 24.4, acima do valor crítico', expr: 'abs(float(f_anova) - 24.411) < 0.01 and bool(diferenca_trimestres) is True', actualExpr: '(f_anova, diferenca_trimestres)', hint: 'ss_entre = soma de n_grupo × (média_grupo - média_geral)²; ss_dentro = soma de (valor - média do seu grupo)²; F = (ss_entre / (k - 1)) / (ss_dentro / (n - k)).' },
         ],
       },
       quiz: {
@@ -1785,7 +1672,7 @@ print(f"ANOVA: F = {f_anova:.1f} (crítico {f_critico})")`,
       id: 'bi-16-regressao-multipla',
       code: '16',
       title: 'Regressão linear múltipla: separar efeitos',
-      lede: 'Na etapa 13 cada cliente valia 16,69 € por dia. Mas dezembro tem mais clientes E cestos maiores: parte desse valor era o Natal. A regressão múltipla separa os efeitos e mede cada um "mantendo o resto constante".',
+      lede: 'Na etapa anterior, cada cliente valia 16,69 € por dia. Mas dezembro tem mais clientes E cestos maiores: parte desse valor era o Natal. A regressão múltipla separa os efeitos e mede cada um "mantendo o resto constante".',
       analogyTitle: 'Quem ganhou o jogo: o avançado ou a equipa?',
       analogyBody: 'Um avançado que joga sempre na melhor equipa marca muitos golos. Parte é mérito dele, parte é a equipa. Para separar, comparas jogos em que só uma coisa muda. A regressão múltipla faz isso com contas: estima o efeito dos clientes, do fim de semana e de dezembro ao mesmo tempo, para que nenhum fique com o mérito dos outros.',
       concepts: [
@@ -1800,7 +1687,7 @@ print(f"ANOVA: F = {f_anova:.1f} (crítico {f_critico})")`,
         'Cria fim_de_semana e dezembro como 0 ou 1 com .astype(int).',
         'Monta X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e resolve com np.linalg.lstsq.',
         'Calcula as previsões X @ coef, o R² e o R² ajustado.',
-        'Compara b_clientes com o declive simples da etapa 13 e usa o modelo para prever um sábado de dezembro com 10 clientes.',
+        'Compara b_clientes com o declive simples da etapa anterior e usa o modelo para prever um sábado de dezembro com 10 clientes.',
       ],
       proPractice: 'Em análise profissional usa-se statsmodels (smf.ols("faturacao ~ clientes + fim_de_semana + dezembro", data=df).fit().summary()), que mostra também erros padrão e p-valores de cada coeficiente. Em scikit-learn usa-se LinearRegression quando o objetivo é prever.',
       commonPitfall: 'Ler o coeficiente da regressão simples como "o efeito" de uma variável quando há outra escondida a mexer nas duas. Pergunta sempre: o que mais muda ao mesmo tempo que x?',
@@ -1825,7 +1712,7 @@ b0, b_area, b_garagem = np.linalg.lstsq(X, preco, rcond=None)[0]
 print(f"preço = {b0:.1f} + {b_area:.2f} × área + {b_garagem:.1f} × garagem")
 print(f"Com a mesma área, ter garagem vale +{b_garagem:.0f} mil €")`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes e faturacao por data, e as colunas fim_de_semana e dezembro (0 ou 1). Ajusta faturacao = b0 + b_clientes × clientes + b_fds × fim_de_semana + b_dezembro × dezembro com np.linalg.lstsq. Guarda os 4 coeficientes, r2, r2_ajustado, declive_simples (o declive só com clientes, como na etapa 13), previsao_sabado_dezembro (10 clientes, fim de semana, dezembro) e dezembro_inflacionava (True se declive_simples > b_clientes).',
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes e faturacao por data, e as colunas fim_de_semana e dezembro (0 ou 1). Ajusta faturacao = b0 + b_clientes × clientes + b_fds × fim_de_semana + b_dezembro × dezembro com np.linalg.lstsq. Guarda os 4 coeficientes, r2, r2_ajustado, declive_simples (o declive só com clientes, como na etapa anterior), previsao_sabado_dezembro (10 clientes, fim de semana, dezembro) e dezembro_inflacionava (True se declive_simples > b_clientes).',
         starterCode: `import numpy as np
 import pandas as pd
 
@@ -1876,7 +1763,7 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
           { label: 'por_dia com 365 dias e colunas 0/1', expr: 'len(por_dia) == 365 and set(por_dia["dezembro"].unique()) == {0, 1} and int(por_dia["dezembro"].sum()) == 31 and int(por_dia["fim_de_semana"].sum()) == 104', actualExpr: '(len(por_dia), int(por_dia["dezembro"].sum()), int(por_dia["fim_de_semana"].sum())) if por_dia is not None else None', hint: 'Usa .astype(int) para transformar True/False em 1/0.' },
           { label: 'Coeficientes: b0 -8.07, clientes 12.29, fim de semana 22.92, dezembro 71.98', expr: 'abs(float(b0) - (-8.0707)) < 0.01 and abs(float(b_clientes) - 12.2878) < 0.001 and abs(float(b_fds) - 22.9175) < 0.01 and abs(float(b_dezembro) - 71.9818) < 0.01', actualExpr: '(b0, b_clientes, b_fds, b_dezembro)', hint: 'X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e np.linalg.lstsq(X, y, rcond=None)[0]. A ordem das colunas define a ordem dos coeficientes.' },
           { label: 'r2 (0.735) e r2_ajustado (0.732)', expr: 'abs(float(r2) - 0.73457) < 0.0005 and abs(float(r2_ajustado) - 0.73236) < 0.0005', actualExpr: '(r2, r2_ajustado)', hint: 'r2 = 1 - soma dos resíduos² / soma de (y - média)²; r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - 3 - 1).' },
-          { label: 'Declive simples (16.69) maior do que o múltiplo: dezembro inflacionava', expr: 'abs(float(declive_simples) - 16.6885) < 0.005 and bool(dezembro_inflacionava) is True', actualExpr: '(declive_simples, dezembro_inflacionava)', hint: 'declive_simples = clientes.cov(faturacao) / clientes.var(), como na etapa 13.' },
+          { label: 'Declive simples (16.69) maior do que o múltiplo: dezembro inflacionava', expr: 'abs(float(declive_simples) - 16.6885) < 0.005 and bool(dezembro_inflacionava) is True', actualExpr: '(declive_simples, dezembro_inflacionava)', hint: 'declive_simples = clientes.cov(faturacao) / clientes.var(), como na etapa anterior.' },
           { label: 'Previsão para um sábado de dezembro com 10 clientes (209.71 €)', expr: 'abs(float(previsao_sabado_dezembro) - 209.706) < 0.05', actualExpr: 'previsao_sabado_dezembro', hint: 'b0 + b_clientes * 10 + b_fds * 1 + b_dezembro * 1.' },
         ],
       },

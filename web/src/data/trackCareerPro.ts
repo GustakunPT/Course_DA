@@ -353,7 +353,7 @@ export const lessonPedagogyMap: Record<string, PedagogicalNotes> = {
 
 export const careerProTrack: Track = {
   id: 'carreira',
-  shortTitle: '6. Nível Profissional',
+  shortTitle: '7. Nível Profissional',
   fullTitle: 'Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista',
   summary: 'A ponte final entre saber sintaxe e trabalhar como Analista de Dados numa empresa: pipelines ETL, testes de qualidade, retenção de clientes, SQL otimizado e casos de entrevista.',
   engineLabel: 'Python + SQL Profissional',

@@ -137,6 +137,19 @@ function activeEngine(): EngineKind {
   return currentLesson().engine;
 }
 
+/**
+ * Encontra a trilha certa para uma etapa. Se a etapa mudou de trilha (ex.: quando a trilha 5
+ * foi dividida), segue a etapa; se não existir, abre a primeira etapa da trilha pedida.
+ */
+function locateLesson(trackId: string | null | undefined, lessonId: string | null | undefined): { trackId: string; lessonId: string } | null {
+  const pedida = allTracks.find((t) => t.id === trackId);
+  if (lessonId) {
+    const dona = pedida?.lessons.some((l) => l.id === lessonId) ? pedida : allTracks.find((t) => t.lessons.some((l) => l.id === lessonId));
+    if (dona) return { trackId: dona.id, lessonId };
+  }
+  return pedida ? { trackId: pedida.id, lessonId: pedida.lessons[0].id } : null;
+}
+
 function syncStateFromUrl(): void {
   const raw = window.location.hash.replace(/^#/, '');
   if (!raw) {
@@ -145,10 +158,10 @@ function syncStateFromUrl(): void {
       if (last.view === 'academia' || last.view === 'explorador' || last.view === 'referencia') {
         state.view = last.view;
       }
-      const tr = allTracks.find((t) => t.id === last.trackId);
-      if (tr) {
-        state.trackId = tr.id;
-        state.lessonId = tr.lessons.some((l) => l.id === last.lessonId) ? last.lessonId : tr.lessons[0].id;
+      const loc = locateLesson(last.trackId, last.lessonId);
+      if (loc) {
+        state.trackId = loc.trackId;
+        state.lessonId = loc.lessonId;
       }
     }
     return;
@@ -158,12 +171,10 @@ function syncStateFromUrl(): void {
   if (v === 'academia' || v === 'explorador' || v === 'referencia') {
     state.view = v;
   }
-  const t = params.get('trilha');
-  if (t && allTracks.some((tr) => tr.id === t)) {
-    state.trackId = t;
-    const track = allTracks.find((tr) => tr.id === t)!;
-    const l = params.get('licao');
-    state.lessonId = l && track.lessons.some((le) => le.id === l) ? l : track.lessons[0].id;
+  const loc = locateLesson(params.get('trilha'), params.get('licao'));
+  if (loc) {
+    state.trackId = loc.trackId;
+    state.lessonId = loc.lessonId;
   }
   const cid = params.get('cidade');
   if (cid) state.explorerCidade = cid;
@@ -1483,12 +1494,10 @@ function attachDomListeners(): void {
               state.syncStatus = 'synced';
               state.syncLastUpdatedAt = remote.updatedAt;
               if (remote.lastLocation) {
-                const tr = allTracks.find((t) => t.id === remote.lastLocation!.trackId);
-                if (tr) {
-                  state.trackId = tr.id;
-                  state.lessonId = tr.lessons.some((l) => l.id === remote.lastLocation!.lessonId)
-                    ? remote.lastLocation!.lessonId
-                    : tr.lessons[0].id;
+                const loc = locateLesson(remote.lastLocation!.trackId, remote.lastLocation!.lessonId);
+                if (loc) {
+                  state.trackId = loc.trackId;
+                  state.lessonId = loc.lessonId;
                 }
                 state.view = remote.lastLocation.view;
                 saveLastLocation(remote.lastLocation);
@@ -1517,12 +1526,10 @@ function attachDomListeners(): void {
             state.quizSelection = restored.quizzes;
             state.practiceDone = new Set(restored.practice);
             if (restored.lastLocation) {
-              const tr = allTracks.find((t) => t.id === restored.lastLocation!.trackId);
-              if (tr) {
-                state.trackId = tr.id;
-                state.lessonId = tr.lessons.some((l) => l.id === restored.lastLocation!.lessonId)
-                  ? restored.lastLocation!.lessonId
-                  : tr.lessons[0].id;
+              const loc = locateLesson(restored.lastLocation!.trackId, restored.lastLocation!.lessonId);
+              if (loc) {
+                state.trackId = loc.trackId;
+                state.lessonId = loc.lessonId;
               }
               state.view = restored.lastLocation.view;
             }
@@ -1808,12 +1815,10 @@ async function bootstrapCloudSync(): Promise<void> {
     state.syncLastUpdatedAt = remote.updatedAt;
 
     if (normalizedUrlCode && remote.lastLocation) {
-      const tr = allTracks.find((t) => t.id === remote.lastLocation!.trackId);
-      if (tr) {
-        state.trackId = tr.id;
-        state.lessonId = tr.lessons.some((l) => l.id === remote.lastLocation!.lessonId)
-          ? remote.lastLocation!.lessonId
-          : tr.lessons[0].id;
+      const loc = locateLesson(remote.lastLocation!.trackId, remote.lastLocation!.lessonId);
+      if (loc) {
+        state.trackId = loc.trackId;
+        state.lessonId = loc.lessonId;
       }
       state.view = remote.lastLocation.view;
       saveLastLocation(remote.lastLocation);

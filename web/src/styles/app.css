@@ -921,6 +921,7 @@ pre,
 .challenge-prompt p {
   font-size: var(--text-sm);
   color: var(--color-ink-2);
+  white-space: pre-line;
 }
 
 .code-editor-shell {
