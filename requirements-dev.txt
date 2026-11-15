@@ -1,0 +1,3 @@
+# Ferramentas para correr os testes (pytest tests/)
+-r requirements.txt
+pytest==9.2.0

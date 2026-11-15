@@ -204,7 +204,9 @@ def analisar_dataset(vendas, produtos, clientes):
 
     for v in vendas:
         if v["produto_id"] not in ids_produtos or v["cliente_id"] not in ids_clientes:
+            # Linha órfã: conta-se, mas não entra nas contas (não sabemos a categoria/cidade).
             chaves_orfas += 1
+            continue
         qtd = int(v["quantidade"])
         preco = float(v["preco"])
         subtotal = qtd * preco

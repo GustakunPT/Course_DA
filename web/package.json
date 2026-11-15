@@ -8,7 +8,9 @@
     "dev": "npm run sync && vite",
     "build": "npm run sync && tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:mockups": "node scripts/test-mockups.mjs"
+    "test:mockups": "node scripts/test-mockups.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vercel/blob": "^2.9.0",
@@ -17,6 +19,7 @@
   "devDependencies": {
     "@types/node": "^22.10.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^3.2.7"
   }
 }
