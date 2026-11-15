@@ -5,6 +5,14 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 
 > **Academia Interativa na Vercel (Produção):** [https://web-one-nu-34.vercel.app](https://web-one-nu-34.vercel.app)
 
+[![CI](https://github.com/GustakunPT/Course_DA/actions/workflows/ci.yml/badge.svg)](https://github.com/GustakunPT/Course_DA/actions/workflows/ci.yml)
+
+![Academia: lição de SQL com editor e bancada](docs/img/academia.png)
+
+| Explorador CSV e downloads Power BI/Excel | Referência rápida de sintaxe |
+| --- | --- |
+| ![Explorador CSV](docs/img/explorador.png) | ![Referência rápida](docs/img/referencia.png) |
+
 ## Academia Web Interativa (`web/`)
 
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
@@ -47,7 +55,7 @@ publicados sem problemas de privacidade. Cada fase do plano acrescenta uma camad
 Precisa do [Python 3](https://www.python.org/downloads/) instalado.
 
 ```bash
-# 1. gerar os dados fictícios (cria 3 ficheiros CSV em dados/)
+# 1. gerar os dados fictícios (cria 4 ficheiros CSV em dados/)
 python src/gerar_dados.py
 
 # 2. (Fase 1) verificar os exercícios das lições
@@ -56,14 +64,41 @@ python verificar.py 3      # só a semana 3
 
 # 3. (Fase 1, semanas 11 e 12) quando tiver escrito a Caixa Registadora
 python src/caixa.py
+
+# 4. (Fase 4) gráficos de estatística em relatorios/graficos/
+pip install -r requirements.txt
+python src/graficos.py
 ```
+
+## Gráficos (Fase 4)
+
+`python src/graficos.py` lê os CSV com pandas e desenha com matplotlib:
+
+| Faturação mensal (sazonal vs base) | Curva ABC dos produtos |
+| --- | --- |
+| ![Faturação mensal](relatorios/graficos/faturacao_mensal.png) | ![Curva ABC](relatorios/graficos/curva_abc.png) |
+| **Faturação por categoria** | **Distribuição do valor por linha** |
+| ![Faturação por categoria](relatorios/graficos/faturacao_categoria.png) | ![Distribuição](relatorios/graficos/distribuicao_vendas.png) |
+
+## Testes
+
+Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os correr localmente:
+
+```bash
+pip install -r requirements-dev.txt
+pytest tests                       # Python: gerador, auditoria e gráficos
+cd web && npm test                 # Web: motores, API de sync e as 47 etapas
+```
+
+Os testes da web confirmam, por exemplo, que a solução oficial de cada desafio SQL e Git passa na
+própria correção automática e que o código inicial ainda não passa.
 
 ## Cadernos de pandas (Academia Interativa, etapas 13 a 16)
 
-O pandas não corre dentro da app da Academia. A prática faz-se aqui, nos cadernos da pasta `cadernos/`:
+A trilha 3 da app já corre pandas no browser. Para prática mais longa, use os cadernos da pasta `cadernos/`:
 
 ```bash
-pip install pandas notebook      # uma só vez
+pip install -r requirements.txt  # uma só vez
 jupyter notebook                 # abra o ficheiro da pasta cadernos/
 ```
 
@@ -94,12 +129,16 @@ mercearia-do-bairro/
 ├── licoes/        # lições com analogias (semanas 1-2 a 12)
 ├── exercicios/    # exercícios para completar
 ├── verificar.py   # verificador automático dos exercícios
-├── src/           # scripts Python
+├── src/           # scripts Python (gerador, auditoria, gráficos)
+├── tests/         # testes pytest
 ├── sql/           # queries SQL
 ├── cadernos/      # cadernos Jupyter da Academia (pandas)
 ├── relatorios/    # gráficos, dashboards, apresentações
+├── web/           # Academia interativa (Vite + TypeScript, deploy na Vercel)
+├── docs/img/      # capturas de ecrã do README
 ├── .gitignore
 ├── requirements.txt
+├── requirements-dev.txt
 └── README.md
 ```
 

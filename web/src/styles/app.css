@@ -52,6 +52,8 @@
   align-items: center;
   gap: var(--space-sm);
   min-width: 0;
+  /* O logótipo nunca encolhe: quem cede espaço é a faixa de trilhas (que faz scroll). */
+  flex-shrink: 0;
 }
 
 .brand-link {
@@ -81,6 +83,14 @@
   overflow-x: auto;
   scrollbar-width: thin;
   min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Em ecrãs médios o subtítulo "Academia de Dados" cede o lugar às trilhas. */
+@media (max-width: 1600px) {
+  .brand-context {
+    display: none;
+  }
 }
 
 .nav-tab {
