@@ -398,6 +398,21 @@ export function isCloudSyncCode(raw: string): boolean {
   return CLOUD_SYNC_CODE_RE.test(raw.trim().toUpperCase());
 }
 
+/** Encontra um código MB-… dentro de texto colado (código solto ou link com ?sync=…). */
+export function extractSyncCode(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (isCloudSyncCode(trimmed)) return trimmed.toUpperCase();
+  const match = trimmed.match(/MB-[A-Z2-9]{4}-[A-Z2-9]{4}(?:-[A-Z2-9]{4})?/i);
+  return match ? match[0].toUpperCase() : null;
+}
+
+/** Link de retoma que abre a Academia já ligada ao código. */
+export function buildSyncShareUrl(code: string, baseHref = window.location.href): string {
+  const url = new URL(baseHref);
+  url.searchParams.set('sync', code);
+  return url.toString();
+}
+
 export function loadSyncCode(): string | null {
   try {
     const code = localStorage.getItem(STORAGE_SYNC_CODE_KEY);

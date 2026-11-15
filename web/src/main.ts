@@ -1,10 +1,10 @@
 import './styles/app.css';
-import { allTracks, cheatsheets } from './data/curriculum';
+import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
 import type { EngineKind, Lesson, Track } from './data/types';
-import { loadMerceariaDataset, type MerceariaDataset } from './engines/csvEngine';
+import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
 import { runPythonCode } from './engines/pythonEngine';
-import { createInitialGitState, runGitSimulator, type GitRepoState } from './engines/gitEngine';
+import { createInitialGitState, runGitSimulator } from './engines/gitEngine';
 import { renderExplorerHtml } from './ui/explorerView';
 import { renderCheatsheetHtml } from './ui/cheatsheetView';
 import { formatCodePrettier, highlightCode, renderLineNumbers } from './ui/codeEditor';
@@ -15,7 +15,8 @@ import {
   exportProgressJson,
   generatePortfolioMarkdown,
   importProgressJson,
-  isCloudSyncCode,
+  buildSyncShareUrl,
+  extractSyncCode,
   loadLastLocation,
   loadSavedDrafts,
   loadSavedProgress,
@@ -29,185 +30,13 @@ import {
   saveProgress,
   saveQuizzes,
   saveSyncCode,
-  type UserProgressMap,
 } from './data/progress';
-
-type ViewMode = 'academia' | 'explorador' | 'referencia';
-type WorkbenchTab = 'challenge' | 'example' | 'sqlfree';
-type OutputStateKind = 'empty' | 'loading' | 'error' | 'full';
-type ThemeId = 'terminal' | 'nordic' | 'glass' | 'graphite' | 'paper';
-
-interface ThemeOption {
-  id: ThemeId;
-  label: string;
-  tag: string;
-  desc: string;
-  swatches: [string, string, string];
-  themeColor: string;
-}
-
-const THEME_OPTIONS: ThemeOption[] = [
-  {
-    id: 'terminal',
-    label: 'Terminal Pro',
-    tag: 'OLED · Mono',
-    desc: 'Fundo OLED #05070A com grelha subtil, verde fósforo e tipografia monoespaçada.',
-    swatches: ['#05070a', '#22c55e', '#38bdf8'],
-    themeColor: '#05070a',
-  },
-  {
-    id: 'nordic',
-    label: 'Nordic Studio',
-    tag: 'Claro · Editorial',
-    desc: 'Branco limpo, bordas Slate e azul cobalto para leitura prolongada de dia.',
-    swatches: ['#f8fafc', '#2563eb', '#d97706'],
-    themeColor: '#f8fafc',
-  },
-  {
-    id: 'glass',
-    label: 'Glassmorphic',
-    tag: 'Escuro · Vidro',
-    desc: 'Gradiente noturno índigo/ciano com painéis translúcidos e cantos suaves.',
-    swatches: ['#1e1b4b', '#6366f1', '#22d3ee'],
-    themeColor: '#0f172a',
-  },
-  {
-    id: 'graphite',
-    label: 'Console Grafite',
-    tag: 'Escuro · Âmbar',
-    desc: 'Grafite quente com contraste equilibrado e destaque âmbar clássico.',
-    swatches: ['#25272d', '#f5b942', '#70a5ff'],
-    themeColor: '#1f2127',
-  },
-  {
-    id: 'paper',
-    label: 'Papel Editorial',
-    tag: 'Claro · Quente',
-    desc: 'Tom papel quente tipo livro técnico com baixo encandeamento.',
-    swatches: ['#f6f4ef', '#a36a1b', '#2c68b8'],
-    themeColor: '#f6f4ef',
-  },
-];
-
-interface OutputViewModel {
-  kind: OutputStateKind;
-  statusMessage?: string;
-  elapsedMs?: number;
-  stdout?: string;
-  table?: { columns: string[]; rows: (string | number | null)[][] };
-  checks?: { label: string; passed: boolean; actual?: string; hint?: string }[];
-  bannerOk?: boolean;
-  bannerText?: string;
-  errorText?: string;
-}
-
-const STORAGE_THEME_KEY = 'mercearia_academia_theme_v1';
-const STORAGE_LAYOUT_KEY = 'mercearia_academia_layout_v1';
-
-interface LayoutPrefs {
-  sidebarWidth: number;
-  lessonRatio: number;
-  editorHeight: number;
-  sidebarCollapsed: boolean;
-}
-
-const DEFAULT_LAYOUT: LayoutPrefs = {
-  sidebarWidth: 256,
-  lessonRatio: 48,
-  editorHeight: 250,
-  sidebarCollapsed: false,
-};
-
-function loadSavedLayout(): LayoutPrefs {
-  try {
-    const raw = localStorage.getItem(STORAGE_LAYOUT_KEY);
-    if (!raw) return { ...DEFAULT_LAYOUT };
-    const parsed = JSON.parse(raw);
-    return {
-      sidebarWidth: Math.min(420, Math.max(180, Number(parsed.sidebarWidth) || DEFAULT_LAYOUT.sidebarWidth)),
-      lessonRatio: Math.min(72, Math.max(28, Number(parsed.lessonRatio) || DEFAULT_LAYOUT.lessonRatio)),
-      editorHeight: Math.min(640, Math.max(140, Number(parsed.editorHeight) || DEFAULT_LAYOUT.editorHeight)),
-      sidebarCollapsed: Boolean(parsed.sidebarCollapsed),
-    };
-  } catch {
-    return { ...DEFAULT_LAYOUT };
-  }
-}
-
-function saveLayoutPrefs(prefs: LayoutPrefs): void {
-  try {
-    localStorage.setItem(STORAGE_LAYOUT_KEY, JSON.stringify(prefs));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-interface AppState {
-  view: ViewMode;
-  trackId: string;
-  lessonId: string;
-  wbTab: WorkbenchTab;
-  editorDrafts: Record<string, string>;
-  quizSelection: Record<string, number>;
-  completedLessons: UserProgressMap;
-  helpedInSession: Set<string>;
-  hintLevel: number;
-  showProgressModal: boolean;
-  showThemeModal: boolean;
-  generatedProgressCode: string;
-  progressCodeInput: string;
-  progressModalFeedback: { ok: boolean; text: string } | null;
-  confirmClearProgress: boolean;
-  syncCode: string | null;
-  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
-  syncLastUpdatedAt: string | null;
-  output: OutputViewModel;
-  gitState: GitRepoState;
-  sidebarOpenMobile: boolean;
-  mobileTab: 'lesson' | 'workbench';
-  layout: LayoutPrefs;
-  explorerSerie: 'sazonal' | 'base';
-  explorerCidade: string;
-  explorerCategoria: string;
-  refQuery: string;
-  refCategory: string;
-  theme: ThemeId;
-  dataset: MerceariaDataset | null;
-  datasetError: string | null;
-  confirmSolutionLessonId: string | null;
-}
-
-function loadSavedTheme(): ThemeId {
-  try {
-    const saved = localStorage.getItem(STORAGE_THEME_KEY);
-    if (saved && THEME_OPTIONS.some((t) => t.id === saved)) {
-      return saved as ThemeId;
-    }
-    return 'terminal';
-  } catch {
-    return 'terminal';
-  }
-}
-
-function applyTheme(theme: ThemeId): void {
-  if (theme === 'terminal') {
-    document.documentElement.removeAttribute('data-theme');
-  } else {
-    document.documentElement.setAttribute('data-theme', theme);
-  }
-  const opt = THEME_OPTIONS.find((t) => t.id === theme) ?? THEME_OPTIONS[0];
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) {
-    metaTheme.setAttribute('content', opt.themeColor);
-  }
-  try {
-    localStorage.setItem(STORAGE_THEME_KEY, theme);
-  } catch {
-    // Ignore
-  }
-}
-
-const totalLessonsCount = allTracks.reduce((sum, t) => sum + t.lessons.length, 0);
+import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
+import { downloadTextFile, escapeHtml } from './ui/html';
+import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
+import { renderProgressModal, renderThemeModal } from './ui/modals';
+import { renderOutputRegion } from './ui/outputView';
+import { applyTheme, loadSavedTheme, THEME_OPTIONS, type ThemeId } from './ui/theme';
 
 const state: AppState = {
   view: 'academia',
@@ -245,14 +74,6 @@ const state: AppState = {
 };
 
 applyTheme(state.theme);
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function currentTrack(): Track {
   return allTracks.find((t) => t.id === state.trackId) ?? allTracks[0];
@@ -399,143 +220,6 @@ function scheduleCloudSync(): void {
         if (state.showProgressModal) renderApp();
       });
   }, 1200);
-}
-
-function extractSyncCode(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (isCloudSyncCode(trimmed)) return trimmed.toUpperCase();
-  const match = trimmed.match(/MB-[A-Z2-9]{4}-[A-Z2-9]{4}(?:-[A-Z2-9]{4})?/i);
-  return match ? match[0].toUpperCase() : null;
-}
-
-function buildSyncShareUrl(code: string): string {
-  const url = new URL(window.location.href);
-  url.searchParams.set('sync', code);
-  return url.toString();
-}
-
-function renderOutputRegion(out: OutputViewModel, engine: EngineKind): string {
-  const engineName =
-    engine === 'sql' ? 'SQLite WebAssembly' : engine === 'git' ? 'Simulador Git' : 'Python 3.12 (Pyodide)';
-
-  if (out.kind === 'loading') {
-    return `
-      <div class="output-panel" role="status" aria-live="polite">
-        <div class="output-header">
-          <span class="status-chip">${escapeHtml(engineName)}</span>
-          <span class="measured">${escapeHtml(out.statusMessage ?? 'A executar…')}</span>
-        </div>
-        <div class="skeleton-stack">
-          <div class="skeleton-bar"></div>
-          <div class="skeleton-bar"></div>
-          <div class="skeleton-bar"></div>
-        </div>
-      </div>
-    `;
-  }
-
-  if (out.kind === 'empty') {
-    return `
-      <div class="output-panel">
-        <div class="output-header">
-          <span class="status-chip">${escapeHtml(engineName)}</span>
-          <span class="measured">Pronto a executar</span>
-        </div>
-        <div class="empty-state">
-          <p>O resultado das tuas queries SQL, código Python/Pandas ou comandos Git aparece aqui em tempo real.</p>
-          <div>
-            <button type="button" class="btn" data-action="run-code">Executar código atual</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  if (out.kind === 'error') {
-    return `
-      <div class="output-panel" role="alert">
-        <div class="output-header">
-          <span class="status-chip is-bad">Erro de execução</span>
-          ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
-        </div>
-        <div class="error-state">
-          <p>${escapeHtml(out.errorText ?? 'Não foi possível concluir a execução.')}</p>
-          <p class="helper-slot">Revê a sintaxe na linha indicada ou clica em Repor código para recomeçar limpo.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  return `
-    <div class="output-panel" aria-live="polite">
-      <div class="output-header">
-        <span class="status-chip ${out.bannerOk === true ? 'is-ok' : out.bannerOk === false ? 'is-person' : ''}">
-          ${
-            out.bannerText
-              ? escapeHtml(out.bannerText)
-              : escapeHtml(`${engineName} executado`)
-          }
-        </span>
-        ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
-      </div>
-
-      ${out.stdout ? `<pre class="output-stdout">${escapeHtml(out.stdout)}</pre>` : ''}
-
-      ${
-        out.table && out.table.columns.length > 0
-          ? `
-        <div class="table-scroll">
-          <table class="data-table">
-            <caption class="visually-hidden">Resultados da execução SQL ou Python/Pandas</caption>
-            <thead>
-              <tr>${out.table.columns.map((c) => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr>
-            </thead>
-            <tbody>
-              ${
-                out.table.rows.length === 0
-                  ? `<tr><td colspan="${out.table.columns.length}">0 linhas devolvidas pela consulta.</td></tr>`
-                  : out.table.rows
-                      .slice(0, 25)
-                      .map(
-                        (row) =>
-                          `<tr>${row
-                            .map((cell) => {
-                              const isNum = typeof cell === 'number' || (typeof cell === 'string' && /^-?\d+(\.\d+)?$/.test(cell));
-                              return `<td class="${isNum ? 'mono-cell' : ''}">${cell === null ? 'NULL' : escapeHtml(String(cell))}</td>`;
-                            })
-                            .join('')}</tr>`,
-                      )
-                      .join('')
-              }
-            </tbody>
-          </table>
-        </div>
-      `
-          : ''
-      }
-
-      ${
-        out.checks && out.checks.length > 0
-          ? `
-        <ul class="check-list">
-          ${out.checks
-            .map(
-              (c) => `
-            <li class="check-row ${c.passed ? 'pass' : 'fail'}">
-              <strong class="measured">${c.passed ? '[certo]' : '[rever]'}</strong>
-              <span>${escapeHtml(c.label)}</span>
-              ${!c.passed && c.actual !== undefined ? `<span class="measured">(obtido: ${escapeHtml(c.actual)})</span>` : ''}
-              ${!c.passed && c.hint ? `<span>Dica: ${escapeHtml(c.hint)}</span>` : ''}
-            </li>
-          `,
-            )
-            .join('')}
-        </ul>
-      `
-          : ''
-      }
-    </div>
-  `;
 }
 
 function renderAcademyWorkspace(): string {
@@ -978,175 +662,6 @@ function renderAcademyWorkspace(): string {
   `;
 }
 
-function renderThemeModal(): string {
-  return `
-    <div class="modal-backdrop" data-action="close-theme-backdrop" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
-      <div class="modal-card seam-panel">
-        <div class="modal-head">
-          <div>
-            <span class="badge-chip">Aparência · 5 estilos</span>
-            <h2 id="theme-modal-title">Escolher estilo visual</h2>
-            <p class="measured">Personaliza as cores, contraste e tipografia da academia. A tua escolha fica guardada neste dispositivo.</p>
-          </div>
-          <button type="button" class="btn" data-action="close-theme-modal" aria-label="Fechar seletor de estilo">Fechar</button>
-        </div>
-        <div class="theme-grid">
-          ${THEME_OPTIONS.map((opt) => {
-            const active = state.theme === opt.id;
-            return `
-              <button
-                type="button"
-                class="theme-option-card ${active ? 'is-active' : ''}"
-                data-action="select-theme"
-                data-theme-id="${opt.id}"
-                aria-pressed="${active ? 'true' : 'false'}"
-              >
-                <div class="theme-option-top">
-                  <strong>${escapeHtml(opt.label)}</strong>
-                  <span class="theme-swatches" aria-hidden="true">
-                    ${opt.swatches.map((hex) => `<span class="theme-swatch" style="background:${hex};"></span>`).join('')}
-                  </span>
-                </div>
-                <span class="status-chip ${active ? 'is-ok' : ''}">${active ? 'Ativo · ' : ''}${escapeHtml(opt.tag)}</span>
-                <span class="theme-option-desc">${escapeHtml(opt.desc)}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderProgressModal(): string {
-  const entries = Object.values(state.completedLessons);
-  const doneCount = entries.length;
-  const autonomousCount = entries.filter((e) => e.status === 'autonomous').length;
-  const quizCorrectCount = allTracks.reduce((acc, tr) => {
-    return (
-      acc +
-      tr.lessons.filter((l) => {
-        const sel = state.quizSelection[l.id];
-        return sel !== undefined && sel === l.quiz.correctIndex;
-      }).length
-    );
-  }, 0);
-
-  return `
-    <div class="modal-backdrop" data-action="close-progress-backdrop" role="dialog" aria-modal="true" aria-labelledby="progress-modal-title">
-      <div class="progress-modal">
-        <div class="workbench-toolbar">
-          <div>
-            <h2 id="progress-modal-title">Progresso, Código de Retoma & Portfólio</h2>
-            <p class="measured">O teu progresso, rascunhos de código e quizzes ficam guardados automaticamente neste navegador.</p>
-          </div>
-          <button type="button" class="btn" data-action="close-progress-modal" aria-label="Fechar janela">Fechar</button>
-        </div>
-
-        <div class="progress-summary-grid">
-          <div class="progress-stat-card">
-            <div class="progress-stat-val">${doneCount} / ${totalLessonsCount}</div>
-            <div class="progress-stat-lbl">Etapas concluídas</div>
-          </div>
-          <div class="progress-stat-card">
-            <div class="progress-stat-val">${autonomousCount}</div>
-            <div class="progress-stat-lbl">Resolvidas s/ ajuda</div>
-          </div>
-          <div class="progress-stat-card">
-            <div class="progress-stat-val">${quizCorrectCount} / ${totalLessonsCount}</div>
-            <div class="progress-stat-lbl">Quizzes certos</div>
-          </div>
-        </div>
-
-        <div class="progress-track-list">
-          ${allTracks
-            .map((tr) => {
-              const trDone = tr.lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
-              const pct = Math.round((trDone / tr.lessons.length) * 100);
-              return `
-                <div class="progress-track-row">
-                  <span>${escapeHtml(tr.shortTitle)}</span>
-                  <span class="measured">${trDone}/${tr.lessons.length}</span>
-                  <div class="progress-bar-bg" aria-hidden="true">
-                    <div class="progress-bar-fill" style="width: ${pct}%;"></div>
-                  </div>
-                </div>
-              `;
-            })
-            .join('')}
-        </div>
-
-        <div class="hints-panel">
-          <strong>Sincronização na Cloud (sem login)</strong>
-          <p class="measured">Liga este dispositivo a um código (<code>MB-XXXX-XXXX-XXXX</code>) para sincronizar automaticamente o progresso entre telemóvel e PC.</p>
-          ${
-            state.syncCode
-              ? `<div class="action-pair" style="align-items:center;flex-wrap:wrap;gap:8px;">
-                  <span class="status-chip is-ok">${escapeHtml(state.syncCode)}</span>
-                  <span class="status-chip">${
-                    state.syncStatus === 'syncing'
-                      ? 'A sincronizar…'
-                      : state.syncStatus === 'error'
-                        ? 'Erro de rede (guardado local)'
-                        : 'Sincronizado na cloud'
-                  }</span>
-                </div>
-                <div class="action-pair" style="margin-top:8px;flex-wrap:wrap;">
-                  <button type="button" class="btn btn-primary" data-action="copy-sync-link">Copiar link de retoma</button>
-                  <button type="button" class="btn" data-action="sync-now">Sincronizar agora</button>
-                  <button type="button" class="btn" data-action="disconnect-cloud-sync">Desligar</button>
-                </div>`
-              : `<div class="action-pair" style="flex-wrap:wrap;">
-                  <button type="button" class="btn btn-primary" data-action="activate-cloud-sync">Ativar código na cloud</button>
-                  <button type="button" class="btn" data-action="generate-progress-code">Gerar código offline (MB1)</button>
-                </div>`
-          }
-          ${
-            state.generatedProgressCode
-              ? `<div class="action-pair" style="margin-top:6px;">
-                  <input type="text" readonly class="code-input-inline" id="generated-code-field" value="${escapeHtml(state.generatedProgressCode)}" aria-label="Código de progresso gerado" style="flex:1;min-width:180px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);" />
-                </div>`
-              : ''
-          }
-          <div class="action-pair" style="margin-top:8px;">
-            <input
-              type="text"
-              id="progress-code-input"
-              placeholder="Cola MB-XXXX-XXXX-XXXX, link ?sync=… ou MB1-…"
-              value="${escapeHtml(state.progressCodeInput)}"
-              aria-label="Colar código de sincronização ou progresso"
-              style="flex:1;min-width:200px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);"
-            />
-            <button type="button" class="btn" data-action="apply-progress-code">Continuar com código</button>
-          </div>
-          ${
-            state.progressModalFeedback
-              ? `<div class="helper-slot ${state.progressModalFeedback.ok ? 'is-ok' : 'is-bad'}">${escapeHtml(state.progressModalFeedback.text)}</div>`
-              : ''
-          }
-        </div>
-
-        <div class="modal-actions-row">
-          <div class="action-pair">
-            <button type="button" class="btn btn-primary" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
-            <button type="button" class="btn" data-action="export-progress-json">Backup (.json)</button>
-            <button type="button" class="btn" data-action="trigger-import-json">Restaurar (.json)</button>
-            <input type="file" id="import-progress-file" accept=".json,application/json" aria-label="Selecionar ficheiro JSON de cópia de segurança do progresso" style="display:none" />
-          </div>
-          <div class="action-pair">
-            ${
-              state.confirmClearProgress
-                ? `<button type="button" class="btn" data-action="confirm-clear-progress" style="color:var(--color-bad);">Confirmar limpeza</button>
-                   <button type="button" class="btn" data-action="cancel-clear-progress">Cancelar</button>`
-                : `<button type="button" class="btn" data-action="ask-clear-progress">Limpar progresso</button>`
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 function renderApp(): void {
   const root = document.getElementById('app');
   if (!root) return;
@@ -1261,8 +776,8 @@ function renderApp(): void {
       <main class="workspace-wrap">
         ${mainContent}
       </main>
-      ${state.showProgressModal ? renderProgressModal() : ''}
-      ${state.showThemeModal ? renderThemeModal() : ''}
+      ${state.showProgressModal ? renderProgressModal(state) : ''}
+      ${state.showThemeModal ? renderThemeModal(state) : ''}
     </div>
   `;
 
@@ -1389,18 +904,6 @@ async function executeWorkbench(): Promise<void> {
           : 'Código Python executado',
   };
   renderApp();
-}
-
-function downloadTextFile(filename: string, content: string, mime = 'text/plain;charset=utf-8'): void {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 }
 
 function attachDomListeners(): void {

@@ -15,3 +15,5 @@ export const allTracks: Track[] = enrichTracksWithPedagogy([
 ]);
 
 export { cheatsheets };
+
+export const totalLessonsCount = allTracks.reduce((sum, t) => sum + t.lessons.length, 0);

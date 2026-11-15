@@ -579,12 +579,16 @@ HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12
 ORDER BY ltv_eur DESC;`,
         hint: 'Adicione HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12 ORDER BY ltv_eur DESC;',
         validate: (cols, rows) => {
-          const ok = rows.length > 0 && cols.length === 3 && Number(rows[0][2]) >= Number(rows[rows.length - 1][2]);
+          // Nos dados de 2025 há exatamente 12 clientes (de 120) com compras em todos os meses.
+          const ordenado = rows.every((r, i) => i === 0 || Number(rows[i - 1][2]) >= Number(r[2]));
+          const ok = rows.length === 12 && cols.length === 3 && ordenado;
           return {
             passed: ok,
             message: ok
               ? `Excelente! Encontraste os ${rows.length} clientes que visitaram a Mercearia em todos os 12 meses do ano.`
-              : 'Usa HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12 e ordena por ltv_eur DESC.',
+              : rows.length !== 12
+                ? `Obtiveste ${rows.length} clientes; devem ser 12. Usa HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12.`
+                : 'Os 12 clientes estão certos: falta ordenar por ltv_eur DESC.',
           };
         },
       },

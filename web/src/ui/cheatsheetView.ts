@@ -1,12 +1,6 @@
 import { cheatsheets } from '../data/curriculum';
+import { escapeHtml } from './html';
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 export function renderCheatsheetHtml(query: string, categoryFilter: string): string {
   const categories = ['Todas', 'Python', 'SQL', 'Pandas', 'Git', 'BI & DAX'];

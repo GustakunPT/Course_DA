@@ -58,3 +58,15 @@ describe('códigos de progresso MB1', () => {
     await expect(progress.decodeProgressCode('abc')).rejects.toThrow();
   });
 });
+
+describe('extractSyncCode e buildSyncShareUrl', () => {
+  it('encontra o código dentro de um link de retoma', () => {
+    const link = progress.buildSyncShareUrl('MB-ABCD-EF23-XY45', 'https://exemplo.pt/?a=1#vista=academia');
+    expect(link).toBe('https://exemplo.pt/?a=1&sync=MB-ABCD-EF23-XY45#vista=academia');
+    expect(progress.extractSyncCode(link)).toBe('MB-ABCD-EF23-XY45');
+  });
+  it('aceita código solto em minúsculas e recusa lixo', () => {
+    expect(progress.extractSyncCode('  mb-abcd-ef23 ')).toBe('MB-ABCD-EF23');
+    expect(progress.extractSyncCode('olá')).toBeNull();
+  });
+});

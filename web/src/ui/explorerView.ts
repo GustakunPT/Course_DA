@@ -1,4 +1,5 @@
 import type { MerceariaDataset } from '../engines/csvEngine';
+import { escapeHtml } from './html';
 
 export interface ExplorerFilters {
   serie: 'sazonal' | 'base';
@@ -6,13 +7,6 @@ export interface ExplorerFilters {
   categoria: string;
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerFilters): string {
   const catByProdId = new Map(dataset.produtos.map((p) => [p.id, p.categoria]));

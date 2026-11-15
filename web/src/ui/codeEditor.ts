@@ -1,12 +1,6 @@
 import type { EngineKind } from '../data/types';
+import { escapeHtml } from './html';
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 const PY_KEYWORDS = new Set([
   'import', 'from', 'as', 'def', 'return', 'if', 'elif', 'else', 'for', 'in',

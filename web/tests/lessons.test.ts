@@ -1,0 +1,80 @@
+// Verifica o conteúdo das 47 etapas: estrutura coerente e, para SQL e Git,
+// que a solução oficial passa na própria correção automática.
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { describe, expect, it, vi } from 'vitest';
+
+const require = createRequire(import.meta.url);
+
+// sql.js em Node: o .wasm vem de node_modules em vez de /sql-wasm.wasm.
+vi.mock('sql.js', async () => {
+  const actual = await vi.importActual<typeof import('sql.js')>('sql.js');
+  const init = actual.default;
+  return {
+    ...actual,
+    default: () => init({ locateFile: (f: string) => require.resolve(`sql.js/dist/${f}`) }),
+  };
+});
+
+// Os CSV vêm da pasta dados/ do projeto, tal como o "npm run sync" os copia para public/.
+vi.stubGlobal('fetch', async (url: string) => {
+  const nome = url.replace('/dados/', '');
+  const texto = readFileSync(new URL(`../../dados/${nome}`, import.meta.url), 'utf-8');
+  return new Response(texto);
+});
+
+const { allTracks, totalLessonsCount } = await import('../src/data/curriculum');
+const { runSqlQuery } = await import('../src/engines/sqlEngine');
+const { createInitialGitState, runGitSimulator } = await import('../src/engines/gitEngine');
+
+const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
+
+describe('estrutura do currículo', () => {
+  it('tem 6 trilhas e 47 etapas', () => {
+    expect(allTracks).toHaveLength(6);
+    expect(totalLessonsCount).toBe(47);
+  });
+
+  it('os ids das etapas são únicos', () => {
+    const ids = todas.map((l) => l.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it.each(todas.map((l) => [l.id, l] as const))('%s tem quiz válido e desafio do motor certo', (_id, l) => {
+    expect(l.title.trim()).not.toBe('');
+    expect(l.quiz.options.length).toBeGreaterThanOrEqual(2);
+    expect(l.quiz.correctIndex).toBeGreaterThanOrEqual(0);
+    expect(l.quiz.correctIndex).toBeLessThan(l.quiz.options.length);
+    if (l.engine === 'sql') expect(l.sqlChallenge).toBeDefined();
+    if (l.engine === 'git') expect(l.gitChallenge).toBeDefined();
+    if (l.engine === 'python') {
+      expect(l.pythonChallenge).toBeDefined();
+      expect(l.pythonChallenge!.checks.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+const sqlLessons = todas.filter((l) => l.sqlChallenge);
+describe('soluções SQL passam na correção', () => {
+  it.each(sqlLessons.map((l) => [l.id, l] as const))('%s', async (_id, l) => {
+    const res = await runSqlQuery(l.sqlChallenge!.solutionSql);
+    expect(res.error).toBeUndefined();
+    const verdict = l.sqlChallenge!.validate(res.columns, res.rows);
+    expect(verdict.passed, verdict.message).toBe(true);
+  });
+
+  it.each(sqlLessons.map((l) => [l.id, l] as const))('%s: o código inicial ainda não passa', async (_id, l) => {
+    const res = await runSqlQuery(l.sqlChallenge!.starterSql);
+    const verdict = res.error ? { passed: false } : l.sqlChallenge!.validate(res.columns, res.rows);
+    expect(verdict.passed).toBe(false);
+  });
+});
+
+const gitLessons = todas.filter((l) => l.gitChallenge);
+describe('soluções Git passam na correção', () => {
+  it.each(gitLessons.map((l) => [l.id, l] as const))('%s', (_id, l) => {
+    const { nextState, output } = runGitSimulator(createInitialGitState(), l.gitChallenge!.solutionCommands);
+    const verdict = l.gitChallenge!.validate(nextState, output);
+    expect(verdict.passed, verdict.message).toBe(true);
+  });
+});
