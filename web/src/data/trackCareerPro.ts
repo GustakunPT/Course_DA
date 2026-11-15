@@ -866,7 +866,7 @@ print(receita_anual, ticket_mediano, quota_mercearia_pct, cidade_maior_ltv)`,
           'Escolher a cidade com mais clientes registados.',
         ],
         correctIndex: 1,
-        explanation: 'Em faturação total ganha Lisboa (5 885,34 €); em gasto médio por cliente ativo ganha Gaia (237,97 €). Traduzir perguntas vagas em métricas precisas é a assinatura de um bom analista.',
+        explanation: 'Em faturação total ganha Lisboa (5 885,34 €); em gasto médio por cliente ativo ganha Braga (254,18 €). Traduzir perguntas vagas em métricas precisas é a assinatura de um bom analista.',
       },
     },
     {
@@ -1064,6 +1064,142 @@ print(faturacao_queijo_q4)`,
         ],
         correctIndex: 1,
         explanation: 'Com ? o SQLite recebe o comando e os dados em separado, por isso um texto com aspas ou com código malicioso nunca é executado. É regra obrigatória em qualquer empresa.',
+      },
+    },
+    {
+      id: 'pro-09-projeto-final',
+      code: '09',
+      title: 'Projeto final guiado: da pergunta à recomendação',
+      lede: 'Junta tudo num só projeto: uma pergunta do dono, uma query SQL, uma transformação em pandas, um gráfico honesto e uma recomendação escrita que alguém consegue usar na segunda-feira.',
+      analogyTitle: 'Do pedido ao balcão',
+      analogyBody: 'O dono pergunta: "Quando e em que categoria devo reforçar o stock?". O SQL vai ao armazém buscar os números certos, o pandas arruma-os na prateleira, o gráfico põe-nos na montra e a recomendação é a frase que dizes ao dono em 10 segundos. Cada ferramenta faz o que faz melhor.',
+      concepts: [
+        'Começa sempre pela pergunta de negócio e só depois escolhe as ferramentas.',
+        'SQL para extrair e agregar (JOIN + GROUP BY); pandas para remodelar e comparar (pivot_table, médias, percentagens).',
+        'pd.read_sql_query(consulta, ligacao) traz o resultado de uma query SQL diretamente para um DataFrame.',
+        'Um gráfico por mensagem: aqui, uma linha mês a mês com o eixo no zero mostra o pico de dezembro.',
+        'A recomendação diz o quê, quando e porquê, com um número: "Reforçar Charcutaria em dezembro: vende +194% do que num mês normal."',
+      ],
+      beginnerSteps: [
+        'Escreve a consulta SQL: faturação por mes (SUBSTR(v.data, 1, 7)) e categoria, com JOIN entre vendas_sazonais e produtos.',
+        'Lê o resultado com pd.read_sql_query(consulta, ligacao) para o DataFrame mensal.',
+        'Cria matriz = mensal.pivot_table(values="faturacao", index="mes", columns="categoria", aggfunc="sum").',
+        'Compara dezembro com a média de janeiro a novembro em cada categoria e escolhe a maior subida.',
+        'Desenha a faturação total por mês com ax.plot(...), eixo no zero e título com a conclusão.',
+        'Escreve a recomendação numa frase com a categoria, o mês e a percentagem.',
+      ],
+      proPractice: 'Este é o formato de um caso técnico de entrevista: pergunta, método, resultado, gráfico e recomendação. Publica-o no GitHub com um README de 5 linhas a seguir esta mesma ordem.',
+      commonPitfall: 'Comparar dezembro com a média dos 12 meses (incluindo o próprio dezembro): o pico entra na média e a subida parece menor do que é.',
+      referenceTitle: 'Roteiro do projeto final',
+      referenceRows: [
+        { syntax: '1. Pergunta', meaning: 'Quando e em que categoria reforçar o stock?', example: 'Pedido do dono' },
+        { syntax: '2. SQL', meaning: 'JOIN + GROUP BY mes, categoria', example: '72 linhas (12 meses x 6 categorias)' },
+        { syntax: '3. pandas', meaning: 'pivot_table e comparação com a média', example: 'Subida de dezembro por categoria' },
+        { syntax: '4. Gráfico', meaning: 'Linha mês a mês com eixo no zero', example: 'Pico de 6 317,85 € em dezembro' },
+        { syntax: '5. Recomendação', meaning: 'O quê, quando e porquê, com um número', example: 'Charcutaria em dezembro (+194%)' },
+      ],
+      engine: 'python',
+      exampleCode: `import sqlite3
+import pandas as pd
+
+# Carregar os CSV para uma base SQLite em memória (o mesmo que fizeste na etapa sqlite3)
+ligacao = sqlite3.connect(":memory:")
+for nome in ["vendas_sazonais", "produtos"]:
+    pd.read_csv(f"dados/{nome}.csv").to_sql(nome, ligacao, index=False)
+
+consulta = """
+SELECT p.categoria, ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao
+FROM vendas_sazonais v
+JOIN produtos p ON p.id = v.produto_id
+GROUP BY p.categoria
+ORDER BY faturacao DESC
+"""
+pd.read_sql_query(consulta, ligacao)`,
+      pythonChallenge: {
+        description: 'Responde ao dono: "Quando e em que categoria devo reforçar o stock?" com vendas_sazonais.csv. 1) Em consulta, escreve o SQL que devolve mes (AAAA-MM), categoria e faturacao, e lê-o para mensal com pd.read_sql_query. 2) Com pivot_table cria matriz (meses x categorias). 3) Guarda em categoria_reforco a categoria com maior subida de dezembro face à média de janeiro a novembro e em subida_reforco_pct essa subida em % (1 casa decimal). 4) Desenha a faturação total por mês em fig, ax (linha, eixo no zero, título). 5) Escreve a recomendacao numa frase com a categoria, o mês e a percentagem.',
+        starterCode: `import sqlite3
+import pandas as pd
+import matplotlib.pyplot as plt
+
+ligacao = sqlite3.connect(":memory:")
+for nome in ["vendas_sazonais", "produtos"]:
+    pd.read_csv(f"dados/{nome}.csv").to_sql(nome, ligacao, index=False)
+
+# 1) SQL: mes (SUBSTR(v.data, 1, 7)), categoria e faturacao, com JOIN e GROUP BY
+consulta = """
+"""
+mensal = None
+
+# 2) pandas: matriz meses x categorias
+matriz = None
+
+# 3) Subida de dezembro face à média de janeiro a novembro
+categoria_reforco = None
+subida_reforco_pct = None
+
+# 4) Gráfico da faturação total por mês (fig, ax)
+
+# 5) Recomendação numa frase
+recomendacao = ""
+print(categoria_reforco, subida_reforco_pct)
+print(recomendacao)`,
+        solutionCode: `import sqlite3
+import pandas as pd
+import matplotlib.pyplot as plt
+
+ligacao = sqlite3.connect(":memory:")
+for nome in ["vendas_sazonais", "produtos"]:
+    pd.read_csv(f"dados/{nome}.csv").to_sql(nome, ligacao, index=False)
+
+consulta = """
+SELECT SUBSTR(v.data, 1, 7) AS mes, p.categoria, ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao
+FROM vendas_sazonais v
+JOIN produtos p ON p.id = v.produto_id
+GROUP BY mes, p.categoria
+ORDER BY mes
+"""
+mensal = pd.read_sql_query(consulta, ligacao)
+
+matriz = mensal.pivot_table(values="faturacao", index="mes", columns="categoria", aggfunc="sum")
+
+media_resto = matriz.loc[matriz.index != "2025-12"].mean()
+subida = (matriz.loc["2025-12"] / media_resto - 1) * 100
+categoria_reforco = str(subida.idxmax())
+subida_reforco_pct = round(float(subida.max()), 1)
+
+total_mes = matriz.sum(axis=1)
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.plot(total_mes.index.str.slice(5, 7), total_mes.values, marker="o")
+ax.set_ylim(bottom=0)
+ax.set_title("Dezembro é o mês mais forte do ano")
+ax.set_xlabel("Mês de 2025")
+ax.set_ylabel("Faturação (€)")
+fig.tight_layout()
+
+recomendacao = (
+    f"Reforçar o stock de {categoria_reforco} em dezembro: "
+    f"vende +{subida_reforco_pct}% do que num mês normal."
+)
+print(categoria_reforco, subida_reforco_pct)
+print(recomendacao)`,
+        checks: [
+          { label: 'consulta usa JOIN e GROUP BY e mensal tem 72 linhas (12 meses x 6 categorias)', expr: '"JOIN" in consulta.upper() and "GROUP BY" in consulta.upper() and hasattr(mensal, "shape") and mensal.shape[0] == 72 and {"mes", "categoria", "faturacao"} <= set(mensal.columns)', actualExpr: 'getattr(mensal, "shape", mensal)', hint: 'SELECT SUBSTR(v.data, 1, 7) AS mes, p.categoria, ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao ... GROUP BY mes, p.categoria.' },
+          { label: 'matriz tem 12 meses x 6 categorias', expr: 'hasattr(matriz, "shape") and tuple(matriz.shape) == (12, 6)', actualExpr: 'getattr(matriz, "shape", matriz)', hint: 'mensal.pivot_table(values="faturacao", index="mes", columns="categoria", aggfunc="sum").' },
+          { label: 'categoria_reforco ("Charcutaria") e subida_reforco_pct (194.0)', expr: 'categoria_reforco == "Charcutaria" and math.isclose(float(subida_reforco_pct), 194.0, abs_tol=0.15)', actualExpr: '(categoria_reforco, subida_reforco_pct)', hint: 'Divide a linha "2025-12" da matriz pela média dos outros 11 meses, subtrai 1 e multiplica por 100; depois .idxmax() e .max().' },
+          { label: 'Gráfico de linha com 12 meses e eixo no zero', expr: 'len(ax.get_lines()) >= 1 and len(ax.get_lines()[0].get_xdata()) == 12 and ax.get_ylim()[0] <= 0 and len(ax.get_title().strip()) >= 10', actualExpr: '(len(ax.get_lines()), ax.get_ylim(), ax.get_title())', hint: 'fig, ax = plt.subplots(); ax.plot(meses, totais, marker="o"); ax.set_ylim(bottom=0); ax.set_title("...").' },
+          { label: 'A recomendação diz a categoria, o mês e a percentagem', expr: 'isinstance(recomendacao, str) and "charcutaria" in recomendacao.lower() and "dezembro" in recomendacao.lower() and "%" in recomendacao and "194" in recomendacao', actualExpr: 'recomendacao', hint: 'Usa uma f-string: f"Reforçar o stock de {categoria_reforco} em dezembro: vende +{subida_reforco_pct}% do que num mês normal."' },
+        ],
+      },
+      quiz: {
+        question: 'Qual destas recomendações finais é a mais útil para o dono da mercearia?',
+        options: [
+          '"A faturação varia ao longo do ano e algumas categorias crescem."',
+          '"Reforçar Charcutaria em dezembro: vende +194% do que num mês normal."',
+          '"Ver o gráfico em anexo para perceber a evolução das categorias."',
+          '"Os dados mostram tendências interessantes que convém acompanhar."',
+        ],
+        correctIndex: 1,
+        explanation: 'Uma boa recomendação diz o quê, quando e porquê, com um número que a sustenta. As outras descrevem os dados mas não dizem ao dono o que fazer.',
       },
     },
   ],

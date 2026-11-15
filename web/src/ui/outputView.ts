@@ -15,6 +15,8 @@ export interface OutputViewModel {
   bannerOk?: boolean;
   bannerText?: string;
   errorText?: string;
+  /** Gráficos matplotlib em PNG (base64). */
+  images?: string[];
 }
 
 export function renderOutputRegion(out: OutputViewModel, engine: EngineKind): string {
@@ -83,6 +85,14 @@ export function renderOutputRegion(out: OutputViewModel, engine: EngineKind): st
       </div>
 
       ${out.stdout ? `<pre class="output-stdout">${escapeHtml(out.stdout)}</pre>` : ''}
+
+      ${(out.images ?? [])
+        .filter((png) => /^[A-Za-z0-9+/=]+$/.test(png))
+        .map(
+          (png, i) =>
+            `<figure class="output-figure"><img src="data:image/png;base64,${png}" alt="Gráfico ${i + 1} desenhado pelo teu código" /></figure>`,
+        )
+        .join('')}
 
       ${
         out.table && out.table.columns.length > 0

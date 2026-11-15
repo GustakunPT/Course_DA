@@ -1669,3 +1669,32 @@ pre,
   color: var(--color-muted);
   line-height: 1.4;
 }
+
+/* Gráficos matplotlib desenhados na bancada */
+.practice-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs);
+  margin-bottom: var(--space-xs);
+}
+
+.practice-switcher .mode-btn[aria-pressed="true"] {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.output-figure {
+  margin: 0;
+  padding: var(--space-xs);
+  background: #fff;
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+}
+
+.output-figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}

@@ -646,7 +646,7 @@ ORDER BY gasto_medio_cliente DESC;`,
         'Comparação de categorias ou cidades: barras horizontais ordenadas (nunca uses gráfico circular com mais de 3 ou 4 fatias!).',
         'Regra da honestidade visual: qualquer gráfico de barras tem obrigatoriamente de começar o eixo no zero (0).',
       ],
-      referenceTitle: 'Guia rápido de escolhe de gráficos',
+      referenceTitle: 'Guia rápido de escolha de gráficos',
       referenceRows: [
         { syntax: 'Série temporal (Jan a Dez)', meaning: 'Gráfico de linha', example: 'Pico em setembro (2 462,82 €)' },
         { syntax: 'Ranking de 15 produtos', meaning: 'Barras horizontais ordenadas do maior ao menor', example: 'Nomes leem-se sem rodar o pescoço' },
@@ -700,6 +700,206 @@ ranking_meses`,
         ],
         correctIndex: 1,
         explanation: 'O olho humano compara comprimentos alinhados com grande precisão, mas falha ao comparar 15 ângulos num gráfico circular.',
+      },
+    },
+    {
+      id: 'bi-07-graficos-matplotlib',
+      code: '07',
+      title: 'Desenhar gráficos honestos com matplotlib',
+      lede: 'Passa da tabela ao gráfico: desenha barras horizontais ordenadas e linhas temporais com matplotlib, com o eixo a começar no zero e um título que diz a conclusão.',
+      analogyTitle: 'A montra da mercearia',
+      analogyBody: 'Uma tabela é o armazém: tem tudo, mas ninguém a lê a passar na rua. O gráfico é a montra: mostra só o essencial, arrumado do mais importante para o menos importante, sem truques de tamanho. Uma montra que corta metade da prateleira para parecer cheia engana o cliente; um eixo que não começa no zero faz o mesmo ao leitor.',
+      concepts: [
+        'fig, ax = plt.subplots() cria a folha (fig) e a área do gráfico (ax). Tudo o que desenhas vai para o ax.',
+        'ax.barh(nomes, valores) desenha barras horizontais; ax.plot(x, y) desenha uma linha.',
+        'Ordena os dados antes de desenhar: em barh a primeira barra fica em baixo, por isso ordena do menor para o maior para o maior ficar no topo.',
+        'Barras começam sempre no zero: ax.set_xlim(left=0) (ou set_ylim(bottom=0) em colunas e linhas de faturação).',
+        'O título deve dizer a conclusão ("A Mercearia vale metade da faturação"), não só o tema ("Faturação por categoria").',
+      ],
+      beginnerSteps: [
+        'Agrupa a faturação por categoria com groupby e ordena com .sort_values() (do menor para o maior).',
+        'Cria fig, ax = plt.subplots(figsize=(7, 4)).',
+        'Desenha com ax.barh(por_categoria.index, por_categoria.values).',
+        'Garante o zero com ax.set_xlim(left=0), escreve o título com ax.set_title(...) e o eixo com ax.set_xlabel("Faturação (€)").',
+      ],
+      proPractice: 'Em relatórios reais o gráfico é guardado com fig.savefig("relatorios/graficos/categorias.png", dpi=150) e colado no PowerPoint ou no README do projeto.',
+      commonPitfall: 'Esquecer de ordenar os dados: as barras ficam por ordem alfabética e o leitor tem de procurar o maior valor com os olhos.',
+      referenceTitle: 'matplotlib essencial para analistas',
+      referenceRows: [
+        { syntax: 'fig, ax = plt.subplots(figsize=(7, 4))', meaning: 'Cria a figura e a área de desenho', example: 'Largura 7 x altura 4 polegadas' },
+        { syntax: 'ax.barh(nomes, valores)', meaning: 'Barras horizontais (rankings)', example: 'Faturação por categoria' },
+        { syntax: 'ax.plot(x, y, marker="o")', meaning: 'Linha temporal com pontos', example: 'Faturação mês a mês' },
+        { syntax: 'ax.set_xlim(left=0) / ax.set_ylim(bottom=0)', meaning: 'Eixo honesto a começar no zero', example: 'Evita exagerar diferenças' },
+        { syntax: 'ax.set_title(...) / ax.set_xlabel(...)', meaning: 'Título com a conclusão e unidade no eixo', example: '"Faturação (€)"' },
+      ],
+      engine: 'python',
+      exampleCode: `import pandas as pd
+import matplotlib.pyplot as plt
+
+vendas = pd.read_csv("dados/vendas_sazonais.csv")
+vendas["mes"] = vendas["data"].str.slice(5, 7)
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+por_mes = vendas.groupby("mes")["sub"].sum()
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.plot(por_mes.index, por_mes.values, marker="o")
+ax.set_ylim(bottom=0)
+ax.set_title("Dezembro quase duplica a faturação de um mês normal")
+ax.set_xlabel("Mês de 2025")
+ax.set_ylabel("Faturação (€)")
+fig.tight_layout()`,
+      pythonChallenge: {
+        description: 'Desenha um gráfico de barras horizontais honesto com a faturação de 2025 (vendas.csv) por categoria de produto: 6 barras ordenadas com a maior no topo, eixo a começar no zero, um título com a conclusão e o eixo X com a unidade "€". Usa as variáveis fig e ax.',
+        starterCode: `import pandas as pd
+import matplotlib.pyplot as plt
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+df = vendas.merge(produtos[["id", "categoria"]], left_on="produto_id", right_on="id")
+
+# 1) Faturação por categoria, ordenada do menor para o maior
+por_categoria = None
+
+# 2) Gráfico: fig, ax = plt.subplots(...), ax.barh(...), eixo no zero, título e rótulo do eixo X
+`,
+        solutionCode: `import pandas as pd
+import matplotlib.pyplot as plt
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+df = vendas.merge(produtos[["id", "categoria"]], left_on="produto_id", right_on="id")
+
+por_categoria = df.groupby("categoria")["sub"].sum().sort_values()
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.barh(por_categoria.index, por_categoria.values)
+ax.set_xlim(left=0)
+ax.set_title("A Mercearia vale mais de metade da faturação")
+ax.set_xlabel("Faturação em 2025 (€)")
+fig.tight_layout()`,
+        checks: [
+          { label: 'Há 6 barras horizontais, uma por categoria', expr: 'len([p for p in ax.patches if p.get_width() > p.get_height()]) == 6', actualExpr: 'len(ax.patches)', hint: 'Usa ax.barh(por_categoria.index, por_categoria.values) com a faturação agrupada por categoria.' },
+          { label: 'As barras estão ordenadas, com a Mercearia (13 879,84 €) no topo', expr: '[round(p.get_width(), 2) for p in ax.patches] == [205.5, 1316.95, 1965.8, 2778.8, 6756.0, 13879.84]', actualExpr: '[round(p.get_width(), 2) for p in ax.patches]', hint: 'Ordena com .sort_values() (do menor para o maior) antes de desenhar: em barh a primeira barra fica em baixo.' },
+          { label: 'O eixo começa no zero', expr: 'ax.get_xlim()[0] <= 0', actualExpr: 'ax.get_xlim()', hint: 'Acrescenta ax.set_xlim(left=0).' },
+          { label: 'Tem título com a conclusão e o eixo X com "€"', expr: 'len(ax.get_title().strip()) >= 15 and "€" in ax.get_xlabel()', actualExpr: '(ax.get_title(), ax.get_xlabel())', hint: 'Usa ax.set_title("...conclusão...") e ax.set_xlabel("Faturação (€)").' },
+        ],
+      },
+      quiz: {
+        question: 'Num gráfico de barras com a faturação de 6 categorias, porque é que o eixo deve começar no zero?',
+        options: [
+          'Porque o matplotlib dá erro se o eixo não começar no zero.',
+          'Porque o comprimento da barra tem de ser proporcional ao valor.',
+          'Porque assim o gráfico fica mais pequeno e cabe no relatório.',
+          'Porque só assim aparecem os valores negativos das devoluções.',
+        ],
+        correctIndex: 1,
+        explanation: 'O olho compara comprimentos. Se o eixo começar em 1 000 €, uma barra de 2 000 € parece o dobro de outra de 1 500 €, quando a diferença é só de um terço.',
+      },
+    },
+    {
+      id: 'bi-08-teste-ab',
+      code: '08',
+      title: 'Diferença real ou acaso? Introdução ao teste A/B',
+      lede: 'Aprende a responder à pergunta mais perigosa de um relatório: "esta diferença é real?". Comparas duas médias, calculas o erro padrão, a estatística t e o p-valor, e decides com um critério fixado antes de olhar para os dados.',
+      analogyTitle: 'Atirar a moeda ao ar na caixa registadora',
+      analogyBody: 'Se atirares uma moeda 10 vezes e saírem 6 caras, ninguém diz que a moeda está viciada: é acaso. Com 1 000 lançamentos e 600 caras, já desconfias. O teste A/B faz esta conta por ti: mede o tamanho da diferença face ao "ruído" natural dos dados. O p-valor responde: se não houvesse diferença nenhuma, quantas vezes veríamos uma diferença tão grande só por acaso?',
+      concepts: [
+        'Hipótese nula (H0): os dois grupos são iguais e a diferença que vês é acaso. O teste tenta reunir provas contra H0.',
+        'Erro padrão da diferença: raiz de (var_A / n_A + var_B / n_B). Mede o ruído esperado na diferença das médias.',
+        'Estatística t = diferença das médias / erro padrão. Quanto mais longe de 0, mais forte a prova.',
+        'Com amostras grandes, p-valor = math.erfc(abs(t) / math.sqrt(2)) (aproximação normal, bilateral).',
+        'Fixa o critério antes de olhar: é habitual usar 5% (p < 0.05). p ≥ 0.05 não prova que os grupos são iguais; só diz que não há provas suficientes.',
+        'Significativo não quer dizer importante: com milhões de linhas, uma diferença de 1 cêntimo pode ter p minúsculo.',
+      ],
+      beginnerSteps: [
+        'Cria a coluna fim_de_semana: pd.to_datetime(df["data"]).dt.day_of_week >= 5 (5 = sábado, 6 = domingo).',
+        'Separa os dois grupos: a = df[df["fim_de_semana"]]["sub"] e b = df[~df["fim_de_semana"]]["sub"].',
+        'Calcula as médias, a diferença (a - b) e o erro padrão com .var() e len().',
+        'Calcula t, o p-valor com math.erfc e decide: significativo = p_valor < 0.05.',
+      ],
+      proPractice: 'Em empresas com testes A/B a sério (preços, campanhas, layout do site) usa-se scipy.stats.ttest_ind(a, b, equal_var=False), que faz estas contas com a distribuição t exata. Aqui fazes à mão para perceber cada peça.',
+      commonPitfall: 'Olhar para a diferença das médias e concluir logo. -0,28 € por linha parece uma tendência, mas pode estar dentro do ruído normal dos dados.',
+      referenceTitle: 'Teste de duas médias (Welch, amostras grandes)',
+      referenceRows: [
+        { syntax: 'a.mean() - b.mean()', meaning: 'Diferença observada', example: 'Fim de semana menos dias úteis' },
+        { syntax: 'math.sqrt(a.var() / len(a) + b.var() / len(b))', meaning: 'Erro padrão da diferença', example: 'O "ruído" esperado' },
+        { syntax: 't = diferenca / erro_padrao', meaning: 'Estatística t', example: '|t| > 1.96 é significativo a 5%' },
+        { syntax: 'math.erfc(abs(t) / math.sqrt(2))', meaning: 'p-valor bilateral (aproximação normal)', example: 't = 1.96 dá p ≈ 0.05' },
+        { syntax: 'p_valor < 0.05', meaning: 'Decisão com critério fixado antes', example: 'True = diferença significativa' },
+      ],
+      engine: 'python',
+      exampleCode: `import math
+import pandas as pd
+
+# Exemplo: dezembro gasta mais por linha do que o resto do ano? (vendas_sazonais.csv)
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+dezembro = df["data"].str.slice(5, 7) == "12"
+
+a = df[dezembro]["sub"]
+b = df[~dezembro]["sub"]
+diferenca = a.mean() - b.mean()
+erro_padrao = math.sqrt(a.var() / len(a) + b.var() / len(b))
+t = diferenca / erro_padrao
+p_valor = math.erfc(abs(t) / math.sqrt(2))
+
+print(f"Dezembro: {a.mean():.2f} € | Resto: {b.mean():.2f} € | diferença {diferenca:.2f} €")
+print(f"t = {t:.2f} | p-valor = {p_valor:.6f} | significativo a 5%? {p_valor < 0.05}")`,
+      pythonChallenge: {
+        description: 'O dono acha que ao fim de semana os clientes gastam menos por linha de venda. Testa em vendas.csv (sub = quantidade * preco): guarda media_fds e media_semana, diferenca (fim de semana menos dias úteis), erro_padrao, estatistica_t, p_valor (aproximação normal com math.erfc) e significativo (True se p_valor < 0.05).',
+        starterCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+df["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5
+
+media_fds = None
+media_semana = None
+diferenca = None
+erro_padrao = None
+estatistica_t = None
+p_valor = None
+significativo = None
+print(diferenca, estatistica_t, p_valor, significativo)`,
+        solutionCode: `import math
+import pandas as pd
+
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+df["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5
+
+a = df[df["fim_de_semana"]]["sub"]
+b = df[~df["fim_de_semana"]]["sub"]
+
+media_fds = a.mean()
+media_semana = b.mean()
+diferenca = media_fds - media_semana
+erro_padrao = math.sqrt(a.var() / len(a) + b.var() / len(b))
+estatistica_t = diferenca / erro_padrao
+p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2))
+significativo = p_valor < 0.05
+print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significativo)`,
+        checks: [
+          { label: 'Médias dos dois grupos (5.13 € e 5.40 €)', expr: 'math.isclose(float(media_fds), 5.1255, abs_tol=0.001) and math.isclose(float(media_semana), 5.4032, abs_tol=0.001)', actualExpr: '(media_fds, media_semana)', hint: 'Filtra com df[df["fim_de_semana"]]["sub"] e df[~df["fim_de_semana"]]["sub"] e usa .mean().' },
+          { label: 'diferenca (fim de semana menos dias úteis: -0.28 €)', expr: 'math.isclose(float(diferenca), -0.2776, abs_tol=0.001)', actualExpr: 'diferenca', hint: 'diferenca = media_fds - media_semana (a ordem importa: dá um valor negativo).' },
+          { label: 'erro_padrao (0.160)', expr: 'math.isclose(float(erro_padrao), 0.1601, abs_tol=0.001)', actualExpr: 'erro_padrao', hint: 'math.sqrt(a.var() / len(a) + b.var() / len(b)).' },
+          { label: 'estatistica_t (-1.73) e p_valor (0.083)', expr: 'math.isclose(float(estatistica_t), -1.734, abs_tol=0.005) and math.isclose(float(p_valor), 0.0829, abs_tol=0.001)', actualExpr: '(estatistica_t, p_valor)', hint: 'estatistica_t = diferenca / erro_padrao e p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2)).' },
+          { label: 'Decisão a 5%: a diferença não é significativa', expr: 'significativo is False or (hasattr(significativo, "item") and significativo.item() is False)', actualExpr: 'significativo', hint: 'significativo = p_valor < 0.05. Com p ≈ 0.083 não há provas suficientes.' },
+        ],
+      },
+      quiz: {
+        question: 'Um teste A/B dá p-valor = 0.083 com o critério de 5%. Qual é a conclusão correta?',
+        options: [
+          'Os dois grupos são iguais: está provado que não há diferença.',
+          'A diferença é real em 91,7% dos casos.',
+          'Não há provas suficientes de que a diferença seja real.',
+          'A diferença é significativa porque o p-valor é baixo.',
+        ],
+        correctIndex: 2,
+        explanation: 'p ≥ 0.05 não prova igualdade; só diz que uma diferença deste tamanho aparece com frequência por acaso. Para decidir com mais confiança, junta mais dados.',
       },
     },
   ],

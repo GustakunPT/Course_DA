@@ -11,6 +11,8 @@ export interface PythonExecutionResult {
   stdout: string;
   table?: { columns: string[]; rows: string[][] };
   checks?: PythonAssertionCheck[];
+  /** Gráficos matplotlib desenhados pelo código, em PNG (base64). */
+  images?: string[];
   elapsedMs: number;
   error?: string;
 }
@@ -110,7 +112,9 @@ export async function runPythonCode(
     pyodide.globals.set('__checks_json__', JSON.stringify(checks ?? []));
 
     const rawJson: string = await pyodide.runPythonAsync(`
-import io, json, math, sys, traceback, warnings
+import io, json, math, os, sys, traceback, warnings
+# Sem janela gráfica no browser: o matplotlib desenha em memória e a bancada mostra o PNG.
+os.environ["MPLBACKEND"] = "AGG"
 
 # O pandas do Pyodide avisa que vai exigir Pyarrow no futuro; para quem aprende é só ruído.
 warnings.filterwarnings("ignore", message=r"(?s).*Pyarrow will become a required dependency")
@@ -195,11 +199,22 @@ finally:
     sys.stdout = _old_out
     sys.stderr = _old_err
 
+_images = []
+if "matplotlib.pyplot" in sys.modules:
+    import base64
+    _plt = sys.modules["matplotlib.pyplot"]
+    for _num in _plt.get_fignums()[:4]:
+        _png = io.BytesIO()
+        _plt.figure(_num).savefig(_png, format="png", dpi=90, bbox_inches="tight")
+        _images.append(base64.b64encode(_png.getvalue()).decode("ascii"))
+    _plt.close("all")
+
 json.dumps({
     "stdout": _buf.getvalue(),
     "error": _err,
     "table": _table,
-    "checks": _check_results
+    "checks": _check_results,
+    "images": _images
 })
 `);
 
@@ -208,6 +223,7 @@ json.dumps({
       stdout: parsed.stdout ?? '',
       table: parsed.table ?? undefined,
       checks: parsed.checks?.length ? parsed.checks : undefined,
+      images: parsed.images?.length ? parsed.images : undefined,
       error: parsed.error ?? undefined,
       elapsedMs: Math.round((performance.now() - start) * 10) / 10,
     };

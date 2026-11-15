@@ -83,7 +83,7 @@ print("Receita estimada:", receita_dia)`,
       title: 'Sintaxe, print() e comentários',
       lede: 'Em Python cada linha é uma instrução direta e a indentação (espaços à esquerda) define os blocos de código.',
       analogyTitle: 'A lista de abertura da loja',
-      analogyBody: 'O Python lê o teu ficheiro de cima para baixo como o funcionário que abre a mercearia: acende as luzes, abre a caixa e imprime o talão de testa. Tudo o que começa por cardinal (#) é uma nota a lápis na margem que o computador ignora.',
+      analogyBody: 'O Python lê o teu ficheiro de cima para baixo como o funcionário que abre a mercearia: acende as luzes, abre a caixa e imprime o talão de teste. Tudo o que começa por cardinal (#) é uma nota a lápis na margem que o computador ignora.',
       concepts: [
         'print() envia texto ou resultados de contas diretamente para o ecrã.',
         'Comentários começam por # e servem para explicar o porquê de uma regra de negócio.',

@@ -18,6 +18,8 @@ export interface SqlChallengeSpec {
 }
 
 export interface PythonChallengeSpec {
+  /** Nome curto do exercício de treino; o desafio principal não precisa. */
+  title?: string;
   description: string;
   starterCode: string;
   solutionCode: string;
@@ -55,6 +57,8 @@ export interface Lesson {
   engine: EngineKind;
   exampleCode: string;
   pythonChallenge?: PythonChallengeSpec;
+  /** Exercícios de treino extra (opcionais): repetem o conceito com outros dados. */
+  practice?: PythonChallengeSpec[];
   sqlChallenge?: SqlChallengeSpec;
   gitChallenge?: GitChallengeSpec;
   quiz: QuizSpec;

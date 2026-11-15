@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 6 trilhas e 47 etapas', () => {
+  it('tem 6 trilhas e 50 etapas', () => {
     expect(allTracks).toHaveLength(6);
-    expect(totalLessonsCount).toBe(47);
+    expect(totalLessonsCount).toBe(50);
   });
 
   it('os ids das etapas são únicos', () => {

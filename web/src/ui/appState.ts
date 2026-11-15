@@ -15,6 +15,10 @@ export interface AppState {
   trackId: string;
   lessonId: string;
   wbTab: WorkbenchTab;
+  /** 0 = desafio principal; 1..n = exercícios de treino da etapa. */
+  practiceIdx: number;
+  /** Treinos resolvidos, por chave "id-da-etapa:n". */
+  practiceDone: Set<string>;
   editorDrafts: Record<string, string>;
   quizSelection: Record<string, number>;
   completedLessons: UserProgressMap;

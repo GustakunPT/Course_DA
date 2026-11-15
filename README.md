@@ -17,13 +17,13 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
-- **6 Trilhas de Analista de Dados (47 etapas do Zero Absoluto ao Nível Profissional):**
-  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly)
+- **6 Trilhas de Analista de Dados (50 etapas do Zero Absoluto ao Nível Profissional):**
+  1. **Python do Zero Absoluto à Caixa Registadora** (inclui Etapa 00 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 01 a 09 têm 2 exercícios de treino extra cada)
   2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser)
   4. **Git, GitHub e Portfólio** (Simulador interativo de terminal Git)
-  5. **Estatística Descritiva, Excel/DAX e Power BI** (Média vs Mediana, IQR/Outliers, Curva ABC, Star Schema)
-  6. **Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista Técnica** (Arquitetura Medalhão Bronze/Silver/Gold, Data Contracts/Testes de Qualidade, Retenção/Coortes/LTV, Performance SQL & Índices, Desafio Clássico de Entrevista `RANK`/`LAG` e Caso Executivo 360º)
+  5. **Estatística Descritiva, Excel/DAX e Power BI** (Média vs Mediana, IQR/Outliers, Curva ABC, Star Schema, gráficos matplotlib desenhados no browser e teste A/B)
+  6. **Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista Técnica** (Arquitetura Medalhão Bronze/Silver/Gold, Data Contracts/Testes de Qualidade, Retenção/Coortes/LTV, Performance SQL & Índices, Desafio Clássico de Entrevista `RANK`/`LAG` Caso Executivo 360º e Projeto Final guiado: SQL + pandas + gráfico + recomendação)
 - **Painéis 100% Redimensionáveis na Página:** divisórias verticais e horizontais arrastáveis (índice lateral, lição vs editor e altura do editor vs consola), modos rápidos (*Recolher índice*, *Foco leitura*, *Divisão 50/50*, *Foco código* e *Repor painéis*) com memória no navegador.
 - **Explorador Analítico CSV & Auditoria de Qualidade** (`26 902,89 €` em 5 078 vendas, filtros por cidade e categoria e diagnóstico de `vendas_sujas.csv`).
 - **Referência Rápida W3** com pesquisa instantânea e botão *Testar na bancada*.
@@ -90,7 +90,7 @@ Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os
 ```bash
 pip install -r requirements-dev.txt
 pytest tests                       # Python: gerador, auditoria e gráficos
-cd web && npm test                 # Web: motores, API de sync e as 47 etapas
+cd web && npm test                 # Web: motores, API de sync e as 50 etapas e os treinos
 ```
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa

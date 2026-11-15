@@ -1,6 +1,6 @@
 import './styles/app.css';
 import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
-import type { EngineKind, Lesson, Track } from './data/types';
+import type { EngineKind, Lesson, PythonChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
 import { runPythonCode } from './engines/pythonEngine';
@@ -44,6 +44,8 @@ const state: AppState = {
   trackId: allTracks[0].id,
   lessonId: allTracks[0].lessons[0].id,
   wbTab: 'challenge',
+  practiceIdx: 0,
+  practiceDone: loadPracticeDone(),
   editorDrafts: loadSavedDrafts(),
   quizSelection: loadSavedQuizzes(),
   completedLessons: loadSavedProgress(),
@@ -85,7 +87,33 @@ function currentLesson(): Lesson {
   return track.lessons.find((l) => l.id === state.lessonId) ?? track.lessons[0];
 }
 
+const PRACTICE_KEY = 'mercearia-treinos-v1';
+
+function loadPracticeDone(): Set<string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PRACTICE_KEY) ?? '[]');
+    return new Set(Array.isArray(raw) ? raw.filter((x) => typeof x === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function savePracticeDone(): void {
+  try {
+    localStorage.setItem(PRACTICE_KEY, JSON.stringify([...state.practiceDone]));
+  } catch {
+    // Sem localStorage (modo privado): o treino fica só nesta sessão.
+  }
+}
+
+/** Desafio Python ativo na bancada: o principal ou um dos treinos. */
+function activePythonChallenge(lesson: Lesson): PythonChallengeSpec | undefined {
+  if (state.practiceIdx > 0) return lesson.practice?.[state.practiceIdx - 1] ?? lesson.pythonChallenge;
+  return lesson.pythonChallenge;
+}
+
 function draftKey(lesson: Lesson, tab: WorkbenchTab): string {
+  if (tab === 'challenge' && state.practiceIdx > 0) return `${lesson.id}:treino${state.practiceIdx}`;
   return `${lesson.id}:${tab}`;
 }
 
@@ -96,7 +124,8 @@ function defaultEditorCode(lesson: Lesson, tab: WorkbenchTab): string {
   if (tab === 'example') {
     return lesson.exampleCode;
   }
-  if (lesson.pythonChallenge) return lesson.pythonChallenge.starterCode;
+  const py = activePythonChallenge(lesson);
+  if (py) return py.starterCode;
   if (lesson.sqlChallenge) return lesson.sqlChallenge.starterSql;
   if (lesson.gitChallenge) return lesson.gitChallenge.starterCommands;
   return lesson.exampleCode;
@@ -223,6 +252,19 @@ function scheduleCloudSync(): void {
   }, 1200);
 }
 
+function renderPracticeSwitcher(lesson: Lesson): string {
+  const treinos = lesson.practice ?? [];
+  if (!treinos.length) return '';
+  const feito = (i: number) =>
+    i === 0 ? Boolean(state.completedLessons[lesson.id]) : state.practiceDone.has(`${lesson.id}:${i}`);
+  const botoes = [lesson.pythonChallenge, ...treinos].map((ch, i) => {
+    const nome = i === 0 ? 'Desafio' : `Treino ${i}`;
+    const dica = i === 0 ? 'Desafio principal da etapa (conta para o progresso)' : ch?.title ?? nome;
+    return `<button type="button" class="mode-btn" aria-pressed="${state.practiceIdx === i}" data-practice-idx="${i}" title="${escapeHtml(dica)}">${nome}${feito(i) ? ' ✓' : ''}</button>`;
+  });
+  return `<div class="practice-switcher" role="group" aria-label="Desafio principal e exercícios de treino">${botoes.join('')}</div>`;
+}
+
 function renderAcademyWorkspace(): string {
   const track = currentTrack();
   const lesson = currentLesson();
@@ -239,7 +281,7 @@ function renderAcademyWorkspace(): string {
       ? 'Consola SQLite aberta com todas as tabelas da Mercearia: produtos (15), clientes (120), vendas (5 078) e vendas_sujas (12).'
       : state.wbTab === 'example'
         ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
-        : lesson.pythonChallenge?.description ??
+        : activePythonChallenge(lesson)?.description ??
           lesson.sqlChallenge?.description ??
           lesson.gitChallenge?.description ??
           'Execute o código abaixo para validar esta etapa.';
@@ -555,7 +597,16 @@ function renderAcademyWorkspace(): string {
         </div>
 
         <div class="challenge-prompt">
-          <strong>${state.wbTab === 'challenge' ? 'Enunciado do desafio' : state.wbTab === 'example' ? 'Laboratório Experimenta' : 'Consulta SQL livre'}</strong>
+          ${state.wbTab === 'challenge' ? renderPracticeSwitcher(lesson) : ''}
+          <strong>${
+            state.wbTab === 'challenge'
+              ? state.practiceIdx > 0
+                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? '')}`
+                : 'Enunciado do desafio'
+              : state.wbTab === 'example'
+                ? 'Laboratório Experimenta'
+                : 'Consulta SQL livre'
+          }</strong>
           <p>${escapeHtml(promptDescription)}</p>
         </div>
 
@@ -635,7 +686,7 @@ function renderAcademyWorkspace(): string {
                 const hint1 =
                   lesson.sqlChallenge?.hint ??
                   lesson.gitChallenge?.hint ??
-                  lesson.pythonChallenge?.checks[0]?.hint ??
+                  activePythonChallenge(lesson)?.checks[0]?.hint ??
                   lesson.beginnerSteps?.[0] ??
                   'Revê a sintaxe na tabela de referência à esquerda.';
                 const hint2 =
@@ -871,7 +922,8 @@ async function executeWorkbench(): Promise<void> {
     return;
   }
 
-  const pyChecks = state.wbTab === 'challenge' && lesson.pythonChallenge ? lesson.pythonChallenge.checks : undefined;
+  const pyChallenge = state.wbTab === 'challenge' ? activePythonChallenge(lesson) : undefined;
+  const pyChecks = pyChallenge?.checks;
   const pyRes = await runPythonCode(code, pyChecks, (statusMsg) => {
     state.output = { kind: 'loading', statusMessage: statusMsg };
     const statusEl = document.querySelector('.output-panel .measured');
@@ -889,7 +941,10 @@ async function executeWorkbench(): Promise<void> {
   }
 
   const allPassed = pyRes.checks ? pyRes.checks.every((c) => c.passed) : undefined;
-  if (allPassed) {
+  if (allPassed && state.practiceIdx > 0) {
+    state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
+    savePracticeDone();
+  } else if (allPassed) {
     markLessonCompleted(lesson);
   }
 
@@ -898,11 +953,14 @@ async function executeWorkbench(): Promise<void> {
     elapsedMs: pyRes.elapsedMs,
     stdout: pyRes.stdout,
     table: pyRes.table,
+    images: pyRes.images,
     checks: pyRes.checks,
     bannerOk: allPassed,
     bannerText:
       allPassed === true
-        ? 'Todos os testes passaram!'
+        ? state.practiceIdx > 0
+          ? 'Treino resolvido!'
+          : 'Todos os testes passaram!'
         : allPassed === false
           ? `${pyRes.checks!.filter((c) => c.passed).length}/${pyRes.checks!.length} verificações certas`
           : 'Código Python executado',
@@ -1001,6 +1059,7 @@ function attachDomListeners(): void {
         state.lessonId = tr.lessons[0].id;
       }
       state.wbTab = 'challenge';
+      state.practiceIdx = 0;
       state.output = { kind: 'empty' };
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
@@ -1021,8 +1080,19 @@ function attachDomListeners(): void {
       if (!lid) return;
       state.lessonId = lid;
       state.wbTab = 'challenge';
+      state.practiceIdx = 0;
       state.output = { kind: 'empty' };
       state.sidebarOpenMobile = false;
+      state.confirmSolutionLessonId = null;
+      state.hintLevel = 0;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-practice-idx]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.practiceIdx = Number(btn.dataset.practiceIdx) || 0;
+      state.output = { kind: 'empty' };
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
       renderApp();
@@ -1209,13 +1279,13 @@ function attachDomListeners(): void {
       } else if (act === 'apply-solution') {
         const l = currentLesson();
         const sol =
-          l.pythonChallenge?.solutionCode ??
+          activePythonChallenge(l)?.solutionCode ??
           l.sqlChallenge?.solutionSql ??
           l.gitChallenge?.solutionCommands ??
           l.exampleCode;
         state.editorDrafts[draftKey(l, 'challenge')] = sol;
         saveDrafts(state.editorDrafts, true);
-        state.helpedInSession.add(l.id);
+        if (state.practiceIdx === 0) state.helpedInSession.add(l.id);
         state.confirmSolutionLessonId = null;
         renderApp();
       } else if (act === 'open-progress-modal') {
