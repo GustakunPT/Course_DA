@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 7 trilhas e 65 etapas', () => {
+  it('tem 7 trilhas e 67 etapas', () => {
     expect(allTracks).toHaveLength(7);
-    expect(totalLessonsCount).toBe(65);
+    expect(totalLessonsCount).toBe(67);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
@@ -97,7 +97,7 @@ describe('soluções SQL passam na correção', () => {
 const treinosSql = todas.flatMap((l) => (l.practiceSql ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
 describe('treinos SQL', () => {
   it('cada etapa de SQL tem pelo menos um treino e a sql-10 treina o RFM', () => {
-    for (const l of sqlLessons.filter((x) => x.trilha === 'sql')) expect(l.practiceSql?.length ?? 0, l.id).toBeGreaterThanOrEqual(1);
+    for (const l of sqlLessons.filter((x) => x.trilha === 'sql' && x.id !== 'sql-11-revisao')) expect(l.practiceSql?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
     expect(todas.find((l) => l.id === 'sql-10-medias-moveis-rfm')!.practiceSql!.map((t) => t.title).join(' ')).toContain('RFM');
   });
 
@@ -126,8 +126,8 @@ describe('sql-02 recusa respostas incompletas', () => {
 const gitLessons = todas.filter((l) => l.gitChallenge);
 const treinosGit = todas.flatMap((l) => (l.practiceGit ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
 describe('treinos Git', () => {
-  it('cada etapa Git tem um treino', () => {
-    expect(treinosGit).toHaveLength(5);
+  it('cada etapa Git tem dois treinos', () => {
+    expect(treinosGit).toHaveLength(10);
   });
 
   it.each(treinosGit)('%s: a solução passa e o código inicial não', (_nome, ch) => {

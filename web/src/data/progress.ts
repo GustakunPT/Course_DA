@@ -237,7 +237,7 @@ export function generatePortfolioMarkdown(
   tracks: Track[],
 ): string {
   const lines: string[] = [
-    '# Portfólio de Análise de Dados — Mercearia do Bairro',
+    '# Portefólio de Análise de Dados — Mercearia do Bairro',
     '',
     `*Relatório gerado em ${new Date().toLocaleDateString('pt-PT')} com as soluções desenvolvidas na Academia Interativa.*`,
     '',

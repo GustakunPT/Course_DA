@@ -269,7 +269,7 @@ LIMIT 3;`,
       ],
       referenceTitle: 'Pipeline de filtragem em SQL',
       referenceRows: [
-        { syntax: 'WHERE data >= "2025-07-01"', meaning: 'Filtra linhas brutas antes de agrupar', example: 'Só 2.º semestre' },
+        { syntax: "WHERE data >= '2025-07-01'", meaning: 'Filtra linhas brutas antes de agrupar', example: 'Só 2.º semestre' },
         { syntax: 'GROUP BY produto', meaning: 'Agrega linhas por chave', example: 'Um grupo por artigo' },
         { syntax: 'HAVING SUM(quantidade) > 850', meaning: 'Filtra os grupos pelo agregado', example: 'Artigos de alta rotação' },
       ],
@@ -628,7 +628,7 @@ ORDER BY preco DESC;`,
     {
       id: 'sql-10-medias-moveis-rfm',
       code: '10',
-      title: 'Médias Móveis (ROWS BETWEEN) e Matriz RFM de Clientes',
+      title: 'Médias móveis (ROWS BETWEEN) e matriz RFM de clientes',
       lede: 'Calcula médias móveis de 3 meses em SQL usando frames de janela no desafio e, nos dois treinos, constrói e segmenta a tabela RFM (Recência, Frequência, Valor Monetário).',
       analogyTitle: 'Suavizar os altos e baixos da caixa e classificar a carteira de clientes',
       analogyBody: 'Uma média móvel de 3 meses junta o mês atual aos 2 meses anteriores para mostrar a tendência limpa sem o ruído de uma semana atípica. Já o RFM mede para cada cliente: quando veio pela última vez (Recência), quantas vezes veio (Frequência) e quanto gastou (Monetário).',
@@ -717,6 +717,102 @@ ORDER BY mes;`,
         ],
         correctIndex: 1,
         explanation: '6 anteriores + 1 atual = janela móvel exata de 7 dias (1 semana completa).',
+      },
+    },
+    {
+      id: 'sql-11-revisao',
+      code: '11',
+      title: 'Revisão geral: o relatório por cidade',
+      lede: 'O dono quer saber, cidade a cidade, quantos clientes compraram, quanto faturou cada cidade e quanto vale em média cada cliente. Respondes com uma só query que junta quase tudo o que aprendeste na trilha.',
+      analogyTitle: 'A reunião de segunda-feira',
+      analogyBody: 'Até aqui cada etapa treinava uma peça: filtrar, agrupar, juntar tabelas, classificar. Num pedido real as peças vêm todas juntas. Antes de escrever, separa a pergunta em passos: de onde vêm os dados, como se juntam, por que coluna se agrupa, que grupos ficam de fora e como se ordena.',
+      beginnerSteps: [
+        'FROM vendas v JOIN clientes c ON c.id = v.cliente_id: junta a cidade a cada venda.',
+        'GROUP BY c.cidade: uma linha por cidade.',
+        'COUNT(DISTINCT v.cliente_id) conta clientes, não vendas; ROUND(SUM(v.quantidade * v.preco), 2) dá a faturação.',
+        'HAVING filtra as cidades pelo número de clientes; CASE WHEN classifica cada cidade.',
+        'ORDER BY faturacao DESC põe a cidade mais forte em cima.',
+      ],
+      concepts: [
+        'A ordem de escrita é SELECT, FROM, JOIN, WHERE, GROUP BY, HAVING, ORDER BY; a ordem em que o motor executa começa no FROM e acaba no ORDER BY.',
+        'COUNT(*) conta linhas (vendas) e COUNT(DISTINCT cliente_id) conta clientes diferentes. Confundir os dois é um dos erros mais comuns em relatórios.',
+        'Um valor médio por cliente calcula-se como faturação total a dividir pelo número de clientes, não com AVG do subtotal (que daria o valor médio por venda).',
+        'O CASE WHEN pode usar agregações: CASE WHEN SUM(...) >= 4500 THEN \'Alta\' ELSE \'Normal\' END classifica cada grupo.',
+        'Escreve a query por camadas e corre-a a cada passo: primeiro o JOIN com LIMIT 5, depois o GROUP BY, depois o HAVING. Assim sabes onde está o erro quando ele aparece.',
+      ],
+      proPractice: 'Num relatório para a direção, cada número precisa de uma definição clara. "Clientes" quer dizer clientes que compraram no período, e isso deve estar escrito ao lado da tabela.',
+      commonPitfall: 'Usar COUNT(*) para contar clientes: dá o número de vendas, e uma cidade com poucos clientes muito assíduos parece maior do que é.',
+      referenceTitle: 'As peças da query, por ordem de execução',
+      referenceRows: [
+        { syntax: 'FROM vendas v JOIN clientes c ON c.id = v.cliente_id', meaning: 'Junta as tabelas', example: 'Cada venda ganha a cidade do cliente' },
+        { syntax: 'WHERE v.data >= \'2025-07-01\'', meaning: 'Filtra linhas antes de agrupar', example: 'Só o 2.º semestre' },
+        { syntax: 'GROUP BY c.cidade', meaning: 'Uma linha por cidade', example: '6 cidades' },
+        { syntax: 'HAVING COUNT(DISTINCT v.cliente_id) >= 15', meaning: 'Filtra grupos', example: 'Tira cidades com poucos clientes' },
+        { syntax: 'ORDER BY faturacao DESC', meaning: 'Ordena o resultado final', example: 'A maior em cima' },
+      ],
+      engine: 'sql',
+      exampleCode: `-- Primeira camada: juntar e espreitar antes de agrupar
+SELECT v.data, c.nome, c.cidade, v.produto, v.quantidade * v.preco AS subtotal
+FROM vendas v
+JOIN clientes c ON c.id = v.cliente_id
+LIMIT 5;`,
+      sqlChallenge: {
+        description: 'Mostra, por cidade: cidade, clientes (clientes diferentes que compraram), faturacao (arredondada a 2 casas), valor_por_cliente (faturacao / clientes, 2 casas) e escalao (\'Alta\' se a faturação for 4500 € ou mais, \'Normal\' nos outros casos). Deixa de fora as cidades com menos de 15 clientes e ordena por faturacao, da maior para a menor.',
+        starterSql: `SELECT
+  c.cidade,
+  COUNT(*) AS clientes,
+  ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao
+FROM vendas v
+JOIN clientes c ON c.id = v.cliente_id
+GROUP BY c.cidade;`,
+        solutionSql: `SELECT
+  c.cidade,
+  COUNT(DISTINCT v.cliente_id) AS clientes,
+  ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao,
+  ROUND(SUM(v.quantidade * v.preco) / COUNT(DISTINCT v.cliente_id), 2) AS valor_por_cliente,
+  CASE WHEN SUM(v.quantidade * v.preco) >= 4500 THEN 'Alta' ELSE 'Normal' END AS escalao
+FROM vendas v
+JOIN clientes c ON c.id = v.cliente_id
+GROUP BY c.cidade
+HAVING COUNT(DISTINCT v.cliente_id) >= 15
+ORDER BY faturacao DESC;`,
+        hint: 'Conta clientes com COUNT(DISTINCT v.cliente_id), filtra com HAVING COUNT(DISTINCT v.cliente_id) >= 15 e classifica com CASE WHEN SUM(v.quantidade * v.preco) >= 4500 THEN \'Alta\' ELSE \'Normal\' END.',
+        validate: (cols, rows) => {
+          const col = (nome: string) => cols.indexOf(nome);
+          const [iC, iN, iF, iV, iE] = ['cidade', 'clientes', 'faturacao', 'valor_por_cliente', 'escalao'].map(col);
+          if ([iC, iN, iF, iV, iE].some((i) => i < 0)) {
+            return { passed: false, message: 'Faltam colunas: o resultado deve ter cidade, clientes, faturacao, valor_por_cliente e escalao.' };
+          }
+          const linha = (cidade: string) => rows.find((r) => r[iC] === cidade);
+          const lisboa = linha('Lisboa');
+          const braga = linha('Braga');
+          const porto = linha('Porto');
+          if (rows.length !== 5 || linha('Maia')) {
+            return { passed: false, message: `Devem ficar 5 cidades (a Maia, com 10 clientes, sai no HAVING). Obtive ${rows.length}.` };
+          }
+          if (!lisboa || Number(lisboa[iN]) !== 26) {
+            return { passed: false, message: 'Lisboa deve ter 26 clientes. Conta clientes diferentes com COUNT(DISTINCT v.cliente_id), não vendas.' };
+          }
+          const ordenado = rows.every((r, i) => i === 0 || Number(rows[i - 1][iF]) >= Number(r[iF]));
+          const ok =
+            ordenado &&
+            rows[0][iC] === 'Lisboa' &&
+            Math.abs(Number(lisboa[iF]) - 5885.34) < 0.01 &&
+            !!braga && Math.abs(Number(braga[iV]) - 254.18) < 0.01 &&
+            braga[iE] === 'Alta' && !!porto && porto[iE] === 'Normal';
+          return {
+            passed: ok,
+            message: ok
+              ? 'Certo: Lisboa lidera com 5 885,34 €, mas é Braga que tem o maior valor por cliente (254,18 €). Porto e Matosinhos ficam abaixo dos 4 500 €.'
+              : 'Confirma a ordem (faturacao DESC), o valor_por_cliente (faturação / clientes) e o CASE com o limite de 4500.',
+          };
+        },
+      },
+      quiz: {
+        question: 'Uma cidade tem 300 vendas feitas por 20 clientes. O que dá COUNT(*) e o que dá COUNT(DISTINCT cliente_id) para essa cidade?',
+        options: ['20 e 300', '300 e 20', '300 nos dois casos', '20 nos dois casos'],
+        correctIndex: 1,
+        explanation: 'COUNT(*) conta linhas, ou seja, vendas (300). COUNT(DISTINCT cliente_id) conta clientes diferentes (20).',
       },
     },
   ],

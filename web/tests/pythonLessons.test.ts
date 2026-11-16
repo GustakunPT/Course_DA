@@ -104,6 +104,18 @@ produtos_caros = ["Azeite", "Café", "Queijo"]`],
     120_000,
   );
 
+  const demos = allTracks.flatMap((t) => t.lessons).filter((l) => l.errorDemo);
+  it('as etapas 02 a 10 da trilha Python têm explicação longa e um erro típico', () => {
+    expect(demos.map((l) => l.id)).toHaveLength(9);
+    for (const l of demos) expect(l.explained!.join(' ').length, l.id).toBeGreaterThan(600);
+  });
+
+  it.each(demos.map((l) => [l.id, l.errorDemo!] as const))('%s: o erro típico dá a mensagem anunciada', async (_id, demo) => {
+    const res = await runPythonCode(demo.code, []);
+    expect(res.error).toBeDefined();
+    expect(res.error).toContain(demo.message);
+  }, 120_000);
+
   it.each(cheatsheets.filter((c) => c.tryEngine === 'python').map((c) => [c.topic, c.trySnippet!] as const))(
     'Referência "%s": o exemplo Python corre sem erros',
     async (_topico, codigo) => {

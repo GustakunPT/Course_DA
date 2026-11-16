@@ -10,7 +10,7 @@ export const pythonTrack: Track = {
     {
       id: 'py-00-pensamento',
       code: '01',
-      title: 'Ponto Zero: como o computador pensa e o que faz um Analista',
+      title: 'Ponto zero: como o computador pensa e o que faz um analista',
       lede: 'Nunca programaste na vida? Começa aqui. Programar não é saber matemática difícil: é dar instruções claras, uma por linha, a um ajudante muito rápido mas literal.',
       analogyTitle: 'Ensinar um estagiário no primeiro dia na Mercearia',
       analogyBody: 'Se disseres a uma pessoa "faz as contas do dia", ela percebe. Mas um computador precisa da receita exata: 1) abre o caderno de vendas, 2) multiplica a quantidade pelo preço de cada linha, 3) soma tudo, 4) mostra o total no ecrã. Essa sequência de passos chama-se algoritmo.',
@@ -277,7 +277,7 @@ print(mensagem_divisao)`,
       analogyBody: 'As maçãs descem por uma calha com cancelas por tamanho: se passa na primeira abertura cai logo no cesto pequeno; só o que não caiu segue para o elif seguinte, e o resto acaba no else.',
       concepts: [
         'Usa == para comparar igualdade (dois sinais de igual) e != para diferente.',
-        'Combine regras de negócio com and (ambas verdadeiras) e or (basta uma verdadeira).',
+        'Combina regras de negócio com and (ambas verdadeiras) e or (basta uma verdadeira).',
         'Assim que um ramo if ou elif é verdadeiro, o Python ignora todos os restantes ramos desse bloco.',
       ],
       referenceTitle: 'Operadores de comparação e lógica',

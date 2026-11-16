@@ -1,3 +1,5 @@
+import { moreQuiz } from './moreQuiz';
+import { pythonExplained } from './pythonExplained';
 import { pythonTrack } from './trackPython';
 import { sqlTrack } from './trackSql';
 import { pandasTrack } from './trackPandas';
@@ -14,7 +16,11 @@ import type { Lesson, PythonChallengeSpec, Track } from './types';
 // Os exercícios de treino ficam num ficheiro à parte e juntam-se aqui à etapa respetiva.
 const pythonTrackComTreinos: Track = {
   ...pythonTrack,
-  lessons: pythonTrack.lessons.map((l) => (pythonPractice[l.id] ? { ...l, practice: pythonPractice[l.id] } : l)),
+  lessons: pythonTrack.lessons.map((l) => ({
+    ...l,
+    ...pythonExplained[l.id],
+    ...(pythonPractice[l.id] ? { practice: pythonPractice[l.id] } : {}),
+  })),
 };
 
 const sqlTrackComTreinos: Track = {
@@ -99,7 +105,7 @@ export const allTracks: Track[] = enrichTracksWithPedagogy([
   visualBiTrack,
   estatisticaTrack,
   careerProComTreinos,
-]);
+]).map((t) => ({ ...t, lessons: t.lessons.map((l) => (moreQuiz[l.id] ? { ...l, moreQuiz: moreQuiz[l.id] } : l)) }));
 
 export { cheatsheets };
 

@@ -429,4 +429,66 @@ print(esperados)`,
       ],
     },
   ],
+  'pd-09-revisao': [
+    {
+      title: 'Valor por cliente em cada cidade',
+      description: 'Junta dados/vendas.csv a dados/clientes.csv (cliente_id ↔ id) para ter a cidade. Em por_cidade guarda, por cidade, faturacao (soma do subtotal) e clientes (clientes diferentes, com "nunique"), e a coluna valor_por_cliente = faturacao / clientes. Em cidade_maior_valor guarda a cidade com maior valor_por_cliente.',
+      starterCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+clientes = pd.read_csv("dados/clientes.csv")
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+
+por_cidade = None
+cidade_maior_valor = None
+print(por_cidade)
+print(cidade_maior_valor)`,
+      solutionCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+clientes = pd.read_csv("dados/clientes.csv")
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+
+juntas = pd.merge(vendas, clientes, left_on="cliente_id", right_on="id")
+por_cidade = juntas.groupby("cidade").agg(faturacao=("subtotal", "sum"), clientes=("cliente_id", "nunique"))
+por_cidade["valor_por_cliente"] = por_cidade["faturacao"] / por_cidade["clientes"]
+cidade_maior_valor = por_cidade["valor_por_cliente"].idxmax()
+print(por_cidade.round(2))
+print(cidade_maior_valor)`,
+      checks: [
+        { label: 'por_cidade tem 6 cidades e Lisboa com 26 clientes', expr: 'hasattr(por_cidade, "loc") and len(por_cidade) == 6 and int(por_cidade.loc["Lisboa", "clientes"]) == 26', actualExpr: 'por_cidade', hint: 'Conta clientes com ("cliente_id", "nunique"): "count" contaria vendas.' },
+        { label: 'cidade_maior_valor ("Braga", 254,18 € por cliente)', expr: 'cidade_maior_valor == "Braga" and abs(float(por_cidade.loc["Braga", "valor_por_cliente"]) - 254.18) < 0.01', actualExpr: 'cidade_maior_valor', hint: 'por_cidade["valor_por_cliente"].idxmax()' },
+        { label: 'Funciona com outros clientes', expr: 'correr_com(clientes=pd.DataFrame({"id": list(range(1, 121)), "nome": ["x"] * 120, "cidade": ["Faro"] * 60 + ["Évora"] * 60}))["cidade_maior_valor"] in ("Faro", "Évora")', actualExpr: 'correr_com(clientes=pd.DataFrame({"id": list(range(1, 121)), "nome": ["x"] * 120, "cidade": ["Faro"] * 60 + ["Évora"] * 60})).get("cidade_maior_valor")', hint: 'Não escrevas "Braga" à mão: usa .idxmax().' },
+      ],
+    },
+    {
+      title: 'O melhor mês de cada categoria',
+      description: 'Junta a categoria às vendas (dados/produtos.csv) e cria mes = data.str.slice(5, 7). Em matriz_mes guarda a tabela dinâmica categoria × mês com a soma do subtotal. Em melhor_mes guarda, para cada categoria, o mês com maior faturação (usa .idxmax(axis=1)).',
+      starterCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+vendas["mes"] = vendas["data"].str.slice(5, 7)
+
+matriz_mes = None
+melhor_mes = None
+print(melhor_mes)`,
+      solutionCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+vendas["mes"] = vendas["data"].str.slice(5, 7)
+
+juntas = pd.merge(vendas, produtos[["id", "categoria"]], left_on="produto_id", right_on="id")
+matriz_mes = juntas.pivot_table(index="categoria", columns="mes", values="subtotal", aggfunc="sum")
+melhor_mes = matriz_mes.idxmax(axis=1)
+print(melhor_mes)`,
+      checks: [
+        { label: 'matriz_mes tem 6 categorias × 12 meses', expr: 'hasattr(matriz_mes, "shape") and tuple(matriz_mes.shape) == (6, 12)', actualExpr: 'getattr(matriz_mes, "shape", matriz_mes)', hint: 'juntas.pivot_table(index="categoria", columns="mes", values="subtotal", aggfunc="sum")' },
+        { label: 'Mercearia e Frutaria em dezembro, Bebidas em julho', expr: 'melhor_mes is not None and melhor_mes["Mercearia"] == "12" and melhor_mes["Frutaria"] == "12" and melhor_mes["Bebidas"] == "07" and melhor_mes["Charcutaria"] == "09"', actualExpr: 'melhor_mes', hint: 'idxmax(axis=1) procura o maior valor em cada linha e devolve o nome da coluna.' },
+      ],
+    },
+  ],
 };

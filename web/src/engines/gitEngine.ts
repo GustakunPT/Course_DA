@@ -82,11 +82,11 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
       continue;
     }
     if (!cmd.startsWith('git ')) {
-      logs.push(`$ ${cmd}\nComando simulado desconhecido. Experimente: pwd, ls, cat .gitignore, git init, git status, git add, git commit, git switch, git merge, git log, git remote, git push.`);
+      logs.push(`$ ${cmd}\nComando simulado desconhecido. Experimenta: pwd, ls, cat .gitignore, git init, git status, git add, git commit, git switch, git merge, git log, git remote, git push.`);
       continue;
     }
     if (!s.initialized) {
-      logs.push(`$ ${cmd}\nfatal: não existe repositório git aqui. Corra primeiro: git init`);
+      logs.push(`$ ${cmd}\nfatal: não existe repositório git aqui. Corre primeiro: git init`);
       continue;
     }
 
@@ -134,9 +134,9 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
     } else if (cmd.startsWith('git commit')) {
       const mMatch = /-m\s+["']([^"']+)["']/.exec(cmd);
       if (!mMatch) {
-        logs.push(`$ ${cmd}\nErro: indique uma mensagem clara com -m "Mensagem no presente"`);
+        logs.push(`$ ${cmd}\nErro: indica uma mensagem clara com -m "Mensagem no presente"`);
       } else if (!s.staged.length) {
-        logs.push(`$ ${cmd}\nNada preparado para commit. Use git add primeiro.`);
+        logs.push(`$ ${cmd}\nNada preparado para commit. Usa git add primeiro.`);
       } else {
         const hash = Math.abs(
           (s.commits.length + 1) * 7919 + mMatch[1].split('').reduce((a, c) => a + c.charCodeAt(0), 0),
@@ -164,7 +164,7 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
     } else if (cmd.startsWith('git switch ') || cmd.startsWith('git checkout ')) {
       const name = cmd.split(/\s+/).pop()!;
       if (!s.branches.includes(name)) {
-        logs.push(`$ ${cmd}\nfatal: ramo '${name}' não existe. Use git switch -c ${name} para criar.`);
+        logs.push(`$ ${cmd}\nfatal: ramo '${name}' não existe. Usa git switch -c ${name} para criar.`);
       } else {
         s.currentBranch = name;
         logs.push(`$ ${cmd}\nMudou para o ramo '${name}'.`);
@@ -190,7 +190,7 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
         s.remoteUrl = 'https://github.com/analista/mercearia-do-bairro.git';
       }
       if (!s.commits.length) {
-        logs.push(`$ ${cmd}\nerro: faça pelo menos um commit antes de enviar para o GitHub.`);
+        logs.push(`$ ${cmd}\nerro: faz pelo menos um commit antes de enviar para o GitHub.`);
       } else {
         if (!s.pushedBranches.includes(s.currentBranch)) s.pushedBranches.push(s.currentBranch);
         logs.push(`$ ${cmd}\nA enviar objetos: 100% concluído.\nPara ${s.remoteUrl}\n * [new branch] ${s.currentBranch} -> ${s.currentBranch}`);

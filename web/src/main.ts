@@ -80,6 +80,58 @@ const state: AppState = {
 
 applyTheme(state.theme);
 
+
+/** Chave onde fica guardada a resposta à pergunta n (0 = a pergunta principal, que conta para o progresso). */
+function quizKey(lessonId: string, n: number): string {
+  return n === 0 ? lessonId : `${lessonId}#${n + 1}`;
+}
+
+function renderQuizzes(lesson: Lesson): string {
+  const perguntas = [lesson.quiz, ...(lesson.moreQuiz ?? [])];
+  const varias = perguntas.length > 1;
+  const certas = perguntas.filter((q, n) => state.quizSelection[quizKey(lesson.id, n)] === q.correctIndex).length;
+  return `
+        <div class="quiz-well" role="group" aria-labelledby="quiz-title">
+          <h3 id="quiz-title">Verificação rápida de conceito${varias ? ` <span class="quiz-score">${certas} de ${perguntas.length} certas</span>` : ''}</h3>
+          ${perguntas
+            .map((q, n) => {
+              const key = quizKey(lesson.id, n);
+              const sel = state.quizSelection[key];
+              return `
+          <div class="quiz-item">
+            <p>${varias ? `<strong>${n + 1}.</strong> ` : ''}${escapeHtml(q.question)}</p>
+            <div class="quiz-options">
+              ${quizDisplayOrder(key, q.options.length)
+                .map((idx) => {
+                  let cls = '';
+                  if (sel !== undefined) {
+                    if (idx === q.correctIndex) cls = 'is-correct';
+                    else if (idx === sel) cls = 'is-wrong';
+                  }
+                  return `
+                  <label class="quiz-option ${cls}">
+                    <input type="radio" name="quiz-${escapeHtml(key)}" value="${idx}" class="quiz-radio"
+                      data-quiz-idx="${idx}" data-quiz-key="${escapeHtml(key)}" ${sel === idx ? 'checked' : ''} />
+                    <span>${escapeHtml(q.options[idx])}</span>
+                  </label>`;
+                })
+                .join('')}
+            </div>
+            <div class="helper-slot ${sel !== undefined ? (sel === q.correctIndex ? 'is-ok' : 'is-bad') : ''}">
+              ${
+                sel === undefined
+                  ? 'Seleciona uma opção para testar a tua compreensão.'
+                  : sel === q.correctIndex
+                    ? `Correto! ${escapeHtml(q.explanation)}`
+                    : `Ainda não: ${escapeHtml(q.explanation)}`
+              }
+            </div>
+          </div>`;
+            })
+            .join('')}
+        </div>`;
+}
+
 function currentTrack(): Track {
   return allTracks.find((t) => t.id === state.trackId) ?? allTracks[0];
 }
@@ -157,8 +209,23 @@ function locateLesson(trackId: string | null | undefined, lessonId: string | nul
   return pedida ? { trackId: pedida.id, lessonId: pedida.lessons[0].id } : null;
 }
 
+// Chaves de navegação que a app lê do endereço. O formato normal é #vista=...&trilha=...&licao=...,
+// mas também se aceitam no ?..., para links escritos à mão; nesse caso passam para o # e saem do ?.
+const CHAVES_NAVEGACAO = ['vista', 'trilha', 'licao', 'cidade', 'categoria', 'q', 'ferramenta'];
+
 function syncStateFromUrl(): void {
-  const raw = window.location.hash.replace(/^#/, '');
+  const search = new URLSearchParams(window.location.search);
+  const daQuery = new URLSearchParams();
+  for (const k of CHAVES_NAVEGACAO) {
+    const valor = search.get(k);
+    if (valor !== null) daQuery.set(k, valor);
+    search.delete(k);
+  }
+  if ([...daQuery.keys()].length) {
+    const resto = search.toString();
+    history.replaceState(null, '', `${window.location.pathname}${resto ? `?${resto}` : ''}${window.location.hash}`);
+  }
+  const raw = window.location.hash.replace(/^#/, '') || daQuery.toString();
   if (!raw) {
     const last = loadLastLocation();
     if (last) {
@@ -297,7 +364,6 @@ function renderAcademyWorkspace(): string {
   const prevLesson = lessonIdx > 0 ? track.lessons[lessonIdx - 1] : null;
   const nextLesson = lessonIdx < track.lessons.length - 1 ? track.lessons[lessonIdx + 1] : null;
 
-  const selectedQuiz = state.quizSelection[lesson.id];
   const engine = activeEngine();
   const editorVal = getEditorValue();
 
@@ -334,7 +400,7 @@ function renderAcademyWorkspace(): string {
         </button>
       </div>
       <div class="layout-controls desktop-only-controls">
-        <span class="status-chip">Arraste as divisórias para redimensionar</span>
+        <span class="status-chip">Arrasta as divisórias para redimensionar</span>
         <button type="button" class="btn" data-action="reset-layout">Repor painéis</button>
       </div>
     </div>
@@ -421,7 +487,7 @@ function renderAcademyWorkspace(): string {
         tabindex="0"
         aria-orientation="vertical"
         aria-label="Redimensionar largura do índice lateral"
-        title="Arraste para redimensionar o índice lateral (duplo clique para repor)"
+        title="Arrasta para redimensionar o índice lateral (duplo clique para repor)"
       ></div>
 
       <!-- Center Lesson Column -->
@@ -450,10 +516,21 @@ function renderAcademyWorkspace(): string {
           lesson.beginnerSteps && lesson.beginnerSteps.length
             ? `
           <section class="prose-section">
-            <h2>Passo a passo (do zero absoluto)</h2>
+            <h2>Passo a passo</h2>
             <ol class="prose-list">
               ${lesson.beginnerSteps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
             </ol>
+          </section>
+        `
+            : ''
+        }
+
+        ${
+          lesson.explained && lesson.explained.length
+            ? `
+          <section class="prose-section">
+            <h2>Explicado com calma</h2>
+            ${lesson.explained.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}
           </section>
         `
             : ''
@@ -465,6 +542,20 @@ function renderAcademyWorkspace(): string {
             ${lesson.concepts.map((c) => `<li>${escapeHtml(c)}</li>`).join('')}
           </ul>
         </section>
+
+        ${
+          lesson.errorDemo
+            ? `
+          <section class="prose-section error-demo" aria-label="Exemplo de erro">
+            <h2>O que acontece se…</h2>
+            <pre class="code-sample"><code>${highlightCode(lesson.errorDemo.code, 'python')}</code></pre>
+            <p class="error-demo-label">O Python responde:</p>
+            <pre class="error-demo-msg">${escapeHtml(lesson.errorDemo.message)}</pre>
+            <p>${escapeHtml(lesson.errorDemo.fix)}</p>
+          </section>
+        `
+            : ''
+        }
 
         ${
           lesson.proPractice || lesson.commonPitfall
@@ -532,44 +623,7 @@ function renderAcademyWorkspace(): string {
           <pre class="code-sample"><code>${highlightCode(lesson.exampleCode, lesson.engine)}</code></pre>
         </section>
 
-        <div class="quiz-well" role="group" aria-labelledby="quiz-title">
-          <h3 id="quiz-title">Verificação rápida de conceito</h3>
-          <p>${escapeHtml(lesson.quiz.question)}</p>
-          <div class="quiz-options">
-            ${quizDisplayOrder(lesson.id, lesson.quiz.options.length)
-              .map((idx) => {
-                const opt = lesson.quiz.options[idx];
-                let cls = '';
-                if (selectedQuiz !== undefined) {
-                  if (idx === lesson.quiz.correctIndex) cls = 'is-correct';
-                  else if (idx === selectedQuiz) cls = 'is-wrong';
-                }
-                return `
-                  <label class="quiz-option ${cls}">
-                    <input
-                      type="radio"
-                      name="quiz-${escapeHtml(lesson.id)}"
-                      value="${idx}"
-                      class="quiz-radio"
-                      data-quiz-idx="${idx}"
-                      ${selectedQuiz === idx ? 'checked' : ''}
-                    />
-                    <span>${escapeHtml(opt)}</span>
-                  </label>
-                `;
-              })
-              .join('')}
-          </div>
-          <div class="helper-slot ${selectedQuiz !== undefined ? (selectedQuiz === lesson.quiz.correctIndex ? 'is-ok' : 'is-bad') : ''}">
-            ${
-              selectedQuiz === undefined
-                ? 'Seleciona uma opção para testar a tua compreensão.'
-                : selectedQuiz === lesson.quiz.correctIndex
-                  ? `Correto! ${escapeHtml(lesson.quiz.explanation)}`
-                  : `Ainda não: ${escapeHtml(lesson.quiz.explanation)}`
-            }
-          </div>
-        </div>
+        ${renderQuizzes(lesson)}
 
         <nav class="lesson-pager" aria-label="Navegação entre lições">
           <button type="button" class="btn" data-select-lesson="${prevLesson ? escapeHtml(prevLesson.id) : ''}" ${!prevLesson ? 'disabled' : ''}>
@@ -595,7 +649,7 @@ function renderAcademyWorkspace(): string {
         tabindex="0"
         aria-orientation="vertical"
         aria-label="Redimensionar largura entre a lição e o editor de código"
-        title="Arraste para redimensionar lição vs editor (duplo clique para 50/50)"
+        title="Arrasta para redimensionar lição vs editor (duplo clique para 50/50)"
       ></div>
 
       <!-- Right Live Workbench -->
@@ -665,7 +719,7 @@ function renderAcademyWorkspace(): string {
           tabindex="0"
           aria-orientation="horizontal"
           aria-label="Redimensionar altura do editor de código"
-          title="Arraste para aumentar ou diminuir a altura do editor (duplo clique para repor)"
+          title="Arrasta para aumentar ou diminuir a altura do editor (duplo clique para repor)"
         ></div>
 
         <div class="workbench-actions">
@@ -826,7 +880,7 @@ function renderApp(): void {
               type="button"
               class="btn nav-progress-btn"
               data-action="open-progress-modal"
-              title="Ver progresso por trilha, código de retoma e exportar portfólio"
+              title="Ver progresso por trilha, código de retoma e exportar portefólio"
             >
               <span class="progress-full">${Object.keys(state.completedLessons).length} / ${totalLessonsCount} etapas · Progresso</span>
               <span class="progress-compact">🏆 ${Object.keys(state.completedLessons).length}/${totalLessonsCount}</span>
@@ -1145,9 +1199,10 @@ function attachDomListeners(): void {
     inp.addEventListener('change', () => {
       const lesson = currentLesson();
       const idx = Number(inp.dataset.quizIdx);
-      state.quizSelection[lesson.id] = idx;
+      const key = inp.dataset.quizKey ?? lesson.id;
+      state.quizSelection[key] = idx;
       saveQuizzes(state.quizSelection);
-      if (state.completedLessons[lesson.id] && idx === lesson.quiz.correctIndex) {
+      if (key === lesson.id && state.completedLessons[lesson.id] && idx === lesson.quiz.correctIndex) {
         state.completedLessons[lesson.id].quizPassed = true;
         saveProgress(state.completedLessons);
       }
@@ -1567,7 +1622,7 @@ function attachDomListeners(): void {
       } else if (act === 'export-portfolio-md') {
         const md = generatePortfolioMarkdown(state.completedLessons, state.editorDrafts, allTracks);
         downloadTextFile('portfolio_mercearia_do_bairro.md', md, 'text/markdown;charset=utf-8');
-        state.progressModalFeedback = { ok: true, text: 'Portfólio (.md) descarregado com sucesso.' };
+        state.progressModalFeedback = { ok: true, text: 'Portefólio (.md) descarregado com sucesso.' };
         renderApp();
       } else if (act === 'export-progress-json') {
         const json = exportProgressJson(state.completedLessons, state.editorDrafts, state.quizSelection, [...state.practiceDone]);

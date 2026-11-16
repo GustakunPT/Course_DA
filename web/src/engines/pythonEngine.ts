@@ -68,7 +68,7 @@ function loadPyodideScript(): Promise<void> {
     script.async = true;
     script.dataset.pyodide = 'true';
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Falha ao transferir o motor Python (Pyodide). Verifique a ligação à internet.'));
+    script.onerror = () => reject(new Error('Falha ao transferir o motor Python (Pyodide). Verifica a ligação à internet.'));
     document.head.appendChild(script);
   });
 }

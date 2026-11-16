@@ -3,8 +3,8 @@ import type { CheatsheetEntry, Track } from './types';
 export const gitTrack: Track = {
   id: 'git',
   shortTitle: '4. Git & GitHub',
-  fullTitle: 'Git, GitHub e Portfólio para Analistas de Dados',
-  summary: 'Controlo de versões ao vivo no terminal simulado: commits limpos, proteção de dados com .gitignore, branches e publicação de portfólio.',
+  fullTitle: 'Git, GitHub e Portefólio para Analistas de Dados',
+  summary: 'Controlo de versões ao vivo no terminal simulado: commits limpos, proteção de dados com .gitignore, branches e publicação de portefólio.',
   engineLabel: 'Simulador Terminal Git',
   lessons: [
     {
@@ -246,27 +246,27 @@ git merge limpeza-pandas`,
     {
       id: 'git-05-github-portfolio',
       code: '05',
-      title: 'GitHub remoto e como montar um Portfólio de Analista',
+      title: 'GitHub remoto e como montar um portefólio de analista',
       lede: 'Publica o teu repositório com git push e estrutura um README executivo que recrutadores técnicos consigam avaliar em 60 segundos.',
       analogyTitle: 'A montra da tua mercearia aberta ao mercado de trabalho',
-      analogyBody: 'Um bom portfólio de analista não despeja apenas código: apresenta o problema de negócio, mostra os KPIs descobertos, explica as limitações dos dados e permite reproduzir tudo num comando.',
+      analogyBody: 'Um bom portefólio de analista não despeja apenas código: apresenta o problema de negócio, mostra os KPIs descobertos, explica as limitações dos dados e permite reproduzir tudo num comando.',
       concepts: [
         'git remote add origin <url> liga o teu repositório local à página do GitHub.',
         'git push -u origin main publica os teus commits na nuvem.',
         'Checklist de README forte: contexto do problema, arquitetura das pastas, principais conclusões quantificadas, como correr e limitações conhecidas.',
         'O git push envia os teus commits para o GitHub e o git pull traz os commits dos outros. Faz pull antes de começar a trabalhar, para não partires de uma versão antiga.',
-        'Um bom projeto de portfólio no GitHub tem um README com a pergunta de negócio, os dados usados, as conclusões (com um gráfico) e como correr o código.',
+        'Um bom projeto de portefólio no GitHub tem um README com a pergunta de negócio, os dados usados, as conclusões (com um gráfico) e como correr o código.',
       ],
       referenceTitle: 'Sincronização com GitHub',
       referenceRows: [
         { syntax: 'git remote add origin <url>', meaning: 'Associa repositório remoto no GitHub', example: 'https://github.com/user/mercearia.git' },
-        { syntax: 'git push -u origin main', meaning: 'Envia commits locais para o GitHub', example: 'Publica o portfólio' },
+        { syntax: 'git push -u origin main', meaning: 'Envia commits locais para o GitHub', example: 'Publica o portefólio' },
         { syntax: 'git pull', meaning: 'Descarrega e integra novidades do remoto', example: 'Sincronizar noutro PC' },
       ],
       engine: 'git',
       exampleCode: `git init
 git add .
-git commit -m "Publica portfolio completo Mercearia do Bairro"
+git commit -m "Publica portefólio completo Mercearia do Bairro"
 git remote add origin https://github.com/analista/mercearia-do-bairro.git
 git push -u origin main`,
       gitChallenge: {
@@ -276,7 +276,7 @@ git push -u origin main`,
 `,
         solutionCommands: `git init
 git add .
-git commit -m "Versao 1.0 do portfólio de análise de dados"
+git commit -m "Versao 1.0 do portefólio de análise de dados"
 git remote add origin https://github.com/analista/mercearia.git
 git push -u origin main`,
         hint: 'Termina com git push -u origin main após ter pelo menos 1 commit.',
@@ -285,7 +285,7 @@ git push -u origin main`,
           return {
             passed: ok,
             message: ok
-              ? `Portfólio publicado em ${state.remoteUrl} no ramo main.`
+              ? `Portefólio publicado em ${state.remoteUrl} no ramo main.`
               : 'Garante que tens um commit gravado e corres git remote add origin ... seguido de git push -u origin main.',
           };
         },
@@ -385,7 +385,7 @@ print(round(media, 2), mediana, desvio_padrao, amplitude)`,
     {
       id: 'bi-02-quartis-outliers',
       code: '02',
-      title: 'Quartis, IQR e deteção de valores atípicos (Outliers)',
+      title: 'Quartis, IQR e deteção de valores atípicos (outliers)',
       lede: 'Aprende a regra prática de Tukey (Q3 + 1,5 * IQR) usada em caixas de bigodes (boxplots) para sinalizar transações fora do padrão.',
       analogyTitle: 'Separar o movimento normal de encomendas extraordinárias',
       analogyBody: 'Dividindo as vendas ordenadas em 4 partes iguais, os 50% centrais ficam entre o 1.º quartil (Q1, 25%) e o 3.º quartil (Q3, 75%). Essa largura central chama-se IQR.',
@@ -456,7 +456,7 @@ print(iqr, num_outliers)`,
     {
       id: 'bi-03-curva-abc',
       code: '03',
-      title: 'Curva ABC (Princípio de Pareto 80/20) na Mercearia',
+      title: 'Curva ABC: o princípio de Pareto (80/20) na Mercearia',
       lede: 'Descobre que pequena fração dos 15 produtos concentra a maior fatia da faturação anual da loja.',
       analogyTitle: 'Quais prateleiras nunca podem ficar sem stock?',
       analogyBody: 'Na gestão de retalho, classificamos em Classe A os artigos que somados geram cerca de 70% a 80% da receita, Classe B os seguintes 15% a 20% e Classe C os restantes.',
@@ -516,7 +516,7 @@ print(quota_top2_pct)`,
     {
       id: 'bi-04-star-schema',
       code: '04',
-      title: 'Modelação Dimensional (Star Schema) para Power BI',
+      title: 'Modelação dimensional (esquema em estrela) para Power BI',
       lede: 'Aprende a organizar tabelas em Factos e Dimensões antes de construir relatórios em Power BI ou Tableau.',
       analogyTitle: 'A estrela com os talões no centro e os catálogos nas pontas',
       analogyBody: 'Evita juntar tudo num único tabelão redundante para o Power BI: mantém fVendas enxuta no meio ligada de 1-para-muitos (*) a dProdutos, dClientes e dCalendario.',
@@ -583,7 +583,7 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
     {
       id: 'bi-05-excel-dax',
       code: '05',
-      title: 'Ponte SQL/Pandas para Excel Moderno e DAX',
+      title: 'Do SQL e pandas para o Excel moderno e o DAX',
       lede: 'Um analista completo transita fluentemente entre SQL, Pandas, Excel (XLOOKUP/SUMIFS) e medidas DAX no Power BI.',
       analogyTitle: 'Quatro línguas para dizer exatamente a mesma frase analítica',
       analogyBody: 'Cruzar tabelas chama-se JOIN em SQL, merge em Pandas, XLOOKUP (PROCX) em Excel e RELATED em DAX. Quando percebes o conceito lógico, dominas qualquer ferramenta.',
@@ -652,7 +652,7 @@ ORDER BY gasto_medio_cliente DESC;`,
     {
       id: 'bi-06-storytelling',
       code: '06',
-      title: 'Visualização Honesta e Relatório Executivo',
+      title: 'Visualização honesta e relatório para a direção',
       lede: 'Escolhe a geometria certa para cada pergunta de negócio e transforma tabelas cruas numa recomendação acionável.',
       analogyTitle: 'Um painel claro lê-se em 5 segundos do outro lado do balcão',
       analogyBody: 'Um bom gráfico não precisa de efeitos 3D nem de 15 cores: usa barras horizontais para rankings, linhas para evolução temporal e destaca a conclusão logo no título.',

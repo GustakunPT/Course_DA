@@ -340,7 +340,7 @@ print(categoria_lider, faturacao_mercearia)`,
     {
       id: 'pd-06-limpeza-sujas',
       code: '06',
-      title: 'Oficina de Limpeza: vendas_sujas.csv',
+      title: 'Oficina de limpeza: vendas_sujas.csv',
       lede: 'Na vida real, limpar dados ocupa grande parte do tempo de um analista: células vazias, linhas duplicadas, vírgulas decimais, espaços e preços impossíveis.',
       analogyTitle: 'Escolher o feijão antes de o pôr na panela',
       analogyBody: 'O ficheiro dados/vendas_sujas.csv tem 12 linhas com todas as armadilhas reais de um ficheiro vindo de fora: " Pão ", "pão", "2,35", preços negativos (-1.00), vazios e duplicados exatos.',
@@ -408,7 +408,7 @@ limpas`,
     {
       id: 'pd-07-pivot-transform',
       code: '07',
-      title: 'Tabelas Dinâmicas (pivot_table) e Pesos de Grupo (.transform)',
+      title: 'Tabelas dinâmicas (pivot_table) e pesos de grupo (.transform)',
       lede: 'Domina as duas ferramentas favoritas dos analistas seniores em Pandas: criar matrizes cruzadas estilo Excel e calcular quotas dentro de cada grupo sem perder linhas.',
       analogyTitle: 'O quadro cruzado Cidade × Categoria e a percentagem no próprio talão',
       analogyBody: 'Enquanto o groupby devolve uma lista vertical comprida, o pivot_table arruma as cidades nas linhas e as categorias nas colunas. E o .transform("sum") funciona exatamente como o SUM() OVER (PARTITION BY ...) do SQL.',
@@ -607,6 +607,108 @@ print(iva_maximo, round(p75_cesto, 2), cafe_fim_de_semana, X.shape)`,
         ],
         correctIndex: 1,
         explanation: 'pd.crosstab conta as ocorrências de cada combinação de valores. Para somar outra coluna em vez de contar, usa-se values= e aggfunc=, ou um pivot_table.',
+      },
+    },
+    {
+      id: 'pd-09-revisao',
+      code: '09',
+      title: 'Revisão geral: faturação por categoria e trimestre',
+      lede: 'Antes de passar ao Git, juntas numa só análise o que treinaste na trilha: ler ficheiros, criar colunas, juntar tabelas, agrupar, ordenar e montar uma tabela dinâmica.',
+      analogyTitle: 'Arrumar o armazém de uma ponta à outra',
+      analogyBody: 'Em cada etapa arrumaste uma prateleira. Agora o pedido é o armazém inteiro: o dono quer saber que categorias faturam mais, como se repartem pelos quatro trimestres e qual delas cresceu mais do primeiro para o último. Cada pergunta é uma linha de pandas que já conheces.',
+      beginnerSteps: [
+        'Lê vendas.csv e produtos.csv e cria a coluna subtotal = quantidade * preco.',
+        'Cria a coluna trimestre ("T1" a "T4") a partir do mês da data.',
+        'Junta a categoria com pd.merge(vendas, produtos[["id", "categoria"]], left_on="produto_id", right_on="id").',
+        'Agrupa por categoria, soma o subtotal e ordena do maior para o menor.',
+        'Monta a tabela dinâmica categoria × trimestre e compara T4 com T1.',
+      ],
+      concepts: [
+        'Uma análise em pandas é uma sequência de passos pequenos, cada um com o resultado guardado num nome claro. Se um número sair estranho, imprimes o passo anterior e encontras o problema.',
+        'O trimestre calcula-se a partir do mês: (mes - 1) // 3 + 1 dá 1 para janeiro a março, 2 para abril a junho, e assim por diante.',
+        'groupby responde a "quanto por categoria"; pivot_table responde a "quanto por categoria e por trimestre", com uma categoria por linha e um trimestre por coluna.',
+        'Para comparar períodos dentro de cada categoria, divide colunas da tabela dinâmica: (matriz["T4"] / matriz["T1"] - 1) * 100 dá a variação em percentagem.',
+        'idxmax() devolve o rótulo do maior valor (o nome da categoria), enquanto max() devolve o próprio valor.',
+      ],
+      proPractice: 'Uma variação percentual grande pode vir de uma base pequena. Ao apresentar "a categoria que mais cresceu", mostra também o valor em euros, para ninguém tomar uma decisão por causa de 15 €.',
+      commonPitfall: 'Comparar trimestres pela soma do ano inteiro, ou esquecer o merge e agrupar pela coluna produto em vez da categoria.',
+      referenceTitle: 'O percurso completo em pandas',
+      referenceRows: [
+        { syntax: 'pd.to_datetime(df["data"]).dt.month', meaning: 'Mês de cada data', example: '1 a 12' },
+        { syntax: '"T" + ((mes - 1) // 3 + 1).astype(str)', meaning: 'Trimestre como texto', example: 'T1, T2, T3, T4' },
+        { syntax: 'pd.merge(v, p, left_on="produto_id", right_on="id")', meaning: 'Junta a categoria', example: 'Uma categoria por venda' },
+        { syntax: 'df.pivot_table(index=..., columns=..., values=..., aggfunc="sum")', meaning: 'Tabela dinâmica', example: 'Categoria × trimestre' },
+        { syntax: 'serie.idxmax()', meaning: 'Rótulo do maior valor', example: '"Padaria"' },
+      ],
+      engine: 'python',
+      exampleCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+vendas["mes"] = pd.to_datetime(vendas["data"]).dt.month
+vendas["trimestre"] = "T" + ((vendas["mes"] - 1) // 3 + 1).astype(str)
+print(vendas[["data", "mes", "trimestre"]].drop_duplicates("trimestre"))`,
+      pythonChallenge: {
+        description: 'Sobre dados/vendas.csv e dados/produtos.csv:\n1) cria subtotal e trimestre ("T1" a "T4") e junta a categoria com pd.merge;\n2) em faturacao_categoria guarda a soma do subtotal por categoria, ordenada do maior para o menor, e em categoria_top o nome da primeira;\n3) em matriz guarda a tabela dinâmica com uma categoria por linha, um trimestre por coluna e a soma do subtotal;\n4) em quota_t4_top_pct guarda o peso do T4 no total anual da categoria_top, em percentagem com 2 casas;\n5) em categoria_maior_subida guarda a categoria com maior variação percentual de T1 para T4.',
+        starterCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+
+# 1) subtotal, trimestre e categoria
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+
+# 2) faturação por categoria (do maior para o menor)
+faturacao_categoria = None
+categoria_top = None
+
+# 3) tabela dinâmica categoria x trimestre
+matriz = None
+
+# 4) peso do T4 na categoria_top
+quota_t4_top_pct = None
+
+# 5) categoria que mais cresceu de T1 para T4
+categoria_maior_subida = None
+print(categoria_top, quota_t4_top_pct, categoria_maior_subida)`,
+        solutionCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+
+vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
+vendas["mes"] = pd.to_datetime(vendas["data"]).dt.month
+vendas["trimestre"] = "T" + ((vendas["mes"] - 1) // 3 + 1).astype(str)
+juntas = pd.merge(vendas, produtos[["id", "categoria"]], left_on="produto_id", right_on="id")
+
+faturacao_categoria = juntas.groupby("categoria")["subtotal"].sum().sort_values(ascending=False)
+categoria_top = faturacao_categoria.index[0]
+
+matriz = juntas.pivot_table(index="categoria", columns="trimestre", values="subtotal", aggfunc="sum", fill_value=0)
+
+quota_t4_top_pct = round(float(matriz.loc[categoria_top, "T4"] / matriz.loc[categoria_top].sum() * 100), 2)
+
+variacao = (matriz["T4"] / matriz["T1"] - 1) * 100
+categoria_maior_subida = variacao.idxmax()
+print(categoria_top, quota_t4_top_pct, categoria_maior_subida)`,
+        checks: [
+          { label: 'faturacao_categoria tem 6 categorias, do maior para o menor', expr: 'hasattr(faturacao_categoria, "is_monotonic_decreasing") and len(faturacao_categoria) == 6 and faturacao_categoria.is_monotonic_decreasing and abs(float(faturacao_categoria.sum()) - 26902.89) < 0.01', actualExpr: 'faturacao_categoria', hint: 'juntas.groupby("categoria")["subtotal"].sum().sort_values(ascending=False)' },
+          { label: 'categoria_top ("Mercearia")', expr: 'categoria_top == "Mercearia"', actualExpr: 'categoria_top', hint: 'É o primeiro rótulo da série ordenada: faturacao_categoria.index[0].' },
+          { label: 'matriz tem 6 categorias × 4 trimestres', expr: 'hasattr(matriz, "shape") and tuple(matriz.shape) == (6, 4) and list(matriz.columns) == ["T1", "T2", "T3", "T4"]', actualExpr: 'getattr(matriz, "shape", matriz)', hint: 'juntas.pivot_table(index="categoria", columns="trimestre", values="subtotal", aggfunc="sum")' },
+          { label: 'quota_t4_top_pct (26.07)', expr: 'quota_t4_top_pct is not None and math.isclose(float(quota_t4_top_pct), 26.07, abs_tol=0.01)', actualExpr: 'quota_t4_top_pct', hint: 'matriz.loc[categoria_top, "T4"] / matriz.loc[categoria_top].sum() * 100' },
+          { label: 'categoria_maior_subida ("Padaria", +36%)', expr: 'categoria_maior_subida == "Padaria"', actualExpr: 'categoria_maior_subida', hint: 'Calcula (matriz["T4"] / matriz["T1"] - 1) * 100 e usa .idxmax().' },
+          { label: 'A análise funciona com outras vendas', expr: '(lambda r: r["categoria_top"] == "Padaria" and r["categoria_maior_subida"] == "Bebidas")(correr_com(vendas=pd.DataFrame({"data": ["2025-01-10", "2025-12-10", "2025-02-01", "2025-11-01"], "cliente_id": [1, 1, 2, 2], "produto_id": [1, 1, 14, 14], "produto": ["Pão", "Pão", "Água", "Água"], "quantidade": [100, 100, 1, 5], "preco": [1.0, 1.0, 1.0, 1.0]})))', actualExpr: '(lambda r: (r["categoria_top"], r["categoria_maior_subida"]))(correr_com(vendas=pd.DataFrame({"data": ["2025-01-10", "2025-12-10", "2025-02-01", "2025-11-01"], "cliente_id": [1, 1, 2, 2], "produto_id": [1, 1, 14, 14], "produto": ["Pão", "Pão", "Água", "Água"], "quantidade": [100, 100, 1, 5], "preco": [1.0, 1.0, 1.0, 1.0]})))', hint: 'Não escrevas os nomes à mão: calcula-os a partir de faturacao_categoria e da variação T1 → T4.' },
+        ],
+      },
+      quiz: {
+        question: 'matriz["T4"] / matriz["T1"] - 1 dá 0.36 para a Padaria e 0.09 para a Mercearia. O que podes concluir?',
+        options: [
+          'A Padaria ganhou mais euros do que a Mercearia entre T1 e T4',
+          'A Padaria cresceu mais em percentagem; em euros, não sabes',
+          'A Mercearia perdeu faturação entre o T1 e o T4',
+          'As duas categorias faturaram o mesmo no T4',
+        ],
+        correctIndex: 1,
+        explanation: 'A percentagem depende da base. A Padaria passou de 43 € para 58,50 € (+36%); a Mercearia subiu só 9%, mas isso são mais 305 €.',
       },
     },
   ],

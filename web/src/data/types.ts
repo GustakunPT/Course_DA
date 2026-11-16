@@ -56,6 +56,10 @@ export interface Lesson {
   beginnerSteps?: string[];
   proPractice?: string;
   commonPitfall?: string;
+  /** Explicação mais longa, em parágrafos, para quem nunca programou. */
+  explained?: string[];
+  /** Um erro típico: o código que o provoca, a mensagem do Python e como corrigir. */
+  errorDemo?: { code: string; message: string; fix: string };
   referenceTitle: string;
   referenceRows: ReferenceRow[];
   engine: EngineKind;
@@ -70,6 +74,8 @@ export interface Lesson {
   sqlChallenge?: SqlChallengeSpec;
   gitChallenge?: GitChallengeSpec;
   quiz: QuizSpec;
+  /** Perguntas extra de revisão; só a primeira (quiz) conta para o progresso. */
+  moreQuiz?: QuizSpec[];
 }
 
 export interface Track {
