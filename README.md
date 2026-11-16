@@ -28,6 +28,7 @@ A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, co
 - **Painéis 100% Redimensionáveis na Página:** divisórias verticais e horizontais arrastáveis (índice lateral, lição vs editor e altura do editor vs consola), modos rápidos (*Recolher índice*, *Foco leitura*, *Divisão 50/50*, *Foco código* e *Repor painéis*) com memória no navegador.
 - **Explorador Analítico CSV & Auditoria de Qualidade** (`26 902,89 €` em 5 078 vendas, filtros por cidade e categoria e diagnóstico de `vendas_sujas.csv`).
 - **Referência Rápida W3** com pesquisa instantânea e botão *Testar na bancada*.
+- **Ecrã de escrita no telemóvel:** no telemóvel e no tablet na vertical, escrever código abre um ecrã próprio com Enunciado, Código e Resultado, para o teclado não desarrumar a lição. Quem preferir pode voltar ao editor normal.
 
 ```bash
 cd web
