@@ -1,6 +1,6 @@
 # Semana 8: Listas, tuplos e fatias (`slicing`)
 
-> **Na app:** Python, etapa 07. [abrir a etapa 07](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-07-listas-colecoes). Tem 2 treinos extra.
+> **Na app:** Python, etapa 08. [abrir a etapa 08](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-07-listas-colecoes). Tem 2 treinos extra.
 
 ## A analogia: o cesto de compras vs a etiqueta plastificada
 

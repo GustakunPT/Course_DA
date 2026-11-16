@@ -40,7 +40,7 @@ function comTreinosExtra(l: Lesson, python?: PythonChallengeSpec[]): Lesson {
 
 const careerProComTreinos: Track = {
   ...careerProTrack,
-  lessons: careerProTrack.lessons.map((l) => comTreinosExtra(l, biProPractice[l.id])),
+  lessons: careerProTrack.lessons.map((l, i) => ({ ...comTreinosExtra(l, biProPractice[l.id]), code: String(i + 1).padStart(2, '0') })),
 };
 
 /** Escolhe e ordena etapas de uma trilha base e renumera os códigos (01, 02, ...). */
@@ -64,7 +64,7 @@ const visualBiTrack = montarTrilha(
     fullTitle: 'Visualização, Excel/DAX e Power BI para Analistas',
     summary: 'Curva ABC, relatório executivo e gráficos honestos com matplotlib, Star Schema, DAX e prática guiada de Excel e Power BI com os dados da Mercearia.',
   },
-  ['bi-03-curva-abc', 'bi-06-storytelling', 'bi-07-graficos-matplotlib', 'bi-04-star-schema', 'bi-05-excel-dax', 'bi-10-pratica-excel-powerbi'],
+  ['bi-03-curva-abc', 'bi-06-storytelling', 'bi-07-graficos-matplotlib', 'bi-04-star-schema', 'bi-05-excel-dax', 'bi-10-pratica-excel-powerbi', 'bi-18-inteligencia-tempo'],
 );
 
 const estatisticaTrack = montarTrilha(
@@ -86,6 +86,7 @@ const estatisticaTrack = montarTrilha(
     'bi-15-qui-quadrado-anova',
     'bi-13-regressao-linear',
     'bi-16-regressao-multipla',
+    'bi-19-series-temporais',
     'bi-14-perguntas-entrevista',
   ],
 );

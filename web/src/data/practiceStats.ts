@@ -518,4 +518,66 @@ print(f"Diferença observada {diferenca_observada:.3f} € | p (permutação) = 
       ],
     },
   ],
+  'bi-18-inteligencia-tempo': [
+    {
+      title: 'Acumulado do mês até ao dia 15 (MTD)',
+      description: 'Em dezembro, a gestão quer saber a meio do mês quanto já se faturou. Em vendas_sazonais.csv, guarda mtd_15_dezembro (faturação de 1 a 15 de dezembro), total_dezembro e pct_do_mes (percentagem do mês feita até dia 15, 2 casas). Em DAX seria TOTALMTD; em pandas, um filtro de datas e uma soma.',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+mtd_15_dezembro = None
+total_dezembro = None
+pct_do_mes = None
+print(mtd_15_dezembro, total_dezembro, pct_do_mes)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+dezembro = df[df["data"].str.slice(0, 7) == "2025-12"]
+mtd_15_dezembro = round(float(dezembro[dezembro["data"] <= "2025-12-15"]["sub"].sum()), 2)
+total_dezembro = round(float(dezembro["sub"].sum()), 2)
+pct_do_mes = round(mtd_15_dezembro / total_dezembro * 100, 2)
+print(f"Até dia 15: {mtd_15_dezembro} € de {total_dezembro} € ({pct_do_mes}% do mês)")`,
+      checks: [
+        { label: 'mtd_15_dezembro (2 942.46 €) e total_dezembro (6 317.85 €)', expr: 'abs(float(mtd_15_dezembro) - 2942.46) < 0.01 and abs(float(total_dezembro) - 6317.85) < 0.01', actualExpr: '(mtd_15_dezembro, total_dezembro)', hint: 'Filtra dezembro e depois data <= "2025-12-15".' },
+        { label: 'pct_do_mes (46.57%): a segunda quinzena vale mais', expr: 'abs(float(pct_do_mes) - 46.57) < 0.01', actualExpr: 'pct_do_mes', hint: 'mtd_15_dezembro / total_dezembro * 100.' },
+      ],
+    },
+  ],
+  'bi-19-series-temporais': [
+    {
+      title: 'O Natal puxa a tendência',
+      description: 'Ajusta a tendência linear da faturação diária de vendas_sazonais.csv duas vezes: com o ano todo (declive_com) e sem dezembro (declive_sem). Guarda natal_pesa = True se o declive com dezembro for mais de 1,5 vezes o declive sem dezembro.',
+      starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+serie = df.groupby("data")["sub"].sum()
+
+declive_com = None
+declive_sem = None
+natal_pesa = None
+print(declive_com, declive_sem, natal_pesa)`,
+      solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+serie = df.groupby("data")["sub"].sum()
+
+declive_com = np.polyfit(np.arange(len(serie)), serie.values, 1)[0]
+sem_dezembro = serie[serie.index.str.slice(5, 7) != "12"]
+declive_sem = np.polyfit(np.arange(len(sem_dezembro)), sem_dezembro.values, 1)[0]
+natal_pesa = declive_com > 1.5 * declive_sem
+print(f"Com dezembro: +{declive_com:.3f} €/dia | sem dezembro: +{declive_sem:.3f} €/dia")`,
+      checks: [
+        { label: 'declive_com (0.247) e declive_sem (0.137)', expr: 'abs(float(declive_com) - 0.24692) < 0.0005 and abs(float(declive_sem) - 0.13657) < 0.0005', actualExpr: '(declive_com, declive_sem)', hint: 'Filtra os dias cujo mês não é "12" e volta a usar np.polyfit com t = 0, 1, 2, ...' },
+        { label: 'O Natal quase duplica a tendência', expr: 'bool(natal_pesa) is True', actualExpr: 'natal_pesa', hint: 'natal_pesa = declive_com > 1.5 * declive_sem.' },
+      ],
+    },
+  ],
 };

@@ -528,6 +528,102 @@ print(catalogo_unico, zero_orfaos, precos_consistentes)`,
       },
     },
     {
+      id: 'pro-10-rgpd-anonimizacao',
+      code: '10',
+      title: 'RGPD na prática: pseudonimizar, minimizar e agrupar antes de partilhar',
+      lede: 'Um parceiro pede os dados de clientes para estudar a faturação por zona. Antes de enviar o que quer que seja, aplicas três regras do RGPD: tirar o que identifica a pessoa, enviar só o necessário e não deixar grupos tão pequenos que se adivinhe quem lá está.',
+      analogyTitle: 'A lista da turma afixada na porta',
+      analogyBody: 'Uma escola pode afixar "a turma B teve média 14", mas não a nota de cada aluno com o nome ao lado. E se a turma tiver só 2 alunos, até a média revela demasiado. Com dados de clientes é igual: troca os nomes por códigos, envia só as colunas pedidas e junta os grupos pequenos.',
+      concepts: [
+        'O RGPD (Regulamento Geral sobre a Proteção de Dados) aplica-se a qualquer dado que identifique uma pessoa, direta ou indiretamente: nome, contacto, morada, ou um conjunto de dados que, juntos, apontam para alguém.',
+        'Pseudonimização: trocar o identificador por um código, por exemplo os primeiros caracteres de hashlib.sha256((sal + id).encode()).hexdigest(). Sem o "sal" secreto, não se consegue voltar ao cliente. Atenção: dados pseudonimizados continuam a ser dados pessoais.',
+        'Minimização: partilha apenas as colunas de que o destinatário precisa para a finalidade combinada. Se o estudo é por zona, o nome nunca sai.',
+        'Grupos pequenos: se uma cidade tiver poucos clientes, junta-a numa categoria "Outras". É a ideia do k-anonimato (cada grupo tem pelo menos k pessoas).',
+        'Direitos do titular: qualquer cliente pode pedir para ver, corrigir ou apagar os seus dados. Um bom processo de dados permite apagar uma pessoa de todas as tabelas.',
+      ],
+      beginnerSteps: [
+        'Escreve pseudonimo(cliente_id), que junta o sal ao id, aplica sha256 e devolve os primeiros 10 caracteres.',
+        'Soma a faturação por cliente em vendas.csv e junta a cidade de clientes.csv.',
+        'Conta os clientes por cidade e troca por "Outras" as cidades com menos de k clientes.',
+        'Monta partilha só com as colunas cliente (pseudónimo), cidade e faturacao.',
+      ],
+      proPractice: 'Nas empresas, partilhas de dados com terceiros exigem um acordo (subcontratação ou partilha) e, muitas vezes, a validação do Encarregado de Proteção de Dados (DPO). Documenta sempre a finalidade, as colunas enviadas e o prazo de conservação.',
+      commonPitfall: 'Achar que tirar a coluna do nome chega. Cidade, data de nascimento e género juntos identificam muitas pessoas; numa cidade com 3 clientes, a faturação "anónima" de cada um é fácil de atribuir.',
+      referenceTitle: 'Proteção de dados em pandas',
+      referenceRows: [
+        { syntax: 'hashlib.sha256((sal + str(id)).encode()).hexdigest()[:10]', meaning: 'Pseudónimo estável e não reversível sem o sal', example: 'b83ad1de98' },
+        { syntax: 'df[["cliente", "cidade", "faturacao"]]', meaning: 'Minimização: só as colunas necessárias', example: 'Sem nome nem id' },
+        { syntax: 'contagem = df["cidade"].map(df["cidade"].value_counts())', meaning: 'Tamanho do grupo de cada linha', example: 'Maia: 10' },
+        { syntax: 'df["cidade"].where(contagem >= k, "Outras")', meaning: 'Agrupar grupos pequenos', example: 'k = 15' },
+      ],
+      engine: 'python',
+      exampleCode: `import hashlib
+
+# O mesmo id dá sempre o mesmo pseudónimo; outro sal dá outro pseudónimo.
+for sal in ["sal-secreto-A", "sal-secreto-B"]:
+    codigos = [hashlib.sha256((sal + str(i)).encode()).hexdigest()[:10] for i in [1, 2, 3]]
+    print(sal, codigos)`,
+      pythonChallenge: {
+        description: 'Prepara os dados para o parceiro:\n1) pseudonimo(cliente_id): os primeiros 10 caracteres de sha256(sal + str(cliente_id)).\n2) partilha: uma linha por cliente com as colunas cliente (pseudónimo), cidade e faturacao (soma de quantidade × preco), por esta ordem e sem nome nem id.\n3) As cidades com menos de k clientes passam a "Outras".\nO direito ao esquecimento está no treino 1.',
+        starterCode: `import hashlib
+import pandas as pd
+
+clientes = pd.read_csv("dados/clientes.csv")
+vendas = pd.read_csv("dados/vendas.csv")
+sal = "mercearia-2025"
+k = 15
+
+
+def pseudonimo(cliente_id):
+    return None
+
+
+partilha = None
+print(partilha)`,
+        solutionCode: `import hashlib
+import pandas as pd
+
+clientes = pd.read_csv("dados/clientes.csv")
+vendas = pd.read_csv("dados/vendas.csv")
+sal = "mercearia-2025"
+k = 15
+
+
+def pseudonimo(cliente_id):
+    return hashlib.sha256((sal + str(cliente_id)).encode()).hexdigest()[:10]
+
+
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+por_cliente = vendas.groupby("cliente_id")["sub"].sum().reset_index()
+juntos = por_cliente.merge(clientes, left_on="cliente_id", right_on="id")
+
+tamanho = juntos["cidade"].map(juntos["cidade"].value_counts())
+juntos["cidade"] = juntos["cidade"].where(tamanho >= k, "Outras")
+juntos["cliente"] = juntos["cliente_id"].map(pseudonimo)
+
+partilha = juntos[["cliente", "cidade", "sub"]].rename(columns={"sub": "faturacao"})
+print(partilha.head())
+print(partilha["cidade"].value_counts())`,
+        checks: [
+          { label: 'pseudonimo: 10 caracteres de sha256(sal + id)', expr: 'pseudonimo(1) == hashlib.sha256(("mercearia-2025" + "1").encode()).hexdigest()[:10] and pseudonimo(1) != pseudonimo(2)', actualExpr: 'pseudonimo(1)', hint: 'return hashlib.sha256((sal + str(cliente_id)).encode()).hexdigest()[:10]' },
+          { label: 'partilha: 120 clientes, só as colunas cliente, cidade e faturacao', expr: 'len(partilha) == 120 and list(partilha.columns) == ["cliente", "cidade", "faturacao"] and abs(float(partilha["faturacao"].sum()) - 26902.89) < 0.01', actualExpr: '(len(partilha), list(partilha.columns)) if partilha is not None else None', hint: 'Seleciona e renomeia no fim: juntos[["cliente", "cidade", "sub"]].rename(columns={"sub": "faturacao"}).' },
+          { label: 'Nenhum nome nem id sai e a Maia (10 clientes) passa a "Outras"', expr: 'not partilha["cliente"].isin(clientes["nome"]).any() and "Maia" not in set(partilha["cidade"]) and int((partilha["cidade"] == "Outras").sum()) == 10', actualExpr: 'dict(partilha["cidade"].value_counts()) if partilha is not None else None', hint: 'Troca por "Outras" as cidades com menos de k clientes, usando o tamanho de cada grupo.' },
+          { label: 'O agrupamento usa k (com k = 20 juntam-se 48 clientes)', expr: 'int((correr_com(k=20)["partilha"]["cidade"] == "Outras").sum()) == 48', actualExpr: 'dict(correr_com(k=20)["partilha"]["cidade"].value_counts())', hint: 'Compara o tamanho de cada cidade com k, sem escrever "Maia" à mão.' },
+        ],
+      },
+      quiz: {
+        question: 'Uma tabela tem o nome dos clientes trocado por um código, mas mantém a data de nascimento e a rua. Ainda está abrangida pelo RGPD?',
+        options: [
+          'Não: sem o nome, os dados são anónimos.',
+          'Só se a tabela for publicada na internet ou partilhada com empresas fora da União Europeia.',
+          'Não, desde que o código seja um hash.',
+          'Sim: data de nascimento e rua juntas podem identificar a pessoa.',
+        ],
+        correctIndex: 3,
+        explanation: 'Dados pseudonimizados continuam a ser dados pessoais. Combinações de atributos (data, rua, género) identificam pessoas mesmo sem o nome.',
+      },
+    },
+    {
       id: 'pro-03-coortes-retencao',
       code: '03',
       title: 'Métricas de Produto e Negócio: Retenção, Recorrência e Ticket por Cliente',
@@ -1205,6 +1301,124 @@ print(recomendacao)`,
         ],
         correctIndex: 1,
         explanation: 'Uma boa recomendação diz o quê, quando e porquê, com um número que a sustenta. As outras descrevem os dados mas não dizem ao dono o que fazer.',
+      },
+    },
+    {
+      id: 'pro-11-portefolio-readme',
+      code: '11',
+      title: 'Apresentar o projeto: o README que um recrutador lê em 2 minutos',
+      lede: 'Um recrutador abre o teu GitHub e decide em poucos minutos. Geras, a partir dos dados, um README curto com a pergunta de negócio, os dados, as conclusões com números e como correr o projeto.',
+      analogyTitle: 'A montra da mercearia',
+      analogyBody: 'Ninguém entra numa loja para ver o armazém: decide pela montra. O código é o armazém; o README é a montra. Tem de mostrar em segundos o que o projeto resolve, o que descobriste e que sabes comunicar com números.',
+      concepts: [
+        'Estrutura que funciona: título, pergunta de negócio, dados usados, conclusões (3 a 5 frases com números), como correr e ferramentas usadas.',
+        'Começa pelas conclusões, não pelo método: "A Mercearia vale 52% da faturação" interessa mais do que "usei groupby".',
+        'Os números do README devem vir do código (f-strings), não de cópias à mão: se os dados mudarem, o README continua certo.',
+        'Formato português nos números para leitores portugueses: 26 902,89 € (espaço nos milhares, vírgula decimal).',
+        'Curto e visual: até 40 linhas, um gráfico e links para os cadernos e o dashboard. O detalhe fica nos ficheiros.',
+      ],
+      beginnerSteps: [
+        'Calcula os 3 números principais: faturação total, categoria líder com a sua quota e o mês de pico.',
+        'Usa a função euros(valor) já dada para formatar em português.',
+        'Monta o README com uma f-string de várias linhas e as secções ## Pergunta, ## Dados, ## Conclusões e ## Como correr.',
+        'Confirma que tem menos de 40 linhas.',
+      ],
+      proPractice: 'No CV e no LinkedIn, descreve cada projeto numa frase com ação, ferramenta e resultado: "Analisei 5 078 vendas com SQL e pandas e mostrei que 2 produtos valem 40% da faturação". Leva o link para o README.',
+      commonPitfall: 'README só com instruções de instalação, ou com números escritos à mão que deixaram de bater certo com o código. Quem lê quer saber primeiro o que descobriste.',
+      referenceTitle: 'Gerar texto a partir dos dados',
+      referenceRows: [
+        { syntax: 'f"""...{valor}..."""', meaning: 'f-string de várias linhas', example: 'O README inteiro' },
+        { syntax: 'f"{x:,.2f}".replace(",", " ").replace(".", ",")', meaning: 'Número em formato português', example: '26 902,89' },
+        { syntax: 'texto.count("\\n")', meaning: 'Contar linhas', example: 'Até 40' },
+        { syntax: 'open("README.md", "w", encoding="utf-8").write(readme)', meaning: 'Gravar o ficheiro (no teu computador)', example: 'README.md do projeto' },
+      ],
+      engine: 'python',
+      exampleCode: `def euros(valor):
+    return f"{valor:,.2f} €".replace(",", " ").replace(".", ",", 1)
+
+projeto = "Caixa Registadora"
+linhas = 5078
+print(f"""# {projeto}
+
+## Pergunta
+Que produtos sustentam a faturação da loja?
+
+## Conclusões
+- Analisei {linhas} linhas de vendas.
+- Faturação total: {euros(26902.89)}.
+""")`,
+      pythonChallenge: {
+        description: 'Gera o README do teu projeto a partir de vendas.csv e produtos.csv:\n1) faturacao_total, categoria_top, quota_top_pct (1 casa) e mes_pico (o mês com mais faturação, no formato 2025-09).\n2) readme: texto que começa por "# ", com as secções ## Pergunta, ## Dados, ## Conclusões e ## Como correr, e menos de 40 linhas.\n3) As conclusões mostram a faturação total com euros(...), a categoria líder com a quota em % e o mês de pico.\nA frase para o CV está no treino 1.',
+        starterCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+
+
+def euros(valor):
+    return f"{valor:,.2f} €".replace(",", " ").replace(".", ",", 1)
+
+
+faturacao_total = None
+categoria_top = None
+quota_top_pct = None
+mes_pico = None
+readme = None
+print(readme)`,
+        solutionCode: `import pandas as pd
+
+vendas = pd.read_csv("dados/vendas.csv")
+produtos = pd.read_csv("dados/produtos.csv")
+vendas["sub"] = vendas["quantidade"] * vendas["preco"]
+
+
+def euros(valor):
+    return f"{valor:,.2f} €".replace(",", " ").replace(".", ",", 1)
+
+
+faturacao_total = vendas["sub"].sum()
+por_categoria = vendas.merge(produtos, left_on="produto_id", right_on="id").groupby("categoria")["sub"].sum()
+categoria_top = por_categoria.idxmax()
+quota_top_pct = round(float(por_categoria.max() / por_categoria.sum() * 100), 1)
+mes_pico = vendas.groupby(vendas["data"].str.slice(0, 7))["sub"].sum().idxmax()
+
+readme = f"""# Mercearia do Bairro: o que sustenta a faturação?
+
+## Pergunta
+Que categorias e meses pesam mais na faturação de 2025?
+
+## Dados
+{len(vendas)} linhas de vendas de 2025 (dados/vendas.csv) e o catálogo de {len(produtos)} produtos.
+
+## Conclusões
+- Faturação total do ano: {euros(faturacao_total)}.
+- A categoria {categoria_top} vale {quota_top_pct}% da faturação.
+- O mês mais forte foi {mes_pico}.
+
+## Como correr
+pip install -r requirements.txt e depois python src/caixa.py.
+
+Ferramentas: Python, pandas, SQL e Power BI.
+"""
+print(readme)`,
+        checks: [
+          { label: 'Números: 26 902,89 €, Mercearia com 51.6% e pico em 2025-09', expr: 'abs(float(faturacao_total) - 26902.89) < 0.01 and categoria_top == "Mercearia" and abs(float(quota_top_pct) - 51.6) < 0.05 and mes_pico == "2025-09"', actualExpr: '(faturacao_total, categoria_top, quota_top_pct, mes_pico)', hint: 'Soma por categoria (com merge) e por mês (data.str.slice(0, 7)) e usa .idxmax().' },
+          { label: 'Título e as 4 secções, em menos de 40 linhas', expr: 'isinstance(readme, str) and readme.startswith("# ") and all(s in readme for s in ["## Pergunta", "## Dados", "## Conclusões", "## Como correr"]) and readme.count("\\n") < 40', actualExpr: '(readme[:40] + "...", readme.count("\\n")) if isinstance(readme, str) else readme', hint: 'Usa uma f-string de várias linhas (três aspas) com as secções ## Pergunta, ## Dados, ## Conclusões e ## Como correr.' },
+          { label: 'As conclusões mostram os números calculados', expr: 'euros(faturacao_total) in readme and categoria_top in readme and f"{quota_top_pct}%" in readme and mes_pico in readme', actualExpr: 'euros(faturacao_total) in readme if isinstance(readme, str) else None', hint: 'Escreve {euros(faturacao_total)}, {categoria_top}, {quota_top_pct}% e {mes_pico} dentro da f-string.' },
+          { label: 'O README acompanha os dados', expr: 'euros(10.0) in correr_com(vendas=pd.DataFrame({"data": ["2025-03-01"], "produto_id": [1], "quantidade": [4], "preco": [2.5]}))["readme"]', actualExpr: 'correr_com(vendas=pd.DataFrame({"data": ["2025-03-01"], "produto_id": [1], "quantidade": [4], "preco": [2.5]})).get("faturacao_total")', hint: 'Os números do README têm de vir das variáveis, não escritos à mão.' },
+        ],
+      },
+      quiz: {
+        question: 'Qual destas frases é melhor para abrir as conclusões de um README de portefólio?',
+        options: [
+          'Usei pandas, groupby e merge para processar os ficheiros CSV.',
+          'Este projeto foi feito no âmbito de um curso de análise de dados, com Python, SQL e Power BI.',
+          'Os dados têm 5 078 linhas e 6 colunas.',
+          'Dois produtos (Azeite e Queijo) valem 40% da faturação: são os que não podem faltar.',
+        ],
+        correctIndex: 3,
+        explanation: 'Quem lê quer saber o que descobriste e porque importa. O método e o tamanho dos dados vêm depois.',
       },
     },
   ],

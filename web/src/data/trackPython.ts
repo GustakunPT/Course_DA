@@ -9,7 +9,7 @@ export const pythonTrack: Track = {
   lessons: [
     {
       id: 'py-00-pensamento',
-      code: '00',
+      code: '01',
       title: 'Ponto Zero: como o computador pensa e o que faz um Analista',
       lede: 'Nunca programaste na vida? Começa aqui. Programar não é saber matemática difícil: é dar instruções claras, uma por linha, a um ajudante muito rápido mas literal.',
       analogyTitle: 'Ensinar um estagiário no primeiro dia na Mercearia',
@@ -79,7 +79,7 @@ print("Receita estimada:", receita_dia)`,
     },
     {
       id: 'py-01-sintaxe',
-      code: '01',
+      code: '02',
       title: 'Sintaxe, print() e comentários',
       lede: 'Em Python cada linha é uma instrução direta e a indentação (espaços à esquerda) define os blocos de código.',
       analogyTitle: 'A lista de abertura da loja',
@@ -101,19 +101,24 @@ print("Mercearia do Bairro")
 print("Artigos no catálogo:", 15)
 print("2 pães a 0.25 EUR:", 2 * 0.25)`,
       pythonChallenge: {
-        description: 'Guarda na variável saudacao o texto exato "Bem-vindo à Mercearia" e na variável dobro_quinze o resultado de 15 * 2.',
-        starterCode: `# Completa as duas variáveis abaixo
+        description: 'Guarda na variável saudacao o texto exato "Bem-vindo à Mercearia" e na variável dobro o dobro do número guardado em numero (usa numero * 2, não escrevas o resultado).',
+        starterCode: `numero = 15
+
+# Completa as duas variáveis abaixo
 saudacao = None
-dobro_quinze = None
+dobro = None
 
-print(saudacao, dobro_quinze)`,
-        solutionCode: `saudacao = "Bem-vindo à Mercearia"
-dobro_quinze = 15 * 2
+print(saudacao, dobro)`,
+        solutionCode: `numero = 15
 
-print(saudacao, dobro_quinze)`,
+saudacao = "Bem-vindo à Mercearia"
+dobro = numero * 2
+
+print(saudacao, dobro)`,
         checks: [
           { label: 'saudacao', expr: 'saudacao == "Bem-vindo à Mercearia"', actualExpr: 'saudacao', hint: 'Escreve o texto exato entre aspas.' },
-          { label: 'dobro_quinze', expr: 'dobro_quinze == 30 and isinstance(dobro_quinze, int)', actualExpr: 'dobro_quinze', hint: 'Multiplica 15 * 2.' },
+          { label: 'dobro (30)', expr: 'dobro == 30 and isinstance(dobro, int)', actualExpr: 'dobro', hint: 'Multiplica numero * 2.' },
+          { label: 'dobro é calculado a partir de numero', expr: 'correr_com(numero=21)["dobro"] == 42', actualExpr: 'correr_com(numero=21).get("dobro")', hint: 'Escreve dobro = numero * 2 (e não o número 30): assim funciona para qualquer número.' },
         ],
       },
       quiz: {
@@ -130,7 +135,7 @@ print(saudacao, dobro_quinze)`,
     },
     {
       id: 'py-02-variaveis',
-      code: '02',
+      code: '03',
       title: 'Variáveis e tipos de dados',
       lede: 'Uma variável guarda um valor com nome e tipo bem definidos: inteiros, decimais, texto ou booleanos.',
       analogyTitle: 'Frascos etiquetados na despensa',
@@ -177,6 +182,7 @@ print(preco_pao, quantidade, total, colado, somado, nome_loja)`,
           { label: 'preco_pao', expr: 'isinstance(preco_pao, (int, float)) and math.isclose(preco_pao, 0.25, abs_tol=0.005)', actualExpr: 'preco_pao', hint: '25 cêntimos escrevem-se 0.25.' },
           { label: 'quantidade', expr: 'quantidade == 10 and isinstance(quantidade, int)', actualExpr: 'quantidade', hint: 'Usa o inteiro 10 sem aspas.' },
           { label: 'total', expr: 'isinstance(total, (int, float)) and math.isclose(total, 2.5, abs_tol=0.005)', actualExpr: 'total', hint: 'Multiplica preco_pao * quantidade.' },
+          { label: 'total é calculado a partir das variáveis', expr: 'math.isclose(correr_com(preco_pao=0.5, quantidade=4)["total"], 2.0)', actualExpr: 'correr_com(preco_pao=0.5, quantidade=4).get("total")', hint: 'Escreve total = preco_pao * quantidade (e não o número 2.5).' },
           { label: 'colado', expr: 'colado == "22"', actualExpr: 'colado', hint: 'Soma os textos "2" + "2".' },
           { label: 'somado', expr: 'somado == 4 and isinstance(somado, int)', actualExpr: 'somado', hint: 'Converte com int("2") + int("2").' },
           { label: 'nome_loja', expr: 'nome_loja == "Mercearia do Bairro"', actualExpr: 'nome_loja', hint: 'Respeite maiúsculas e espaços.' },
@@ -196,7 +202,7 @@ print(preco_pao, quantidade, total, colado, somado, nome_loja)`,
     },
     {
       id: 'py-03-strings-conversoes',
-      code: '03',
+      code: '04',
       title: 'Texto, limpeza, conversões e f-strings',
       lede: 'Dados reais chegam como texto com espaços a mais ou casas decimais compridas; limpar e formatar texto é pão nosso do analista.',
       analogyTitle: 'O leitor de código de barras e a impressora de talões',
@@ -264,7 +270,7 @@ print(mensagem_divisao)`,
     },
     {
       id: 'py-04-condicoes',
-      code: '04',
+      code: '05',
       title: 'Comparações e condições if / elif / else',
       lede: 'As estruturas condicionais permitem aplicar escalões de desconto, regras de entrega e validações de qualidade.',
       analogyTitle: 'O tapete separador de fruta',
@@ -347,7 +353,7 @@ print(desconto_pct, total_final, pode_entrar, entrega_gratis)`,
     },
     {
       id: 'py-05-ciclo-for',
-      code: '05',
+      code: '06',
       title: 'Ciclo for e range()',
       lede: 'O ciclo for percorre cada artigo de uma lista ou intervalo numérico sem repetir linhas de código.',
       analogyTitle: 'Passar artigo a artigo no tapete da caixa',
@@ -433,7 +439,7 @@ print(soma_1_a_100, quantas_acima_100, maior_venda, descontos)`,
     },
     {
       id: 'py-06-while',
-      code: '06',
+      code: '07',
       title: 'Ciclo while e acumuladores',
       lede: 'Quando não sabemos à partida quantas voltas serão precisas até atingir uma meta, usamos while.',
       analogyTitle: 'O mealheiro semanal da mercearia',
@@ -507,7 +513,7 @@ print(total_vendas, media_vendas, semanas, saldo_final)`,
     },
     {
       id: 'py-07-listas-colecoes',
-      code: '07',
+      code: '08',
       title: 'Listas, fatias e compreensão de listas',
       lede: 'Domina indexação, slicing, ordenação e list comprehensions para transformar colunas inteiras numa linha.',
       analogyTitle: 'As prateleiras numeradas a partir do zero',
@@ -575,7 +581,7 @@ print(primeiro, ultimo, tres_primeiros, precos_caros, precos_desc)`,
     },
     {
       id: 'py-08-dicionarios',
-      code: '08',
+      code: '09',
       title: 'Dicionários e agrupamento por chave',
       lede: 'Os dicionários associam chaves únicas a valores, funcionando como tabelas de consulta rápida e acumuladores por categoria.',
       analogyTitle: 'O preçário afixado na parede',
@@ -646,7 +652,7 @@ print(preco_azeite, preco_chocolate, unidades_por_produto, round(total_talao, 2)
     },
     {
       id: 'py-09-funcoes',
-      code: '09',
+      code: '10',
       title: 'Funções reutilizáveis e return',
       lede: 'Organizar cálculos e limpezas em funções torna os scripts testáveis, legíveis e livres de código duplicado.',
       analogyTitle: 'As teclas rápidas da balança',
@@ -712,7 +718,7 @@ print(calcular_subtotal(3, 0.89), limpar_nome_produto("  pão "), aplicar_iva(10
     },
     {
       id: 'py-11-revisao',
-      code: '10',
+      code: '11',
       title: 'Revisão geral: o talão de compra completo',
       lede: 'Antes do projeto da Caixa Registadora, volta a usar tudo o que aprendeste num só problema: variáveis, texto formatado, condições, ciclos, listas, dicionários e funções. A correção testa o teu código com outros carrinhos, por isso tem de funcionar para qualquer compra.',
       analogyTitle: 'O teste de condução depois das aulas',
@@ -832,7 +838,7 @@ print(unidades_por_categoria, produtos_caros)`,
     },
     {
       id: 'py-10-caixa-csv',
-      code: '11',
+      code: '12',
       title: 'Projeto Caixa Registadora sobre vendas.csv',
       lede: 'Chegou o momento de juntar tudo: ler as 5 078 linhas reais de dados/vendas.csv em Python puro e responder às 4 perguntas da gerência.',
       analogyTitle: 'O fecho anual de contas da Mercearia',

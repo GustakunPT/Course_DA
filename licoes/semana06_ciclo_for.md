@@ -1,6 +1,6 @@
 # Semana 6: O ciclo for e as listas (primeiro contacto)
 
-> **Na app:** Python, etapa 05. [abrir a etapa 05](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-05-ciclo-for). Tem 2 treinos extra.
+> **Na app:** Python, etapa 06. [abrir a etapa 06](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-05-ciclo-for). Tem 2 treinos extra.
 
 ## A analogia: a caixa do supermercado
 

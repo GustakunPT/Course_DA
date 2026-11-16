@@ -339,6 +339,61 @@ print(f"Reforçar {categoria_verao} no verão: +{subida_verao_pct}% face a um tr
       ],
     },
   ],
+  'pro-10-rgpd-anonimizacao': [
+    {
+      title: 'Direito ao esquecimento',
+      description: 'O cliente com id_a_apagar = 27 pediu para ser apagado. Remove-o de clientes e de vendas e guarda clientes_depois (número de clientes), linhas_apagadas (linhas de venda removidas) e faturacao_depois (faturação que fica, 2 casas).',
+      starterCode: `import pandas as pd
+
+clientes = pd.read_csv("dados/clientes.csv")
+vendas = pd.read_csv("dados/vendas.csv")
+id_a_apagar = 27
+
+clientes_depois = None
+linhas_apagadas = None
+faturacao_depois = None
+print(clientes_depois, linhas_apagadas, faturacao_depois)`,
+      solutionCode: `import pandas as pd
+
+clientes = pd.read_csv("dados/clientes.csv")
+vendas = pd.read_csv("dados/vendas.csv")
+id_a_apagar = 27
+
+clientes_limpos = clientes[clientes["id"] != id_a_apagar]
+vendas_limpas = vendas[vendas["cliente_id"] != id_a_apagar]
+
+clientes_depois = len(clientes_limpos)
+linhas_apagadas = len(vendas) - len(vendas_limpas)
+faturacao_depois = round(float((vendas_limpas["quantidade"] * vendas_limpas["preco"]).sum()), 2)
+print(clientes_depois, linhas_apagadas, faturacao_depois)`,
+      checks: [
+        { label: '119 clientes e 65 linhas de venda apagadas', expr: 'int(clientes_depois) == 119 and int(linhas_apagadas) == 65', actualExpr: '(clientes_depois, linhas_apagadas)', hint: 'Filtra as duas tabelas com != id_a_apagar e compara os tamanhos.' },
+        { label: 'faturacao_depois (26 485.78 €)', expr: 'abs(float(faturacao_depois) - 26485.78) < 0.01', actualExpr: 'faturacao_depois', hint: 'Soma quantidade × preco só nas vendas que ficam.' },
+        { label: 'Funciona para qualquer cliente', expr: 'int(correr_com(id_a_apagar=1)["clientes_depois"]) == 119 and int(correr_com(id_a_apagar=999)["linhas_apagadas"]) == 0', actualExpr: 'correr_com(id_a_apagar=999).get("linhas_apagadas")', hint: 'Usa a variável id_a_apagar nos filtros, sem escrever 27 à mão.' },
+      ],
+    },
+  ],
+  'pro-11-portefolio-readme': [
+    {
+      title: 'Uma frase para o CV',
+      description: 'Escreve frase_cv: uma frase com até 200 caracteres que diga o que fizeste (um verbo no passado na 1.ª pessoa, como "Analisei"), com que ferramentas (SQL e Python) e um resultado com número e %. Usa as variáveis linhas e quota_top2 já dadas.',
+      starterCode: `linhas = 5078
+quota_top2 = 39.8
+
+frase_cv = None
+print(frase_cv, len(frase_cv or ""))`,
+      solutionCode: `linhas = 5078
+quota_top2 = 39.8
+
+frase_cv = f"Analisei {linhas} vendas com SQL e Python e mostrei que 2 produtos valem {quota_top2}% da faturação."
+print(frase_cv, len(frase_cv))`,
+      checks: [
+        { label: 'Até 200 caracteres, com SQL e Python', expr: 'isinstance(frase_cv, str) and 30 <= len(frase_cv) <= 200 and "SQL" in frase_cv and "Python" in frase_cv', actualExpr: 'len(frase_cv) if isinstance(frase_cv, str) else frase_cv', hint: 'Uma só frase, curta, com as ferramentas pelo nome.' },
+        { label: 'Começa por uma ação e mostra o resultado com %', expr: 'frase_cv.split()[0].endswith("ei") and f"{quota_top2}%" in frase_cv and str(linhas) in frase_cv', actualExpr: 'frase_cv.split()[0] if isinstance(frase_cv, str) else None', hint: 'Começa por "Analisei", "Construí" ou "Mostrei" e usa {linhas} e {quota_top2}% numa f-string.' },
+        { label: 'Os números vêm das variáveis', expr: '"41.5%" in correr_com(quota_top2=41.5)["frase_cv"]', actualExpr: 'correr_com(quota_top2=41.5).get("frase_cv")', hint: 'Escreve a frase como f-string com {quota_top2}.' },
+      ],
+    },
+  ],
 };
 
 export const biProSqlPractice: Record<string, SqlChallengeSpec[]> = {

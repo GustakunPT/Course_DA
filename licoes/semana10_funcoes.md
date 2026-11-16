@@ -1,6 +1,6 @@
 # Semana 10: Funções — escrever a receita uma vez, cozinhar mil vezes
 
-> **Na app:** Python, etapa 09. [abrir a etapa 09](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-09-funcoes). Tem 2 treinos extra.
+> **Na app:** Python, etapa 10. [abrir a etapa 10](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-09-funcoes). Tem 2 treinos extra.
 
 ## A analogia: a tecla programada na balança da frutaria
 

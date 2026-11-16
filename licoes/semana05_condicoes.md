@@ -1,6 +1,6 @@
 # Semana 5: Condições (if, elif, else)
 
-> **Na app:** Python, etapa 04. [abrir a etapa 04](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-04-condicoes). Tem 2 treinos extra.
+> **Na app:** Python, etapa 05. [abrir a etapa 05](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-04-condicoes). Tem 2 treinos extra.
 
 ## A analogia: o porteiro da discoteca
 

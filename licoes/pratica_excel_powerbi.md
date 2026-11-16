@@ -125,3 +125,30 @@ Gasto por Cliente = DIVIDE([Faturação], [Clientes Ativos])
 Abre a etapa **06 da trilha Visualização & BI** na app, escreve os 8 valores na folha de respostas e carrega em **Correr**. Cada valor errado vem com uma dica sobre o passo onde costuma estar o erro.
 
 Para ir mais longe, abre o modelo completo em `relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip` e compara as tuas medidas com as que lá estão.
+
+---
+
+## Parte 3 (opcional): inteligência de tempo
+
+Usa agora `dados/vendas_sazonais.csv`, que tem um Natal forte. Faz uma Tabela Dinâmica com a faturação por mês.
+
+### Excel
+
+1. Ao lado da Tabela Dinâmica, calcula o acumulado do ano com `=SOMA($B$2:B2)` arrastado para baixo
+   (ou, na própria tabela, **Mostrar Valores Como > Total Corrente Em > Mes**).
+2. Calcula a variação face ao mês anterior com `=(B3-B2)/B2` e formata como percentagem.
+3. Calcula a média móvel de 3 meses com `=MÉDIA(B2:B4)` (AVERAGE), a começar em março.
+
+### Power BI
+
+1. Cria uma tabela calendário: **Modelação > Nova tabela** com `Calendario = CALENDARAUTO()`, marca-a como
+   tabela de datas e liga `Calendario[Date]` à data das vendas.
+2. Cria as medidas:
+   ```
+   Faturação YTD = TOTALYTD([Faturação], Calendario[Date])
+   Mês Anterior = CALCULATE([Faturação], DATEADD(Calendario[Date], -1, MONTH))
+   Variação % = DIVIDE([Faturação] - [Mês Anterior], [Mês Anterior])
+   ```
+
+Confirma os teus números com a etapa **07 da trilha Visualização & BI**: o acumulado até junho é 15 080,99 € e
+dezembro sobe 75,53% face a novembro.

@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 7 trilhas e 61 etapas', () => {
+  it('tem 7 trilhas e 65 etapas', () => {
     expect(allTracks).toHaveLength(7);
-    expect(totalLessonsCount).toBe(61);
+    expect(totalLessonsCount).toBe(65);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {

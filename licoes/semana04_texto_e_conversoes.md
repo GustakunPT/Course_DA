@@ -1,6 +1,6 @@
 # Semana 4: Falar com o utilizador (input, print) e converter tipos
 
-> **Na app:** Python, etapa 03. [abrir a etapa 03](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-03-strings-conversoes). Tem 2 treinos extra.
+> **Na app:** Python, etapa 04. [abrir a etapa 04](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-03-strings-conversoes). Tem 2 treinos extra.
 
 ## A analogia: o balcão da mercearia
 

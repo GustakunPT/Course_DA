@@ -1006,7 +1006,7 @@ print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
       quiz: {
         question: 'Nas lojas com mais funcionários a faturação é maior (r = 0,85). O que podes concluir?',
         options: [
-          'Contratar mais funcionários vai aumentar a faturação.',
+          'Contratar mais funcionários vai aumentar a faturação, porque a correlação é forte e positiva.',
           'As duas variáveis andam juntas, mas os dados não dizem qual causa qual.',
           'A relação é fraca porque r é menor do que 1.',
           'Mais faturação obriga sempre a contratar mais funcionários.',
@@ -1228,7 +1228,7 @@ print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
         question: 'A taxa de conversão passou de 4% para 5%. Como descreves a mudança num relatório?',
         options: [
           'Subiu 1%, porque 5 - 4 = 1.',
-          'Subiu 25%, e isso é o mesmo que 1 ponto.',
+          'Subiu 25%, e isso é exatamente o mesmo que dizer que subiu 1 ponto percentual.',
           'Subiu 20%, porque 1 / 5 = 0,20.',
           'Subiu 1 ponto percentual, ou seja, +25% em termos relativos.',
         ],
@@ -1327,7 +1327,7 @@ print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | l
         question: 'Um teste apanha 99% dos casos e tem 1% de falsos positivos. A doença afeta 1 em 10 000 pessoas. Um resultado positivo significa que a pessoa:',
         options: [
           'tem a doença com probabilidade abaixo de 1%, porque quase todos os positivos são falsos.',
-          'tem a doença com probabilidade de 99%, porque o teste é muito bom.',
+          'tem a doença com probabilidade de 99%, porque o teste acerta em 99 de cada 100 doentes que o fazem.',
           'tem a doença com probabilidade de 50%, porque ou tem ou não tem.',
           'tem a doença com probabilidade de 1%, porque é a taxa de falsos positivos.',
         ],
@@ -1428,9 +1428,9 @@ print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {
       quiz: {
         question: 'Uma regressão da faturação diária contra o número de clientes dá declive 16,7 e R² = 0,64. Qual é a leitura correta?',
         options: [
-          'Cada cliente novo causa exatamente 16,7 € de faturação extra.',
+          'Cada cliente novo causa exatamente 16,7 € de faturação extra, todos os dias, sem exceção.',
           '64% dos clientes gastam 16,7 €.',
-          'Em média, cada cliente a mais está associado a +16,7 € por dia, e os clientes explicam 64% da variação diária.',
+          'Cada cliente a mais está associado a +16,7 € por dia e explica 64% da variação.',
           'A reta acerta em 64% dos dias.',
         ],
         correctIndex: 2,
@@ -1785,9 +1785,9 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
       quiz: {
         question: 'Numa regressão múltipla, o coeficiente de "dezembro" é 72 €. Como o lês?',
         options: [
-          'Dezembro fatura 72 € por mês a mais do que os outros meses.',
+          'Dezembro fatura, no total do mês, mais 72 € do que a média dos outros onze meses do ano.',
           'Cada cliente de dezembro gasta mais 72 €.',
-          'Um dia de dezembro fatura, em média, mais 72 € do que um dia normal com os mesmos clientes e o mesmo tipo de dia.',
+          'Um dia de dezembro fatura mais 72 € do que um dia normal com os mesmos clientes.',
           'Dezembro explica 72% da faturação.',
         ],
         correctIndex: 2,
@@ -1904,13 +1904,208 @@ print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} €
       quiz: {
         question: 'Tens uma amostra de 200 cestos e queres um intervalo de confiança para a mediana. O que fazes no bootstrap?',
         options: [
-          'Calculas mediana ± 1.96 × desvio padrão / raiz de 200.',
-          'Reamostras os 200 cestos com reposição muitas vezes e usas os percentis 2,5 e 97,5 das medianas.',
+          'Calculas a mediana ± 1.96 × desvio padrão / raiz de 200, como na fórmula da média.',
+          'Reamostras com reposição muitas vezes e usas os percentis 2,5 e 97,5.',
           'Divides a amostra em 2 metades e comparas as medianas.',
           'Reamostras sem reposição, para não repetir cestos.',
         ],
         correctIndex: 1,
         explanation: 'O bootstrap trata a amostra como se fosse a população e repete a amostragem com reposição. Sem reposição, todas as reamostras seriam iguais à original.',
+      },
+    },
+    {
+      id: 'bi-18-inteligencia-tempo',
+      code: '18',
+      title: 'Inteligência de tempo: acumulado do ano, mês anterior e média móvel',
+      lede: 'Os relatórios de gestão perguntam sempre "quanto levamos este ano?", "subimos face ao mês passado?" e "qual é a tendência?". Aprendes as medidas de tempo do DAX e as fórmulas do Excel equivalentes, e confirmas os números em pandas.',
+      analogyTitle: 'O conta-quilómetros e o velocímetro',
+      analogyBody: 'O acumulado do ano é o conta-quilómetros: só sobe e diz quanto já fizeste desde janeiro. A variação face ao mês anterior é o velocímetro: diz se estás a acelerar ou a travar agora. A média móvel é olhar para a velocidade média dos últimos minutos, para não te assustares com uma travagem pontual.',
+      concepts: [
+        'Acumulado do ano (YTD): em DAX, TOTALYTD([Faturação], calendario[data]); no Excel, =SOMA($B$2:B2) arrastado para baixo; em pandas, .cumsum().',
+        'Mês anterior: em DAX, CALCULATE([Faturação], DATEADD(calendario[data], -1, MONTH)); em pandas, .shift(1). A variação é (atual - anterior) / anterior, com DIVIDE para não dividir por zero.',
+        'Média móvel de 3 meses: em DAX, AVERAGEX(DATESINPERIOD(calendario[data], MAX(calendario[data]), -3, MONTH), [Faturação]); no Excel, =MÉDIA(B2:B4); em pandas, .rolling(3).mean().',
+        'As funções de tempo do DAX precisam de uma tabela calendário com todos os dias, marcada como "tabela de datas" e ligada à tabela de vendas.',
+        'Na Tabela Dinâmica do Excel, "Mostrar Valores Como > Total Corrente Em" dá o acumulado sem fórmulas.',
+      ],
+      beginnerSteps: [
+        'Soma a faturação por mês (os 7 primeiros caracteres da data).',
+        'Acumula com .cumsum() e lê junho.',
+        'Calcula a variação face ao mês anterior com .pct_change() * 100.',
+        'Calcula a média móvel de 3 meses com .rolling(3).mean() e lê dezembro.',
+        'Divide dezembro pelo total do ano para obter a quota.',
+      ],
+      proPractice: 'Num dashboard de gestão, os cartões do topo costumam ser: faturação do mês, variação face ao mês anterior, acumulado do ano e comparação com o mesmo período do ano anterior (SAMEPERIODLASTYEAR). Com só um ano de dados, como aqui, essa última não é possível: diz isso no relatório em vez de a inventar.',
+      commonPitfall: 'Usar TOTALYTD sem uma tabela calendário completa: se faltarem dias (por exemplo, domingos sem vendas), o acumulado salta ou fica errado. A tabela calendário cria-se à parte, com CALENDAR ou CALENDARAUTO.',
+      referenceTitle: 'Medidas de tempo em DAX, Excel e pandas',
+      referenceRows: [
+        { syntax: 'TOTALYTD([Faturação], calendario[data])', meaning: 'Acumulado do ano (DAX)', example: 'Excel: =SOMA($B$2:B2) | pandas: .cumsum()' },
+        { syntax: 'CALCULATE([Faturação], DATEADD(calendario[data], -1, MONTH))', meaning: 'Mês anterior (DAX)', example: 'pandas: .shift(1)' },
+        { syntax: 'DIVIDE([Faturação] - [Mês Anterior], [Mês Anterior])', meaning: 'Variação em % sem erro de divisão', example: 'pandas: .pct_change()' },
+        { syntax: 'AVERAGEX(DATESINPERIOD(...), [Faturação])', meaning: 'Média móvel (DAX)', example: 'Excel: =MÉDIA(B2:B4) | pandas: .rolling(3).mean()' },
+        { syntax: 'SAMEPERIODLASTYEAR(calendario[data])', meaning: 'Mesmo período do ano anterior', example: 'Precisa de 2 anos de dados' },
+      ],
+      engine: 'python',
+      exampleCode: `import pandas as pd
+
+# Exemplo com vendas.csv (um ano sem grande sazonalidade)
+df = pd.read_csv("dados/vendas.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+mensal = df.groupby(df["data"].str.slice(0, 7))["sub"].sum()
+
+tabela = pd.DataFrame({
+    "faturacao": mensal,
+    "acumulado_ano": mensal.cumsum(),
+    "mes_anterior": mensal.shift(1),
+    "variacao_pct": mensal.pct_change() * 100,
+    "media_movel_3m": mensal.rolling(3).mean(),
+})
+print(tabela.round(1))`,
+      pythonChallenge: {
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) mensal: faturação por mês (12 meses).\n2) acumulado = mensal.cumsum() e acumulado_junho.\n3) variacao_pct = variação face ao mês anterior em %; guarda subida_dezembro_pct.\n4) media_movel_dezembro: média móvel de 3 meses em dezembro.\n5) quota_dezembro_pct: peso de dezembro no ano.\nO acumulado do mês até ao dia 15 está no treino 1.',
+        starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+mensal = None
+acumulado = None
+acumulado_junho = None
+variacao_pct = None
+subida_dezembro_pct = None
+media_movel_dezembro = None
+quota_dezembro_pct = None
+print(acumulado_junho, subida_dezembro_pct, media_movel_dezembro, quota_dezembro_pct)`,
+        solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+mensal = df.groupby(df["data"].str.slice(0, 7))["sub"].sum()
+acumulado = mensal.cumsum()
+acumulado_junho = round(float(acumulado["2025-06"]), 2)
+variacao_pct = mensal.pct_change() * 100
+subida_dezembro_pct = round(float(variacao_pct["2025-12"]), 2)
+media_movel_dezembro = round(float(mensal.rolling(3).mean()["2025-12"]), 2)
+quota_dezembro_pct = round(float(mensal["2025-12"] / mensal.sum() * 100), 2)
+print(f"Acumulado até junho: {acumulado_junho} € | dezembro: +{subida_dezembro_pct}% face a novembro")
+print(f"Média móvel 3m em dezembro: {media_movel_dezembro} € | dezembro vale {quota_dezembro_pct}% do ano")`,
+        checks: [
+          { label: 'mensal com 12 meses e acumulado_junho (15 080.99 €)', expr: 'len(mensal) == 12 and abs(float(acumulado_junho) - 15080.99) < 0.01 and abs(float(acumulado.iloc[-1]) - 37426.47) < 0.01', actualExpr: '(len(mensal) if mensal is not None else None, acumulado_junho)', hint: 'mensal = df.groupby(df["data"].str.slice(0, 7))["sub"].sum() e acumulado = mensal.cumsum().' },
+          { label: 'subida_dezembro_pct (+75.53%)', expr: 'abs(float(subida_dezembro_pct) - 75.53) < 0.01', actualExpr: 'subida_dezembro_pct', hint: 'variacao_pct = mensal.pct_change() * 100 e lê "2025-12".' },
+          { label: 'media_movel_dezembro (4 267.66 €) e quota_dezembro_pct (16.88%)', expr: 'abs(float(media_movel_dezembro) - 4267.66) < 0.01 and abs(float(quota_dezembro_pct) - 16.88) < 0.01', actualExpr: '(media_movel_dezembro, quota_dezembro_pct)', hint: 'mensal.rolling(3).mean() e mensal["2025-12"] / mensal.sum() * 100.' },
+          { label: 'As medidas vêm dos dados', expr: '(lambda r: abs(float(r["acumulado"].iloc[-1]) - 78.0) < 1e-9 and abs(float(r["subida_dezembro_pct"]) - 9.09) < 0.01)(correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})).get("subida_dezembro_pct")', hint: 'Calcula tudo a partir de df, sem números escritos à mão.' },
+        ],
+      },
+      quiz: {
+        question: 'Num dashboard, a medida TOTALYTD devolve valores estranhos que saltam de dia para dia. Qual é a causa mais provável?',
+        options: [
+          'A medida devia usar SUM em vez de TOTALYTD.',
+          'O Power BI não suporta acumulados quando os dados têm mais de um ano de vendas.',
+          'Falta uma tabela calendário completa, marcada como tabela de datas.',
+          'A faturação tem valores negativos.',
+        ],
+        correctIndex: 2,
+        explanation: 'As funções de tempo do DAX percorrem uma tabela de datas contínua. Usar a coluna de datas das vendas (onde faltam dias) dá acumulados errados.',
+      },
+    },
+    {
+      id: 'bi-19-series-temporais',
+      code: '19',
+      title: 'Séries temporais: tendência, sazonalidade e uma previsão simples',
+      lede: 'Uma série de vendas diárias mistura três coisas: a tendência (a loja está a crescer?), a sazonalidade (o fim de semana vende mais) e o ruído. Separas as duas primeiras e usas-as para uma previsão simples e explicável.',
+      analogyTitle: 'A maré e as ondas',
+      analogyBody: 'Na praia, a maré sobe devagar durante horas (a tendência) e as ondas chegam e vão com um ritmo regular (a sazonalidade). Para saber onde vai estar a água daqui a uma hora, olhas para a maré e depois para o ritmo das ondas. Nas vendas é igual: a tendência diz para onde a loja vai, o padrão semanal diz como cada dia se desvia.',
+      concepts: [
+        'Tendência linear: np.polyfit(t, y, 1) ajusta uma reta ao longo do tempo, com t = 0, 1, 2, ... O declive diz quanto a faturação sobe por dia.',
+        'Índice sazonal: média de cada dia da semana a dividir pela média geral. Um índice de 1.5 quer dizer que esse dia vende 50% acima de um dia médio.',
+        'Previsão simples = tendência no dia futuro × índice desse dia da semana. É fácil de explicar a quem decide, o que vale muito.',
+        'Picos excecionais (o Natal) puxam a tendência para cima. Calcula-a com e sem esses dias e mostra a diferença.',
+        'Para previsões a sério usam-se modelos como o ETS ou o Prophet, e mede-se o erro em dados que o modelo não viu. Esta etapa ensina a lógica que esses modelos automatizam.',
+      ],
+      beginnerSteps: [
+        'Soma a faturação por dia e converte o índice para datas com pd.to_datetime.',
+        'Cria t = np.arange(len(serie)) e ajusta a reta com np.polyfit(t, serie.values, 1).',
+        'Agrupa por serie.index.day_of_week, faz a média e divide pela média geral.',
+        'Para segunda-feira, 5 de janeiro de 2026, t = 369 (365 dias de 2025 mais 4). Multiplica a tendência nesse dia pelo índice de segunda.',
+      ],
+      proPractice: 'Em retalho, esta decomposição serve para planear turnos e stock: se o domingo vale 1,5 vezes um dia médio, é nesse dia que fazem falta mais pessoas na caixa. Apresenta sempre a previsão com uma margem (por exemplo, mais ou menos 20%), nunca como um número exato.',
+      commonPitfall: 'Prever com uma média simples de todos os dias: para uma segunda-feira, isso sobrestima, porque a média inclui os fins de semana fortes.',
+      referenceTitle: 'Decomposição simples de uma série',
+      referenceRows: [
+        { syntax: 'np.polyfit(t, y, 1)', meaning: 'Reta de tendência (declive, ordenada)', example: '+0.25 € por dia' },
+        { syntax: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean()', meaning: 'Índice sazonal semanal', example: 'domingo 1.50, quinta 0.66' },
+        { syntax: '(ordenada + declive * t_futuro) * indice[dia]', meaning: 'Previsão tendência × sazonalidade', example: 'segunda 5/1/2026: 109.90 €' },
+        { syntax: 'serie.rolling(7).mean()', meaning: 'Média móvel semanal (alisa as ondas)', example: 'Mostra a maré' },
+      ],
+      engine: 'python',
+      exampleCode: `import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+serie = df.groupby("data")["sub"].sum()
+serie.index = pd.to_datetime(serie.index)
+
+fig, ax = plt.subplots(figsize=(7, 3))
+ax.plot(serie.index, serie.values, alpha=0.4, label="por dia")
+ax.plot(serie.index, serie.rolling(7).mean(), label="média móvel 7 dias")
+ax.set_ylim(bottom=0)
+ax.set_title("A maré (média móvel) e as ondas (dias)")
+ax.legend()
+fig.tight_layout()`,
+      pythonChallenge: {
+        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) serie: faturação por dia, com índice de datas (pd.to_datetime).\n2) declive e ordenada da tendência linear (np.polyfit com t = 0, 1, 2, ...).\n3) indice_semanal: média de cada dia da semana (0 = segunda) a dividir pela média geral; guarda dia_mais_forte e dia_mais_fraco.\n4) previsao_segunda: previsão para segunda-feira, 5 de janeiro de 2026 (t = 369) = tendência × índice de segunda.\nO efeito do Natal na tendência está no treino 1.',
+        starterCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+serie = None
+declive = None
+ordenada = None
+indice_semanal = None
+dia_mais_forte = None
+dia_mais_fraco = None
+previsao_segunda = None
+print(declive, indice_semanal, previsao_segunda)`,
+        solutionCode: `import numpy as np
+import pandas as pd
+
+df = pd.read_csv("dados/vendas_sazonais.csv")
+df["sub"] = df["quantidade"] * df["preco"]
+
+serie = df.groupby("data")["sub"].sum()
+serie.index = pd.to_datetime(serie.index)
+
+t = np.arange(len(serie))
+declive, ordenada = np.polyfit(t, serie.values, 1)
+
+indice_semanal = serie.groupby(serie.index.day_of_week).mean() / serie.mean()
+dia_mais_forte = int(indice_semanal.idxmax())
+dia_mais_fraco = int(indice_semanal.idxmin())
+
+previsao_segunda = (ordenada + declive * 369) * indice_semanal[0]
+print(f"Tendência: +{declive:.2f} € por dia")
+print(indice_semanal.round(2))
+print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
+        checks: [
+          { label: 'serie com 365 dias e índice de datas', expr: 'len(serie) == 365 and str(serie.index.dtype).startswith("datetime64")', actualExpr: '(len(serie), str(serie.index.dtype)) if serie is not None else None', hint: 'serie = df.groupby("data")["sub"].sum() e serie.index = pd.to_datetime(serie.index).' },
+          { label: 'Tendência: +0.247 € por dia (ordenada 57.60 €)', expr: 'abs(float(declive) - 0.24692) < 0.0005 and abs(float(ordenada) - 57.5987) < 0.01', actualExpr: '(declive, ordenada)', hint: 't = np.arange(len(serie)) e declive, ordenada = np.polyfit(t, serie.values, 1).' },
+          { label: 'Índice semanal: domingo é o mais forte (1.50) e quinta o mais fraco (0.66)', expr: 'dia_mais_forte == 6 and dia_mais_fraco == 3 and abs(float(indice_semanal[6]) - 1.495) < 0.001 and abs(float(indice_semanal.mean()) - 1.0) < 0.02', actualExpr: '(dia_mais_forte, dia_mais_fraco)', hint: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean(). Domingo é 6 e quinta é 3.' },
+          { label: 'previsao_segunda (109.90 €)', expr: 'abs(float(previsao_segunda) - 109.895) < 0.01', actualExpr: 'previsao_segunda', hint: '(ordenada + declive * 369) * indice_semanal[0].' },
+        ],
+      },
+      quiz: {
+        question: 'O índice sazonal do domingo é 1,5 e a tendência prevê 100 € para o próximo domingo. Qual é a previsão?',
+        options: [
+          '100 €, porque a tendência já inclui o efeito de todos os dias da semana.',
+          '150 €: a tendência vezes o índice do domingo.',
+          '101,5 €: a tendência mais o índice.',
+          '66,7 €: a tendência a dividir pelo índice.',
+        ],
+        correctIndex: 1,
+        explanation: 'O índice multiplica: 1,5 quer dizer 50% acima de um dia médio. A tendência dá o nível; o índice ajusta-o ao dia da semana.',
       },
     },
   ],

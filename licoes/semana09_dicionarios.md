@@ -1,6 +1,6 @@
 # Semana 9: Dicionários e contadores por chave
 
-> **Na app:** Python, etapa 08. [abrir a etapa 08](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-08-dicionarios). Tem 2 treinos extra.
+> **Na app:** Python, etapa 09. [abrir a etapa 09](https://web-one-nu-34.vercel.app/#vista=academia&trilha=python&licao=py-08-dicionarios). Tem 2 treinos extra.
 
 ## A analogia: a tabela de preços afixada atrás do balcão
 
