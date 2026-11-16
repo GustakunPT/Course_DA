@@ -4,6 +4,8 @@ Cria 4 ficheiros CSV na pasta dados/:
   - produtos.csv         (catálogo de 15 artigos)
   - clientes.csv         (fichas de 120 clientes)
   - vendas.csv           (base uniforme de reconciliação: 5 078 linhas)
+  - bicicletas_viagens_sujas.csv / bicicletas_viagens_limpas.csv
+                         (viagens de bicicletas partilhadas, com e sem problemas)
   - vendas_sazonais.csv  (sazonalidade e tendências reais de retalho:
                           crescimento de coortes de clientes, verão, Páscoa,
                           Natal, efeito dia de salário e fim de semana)
@@ -18,7 +20,8 @@ Como correr (a partir da pasta do projeto):
 
 import csv
 import random
-from datetime import date, timedelta
+import unicodedata
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 SEMENTE = 42
@@ -190,6 +193,152 @@ def gerar_vendas_sazonais(n_clientes, ano=2025):
     return caminho, linhas
 
 
+COLUNAS_BICICLETAS = [
+    "viagem_id", "inicio", "fim", "estacao_partida", "estacao_chegada",
+    "duracao_min", "tipo_cliente", "valor_eur",
+]
+
+ESTACOES = [
+    "Estação Central", "Estação Jardim Botânico", "Estação Ribeira", "Estação Universidade",
+    "Estação São Bento", "Estação do Mercado", "Estação Praça Nova", "Estação Farol",
+    "Estação Parque Verde", "Estação Hospital", "Estação Avenida da Liberdade", "Estação Cais do Sodré",
+]
+
+
+def _sem_acentos(texto):
+    return "".join(c for c in unicodedata.normalize("NFD", texto) if unicodedata.category(c) != "Mn")
+
+
+def _variante_estacao(nome, rng):
+    escolha = rng.randrange(4)
+    if escolha == 0:
+        return f"  {nome.lower()} "
+    if escolha == 1:
+        return nome.upper()
+    if escolha == 2:
+        return _sem_acentos(nome)
+    return nome.replace("Estação", "Est.", 1)
+
+
+def _formatar_data(momento, formato):
+    if formato == "iso":
+        return momento.strftime("%Y-%m-%d %H:%M")
+    if formato == "dd_mm":
+        return momento.strftime("%d/%m/%Y %H:%M")
+    # hora sem zero à esquerda (pode ter 1 algarismo)
+    return f"{momento:%d-%m-%Y} {momento.hour}h{momento.minute:02d}"
+
+
+def gerar_viagens_bicicletas(n=20000):
+    """Gera viagens de bicicletas partilhadas: versão suja e versão limpa.
+
+    Devolve (sujas, limpas, contagens). Cada problema cai em linhas próprias,
+    sem outros problemas, para as contagens não dependerem da ordem.
+    """
+    rng = random.Random(SEMENTE + 200)
+    inicio_ano = datetime(2025, 1, 1)
+
+    # Viagens boas, já limpas
+    base = []
+    for _ in range(n):
+        inicio = inicio_ano + timedelta(minutes=rng.randrange(365 * 24 * 60))
+        duracao = rng.randint(3, 90)
+        tipo = "Anual" if rng.random() < 0.6 else "Ocasional"
+        valor = 0.0 if tipo == "Anual" else rng.randint(1, 12) * 0.5
+        base.append({
+            "inicio": inicio,
+            "fim": inicio + timedelta(minutes=duracao),
+            "partida": rng.choice(ESTACOES),
+            "chegada": rng.choice(ESTACOES),
+            "duracao": duracao,
+            "tipo": tipo,
+            "valor": valor,
+        })
+    base.sort(key=lambda b: b["inicio"])
+
+    # Cada linha recebe no máximo um problema
+    indices = list(range(n))
+    rng.shuffle(indices)
+    quantidades = [
+        ("duplicadas", 300), ("duracao_impossivel", 200), ("fim_antes_inicio", 150),
+        ("data_formato_dd_mm", 1600), ("data_formato_h", 1200), ("estacao_variante", 2000),
+        ("tipo_vazio", 600), ("tipo_variante", 1600), ("valor_vazio", 500), ("valor_virgula", 800),
+    ]
+    problema = {}
+    posicao = 0
+    for nome, qtd in quantidades:
+        if nome in ("valor_vazio", "valor_virgula"):
+            # só as linhas Ocasional têm valor com decimais
+            ocasionais = [i for i in indices[posicao:] if base[i]["tipo"] == "Ocasional"][:qtd]
+            resto = set(ocasionais)
+            indices = indices[:posicao] + ocasionais + [i for i in indices[posicao:] if i not in resto]
+        for i in indices[posicao:posicao + qtd]:
+            problema[i] = nome
+        posicao += qtd
+    contagens = dict(quantidades)
+
+    sujas, limpas = [], []
+    for i, b in enumerate(base):
+        tipo = problema.get(i)
+        viagem_id = f"V{i + 1:06d}"
+        inicio, fim, duracao = b["inicio"], b["fim"], b["duracao"]
+        partida, chegada = b["partida"], b["chegada"]
+        tipo_cliente, valor = b["tipo"], b["valor"]
+
+        if tipo == "duracao_impossivel":
+            duracao = rng.choice([0, -rng.randint(1, 60), rng.randint(1500, 5000)])
+            fim = inicio + timedelta(minutes=max(duracao, 0))
+        elif tipo == "fim_antes_inicio":
+            fim = inicio - timedelta(minutes=duracao)
+
+        formato = {"data_formato_dd_mm": "dd_mm", "data_formato_h": "h"}.get(tipo, "iso")
+        suja = {
+            "viagem_id": viagem_id,
+            "inicio": _formatar_data(inicio, formato),
+            "fim": _formatar_data(fim, formato),
+            "estacao_partida": partida,
+            "estacao_chegada": chegada,
+            "duracao_min": str(duracao),
+            "tipo_cliente": tipo_cliente,
+            "valor_eur": f"{valor:.2f}",
+        }
+        limpa = dict(suja, inicio=_formatar_data(inicio, "iso"), fim=_formatar_data(fim, "iso"))
+
+        if tipo == "estacao_variante":
+            campo = rng.choice(["estacao_partida", "estacao_chegada"])
+            suja[campo] = _variante_estacao(suja[campo], rng)
+        elif tipo == "tipo_vazio":
+            suja["tipo_cliente"] = ""
+            limpa["tipo_cliente"] = "Desconhecido"
+        elif tipo == "tipo_variante":
+            suja["tipo_cliente"] = rng.choice(
+                [tipo_cliente.lower(), tipo_cliente.upper(), f" {tipo_cliente} "]
+            )
+        elif tipo == "valor_vazio":
+            suja["valor_eur"] = ""
+            limpa["valor_eur"] = ""
+        elif tipo == "valor_virgula":
+            suja["valor_eur"] = suja["valor_eur"].replace(".", ",")
+
+        sujas.append(suja)
+        if tipo == "duplicadas":
+            sujas.append(dict(suja))  # linha igual, mesmo viagem_id
+        if tipo not in ("duracao_impossivel", "fim_antes_inicio"):
+            limpas.append(limpa)
+
+    return sujas, limpas, contagens
+
+
+def escrever_bicicletas():
+    sujas, limpas, contagens = gerar_viagens_bicicletas()
+    for nome, linhas in (("bicicletas_viagens_sujas.csv", sujas), ("bicicletas_viagens_limpas.csv", limpas)):
+        with open(PASTA_DADOS / nome, "w", newline="", encoding="utf-8") as f:
+            escritor = csv.DictWriter(f, fieldnames=COLUNAS_BICICLETAS)
+            escritor.writeheader()
+            escritor.writerows(linhas)
+    return len(sujas), len(limpas), contagens
+
+
 def main():
     random.seed(SEMENTE)
     PASTA_DADOS.mkdir(exist_ok=True)
@@ -197,11 +346,13 @@ def main():
     _, n_clientes = gerar_clientes()
     _, n_vendas = gerar_vendas(n_clientes)
     _, n_sazonais = gerar_vendas_sazonais(n_clientes)
+    n_sujas, n_limpas, _ = escrever_bicicletas()
     print(f"Dados criados em {PASTA_DADOS}")
     print(
         f"  produtos: {len(PRODUTOS)} | clientes: {n_clientes} | "
         f"vendas base: {n_vendas} | vendas sazonais: {n_sazonais}"
     )
+    print(f"  bicicletas: {n_sujas} viagens sujas | {n_limpas} viagens limpas")
 
 
 if __name__ == "__main__":
