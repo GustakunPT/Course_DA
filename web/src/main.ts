@@ -50,7 +50,7 @@ import {
   vigiarAparelho,
 } from './ui/mobileEditor';
 import { applyTheme, loadSavedTheme, THEME_OPTIONS, type ThemeId } from './ui/theme';
-import { applyFontSize, FONT_SIZE_OPTIONS, type FontSizeId, loadSavedFontSize, renderFontSizeMenu, saveFontSize } from './ui/fontSize';
+import { applyFontSize, FONT_SIZE_OPTIONS, type FontSizeId, loadSavedFontSize, NORMAL, renderFontSizeMenu, saveFontSize } from './ui/fontSize';
 
 const state: AppState = {
   view: 'academia',
@@ -1045,7 +1045,7 @@ function renderApp(): void {
                 data-action="toggle-font-menu"
                 aria-haspopup="menu"
                 aria-expanded="${state.showFontMenu}"
-                aria-label="Tamanho do texto: ${escapeHtml((FONT_SIZE_OPTIONS.find((o) => o.id === state.fontSize) ?? FONT_SIZE_OPTIONS[1]).label)}"
+                aria-label="Tamanho do texto: ${escapeHtml((FONT_SIZE_OPTIONS.find((o) => o.id === state.fontSize) ?? NORMAL).label)}"
                 title="Tamanho do texto"
               ><span aria-hidden="true">A<small>A</small></span></button>
               ${state.showFontMenu ? renderFontSizeMenu(state.fontSize) : ''}

@@ -4,7 +4,16 @@
 // aluno já escolheu no próprio browser.
 import { escapeHtml } from './html';
 
-export type FontSizeId = 'pequeno' | 'normal' | 'grande' | 'muito-grande' | 'enorme';
+export type FontSizeId =
+  | 'minimo'
+  | 'minusculo'
+  | 'muito-pequeno'
+  | 'compacto'
+  | 'pequeno'
+  | 'normal'
+  | 'grande'
+  | 'muito-grande'
+  | 'enorme';
 
 export interface FontSizeOption {
   id: FontSizeId;
@@ -13,12 +22,19 @@ export interface FontSizeOption {
 }
 
 export const FONT_SIZE_OPTIONS: FontSizeOption[] = [
+  { id: 'minimo', label: 'Mínimo', percent: 70 },
+  { id: 'minusculo', label: 'Minúsculo', percent: 75 },
+  { id: 'muito-pequeno', label: 'Muito pequeno', percent: 80 },
+  { id: 'compacto', label: 'Compacto', percent: 85 },
   { id: 'pequeno', label: 'Pequeno', percent: 90 },
   { id: 'normal', label: 'Normal', percent: 100 },
   { id: 'grande', label: 'Grande', percent: 112.5 },
   { id: 'muito-grande', label: 'Muito grande', percent: 125 },
   { id: 'enorme', label: 'Enorme', percent: 140 },
 ];
+
+/** A opção Normal (100%), usada quando a escolha não é reconhecida. */
+export const NORMAL = FONT_SIZE_OPTIONS.find((o) => o.id === 'normal')!;
 
 const STORAGE_FONT_KEY = 'mercearia_academia_fonte_v1';
 
@@ -41,7 +57,7 @@ export function saveFontSize(id: FontSizeId): void {
 
 /** Aplica o tamanho à página inteira. */
 export function applyFontSize(id: FontSizeId): void {
-  const opt = FONT_SIZE_OPTIONS.find((o) => o.id === id) ?? FONT_SIZE_OPTIONS[1];
+  const opt = FONT_SIZE_OPTIONS.find((o) => o.id === id) ?? NORMAL;
   document.documentElement.style.fontSize = opt.percent === 100 ? '' : `${opt.percent}%`;
 }
 

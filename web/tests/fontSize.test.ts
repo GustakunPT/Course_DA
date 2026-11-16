@@ -9,6 +9,12 @@ describe('opções de tamanho do texto', () => {
     expect(FONT_SIZE_OPTIONS.length).toBeGreaterThanOrEqual(4);
     expect(FONT_SIZE_OPTIONS.find((o) => o.id === 'normal')?.percent).toBe(100);
   });
+
+  it('há pelo menos 5 tamanhos abaixo do Normal, até 70%', () => {
+    const pequenos = FONT_SIZE_OPTIONS.filter((o) => o.percent < 100);
+    expect(pequenos.length).toBeGreaterThanOrEqual(5);
+    expect(Math.min(...pequenos.map((o) => o.percent))).toBe(70);
+  });
 });
 
 describe('escolha guardada', () => {
