@@ -23,7 +23,7 @@ vi.stubGlobal('fetch', async (url: string) => {
   return new Response(texto);
 });
 
-const { allTracks, totalLessonsCount } = await import('../src/data/curriculum');
+const { allTracks, totalLessonsCount, cheatsheets } = await import('../src/data/curriculum');
 const { runSqlQuery } = await import('../src/engines/sqlEngine');
 const { createInitialGitState, runGitSimulator } = await import('../src/engines/gitEngine');
 
@@ -156,5 +156,24 @@ describe('base SQL da bancada', () => {
     expect(Number(res.rows[0][0])).toBeGreaterThan(0);
     const total = await runSqlQuery('SELECT ROUND(SUM(subtotal), 2) FROM vendas_detalhe');
     expect(total.rows[0][0]).toBe(26902.89);
+  });
+});
+
+describe('fichas da Referência', () => {
+  it('cobrem todas as categorias do filtro', () => {
+    const cats = new Set(cheatsheets.map((c) => c.category));
+    for (const c of ['Python', 'SQL', 'Pandas', 'NumPy & Gráficos', 'Estatística', 'Git', 'BI & DAX']) expect(cats.has(c as never), c).toBe(true);
+  });
+
+  it.each(cheatsheets.filter((c) => c.tryEngine === 'sql').map((c) => [c.topic, c.trySnippet!] as const))('"%s": o exemplo SQL corre', async (_t, sql) => {
+    const res = await runSqlQuery(sql);
+    expect(res.error).toBeUndefined();
+    expect(res.rows.length).toBeGreaterThan(0);
+  });
+
+  it.each(cheatsheets.filter((c) => c.tryEngine === 'git').map((c) => [c.topic, c.trySnippet!] as const))('"%s": o exemplo Git corre', (_t, cmds) => {
+    const { output } = runGitSimulator(createInitialGitState(), cmds);
+    expect(output).not.toContain('não suportado');
+    expect(output).not.toContain('fatal');
   });
 });

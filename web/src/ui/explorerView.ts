@@ -116,7 +116,7 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
 
             <label for="f-categoria" class="visually-hidden">Filtrar por categoria</label>
             <select id="f-categoria" name="categoria" class="select-field" data-filter="categoria">
-              <option value="todas" ${filters.categoria === 'todas' ? 'selected' : ''}>Todas as categorias (5)</option>
+              <option value="todas" ${filters.categoria === 'todas' ? 'selected' : ''}>Todas as categorias (${categorias.length})</option>
               ${categorias.map((c) => `<option value="${escapeHtml(c)}" ${filters.categoria === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
             </select>
 

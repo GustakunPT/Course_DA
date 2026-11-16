@@ -3,7 +3,7 @@ import { escapeHtml } from './html';
 
 
 export function renderCheatsheetHtml(query: string, categoryFilter: string): string {
-  const categories = ['Todas', 'Python', 'SQL', 'Pandas', 'Git', 'BI & DAX'];
+  const categories = ['Todas', 'Python', 'SQL', 'Pandas', 'NumPy & Gráficos', 'Estatística', 'Git', 'BI & DAX'];
   const q = query.trim().toLowerCase();
 
   const filtered = cheatsheets.filter((item) => {

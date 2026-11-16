@@ -279,6 +279,17 @@ function renderPracticeSwitcher(lesson: Lesson): string {
   return `<div class="practice-switcher" role="group" aria-label="Desafio principal e exercícios de treino">${botoes.join('')}</div>`;
 }
 
+/** Atalhos da barra de símbolos no telemóvel, de acordo com o motor da bancada. */
+function simbolosRapidos(engine: EngineKind): [string, string][] {
+  if (engine === 'sql') {
+    return [['SELECT', 'SELECT '], ['FROM', 'FROM '], ['WHERE', 'WHERE '], ['GROUP BY', 'GROUP BY '], ['*', '*'], ['=', '='], ["'", "'"], ['(', '('], [')', ')'], [',', ','], [';', ';']];
+  }
+  if (engine === 'git') {
+    return [['git ', 'git '], ['add .', 'add .'], ['commit -m', 'commit -m "'], ['switch', 'switch '], ['-c', '-c '], ['"', '"'], ['.', '.']];
+  }
+  return [['⇥ Tab', '    '], [':', ':'], ['(', '('], [')', ')'], ['[', '['], [']', ']'], ['"', '"'], ['=', '='], ['==', ' == '], ['.', '.'], [',', ', '], ['#', '# ']];
+}
+
 function renderAcademyWorkspace(): string {
   const track = currentTrack();
   const lesson = currentLesson();
@@ -298,7 +309,7 @@ function renderAcademyWorkspace(): string {
         : activePythonChallenge(lesson)?.description ??
           activeSqlChallenge(lesson)?.description ??
           activeGitChallenge(lesson)?.description ??
-          'Execute o código abaixo para validar esta etapa.';
+          'Corre o código abaixo para validar esta etapa.';
 
   const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
   const workbenchRatio = 100 - lessonRatio;
@@ -307,7 +318,7 @@ function renderAcademyWorkspace(): string {
     <div class="layout-bar" role="region" aria-label="Controlo de painéis e redimensionamento">
       <div class="layout-controls">
         <button type="button" class="btn mobile-index-toggle" data-action="toggle-mobile-sidebar">
-          ${state.sidebarOpenMobile ? 'Ocultar índice' : `Etapas (${lessonIdx + 1}/${track.lessons.length})`}
+          ${state.sidebarOpenMobile ? 'Ocultar índice' : `Índice (etapa ${escapeHtml(lesson.code)})`}
         </button>
         <button type="button" class="btn" data-action="toggle-desktop-sidebar">
           ${sidebarCollapsed ? 'Mostrar índice' : 'Recolher índice'}
@@ -625,17 +636,9 @@ function renderAcademyWorkspace(): string {
         </div>
 
         <div class="mobile-symbols-bar" aria-label="Símbolos rápidos de código">
-          <button type="button" class="sym-btn" data-insert="SELECT ">SELECT </button>
-          <button type="button" class="sym-btn" data-insert="FROM ">FROM </button>
-          <button type="button" class="sym-btn" data-insert="WHERE ">WHERE </button>
-          <button type="button" class="sym-btn" data-insert="*">*</button>
-          <button type="button" class="sym-btn" data-insert="=">=</button>
-          <button type="button" class="sym-btn" data-insert="'">'</button>
-          <button type="button" class="sym-btn" data-insert="&quot;">&quot;</button>
-          <button type="button" class="sym-btn" data-insert="(">(</button>
-          <button type="button" class="sym-btn" data-insert=")">)</button>
-          <button type="button" class="sym-btn" data-insert=",">,</button>
-          <button type="button" class="sym-btn" data-insert=";">;</button>
+          ${simbolosRapidos(engine)
+            .map(([texto, valor]) => `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`)
+            .join('')}
         </div>
 
         <div class="code-editor-shell" id="editor-shell">

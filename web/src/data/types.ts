@@ -82,7 +82,7 @@ export interface Track {
 }
 
 export interface CheatsheetEntry {
-  category: 'Python' | 'SQL' | 'Pandas' | 'Git' | 'BI & DAX';
+  category: 'Python' | 'SQL' | 'Pandas' | 'NumPy & Gráficos' | 'Estatística' | 'Git' | 'BI & DAX';
   topic: string;
   syntax: string;
   description: string;

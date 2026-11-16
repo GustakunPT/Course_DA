@@ -95,7 +95,7 @@ export const lessonPedagogyMap: Record<string, PedagogicalNotes> = {
       'Converte sempre int(v["quantidade"]) e float(v["preco"]) antes de multiplicar.',
     ],
     proPractice: 'Validar os totais de um ficheiro bruto em Python puro antes de o carregar na base de dados é uma técnica clássica de reconciliação de dados.',
-    commonPitfall: 'Multiplicar linha["quantidade"] * float(linha["preco"]) sem converter a quantidade para int, o que repete o texto!',
+    commonPitfall: 'Multiplicar linha["quantidade"] * float(linha["preco"]) sem converter a quantidade para int, o que repete o texto.',
   },
   'sql-01-select': {
     beginnerSteps: [
@@ -376,7 +376,7 @@ export const careerProTrack: Track = {
         'Devolve um dicionário ou resumo com as métricas de execução do pipeline.',
       ],
       proPractice: 'Em equipas de Engenharia e Análise de Dados (dbt, Airflow, Fabric), todo o pipeline regista logs de contagem antes e depois da transformação.',
-      commonPitfall: 'Substituir o ficheiro original com os dados limpos: se descobrires um bug na tua regra amanhã, perdeste os dados brutos para reprocessar!',
+      commonPitfall: 'Substituir o ficheiro original com os dados limpos: se descobrires um bug na tua regra amanhã, perdeste os dados brutos para reprocessar.',
       referenceTitle: 'Arquitetura Medalhão (Bronze / Silver / Gold)',
       referenceRows: [
         { syntax: 'Camada Bronze (Raw)', meaning: 'Dados brutos imutáveis tal como chegaram', example: 'dados/vendas_sujas.csv (12 linhas)' },
@@ -593,7 +593,7 @@ ORDER BY ltv_eur DESC;`,
           return {
             passed: ok,
             message: ok
-              ? `Excelente! Encontraste os ${rows.length} clientes que visitaram a Mercearia em todos os 12 meses do ano.`
+              ? `Encontraste os ${rows.length} clientes que visitaram a Mercearia em todos os 12 meses do ano.`
               : rows.length !== 12
                 ? `Obtiveste ${rows.length} clientes; devem ser 12. Usa HAVING COUNT(DISTINCT SUBSTR(v.data, 1, 7)) = 12.`
                 : 'Os 12 clientes estão certos: falta ordenar por ltv_eur DESC.',
@@ -671,7 +671,7 @@ ORDER BY faturacao_q3 DESC;`,
           return {
             passed: ok,
             message: ok
-              ? 'Perfeito! Consulta limpa, rápida e compatível com índices de data em produção (as 6 categorias da mercearia foram agregadas no Q3).'
+              ? 'Consulta limpa e compatível com índices de data em produção (as 6 categorias da mercearia foram agregadas no Q3).'
               : `Obtiveste ${rows.length} categorias. Verifica o filtro entre 2025-07-01 e 2025-09-30, o GROUP BY p.categoria e o ORDER BY faturacao_q3 DESC (são esperadas as 6 categorias).`,
           };
         },
@@ -698,7 +698,7 @@ ORDER BY faturacao_q3 DESC;`,
       concepts: [
         'LAG(coluna, 1) OVER (ORDER BY mes) vai buscar o valor da linha anterior sem precisar de auto-join.',
         'Variação mensal (MoM %): (faturacao_atual - faturacao_anterior) / faturacao_anterior * 100.',
-        'Para filtrar o resultado de uma Window Function (ex.: ficar apenas com pos <= 2), coloca a Window Function numa CTE e filtra no WHERE exterior!',
+        'Para filtrar o resultado de uma Window Function (ex.: ficar apenas com pos <= 2), coloca a Window Function numa CTE e filtra no WHERE exterior.',
       ],
       beginnerSteps: [
         'Na CTE, calcula a métrica agrupada e a coluna de janela (RANK ou LAG).',
@@ -763,7 +763,7 @@ ORDER BY faturacao DESC;`,
           return {
             passed: ok,
             message: ok
-              ? 'Brilhante! Usaste CTE com ROW_NUMBER() para encontrar o campeão de cada uma das 6 categorias.'
+              ? 'Usaste uma CTE com ROW_NUMBER() para encontrar o campeão de cada uma das 6 categorias.'
               : `Obtiveste ${rows.length} linhas. Filtra WHERE pos = 1 e ordena por faturacao DESC para devolver os 6 líderes das 6 categorias do catálogo.`,
           };
         },
@@ -878,7 +878,7 @@ print(receita_anual, ticket_mediano, quota_mercearia_pct, cidade_maior_ltv)`,
       title: 'Python em Produção: Ficheiros JSON, APIs e Tratamento de Erros (try / except)',
       lede: 'No mundo profissional, metade dos dados não vem em CSV mas sim em formato JSON de APIs web, e o teu código tem de saber lidar com erros sem parar o servidor.',
       analogyTitle: 'Receber encomendas em caixas dentro de caixas e isolar pacotes danificados',
-      analogyBody: 'Um JSON é uma combinação de listas e dicionários uns dentro dos outros (como uma encomenda com dados do fornecedor e uma lista de artigos lá dentro). Com try / except, se uma linha vier avariada, o programa regista o erro e continua a processar as restantes!',
+      analogyBody: 'Um JSON é uma combinação de listas e dicionários uns dentro dos outros (como uma encomenda com dados do fornecedor e uma lista de artigos lá dentro). Com try / except, se uma linha vier avariada, o programa regista o erro e continua a processar as restantes.',
       concepts: [
         'import json: json.loads(texto) transforma texto JSON em dicionários/listas Python; json.dumps(obj) faz o inverso.',
         'try / except ValueError: captura erros de conversão sem deixar o programa rebentar a meio de um lote de 10 000 registos.',
@@ -987,7 +987,7 @@ print(valor_valido, registos_invalidos)`,
       title: 'Python + SQL Integrados: sqlite3, Queries Parametrizadas (?) e pd.read_sql',
       lede: 'Aprende a ligar Python diretamente a uma base de dados SQL, executar queries seguras contra SQL Injection e carregar o resultado direto para um DataFrame Pandas.',
       analogyTitle: 'O Python como maestro que comanda a base de dados SQL',
-      analogyBody: 'Em vez de correres SQL num programa e Python noutro, o módulo sqlite3 (ou psycopg2/SQLAlchemy em PostgreSQL) permite ao teu script Python enviar queries SQL parametrizadas com ? e receber uma tabela Pandas pronta!',
+      analogyBody: 'Em vez de correres SQL num programa e Python noutro, o módulo sqlite3 (ou psycopg2/SQLAlchemy em PostgreSQL) permite ao teu script Python enviar queries SQL parametrizadas com ? e receber uma tabela Pandas pronta.',
       concepts: [
         'sqlite3.connect(":memory:") cria uma base de dados SQL rápida em memória controlada pelo Python.',
         'df.to_sql("vendas", con, index=False) grava qualquer DataFrame Pandas como tabela SQL; pd.read_sql_query(sql, con, params=...) lê de SQL para Pandas.',
@@ -999,7 +999,7 @@ print(valor_valido, registos_invalidos)`,
         'Executa consultas seguras com pd.read_sql_query("SELECT ... WHERE produto = ?", con, params=["Azeite"]).',
       ],
       proPractice: 'No dia a dia empresarial, este é o fluxo mais usado do mundo: o SQL faz os filtros e JOINs pesados dentro do servidor de base de dados e entrega apenas o resultado agregado ao Python/Pandas.',
-      commonPitfall: 'Escrever f"SELECT * FROM vendas WHERE produto = \'{input_utilizador}\'" — vulnerabilidade grava de segurança (SQL Injection)!',
+      commonPitfall: 'Escrever f"SELECT * FROM vendas WHERE produto = \'{input_utilizador}\'" — vulnerabilidade grave de segurança (SQL Injection).',
       referenceTitle: 'Integração Python + SQL (DB-API 2.0 & Pandas)',
       referenceRows: [
         { syntax: 'con = sqlite3.connect(":memory:")', meaning: 'Abre ligação SQLite em Python', example: 'Motor relacional embutido' },

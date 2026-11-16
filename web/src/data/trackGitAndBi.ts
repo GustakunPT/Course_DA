@@ -18,6 +18,8 @@ export const gitTrack: Track = {
         'pwd mostra a pasta atual e ls lista os ficheiros existentes.',
         'git init transforma uma pasta comum num repositório Git.',
         'git status mostra ficheiros modificados, preparados (staged) e não seguidos (untracked).',
+        'O Git guarda fotografias do projeto, chamadas commits. O git status diz-te o que mudou desde a última fotografia.',
+        'Todo o histórico vive na pasta escondida .git: se a apagares, perdes as versões anteriores (os ficheiros atuais ficam).',
       ],
       referenceTitle: 'Comandos de inspeção e arranque',
       referenceRows: [
@@ -43,7 +45,7 @@ git status`,
           return {
             passed: ok,
             message: ok
-              ? 'Repositório inicializado e inspecionado com sucesso!'
+              ? 'Repositório inicializado e inspecionado.'
               : 'Corre git init seguido de git status.',
           };
         },
@@ -71,6 +73,8 @@ git status`,
         'git diff mostra as linhas exatas adicionadas (+) e removidas (-) antes de preparar.',
         'git add <ficheiro> prepara um ficheiro específico; git add . prepara tudo o que não está ignorado.',
         'Boas mensagens de commit são curtas e específicas: "Adiciona query de faturacao por cidade".',
+        'Uma boa mensagem de commit diz o que a mudança faz, no presente: "Corrige o cálculo do IVA" é muito mais útil do que "alterações".',
+        'O git add escolhe o que entra no próximo commit: podes deixar de fora, de propósito, ficheiros que mudaram mas ainda não estão prontos.',
       ],
       referenceTitle: 'Fluxo diário de gravação',
       referenceRows: [
@@ -127,7 +131,9 @@ git log`,
       concepts: [
         'O ficheiro .gitignore lista nomes ou padrões (como *.env ou *_privados.xlsx) que o Git deve ignorar.',
         'Os dados da Mercearia podem ir para o GitHub apenas porque são sintéticos (gerados por src/gerar_dados.py com semente 42).',
-        'Experimenta ver cat .gitignore no simulador: vais notar que .env e dados_clientes_privados.xlsx são bloqueados automaticamente!',
+        'Experimenta ver cat .gitignore no simulador: vais notar que .env e dados_clientes_privados.xlsx são bloqueados automaticamente.',
+        'O .gitignore só funciona para ficheiros que ainda não foram adicionados. Um ficheiro que já está no histórico continua a ser seguido até o tirares com git rm --cached ficheiro.',
+        'Nomes, moradas e contactos de clientes são dados pessoais protegidos pelo RGPD: nunca os ponhas num repositório, muito menos público.',
       ],
       referenceTitle: 'Regras essenciais de .gitignore para dados',
       referenceRows: [
@@ -141,7 +147,7 @@ git init
 git add .env
 git status`,
       gitChallenge: {
-        description: 'Inspecione o ficheiro .gitignore com cat .gitignore, adiciona uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirma com cat .gitignore.',
+        description: 'Inspeciona o ficheiro .gitignore com cat .gitignore, adiciona uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirma com cat .gitignore.',
         starterCommands: `cat .gitignore
 # Acrescenta a regra *.bak ao .gitignore
 `,
@@ -182,6 +188,8 @@ cat .gitignore`,
         'git switch -c nome-do-ramo cria um ramo novo e muda imediatamente para ele.',
         'git branch lista todos os ramos locais e assinala o ramo ativo com asterisco (*).',
         'git switch main seguido de git merge nome-do-ramo integra o trabalho validado.',
+        'Um ramo é uma linha de trabalho paralela: podes experimentar uma análise sem estragar a versão que funciona no main.',
+        'Se duas pessoas mudarem a mesma linha em ramos diferentes, o merge pára com um conflito: o Git marca as duas versões no ficheiro e és tu que escolhes qual fica.',
       ],
       referenceTitle: 'Gestão de ramos em Git',
       referenceRows: [
@@ -218,7 +226,7 @@ git merge limpeza-pandas`,
           return {
             passed: ok,
             message: ok
-              ? 'Fluxo completo de feature branch concluído e integrado em main!'
+              ? 'Fluxo completo de feature branch concluído e integrado em main.'
               : 'Verifica todos os passos: criar ramo limpeza-pandas, fazer commit, voltar a main e correr git merge limpeza-pandas.',
           };
         },
@@ -246,6 +254,8 @@ git merge limpeza-pandas`,
         'git remote add origin <url> liga o teu repositório local à página do GitHub.',
         'git push -u origin main publica os teus commits na nuvem.',
         'Checklist de README forte: contexto do problema, arquitetura das pastas, principais conclusões quantificadas, como correr e limitações conhecidas.',
+        'O git push envia os teus commits para o GitHub e o git pull traz os commits dos outros. Faz pull antes de começar a trabalhar, para não partires de uma versão antiga.',
+        'Um bom projeto de portfólio no GitHub tem um README com a pergunta de negócio, os dados usados, as conclusões (com um gráfico) e como correr o código.',
       ],
       referenceTitle: 'Sincronização com GitHub',
       referenceRows: [
@@ -260,13 +270,13 @@ git commit -m "Publica portfolio completo Mercearia do Bairro"
 git remote add origin https://github.com/analista/mercearia-do-bairro.git
 git push -u origin main`,
       gitChallenge: {
-        description: 'Faz o percurso completo de publicação: git init, git add ., git commit -m "...", configure um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
+        description: 'Faz o percurso completo de publicação: git init, git add ., git commit -m "...", configura um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
         starterCommands: `git init
 # Faz add, commit, remote add e push para main
 `,
         solutionCommands: `git init
 git add .
-git commit -m "Versao 1.0 do portfolio de analisa de dados"
+git commit -m "Versao 1.0 do portfólio de análise de dados"
 git remote add origin https://github.com/analista/mercearia.git
 git push -u origin main`,
         hint: 'Termina com git push -u origin main após ter pelo menos 1 commit.',
@@ -275,7 +285,7 @@ git push -u origin main`,
           return {
             passed: ok,
             message: ok
-              ? `Portfólio publicado em ${state.remoteUrl} no ramo main!`
+              ? `Portfólio publicado em ${state.remoteUrl} no ramo main.`
               : 'Garante que tens um commit gravado e corres git remote add origin ... seguido de git push -u origin main.',
           };
         },
@@ -453,7 +463,7 @@ print(iqr, num_outliers)`,
       concepts: [
         'Ordenam-se os produtos por faturação decrescente.',
         'Calcula-se a quota individual (%) e a quota acumulada (.cumsum()) do primeiro ao último.',
-        'Apenas 2 artigos (Azeite e Queijo) representam quase 40% de toda a faturação da Mercearia!',
+        'Apenas 2 artigos (Azeite e Queijo) representam quase 40% de toda a faturação da Mercearia.',
       ],
       referenceTitle: 'Cálculo de Curva ABC em Pandas',
       referenceRows: [
@@ -500,7 +510,7 @@ print(quota_top2_pct)`,
           'Porque é comprado por poucos clientes diferentes.',
         ],
         correctIndex: 0,
-        explanation: 'Nunca se descontinua um produto Classe C em receita sem verificar se ele é o chamariz que traz o cliente à loja!',
+        explanation: 'Nunca se descontinua um produto Classe C em receita sem verificar se ele é o chamariz que traz o cliente à loja.',
       },
     },
     {
@@ -553,7 +563,7 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
           return {
             passed: ok,
             message: ok
-              ? 'Certo: 6 categorias x 6 cidades = 36 células prontas para uma matriz de Power BI!'
+              ? 'Certo: 6 categorias x 6 cidades = 36 células prontas para uma matriz de Power BI.'
               : `Obtiveste ${rows.length} linhas. Confirma os dois INNER JOIN, GROUP BY p.categoria, c.cidade e ORDER BY p.categoria ASC, faturacao DESC (esperam-se 6 categorias x 6 cidades = 36 linhas).`,
           };
         },
@@ -1950,10 +1960,10 @@ export const cheatsheets: CheatsheetEntry[] = [
   {
     category: 'SQL',
     topic: 'Encontrar registos sem correspondência (Anti-Join)',
-    syntax: 'SELECT c.* FROM clientes c LEFT JOIN vendas v ON v.cliente_id = c.id WHERE v.id IS NULL;',
-    description: 'Descobre clientes que nunca efetuaram compras.',
+    syntax: "SELECT c.* FROM clientes c LEFT JOIN vendas v ON v.cliente_id = c.id AND v.produto = 'Azeite' WHERE v.cliente_id IS NULL;",
+    description: 'Descobre os clientes sem nenhuma linha correspondente (aqui, os que nunca compraram Azeite). A condição sobre vendas vai no ON; no WHERE fica só o IS NULL.',
     tryEngine: 'sql',
-    trySnippet: 'SELECT c.id, c.nome, c.cidade\nFROM clientes c\nLEFT JOIN vendas v ON v.cliente_id = c.id\nWHERE v.id IS NULL;',
+    trySnippet: "SELECT c.id, c.nome, c.cidade\nFROM clientes c\nLEFT JOIN vendas v ON v.cliente_id = c.id AND v.produto = 'Azeite'\nWHERE v.cliente_id IS NULL;",
   },
   {
     category: 'SQL',
@@ -2000,5 +2010,143 @@ export const cheatsheets: CheatsheetEntry[] = [
     topic: 'Faturação linha a linha e Quota % em DAX',
     syntax: 'Faturacao = SUMX(vendas, vendas[quantidade] * vendas[preco])\nQuota % = DIVIDE([Faturacao], CALCULATE([Faturacao], ALL(produtos)))',
     description: 'Padrão fundamental em Power BI para multiplicar colunas e calcular peso percentual.',
+  },
+  {
+    category: 'SQL',
+    topic: 'Filtrar valores em falta (NULL)',
+    syntax: 'WHERE coluna IS NULL   -- e nunca WHERE coluna = NULL',
+    description: 'NULL é "desconhecido": qualquer comparação com = dá desconhecido e a linha não aparece. COALESCE(coluna, 0) troca o NULL por um valor.',
+    tryEngine: 'sql',
+    trySnippet: 'SELECT COUNT(*) AS sem_quantidade\nFROM vendas_sujas\nWHERE quantidade IS NULL;',
+  },
+  {
+    category: 'SQL',
+    topic: 'Ranking com empates: ROW_NUMBER, RANK e DENSE_RANK',
+    syntax: 'DENSE_RANK() OVER (PARTITION BY categoria ORDER BY unidades DESC)',
+    description: 'ROW_NUMBER dá 1, 2, 3 sem empates; RANK dá 1, 1, 3; DENSE_RANK dá 1, 1, 2. Filtra a posição numa CTE.',
+    tryEngine: 'sql',
+    trySnippet: 'WITH u AS (\n  SELECT p.categoria, p.nome, SUM(v.quantidade) AS unidades\n  FROM vendas v JOIN produtos p ON p.id = v.produto_id\n  GROUP BY p.categoria, p.nome\n)\nSELECT *, DENSE_RANK() OVER (PARTITION BY categoria ORDER BY unidades DESC) AS pos\nFROM u\nORDER BY categoria, pos;',
+  },
+  {
+    category: 'SQL',
+    topic: 'Comparar com o mês anterior (LAG)',
+    syntax: 'LAG(faturacao) OVER (ORDER BY mes) AS mes_anterior',
+    description: 'Vai buscar o valor da linha anterior para calcular variações mês a mês.',
+    tryEngine: 'sql',
+    trySnippet: 'WITH m AS (\n  SELECT SUBSTR(data, 1, 7) AS mes, ROUND(SUM(quantidade * preco), 2) AS faturacao\n  FROM vendas GROUP BY mes\n)\nSELECT mes, faturacao, faturacao - LAG(faturacao) OVER (ORDER BY mes) AS variacao\nFROM m;',
+  },
+  {
+    category: 'Pandas',
+    topic: 'Tabela de contagens (pd.crosstab)',
+    syntax: 'pd.crosstab(df["fim_de_semana"], df["produto"])',
+    description: 'Conta quantas vezes aparece cada combinação de dois valores. É a base do teste de qui-quadrado.',
+    tryEngine: 'python',
+    trySnippet: 'import pandas as pd\ndf = pd.read_csv("dados/vendas.csv")\ndf["fim_de_semana"] = pd.to_datetime(df["data"]).dt.day_of_week >= 5\nprint(pd.crosstab(df["fim_de_semana"], df["produto"]).iloc[:, :5])',
+  },
+  {
+    category: 'Pandas',
+    topic: 'Matriz com pivot_table',
+    syntax: 'df.pivot_table(values="sub", index="produto", columns="mes", aggfunc="sum", fill_value=0)',
+    description: 'Transforma linhas em matriz (como uma Tabela Dinâmica do Excel) para comparar categorias ao longo do tempo.',
+    tryEngine: 'python',
+    trySnippet: 'import pandas as pd\ndf = pd.read_csv("dados/vendas.csv")\ndf["sub"] = df["quantidade"] * df["preco"]\ndf["mes"] = df["data"].str.slice(5, 7)\nprint(df.pivot_table(values="sub", index="produto", columns="mes", aggfunc="sum", fill_value=0).round(0).iloc[:5, :6])',
+  },
+  {
+    category: 'Pandas',
+    topic: 'Total do grupo em cada linha (.transform)',
+    syntax: 'df["total_dia"] = df.groupby("data")["sub"].transform("sum")',
+    description: 'Ao contrário do .sum(), mantém o número de linhas: útil para calcular o peso de cada linha no seu grupo.',
+    tryEngine: 'python',
+    trySnippet: 'import pandas as pd\ndf = pd.read_csv("dados/vendas.csv")\ndf["sub"] = df["quantidade"] * df["preco"]\ndf["quota_dia_pct"] = df["sub"] / df.groupby("data")["sub"].transform("sum") * 100\nprint(df[["data", "produto", "sub", "quota_dia_pct"]].head())',
+  },
+  {
+    category: 'NumPy & Gráficos',
+    topic: 'Contas com a coluna inteira (arrays NumPy)',
+    syntax: 'precos = produtos["preco"].to_numpy()\nnp.round(precos * 1.23, 2)',
+    description: 'Um array faz a mesma conta em todos os valores de uma vez, sem ciclos for.',
+    tryEngine: 'python',
+    trySnippet: 'import numpy as np\nimport pandas as pd\nprecos = pd.read_csv("dados/produtos.csv")["preco"].to_numpy()\nprint(np.round(precos * 1.23, 2), precos.mean())',
+  },
+  {
+    category: 'NumPy & Gráficos',
+    topic: 'Números aleatórios reprodutíveis',
+    syntax: 'rng = np.random.default_rng(42)\nrng.choice(valores, size=50)',
+    description: 'A semente fixa faz a simulação dar sempre o mesmo resultado. rng.choice tira valores com reposição (base do bootstrap).',
+    tryEngine: 'python',
+    trySnippet: 'import numpy as np\nrng = np.random.default_rng(42)\nprint(rng.choice([1, 2, 3, 4, 5, 6], size=10))',
+  },
+  {
+    category: 'NumPy & Gráficos',
+    topic: 'Barras horizontais honestas (matplotlib)',
+    syntax: 'fig, ax = plt.subplots()\nax.barh(nomes, valores)\nax.set_xlim(left=0)\nax.set_title("A conclusão numa frase")',
+    description: 'Barras ordenadas, eixo a começar no zero e um título que diz a conclusão.',
+    tryEngine: 'python',
+    trySnippet: 'import matplotlib.pyplot as plt\nfig, ax = plt.subplots(figsize=(6, 3))\nax.barh(["Padaria", "Bebidas", "Mercearia"], [205.5, 1965.8, 13879.84])\nax.set_xlim(left=0)\nax.set_title("A Mercearia vale mais de metade da faturação")\nfig.tight_layout()',
+  },
+  {
+    category: 'NumPy & Gráficos',
+    topic: 'Histograma de uma distribuição',
+    syntax: 'ax.hist(valores, bins=30)',
+    description: 'Mostra como os valores se distribuem: assimetria, valores extremos e onde está a maioria.',
+    tryEngine: 'python',
+    trySnippet: 'import pandas as pd\nimport matplotlib.pyplot as plt\ndf = pd.read_csv("dados/vendas.csv")\nfig, ax = plt.subplots(figsize=(6, 3))\nax.hist(df["quantidade"] * df["preco"], bins=30)\nax.set_title("Muitas vendas pequenas, poucas grandes")\nfig.tight_layout()',
+  },
+  {
+    category: 'Estatística',
+    topic: 'Intervalo de confiança a 95% da média',
+    syntax: 'media ± 1.96 * s.std() / math.sqrt(len(s))',
+    description: 'Diz "quanto vale a média, mais ou menos". Com amostras pequenas, o intervalo fica mais largo.',
+    tryEngine: 'python',
+    trySnippet: 'import math\nimport pandas as pd\ndf = pd.read_csv("dados/vendas.csv")\ns = df["quantidade"] * df["preco"]\nep = s.std() / math.sqrt(len(s))\nprint(f"{s.mean():.2f} € (IC 95%: {s.mean() - 1.96 * ep:.2f} € a {s.mean() + 1.96 * ep:.2f} €)")',
+  },
+  {
+    category: 'Estatística',
+    topic: 'Teste A/B de duas médias',
+    syntax: 't = (a.mean() - b.mean()) / math.sqrt(a.var() / len(a) + b.var() / len(b))\np = math.erfc(abs(t) / math.sqrt(2))',
+    description: 'p < 0.05 indica uma diferença significativa. p ≥ 0.05 não prova igualdade: só diz que faltam provas.',
+    tryEngine: 'python',
+    trySnippet: 'import math\nimport pandas as pd\ndf = pd.read_csv("dados/vendas.csv")\ndf["sub"] = df["quantidade"] * df["preco"]\nfds = pd.to_datetime(df["data"]).dt.day_of_week >= 5\na, b = df[fds]["sub"], df[~fds]["sub"]\nt = (a.mean() - b.mean()) / math.sqrt(a.var() / len(a) + b.var() / len(b))\nprint(round(t, 2), round(math.erfc(abs(t) / math.sqrt(2)), 3))',
+  },
+  {
+    category: 'Estatística',
+    topic: 'Teste A/B de duas proporções e tamanho de amostra',
+    syntax: 'z = (p_a - p_b) / math.sqrt(p * (1 - p) * (1 / n_a + 1 / n_b))\nn = (1.96 + 0.84) ** 2 * (p1*(1-p1) + p2*(1-p2)) / (p2 - p1) ** 2',
+    description: 'Para taxas de conversão (sim/não). Calcula o tamanho de amostra antes de lançar o teste.',
+    tryEngine: 'python',
+    trySnippet: 'import math\nconv_a, n_a, conv_b, n_b = 500, 10_000, 560, 10_000\np = (conv_a + conv_b) / (n_a + n_b)\nz = (conv_b / n_b - conv_a / n_a) / math.sqrt(p * (1 - p) * (1 / n_a + 1 / n_b))\nprint(round(z, 2), round(math.erfc(abs(z) / math.sqrt(2)), 3))',
+  },
+  {
+    category: 'Estatística',
+    topic: 'Regressão linear com numpy',
+    syntax: 'X = np.column_stack([np.ones(n), x1, x2])\ncoef = np.linalg.lstsq(X, y, rcond=None)[0]',
+    description: 'Cada coeficiente é o efeito de uma variável mantendo as outras constantes. Usa o R² ajustado para comparar modelos.',
+    tryEngine: 'python',
+    trySnippet: 'import numpy as np\nx = np.array([1, 2, 3, 4, 5])\ny = np.array([3.1, 4.9, 7.2, 8.8, 11.1])\nX = np.column_stack([np.ones(len(x)), x])\nprint(np.linalg.lstsq(X, y, rcond=None)[0])',
+  },
+  {
+    category: 'Git',
+    topic: 'Ver o que mudou antes de gravar',
+    syntax: 'git status\ngit diff',
+    description: 'O status diz que ficheiros mudaram; o diff mostra as linhas. Vê os dois antes de cada commit.',
+    tryEngine: 'git',
+    trySnippet: 'git init\ngit status\ngit diff',
+  },
+  {
+    category: 'Git',
+    topic: 'Deixar de seguir um ficheiro já gravado',
+    syntax: 'echo "segredo.env" >> .gitignore\ngit rm --cached segredo.env',
+    description: 'O .gitignore não afeta ficheiros que já estão no histórico: é preciso tirá-los com git rm --cached.',
+  },
+  {
+    category: 'BI & DAX',
+    topic: 'Filtrar uma medida (CALCULATE)',
+    syntax: 'Faturação Charcutaria = CALCULATE([Faturacao], produtos[categoria] = "Charcutaria")',
+    description: 'CALCULATE muda o filtro em que a medida é avaliada. É a função mais importante do DAX.',
+  },
+  {
+    category: 'BI & DAX',
+    topic: 'Acumulado do ano e ano anterior',
+    syntax: 'Faturação YTD = TOTALYTD([Faturacao], calendario[data])\nFaturação Ano Anterior = CALCULATE([Faturacao], SAMEPERIODLASTYEAR(calendario[data]))',
+    description: 'Funções de tempo do DAX. Precisam de uma tabela calendário marcada como tabela de datas e ligada às vendas.',
   },
 ];

@@ -18,6 +18,8 @@ export const sqlTrack: Track = {
         'SELECT escolhe colunas específicas; FROM indica a tabela (produtos, clientes ou vendas).',
         'SELECT DISTINCT devolve apenas os valores únicos de uma coluna (por exemplo, as cidades onde temos clientes).',
         'LIMIT restringe o número de linhas devolvidas para explorar tabelas grandes com segurança.',
+        'O SQL não lê a consulta pela ordem em que a escreves: corre FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY e por fim LIMIT. Por isso um nome criado com AS no SELECT ainda não existe dentro do WHERE.',
+        'SELECT * serve para explorar. Em relatórios escreve as colunas pelo nome: a consulta fica mais rápida e não muda de forma quando alguém acrescenta colunas à tabela.',
       ],
       referenceTitle: 'Sintaxe base de consulta (W3Schools SQL)',
       referenceRows: [
@@ -43,7 +45,7 @@ ORDER BY categoria ASC;`,
           return {
             passed: ok,
             message: ok
-              ? 'Perfeito! Encontraste as 6 categorias únicas ordenadas de A a Z.'
+              ? 'Encontraste as 6 categorias únicas ordenadas de A a Z.'
               : `Obtiveste ${rows.length} categorias. Dica: usa DISTINCT e ORDER BY categoria (existem exatamente 6 categorias no catálogo).`,
           };
         },
@@ -69,8 +71,10 @@ ORDER BY categoria ASC;`,
       analogyBody: 'O WHERE funciona linha a linha: cada venda passa pela peneira; se cumprir a regra segue para o resultado, se não cumprir fica de fora.',
       concepts: [
         'BETWEEN inclui ambos os extremos: preco BETWEEN 1.00 AND 3.00 apanha 1.00 e 3.00.',
-        'IN ("Porto", "Gaia") substitui vários OR repetitivos de forma muito mais limpa.',
-        'LIKE usa % como joker para qualquer sequência de caracteres (ex.: nome LIKE "%Silva").',
+        "IN ('Porto', 'Gaia') substitui vários OR repetidos de forma muito mais limpa. Em SQL o texto vai sempre entre aspas simples; as aspas duplas são para nomes de colunas.",
+        "LIKE usa % como joker para qualquer sequência de caracteres (ex.: nome LIKE '%Silva').",
+        'NULL quer dizer "valor desconhecido": WHERE coluna = NULL nunca devolve linhas. Usa WHERE coluna IS NULL ou IS NOT NULL.',
+        'O AND é avaliado antes do OR: WHERE cidade = \'Porto\' OR cidade = \'Braga\' AND preco > 2 só aplica o preço a Braga. Usa parênteses sempre que misturares os dois.',
       ],
       referenceTitle: 'Operadores de filtro em WHERE (W3Schools)',
       referenceRows: [
@@ -97,7 +101,7 @@ WHERE cidade IN ('Porto', 'Matosinhos')
           const cidades = new Set(rows.map((r) => String(r[2])));
           const ok = certas && rows.length === 9 && cidades.has('Porto') && cidades.has('Matosinhos');
           let message = 'Certo: encontraste os 9 clientes Santos (6 do Porto e 3 de Matosinhos).';
-          if (!certas) message = 'Há linhas a mais: confirma o filtro de cidade IN ("Porto", "Matosinhos") e o nome LIKE "%Santos".';
+          if (!certas) message = "Há linhas a mais: confirma o filtro de cidade IN ('Porto', 'Matosinhos') e o nome LIKE '%Santos'.";
           else if (!cidades.has('Matosinhos') || !cidades.has('Porto')) message = 'Falta uma das cidades: devem aparecer clientes do Porto e de Matosinhos.';
           else if (!ok) message = `Encontraste ${rows.length} clientes, mas são 9 no total. Tiraste algum LIMIT?`;
           return { passed: ok, message };
@@ -112,7 +116,7 @@ WHERE cidade IN ('Porto', 'Matosinhos')
           'Têm a mesma precedência, por isso dá erro',
         ],
         correctIndex: 1,
-        explanation: 'Tal como a multiplicação precede a soma, o AND liga mais forte do que o OR. Usa sempre parênteses quando combinas ambos!',
+        explanation: 'Tal como a multiplicação precede a soma, o AND liga mais forte do que o OR. Usa sempre parênteses quando combinas ambos.',
       },
     },
     {
@@ -126,6 +130,8 @@ WHERE cidade IN ('Porto', 'Matosinhos')
         'quantidade * preco AS subtotal cria uma coluna derivada legível no relatório.',
         'ORDER BY coluna DESC ordena do maior para o menor; ASC (padrão) ordena do menor para o maior.',
         'Podes ordenar por duas colunas para desempatar (ORDER BY subtotal DESC, data ASC).',
+        'ORDER BY aceita várias colunas: ORDER BY categoria, preco DESC ordena por categoria e, dentro de cada uma, do mais caro para o mais barato.',
+        'Em SQLite, dividir dois números inteiros dá um inteiro: 7 / 2 = 3. Multiplica por 1.0 (7 * 1.0 / 2) para obter 3.5.',
       ],
       referenceTitle: 'Cálculos e ordenação',
       referenceRows: [
@@ -190,6 +196,8 @@ LIMIT 5;`,
         'COUNT(*) conta linhas; SUM() soma valores; AVG() calcula a média.',
         'Regra de ouro do SQL: toda a coluna no SELECT que não esteja dentro de COUNT/SUM/AVG/MIN/MAX tem de aparecer no GROUP BY.',
         'Com semente 42, a faturação total de vendas é exatamente 26 902,89 € e o dia recorde é 2025-09-14 (217,97 €).',
+        'Todas as colunas do SELECT que não estão dentro de uma função de agregação têm de estar no GROUP BY. O SQLite deixa passar o erro e devolve um valor ao acaso; outros motores recusam a consulta.',
+        'COUNT(*) conta linhas, COUNT(coluna) ignora os NULL e COUNT(DISTINCT coluna) conta valores diferentes: são três perguntas diferentes.',
       ],
       referenceTitle: 'Funções de agregação SQL (W3Schools)',
       referenceRows: [
@@ -242,7 +250,7 @@ LIMIT 3;`,
           'COUNT(coluna) conta só os valores diferentes dessa coluna.',
         ],
         correctIndex: 1,
-        explanation: 'Detalhe crucial em entrevistas de análise de dados: COUNT(coluna) ignora valores NULL!',
+        explanation: 'Detalhe crucial em entrevistas de análise de dados: COUNT(coluna) ignora valores NULL.',
       },
     },
     {
@@ -256,6 +264,8 @@ LIMIT 3;`,
         'WHERE filtra linhas individuais antes de GROUP BY.',
         'HAVING filtra grupos já formados depois de GROUP BY.',
         'Podes usar ambos na mesma query: WHERE para filtrar o mês e HAVING para exigir um mínimo de compras.',
+        'O WHERE corre antes do GROUP BY e não conhece os totais; o HAVING corre depois e é o único sítio onde podes filtrar por SUM, COUNT ou AVG.',
+        'Sempre que o filtro for sobre linhas (e não sobre totais), põe-no no WHERE: o motor agrupa menos linhas e a consulta fica mais rápida.',
       ],
       referenceTitle: 'Pipeline de filtragem em SQL',
       referenceRows: [
@@ -320,6 +330,8 @@ ORDER BY unidades DESC;`,
         'INNER JOIN devolve apenas linhas que têm correspondência nas duas tabelas.',
         'LEFT JOIN mantém todas as linhas da tabela da esquerda, preenchendo com NULL se não houver par à direita (perfeito para achar clientes sem compras!).',
         'Usa sempre aliases curtos (vendas v, clientes c, produtos p) para qualificar v.cliente_id = c.id.',
+        'Um JOIN pode multiplicar linhas: se a tabela da direita tiver duas linhas com a mesma chave, cada venda aparece duas vezes e as somas ficam inflacionadas. Compara COUNT(*) antes e depois do JOIN.',
+        'Num LEFT JOIN, uma condição sobre a tabela da direita escrita no WHERE elimina as linhas sem correspondência e transforma-o num INNER JOIN. Põe essa condição no ON.',
       ],
       referenceTitle: 'Tipos de JOIN em SQL (W3Schools)',
       referenceRows: [
@@ -386,6 +398,8 @@ ORDER BY faturacao_eur DESC;`,
         'CASE WHEN cond THEN valor ELSE outro END cria colunas categóricas ou bandeiras binárias (1/0).',
         'NULLIF(coluna, "") transforma texto vazio "" num verdadeiro NULL.',
         'COALESCE(valor, padrao) devolve o primeiro argumento não nulo.',
+        'O CASE WHEN avalia as condições por ordem e pára na primeira verdadeira: põe as condições mais específicas primeiro.',
+        'COALESCE(a, b, 0) devolve o primeiro valor que não seja NULL. NULLIF(x, 0) transforma 0 em NULL e evita divisões por zero: total / NULLIF(clientes, 0).',
       ],
       referenceTitle: 'Expressões condicionais e nulos',
       referenceRows: [
@@ -457,6 +471,8 @@ ORDER BY qtd_produtos DESC;`,
         'WITH nome_cte AS (...) divide queries complexas em blocos limpos e fáceis de auditar.',
         'SUM(valor) OVER (ORDER BY mes) calcula o total acumulado (running total) linha a linha.',
         'RANK() OVER (PARTITION BY categoria ORDER BY faturacao DESC) cria rankings dentro de cada categoria.',
+        'Uma window function calcula sobre um grupo de linhas sem as juntar: ao contrário do GROUP BY, cada linha continua no resultado.',
+        'ROW_NUMBER dá posições sem empates (1, 2, 3), RANK salta posições depois de um empate (1, 1, 3) e DENSE_RANK não salta (1, 1, 2). É uma das perguntas de SQL mais comuns em entrevistas.',
       ],
       referenceTitle: 'CTEs e funções de janela',
       referenceRows: [
@@ -519,7 +535,7 @@ ORDER BY mes;`,
           return {
             passed: ok,
             message: ok
-              ? 'Brilhante! O acumulado de dezembro fecha exatamente nos 26 902,89 € anuais.'
+              ? 'O acumulado de dezembro fecha exatamente nos 26 902,89 € anuais.'
               : 'Confirma que devolves 3 colunas para os 12 meses e que o último acumulado fecha em 26902.89.',
           };
         },
@@ -542,18 +558,20 @@ ORDER BY mes;`,
       title: 'Subqueries, EXISTS vs IN e UNION ALL',
       lede: 'Domina subconsultas escalares, verificação rápida de existência com EXISTS e consolidação de múltiplas tabelas com UNION ALL.',
       analogyTitle: 'Consultar a média geral antes de escolher os produtos acima da média',
-      analogyBody: 'Como descobres que produtos custam mais do que o preço médio da loja se ainda não sabes qual é a média? Colocas uma query pequenina entre parênteses (SELECT AVG(preco) FROM produtos) dentro do WHERE da query principal!',
+      analogyBody: 'Como descobres que produtos custam mais do que o preço médio da loja se ainda não sabes qual é a média? Colocas uma query pequenina entre parênteses (SELECT AVG(preco) FROM produtos) dentro do WHERE da query principal.',
       concepts: [
         'Subquery escalar: devolve 1 único valor (ex.: WHERE preco > (SELECT AVG(preco) FROM produtos)).',
         'EXISTS (SELECT 1 FROM vendas v WHERE v.cliente_id = c.id ...) pára assim que encontra a primeira linha correspondente, sendo muito rápido em tabelas grandes.',
         'UNION ALL empilha resultados de duas queries com as mesmas colunas sem gastar tempo a remover duplicados; UNION remove duplicados.',
+        'Uma subconsulta correlacionada (que usa colunas da consulta de fora) é avaliada uma vez por linha. Uma CTE ou um JOIN fazem o mesmo e costumam ser mais fáceis de ler.',
+        'UNION remove as linhas repetidas, o que o torna mais lento; UNION ALL junta tudo tal como está. Usa UNION ALL quando sabes que não há repetidos.',
       ],
       beginnerSteps: [
         'Testa primeiro a query interior sozinha para teres a certeza do que ela devolve.',
         'Coloca a query interior entre parênteses curvos () dentro do WHERE ou do FROM.',
         'Usa UNION ALL quando quiseres juntar duas listas de resultados numa tabela vertical única.',
       ],
-      proPractice: 'Em bases de dados de produção com milhões de registos, NOT EXISTS é muito mais seguro do que NOT IN porque NOT IN falha silenciosamente se a subquery devolver um único valor NULL!',
+      proPractice: 'Em bases de dados de produção com milhões de registos, NOT EXISTS é muito mais seguro do que NOT IN porque NOT IN falha silenciosamente se a subquery devolver um único valor NULL.',
       commonPitfall: 'Usar UNION simples por hábito quando não há duplicados para remover, desperdiçando memória num sort desnecessário (prefere UNION ALL).',
       referenceTitle: 'Subconsultas e Operadores de Conjunto',
       referenceRows: [
@@ -618,6 +636,8 @@ ORDER BY preco DESC;`,
         'AVG(faturacao) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) calcula a média móvel trimestral.',
         'JULIANDAY("2025-12-31") - JULIANDAY(MAX(data)) calcula há quantos dias o cliente fez a última compra (Recência).',
         'A análise RFM é o modelo padrão na indústria para segmentar clientes em Campeões, Fiéis e Em Risco.',
+        'ROWS BETWEEN conta linhas, não datas: se faltar um mês na tabela, a "média de 3 meses" passa a cobrir 4. Confirma primeiro que a série não tem buracos.',
+        'Na RFM, cada letra responde a uma pergunta de negócio: está ativo (R)? É fiel (F)? Vale muito (M)? Quem comprou há pouco mas poucas vezes é um cliente novo; quem comprava muito e deixou de vir está em risco.',
       ],
       beginnerSteps: [
         'Prepara primeiro uma CTE com a faturação de cada mês.',
@@ -680,7 +700,7 @@ ORDER BY mes;`,
           return {
             passed: valoresCertos,
             message: valoresCertos
-              ? 'Domínio total de Window Frames! A média móvel do 4.º trimestre mostra claramente a aceleração de Natal.'
+              ? 'A média móvel do 4.º trimestre mostra claramente a aceleração de Natal.'
               : !formaCerta
                 ? 'Confirma que tens 3 colunas (mes, faturacao_mes, media_movel_3m) para os 12 meses de vendas_sazonais.'
                 : 'A forma está certa, mas a média móvel não: confirma ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, ORDER BY mes e ROUND(..., 2).',

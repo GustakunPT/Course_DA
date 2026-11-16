@@ -17,7 +17,7 @@ vi.stubGlobal('fetch', async (url: string | URL | Request, init?: RequestInit) =
   return fetchReal(url, init);
 });
 
-const { allTracks } = await import('../src/data/curriculum');
+const { allTracks, cheatsheets } = await import('../src/data/curriculum');
 const { runPythonCode, setPyodideLoaderForTests } = await import('../src/engines/pythonEngine');
 
 const licoes = allTracks.flatMap((t) => t.lessons).filter((l) => l.pythonChallenge);
@@ -100,6 +100,15 @@ produtos_caros = ["Azeite", "Café", "Queijo"]`],
       const res = await runPythonCode(ch.starterCode, ch.checks);
       const todasCertas = !res.error && (res.checks ?? []).length > 0 && res.checks!.every((c) => c.passed);
       expect(todasCertas).toBe(false);
+    },
+    120_000,
+  );
+
+  it.each(cheatsheets.filter((c) => c.tryEngine === 'python').map((c) => [c.topic, c.trySnippet!] as const))(
+    'Referência "%s": o exemplo Python corre sem erros',
+    async (_topico, codigo) => {
+      const res = await runPythonCode(codigo, []);
+      expect(res.error).toBeUndefined();
     },
     120_000,
   );
