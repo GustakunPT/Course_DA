@@ -1892,3 +1892,11 @@ pre,
 body.tem-ecra-escrita {
   overflow: hidden;
 }
+
+/* O Safari do iPhone faz zoom ao focar um campo com menos de 16px; o zoom desalinhava o ecrã
+   de escrita. As três camadas (texto, cores e números de linha) têm de ter o mesmo tamanho. */
+.ecra-escrita .code-editor,
+.ecra-escrita .code-highlight-layer,
+.ecra-escrita .code-gutter {
+  font-size: max(16px, var(--text-sm));
+}

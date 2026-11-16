@@ -472,7 +472,11 @@ function renderPistas(lesson: Lesson): string {
 // ---- Ecrã de escrita no telemóvel ----
 
 const aparelho = vigiarAparelho(() => {
-  if (state.mobileEditor !== null && !usaEcraDeEscrita()) state.mobileEditor = null;
+  if (state.mobileEditor !== null && !usaEcraDeEscrita()) {
+    // Tira a entrada do ecrã do histórico; o popstate que se segue é ignorado (o ecrã já está fechado).
+    if (history.state?.ecraEscrita) history.back();
+    state.mobileEditor = null;
+  }
   if (state.view === 'academia') renderApp();
 });
 
@@ -918,7 +922,7 @@ function renderAcademyWorkspace(): string {
 
         ${state.mobileEditor === null ? renderPistas(lesson) : ''}
 
-        ${renderOutputRegion(state.output, engine)}
+        ${state.mobileEditor === null ? renderOutputRegion(state.output, engine) : ''}
       </section>
     </div>
   `;
@@ -1262,6 +1266,8 @@ function attachDomListeners(): void {
   }
 
   document.querySelectorAll<HTMLElement>('[data-insert]').forEach((btn) => {
+    // Sem isto o botão tira o foco ao editor e o teclado do telemóvel fecha e reabre a cada símbolo.
+    btn.addEventListener('mousedown', (ev) => ev.preventDefault());
     btn.addEventListener('click', (ev) => {
       ev.preventDefault();
       const textToInsert = btn.dataset.insert;
