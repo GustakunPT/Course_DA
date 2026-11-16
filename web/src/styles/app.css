@@ -1900,3 +1900,70 @@ body.tem-ecra-escrita {
 .ecra-escrita .code-gutter {
   font-size: max(16px, var(--text-sm));
 }
+
+/* Botão "Aa" e menu do tamanho do texto (ao lado do botão do tema). */
+.font-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-font-btn {
+  min-width: 40px;
+  justify-content: center;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.nav-font-btn small {
+  font-size: 0.72em;
+}
+
+.font-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2xs));
+  right: 0;
+  z-index: var(--z-dropdown);
+  display: grid;
+  min-width: 15rem;
+  padding: var(--space-2xs);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+}
+
+.font-menu-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-chip);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.font-menu-item:hover,
+.font-menu-item:focus-visible {
+  background: var(--color-paper-3);
+}
+
+.font-menu-item[aria-checked="true"] {
+  background: var(--color-paper-3);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.font-menu-sample {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.font-menu-pct {
+  color: var(--color-ink-2);
+  font-size: var(--text-xs);
+}

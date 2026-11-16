@@ -50,6 +50,7 @@ import {
   vigiarAparelho,
 } from './ui/mobileEditor';
 import { applyTheme, loadSavedTheme, THEME_OPTIONS, type ThemeId } from './ui/theme';
+import { applyFontSize, FONT_SIZE_OPTIONS, type FontSizeId, loadSavedFontSize, renderFontSizeMenu, saveFontSize } from './ui/fontSize';
 
 const state: AppState = {
   view: 'academia',
@@ -87,9 +88,12 @@ const state: AppState = {
   datasetError: null,
   confirmSolutionLessonId: null,
   mobileEditor: null,
+  fontSize: loadSavedFontSize(),
+  showFontMenu: false,
 };
 
 applyTheme(state.theme);
+applyFontSize(state.fontSize);
 
 
 /** Chave onde fica guardada a resposta à pergunta n (0 = a pergunta principal, que conta para o progresso). */
@@ -1034,6 +1038,18 @@ function renderApp(): void {
               <span class="progress-full">${Object.keys(state.completedLessons).length} / ${totalLessonsCount} etapas · Progresso</span>
               <span class="progress-compact">🏆 ${Object.keys(state.completedLessons).length}/${totalLessonsCount}</span>
             </button>
+            <div class="font-menu-wrap">
+              <button
+                type="button"
+                class="btn nav-theme-btn nav-font-btn"
+                data-action="toggle-font-menu"
+                aria-haspopup="menu"
+                aria-expanded="${state.showFontMenu}"
+                aria-label="Tamanho do texto: ${escapeHtml((FONT_SIZE_OPTIONS.find((o) => o.id === state.fontSize) ?? FONT_SIZE_OPTIONS[1]).label)}"
+                title="Tamanho do texto"
+              ><span aria-hidden="true">A<small>A</small></span></button>
+              ${state.showFontMenu ? renderFontSizeMenu(state.fontSize) : ''}
+            </div>
             <button
               type="button"
               class="btn nav-theme-btn"
@@ -1453,7 +1469,22 @@ function attachDomListeners(): void {
         state.lessonId = allTracks[0].lessons[0].id;
         state.wbTab = 'challenge';
         renderApp();
+      } else if (act === 'toggle-font-menu') {
+        state.showFontMenu = !state.showFontMenu;
+        renderApp();
+        if (state.showFontMenu) document.querySelector<HTMLElement>('.font-menu-item[aria-checked="true"]')?.focus();
+      } else if (act === 'select-font-size') {
+        const id = el.dataset.fontSize as FontSizeId | undefined;
+        if (id && FONT_SIZE_OPTIONS.some((o) => o.id === id)) {
+          state.fontSize = id;
+          saveFontSize(id);
+          applyFontSize(id);
+        }
+        state.showFontMenu = false;
+        renderApp();
+        document.querySelector<HTMLElement>('.nav-font-btn')?.focus();
       } else if (act === 'open-theme-modal') {
+        state.showFontMenu = false;
         state.showThemeModal = true;
         renderApp();
       } else if (act === 'close-theme-modal') {
@@ -2035,7 +2066,21 @@ window.addEventListener('hashchange', () => {
   renderApp();
 });
 
+// O menu do tamanho do texto fecha com um clique fora dele ou com Escape.
+document.addEventListener('click', (ev) => {
+  if (state.showFontMenu && !(ev.target as HTMLElement | null)?.closest('.font-menu-wrap')) {
+    state.showFontMenu = false;
+    renderApp();
+  }
+});
+
 window.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && state.showFontMenu) {
+    state.showFontMenu = false;
+    renderApp();
+    document.querySelector<HTMLElement>('.nav-font-btn')?.focus();
+    return;
+  }
   if (ev.key === 'Escape' && state.mobileEditor !== null && !state.showProgressModal && !state.showThemeModal) {
     fecharEcraDeEscrita();
     return;
