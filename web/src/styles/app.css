@@ -1747,6 +1747,8 @@ pre,
   z-index: calc(var(--z-sticky-nav) + 50);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  /* Sem isto a coluna cresce até à linha de código mais comprida e o ecrã fica mais largo do que o telemóvel. */
+  grid-template-columns: minmax(0, 1fr);
   background: var(--color-paper);
   color: var(--color-ink);
 }
@@ -1763,6 +1765,7 @@ pre,
 .ecra-abas {
   display: flex;
   flex: 1 1 auto;
+  min-width: 0;
   gap: var(--space-3xs);
 }
 
@@ -1828,6 +1831,7 @@ pre,
 .ecra-simbolos {
   display: flex;
   flex: 1 1 auto;
+  min-width: 0;
   gap: var(--space-2xs);
   overflow-x: auto;
   scrollbar-width: none;

@@ -39,6 +39,16 @@ import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
 import { renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
+import {
+  type AbaEscrita,
+  deveUsarEcraDeEscrita,
+  ligarAlturaVisivel,
+  loadPreferirEditorNormal,
+  renderEcraDeEscrita,
+  renderPreviaCodigo,
+  savePreferirEditorNormal,
+  vigiarAparelho,
+} from './ui/mobileEditor';
 import { applyTheme, loadSavedTheme, THEME_OPTIONS, type ThemeId } from './ui/theme';
 
 const state: AppState = {
@@ -76,6 +86,7 @@ const state: AppState = {
   dataset: null,
   datasetError: null,
   confirmSolutionLessonId: null,
+  mobileEditor: null,
 };
 
 applyTheme(state.theme);
@@ -357,6 +368,193 @@ function simbolosRapidos(engine: EngineKind): [string, string][] {
   return [['⇥ Tab', '    '], [':', ':'], ['(', '('], [')', ')'], ['[', '['], [']', ']'], ['"', '"'], ['=', '='], ['==', ' == '], ['.', '.'], [',', ', '], ['#', '# ']];
 }
 
+/** Descrição do que o aluno tem de fazer no separador ativo da bancada. */
+function descricaoDoEnunciado(lesson: Lesson): string {
+  return (
+    state.wbTab === 'sqlfree'
+      ? 'Consola SQLite aberta com todas as tabelas da Mercearia: produtos (15), clientes (120), vendas (5 078) e vendas_sujas (12).'
+      : state.wbTab === 'example'
+        ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
+        : activePythonChallenge(lesson)?.description ??
+          activeSqlChallenge(lesson)?.description ??
+          activeGitChallenge(lesson)?.description ??
+          'Corre o código abaixo para validar esta etapa.'
+  );
+}
+
+/** Título e descrição do desafio (o seletor de treinos incluído). */
+function renderEnunciado(lesson: Lesson): string {
+  const promptDescription = descricaoDoEnunciado(lesson);
+  return `
+        <div class="challenge-prompt">
+          ${state.wbTab === 'challenge' ? renderPracticeSwitcher(lesson) : ''}
+          <strong>${
+            state.wbTab === 'challenge'
+              ? state.practiceIdx > 0
+                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? activeSqlChallenge(lesson)?.title ?? activeGitChallenge(lesson)?.title ?? '')}`
+                : 'Enunciado do desafio'
+              : state.wbTab === 'example'
+                ? 'Laboratório Experimenta'
+                : 'Consulta SQL livre'
+          }</strong>
+          <p>${escapeHtml(promptDescription)}</p>
+        </div>
+  `;
+}
+
+function renderSimbolosBar(engine: EngineKind): string {
+  return `
+        <div class="mobile-symbols-bar" aria-label="Símbolos rápidos de código">
+          ${simbolosRapidos(engine)
+            .map(([texto, valor]) => `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`)
+            .join('')}
+        </div>
+  `;
+}
+
+/** O editor de código (com os ids que os listeners procuram). Existe uma só vez no DOM. */
+function renderEditorShell(editorVal: string, engine: EngineKind): string {
+  return `
+        <div class="code-editor-shell" id="editor-shell">
+          <div class="code-gutter" id="workbench-gutter" aria-hidden="true">${renderLineNumbers(editorVal)}</div>
+          <div class="code-stage">
+            <pre class="code-highlight-layer" id="workbench-highlight" aria-hidden="true"><code>${highlightCode(editorVal, engine)}</code></pre>
+            <label for="workbench-editor" class="visually-hidden">Editor de código interativo</label>
+            <textarea
+              id="workbench-editor"
+              name="code"
+              class="code-editor"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+            >${escapeHtml(editorVal)}</textarea>
+          </div>
+        </div>
+  `;
+}
+
+/** Pistas progressivas do desafio guiado. */
+function renderPistas(lesson: Lesson): string {
+  return `
+        ${
+          state.wbTab === 'challenge' && state.hintLevel > 0
+            ? (() => {
+                const hint1 =
+                  activeSqlChallenge(lesson)?.hint ??
+                  activeGitChallenge(lesson)?.hint ??
+                  activePythonChallenge(lesson)?.checks[0]?.hint ??
+                  lesson.beginnerSteps?.[0] ??
+                  'Revê a sintaxe na tabela de referência à esquerda.';
+                const hint2 =
+                  lesson.beginnerSteps && lesson.beginnerSteps.length > 0
+                    ? lesson.beginnerSteps.join(' · ')
+                    : lesson.commonPitfall ?? 'Compara a tua lógica passo a passo com o exemplo demonstrativo.';
+                return `
+                  <div class="hints-panel" role="region" aria-label="Pistas progressivas">
+                    <div class="hint-card">
+                      <strong>Pista 1:</strong> ${escapeHtml(hint1)}
+                    </div>
+                    ${
+                      state.hintLevel >= 2
+                        ? `<div class="hint-card is-step2">
+                             <strong>Pista 2 (Passo a passo):</strong> ${escapeHtml(hint2)}
+                           </div>`
+                        : ''
+                    }
+                  </div>
+                `;
+              })()
+            : ''
+        }
+  `;
+}
+
+// ---- Ecrã de escrita no telemóvel ----
+
+const aparelho = vigiarAparelho(() => {
+  if (state.mobileEditor !== null && !usaEcraDeEscrita()) state.mobileEditor = null;
+  if (state.view === 'academia') renderApp();
+});
+
+/** O aparelho é de toque e estreito (independentemente da preferência do aluno). */
+function aparelhoPedeEcraDeEscrita(): boolean {
+  return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: false });
+}
+
+function usaEcraDeEscrita(): boolean {
+  return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: loadPreferirEditorNormal() });
+}
+
+let scrollAntesDoEcra = 0;
+let desligarAlturaVisivel: () => void = () => {};
+/** Etapa em que o ecrã foi aberto: se mudar, o ecrã fecha. */
+let etapaDoEcra = '';
+
+function etapaAtual(): string {
+  return `${state.view}|${state.trackId}|${state.lessonId}|${state.wbTab}|${state.practiceIdx}`;
+}
+
+function focarEditor(): void {
+  const ed = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+  if (!ed) return;
+  ed.focus({ preventScroll: true });
+  ed.selectionStart = ed.selectionEnd = ed.value.length;
+}
+
+function abrirEcraDeEscrita(aba: AbaEscrita): void {
+  if (state.mobileEditor === null) {
+    scrollAntesDoEcra = window.scrollY;
+    etapaDoEcra = etapaAtual();
+    history.pushState({ ecraEscrita: true }, '');
+  }
+  state.mobileEditor = aba;
+  renderApp();
+  // No iPhone o teclado só abre se o foco acontecer dentro do gesto do toque: tem de ser já.
+  if (aba === 'codigo') focarEditor();
+}
+
+function fecharEcraDeEscrita(opcoes: { viaHistorico?: boolean } = {}): void {
+  if (state.mobileEditor === null) return;
+  // Se o ecrã tem uma entrada no histórico, quem fecha é o popstate desse Voltar. Fechar já e
+  // voltar depois deixava o histórico dessincronizado quando o aluno reabria antes de o Voltar acabar.
+  if (!opcoes.viaHistorico && history.state?.ecraEscrita) {
+    history.back();
+    return;
+  }
+  const mesmaEtapa = etapaAtual() === etapaDoEcra;
+  state.mobileEditor = null;
+  renderApp();
+  if (mesmaEtapa) window.scrollTo(0, scrollAntesDoEcra);
+}
+
+window.addEventListener('popstate', () => {
+  if (state.mobileEditor === null) return;
+  // Mudar o # também dispara popstate: lê-se primeiro o endereço novo, senão o render seguinte
+  // escreveria no endereço a etapa antiga.
+  syncStateFromUrl();
+  fecharEcraDeEscrita({ viaHistorico: true });
+});
+
+function renderEcraDeEscritaAtual(): string {
+  const lesson = currentLesson();
+  const engine = activeEngine();
+  const enunciado =
+    renderEnunciado(lesson) +
+    renderPistas(lesson) +
+    (state.wbTab === 'challenge' && state.hintLevel < 2
+      ? `<button type="button" class="btn" data-action="next-hint">${state.hintLevel === 0 ? 'Pedir pista (1/2)' : 'Mais uma pista (2/2)'}</button>`
+      : '');
+  return renderEcraDeEscrita({
+    aba: state.mobileEditor ?? 'codigo',
+    enunciadoHtml: enunciado,
+    editorHtml: renderEditorShell(getEditorValue(), engine),
+    resultadoHtml: renderOutputRegion(state.output, engine),
+    simbolos: simbolosRapidos(engine),
+    rotuloExecutar: state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar',
+    aCorrer: state.output.kind === 'loading',
+  });
+}
+
 function renderAcademyWorkspace(): string {
   const track = currentTrack();
   const lesson = currentLesson();
@@ -367,15 +565,6 @@ function renderAcademyWorkspace(): string {
   const engine = activeEngine();
   const editorVal = getEditorValue();
 
-  const promptDescription =
-    state.wbTab === 'sqlfree'
-      ? 'Consola SQLite aberta com todas as tabelas da Mercearia: produtos (15), clientes (120), vendas (5 078) e vendas_sujas (12).'
-      : state.wbTab === 'example'
-        ? 'Modo Experimenta (estilo W3Schools): altera os valores à vontade e executa para observar o comportamento.'
-        : activePythonChallenge(lesson)?.description ??
-          activeSqlChallenge(lesson)?.description ??
-          activeGitChallenge(lesson)?.description ??
-          'Corre o código abaixo para validar esta etapa.';
 
   const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
   const workbenchRatio = 100 - lessonRatio;
@@ -675,41 +864,17 @@ function renderAcademyWorkspace(): string {
           <span class="status-chip desktop-shortcut-chip">Ctrl + Enter para correr</span>
         </div>
 
-        <div class="challenge-prompt">
-          ${state.wbTab === 'challenge' ? renderPracticeSwitcher(lesson) : ''}
-          <strong>${
-            state.wbTab === 'challenge'
-              ? state.practiceIdx > 0
-                ? `Treino ${state.practiceIdx}: ${escapeHtml(activePythonChallenge(lesson)?.title ?? activeSqlChallenge(lesson)?.title ?? activeGitChallenge(lesson)?.title ?? '')}`
-                : 'Enunciado do desafio'
-              : state.wbTab === 'example'
-                ? 'Laboratório Experimenta'
-                : 'Consulta SQL livre'
-          }</strong>
-          <p>${escapeHtml(promptDescription)}</p>
-        </div>
+        ${renderEnunciado(lesson)}
 
-        <div class="mobile-symbols-bar" aria-label="Símbolos rápidos de código">
-          ${simbolosRapidos(engine)
-            .map(([texto, valor]) => `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`)
-            .join('')}
-        </div>
-
-        <div class="code-editor-shell" id="editor-shell">
-          <div class="code-gutter" id="workbench-gutter" aria-hidden="true">${renderLineNumbers(editorVal)}</div>
-          <div class="code-stage">
-            <pre class="code-highlight-layer" id="workbench-highlight" aria-hidden="true"><code>${highlightCode(editorVal, engine)}</code></pre>
-            <label for="workbench-editor" class="visually-hidden">Editor de código interativo</label>
-            <textarea
-              id="workbench-editor"
-              name="code"
-              class="code-editor"
-              spellcheck="false"
-              autocomplete="off"
-              autocapitalize="off"
-            >${escapeHtml(editorVal)}</textarea>
-          </div>
-        </div>
+        ${
+          usaEcraDeEscrita()
+            ? state.mobileEditor === null
+              ? renderPreviaCodigo(highlightCode(editorVal, engine))
+              : ''
+            : `${renderSimbolosBar(engine)}
+        ${renderEditorShell(editorVal, engine)}
+        ${aparelhoPedeEcraDeEscrita() ? '<button type="button" class="link-btn" data-action="usar-ecra-escrita">Usar o ecrã de escrita</button>' : ''}`
+        }
 
         <!-- Resizable Horizontal Splitter: Editor <-> Output -->
         <div
@@ -751,36 +916,7 @@ function renderAcademyWorkspace(): string {
           }
         </div>
 
-        ${
-          state.wbTab === 'challenge' && state.hintLevel > 0
-            ? (() => {
-                const hint1 =
-                  activeSqlChallenge(lesson)?.hint ??
-                  activeGitChallenge(lesson)?.hint ??
-                  activePythonChallenge(lesson)?.checks[0]?.hint ??
-                  lesson.beginnerSteps?.[0] ??
-                  'Revê a sintaxe na tabela de referência à esquerda.';
-                const hint2 =
-                  lesson.beginnerSteps && lesson.beginnerSteps.length > 0
-                    ? lesson.beginnerSteps.join(' · ')
-                    : lesson.commonPitfall ?? 'Compara a tua lógica passo a passo com o exemplo demonstrativo.';
-                return `
-                  <div class="hints-panel" role="region" aria-label="Pistas progressivas">
-                    <div class="hint-card">
-                      <strong>Pista 1:</strong> ${escapeHtml(hint1)}
-                    </div>
-                    ${
-                      state.hintLevel >= 2
-                        ? `<div class="hint-card is-step2">
-                             <strong>Pista 2 (Passo a passo):</strong> ${escapeHtml(hint2)}
-                           </div>`
-                        : ''
-                    }
-                  </div>
-                `;
-              })()
-            : ''
-        }
+        ${state.mobileEditor === null ? renderPistas(lesson) : ''}
 
         ${renderOutputRegion(state.output, engine)}
       </section>
@@ -793,6 +929,15 @@ function renderApp(): void {
   if (!root) return;
 
   writeStateToUrl();
+
+  // O ecrã de escrita fecha se a etapa, o separador ou o aparelho mudarem.
+  if (state.mobileEditor !== null && (etapaAtual() !== etapaDoEcra || !usaEcraDeEscrita())) {
+    state.mobileEditor = null;
+    if (history.state?.ecraEscrita) history.replaceState(null, '');
+  }
+  const ecraAberto = state.view === 'academia' && state.mobileEditor !== null;
+  desligarAlturaVisivel();
+  desligarAlturaVisivel = () => {};
 
   let mainContent = '';
   if (state.view === 'academia') {
@@ -904,8 +1049,13 @@ function renderApp(): void {
       </main>
       ${state.showProgressModal ? renderProgressModal(state) : ''}
       ${state.showThemeModal ? renderThemeModal(state) : ''}
+      ${ecraAberto ? renderEcraDeEscritaAtual() : ''}
     </div>
   `;
+
+  document.body.classList.toggle('tem-ecra-escrita', ecraAberto);
+  const ecra = root.querySelector<HTMLElement>('.ecra-escrita');
+  if (ecra) desligarAlturaVisivel = ligarAlturaVisivel(ecra);
 
   attachDomListeners();
 }
@@ -1128,6 +1278,13 @@ function attachDomListeners(): void {
     });
   });
 
+  document.querySelectorAll<HTMLElement>('[data-ecra-aba]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const aba = btn.dataset.ecraAba as AbaEscrita | undefined;
+      if (aba) abrirEcraDeEscrita(aba);
+    });
+  });
+
   document.querySelectorAll<HTMLElement>('[data-mobile-tab]').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.mobileTab = btn.dataset.mobileTab === 'workbench' ? 'workbench' : 'lesson';
@@ -1339,6 +1496,21 @@ function attachDomListeners(): void {
         renderApp();
         void executeWorkbench();
       } else if (act === 'run-code') {
+        void executeWorkbench();
+      } else if (act === 'abrir-ecra-escrita') {
+        abrirEcraDeEscrita('codigo');
+      } else if (act === 'fechar-ecra-escrita') {
+        fecharEcraDeEscrita();
+      } else if (act === 'usar-editor-normal') {
+        savePreferirEditorNormal(true);
+        fecharEcraDeEscrita();
+        renderApp();
+      } else if (act === 'usar-ecra-escrita') {
+        savePreferirEditorNormal(false);
+        renderApp();
+      } else if (act === 'executar-ecra-escrita') {
+        (document.activeElement as HTMLElement | null)?.blur();
+        state.mobileEditor = 'resultado';
         void executeWorkbench();
       } else if (act === 'format-code') {
         const cur = getEditorValue();
@@ -1858,6 +2030,10 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && state.mobileEditor !== null && !state.showProgressModal && !state.showThemeModal) {
+    fecharEcraDeEscrita();
+    return;
+  }
   if (ev.key === 'Escape' && (state.showProgressModal || state.showThemeModal)) {
     state.showProgressModal = false;
     state.showThemeModal = false;

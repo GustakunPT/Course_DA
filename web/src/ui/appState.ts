@@ -1,3 +1,4 @@
+import type { AbaEscrita } from './mobileEditor';
 import type { MerceariaDataset } from '../engines/csvEngine';
 import type { GitRepoState } from '../engines/gitEngine';
 import type { UserProgressMap } from '../data/progress';
@@ -47,4 +48,6 @@ export interface AppState {
   dataset: MerceariaDataset | null;
   datasetError: string | null;
   confirmSolutionLessonId: string | null;
+  /** Separador aberto no ecrã de escrita do telemóvel; null quando está fechado. */
+  mobileEditor: AbaEscrita | null;
 }
