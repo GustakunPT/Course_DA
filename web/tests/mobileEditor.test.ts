@@ -1,6 +1,12 @@
 // Ecrã de escrita para telemóvel: quem o recebe e como é desenhado.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { deveUsarEcraDeEscrita, loadPreferirEditorNormal, savePreferirEditorNormal } from '../src/ui/mobileEditor';
+import {
+  deveUsarEcraDeEscrita,
+  loadPreferirEditorNormal,
+  renderEcraDeEscrita,
+  renderPreviaCodigo,
+  savePreferirEditorNormal,
+} from '../src/ui/mobileEditor';
 
 describe('deveUsarEcraDeEscrita', () => {
   it.each([
@@ -37,5 +43,64 @@ describe('preferência do editor normal', () => {
     vi.stubGlobal('localStorage', undefined);
     expect(loadPreferirEditorNormal()).toBe(false);
     expect(() => savePreferirEditorNormal(true)).not.toThrow();
+  });
+});
+
+describe('renderEcraDeEscrita', () => {
+  const base = {
+    enunciadoHtml: '<p>Soma as vendas</p>',
+    editorHtml: '<textarea id="workbench-editor"></textarea>',
+    resultadoHtml: '<div class="out">ok</div>',
+    simbolos: [[':', ':'], ['"', '"']] as [string, string][],
+    rotuloExecutar: 'Executar',
+    aCorrer: false,
+  };
+
+  it('desenha os 3 separadores por ordem e marca o ativo', () => {
+    const html = renderEcraDeEscrita({ ...base, aba: 'codigo' });
+    const abas = [...html.matchAll(/data-ecra-aba="(\w+)"/g)].map((m) => m[1]);
+    expect(abas).toEqual(['enunciado', 'codigo', 'resultado']);
+    expect(html).toMatch(/aria-selected="true"[^>]*data-ecra-aba="codigo"|data-ecra-aba="codigo"[^>]*aria-selected="true"/);
+  });
+
+  it('o editor existe uma só vez, mesmo noutro separador', () => {
+    for (const aba of ['enunciado', 'codigo', 'resultado'] as const) {
+      const html = renderEcraDeEscrita({ ...base, aba });
+      expect(html.match(/id="workbench-editor"/g)).toHaveLength(1);
+    }
+  });
+
+  it('só o painel ativo fica visível', () => {
+    const html = renderEcraDeEscrita({ ...base, aba: 'resultado' });
+    expect(html).toMatch(/data-painel="resultado"(?![^>]*hidden)/);
+    expect(html).toMatch(/data-painel="codigo"[^>]*hidden/);
+    expect(html).toMatch(/data-painel="enunciado"[^>]*hidden/);
+  });
+
+  it('os símbolos só aparecem no separador Código', () => {
+    expect(renderEcraDeEscrita({ ...base, aba: 'codigo' })).toContain('data-insert=":"');
+    expect(renderEcraDeEscrita({ ...base, aba: 'resultado' })).not.toContain('data-insert');
+  });
+
+  it('executar fica desativado enquanto corre', () => {
+    const html = renderEcraDeEscrita({ ...base, aba: 'resultado', aCorrer: true });
+    expect(html).toMatch(/data-action="executar-ecra-escrita"[^>]*disabled/);
+  });
+
+  it('escapa os símbolos e tem saída para o editor normal', () => {
+    const html = renderEcraDeEscrita({ ...base, aba: 'codigo' });
+    expect(html).toContain('data-insert="&quot;"');
+    expect(html).toContain('data-action="usar-editor-normal"');
+    expect(html).toContain('data-action="fechar-ecra-escrita"');
+  });
+});
+
+describe('renderPreviaCodigo', () => {
+  it('mostra o código sem caixa de texto e abre o ecrã de escrita', () => {
+    const html = renderPreviaCodigo('<span>print</span>(1)');
+    expect(html).toContain('data-action="abrir-ecra-escrita"');
+    expect(html).toContain('<span>print</span>(1)');
+    expect(html).toContain('Escrever código');
+    expect(html).not.toContain('<textarea');
   });
 });
