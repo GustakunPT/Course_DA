@@ -34,6 +34,8 @@ const PYODIDE_INDEX_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
 
 let pyodidePromise: Promise<any> | null = null;
 let pandasLoaded = false;
+// Ficheiros extra (além dos CSV da Mercearia) já escritos no sistema de ficheiros do Pyodide.
+const ficheirosCarregados = new Set<string>();
 
 type PyodideLoader = () => Promise<any>;
 
@@ -48,6 +50,7 @@ export function setPyodideLoaderForTests(loader: PyodideLoader): void {
   pyodideLoader = loader;
   pyodidePromise = null;
   pandasLoaded = false;
+  ficheirosCarregados.clear();
 }
 
 function loadPyodideScript(): Promise<void> {
@@ -95,10 +98,27 @@ export async function runPythonCode(
   code: string,
   checks?: PythonCheckSpec[],
   onStatus?: (msg: string) => void,
+  ficheirosExtra: string[] = [],
 ): Promise<PythonExecutionResult> {
   const start = performance.now();
   try {
     const pyodide = await getPyodideEngine(onStatus);
+    for (const nome of ficheirosExtra) {
+      if (ficheirosCarregados.has(nome)) continue;
+      onStatus?.(`A carregar ${nome}…`);
+      const resposta = await fetch(`/dados/${nome}`);
+      if (!resposta.ok) {
+        return {
+          stdout: '',
+          elapsedMs: Math.round((performance.now() - start) * 10) / 10,
+          error: `Não foi possível carregar /dados/${nome} (HTTP ${resposta.status}).`,
+        };
+      }
+      const conteudo = await resposta.text();
+      pyodide.FS.writeFile(`/home/pyodide/dados/${nome}`, conteudo, { encoding: 'utf8' });
+      pyodide.FS.writeFile(`/home/dados/${nome}`, conteudo, { encoding: 'utf8' });
+      ficheirosCarregados.add(nome);
+    }
     const needsPandas = /\bpandas\b/.test(code) || (checks ?? []).some((c) => /\bpd\b/.test(c.expr));
     if (needsPandas && !pandasLoaded) {
       onStatus?.('A carregar biblioteca pandas no navegador…');
@@ -229,6 +249,7 @@ json.dumps({
     };
   } catch (err) {
     pyodidePromise = null;
+    ficheirosCarregados.clear(); // um novo Pyodide começa sem os ficheiros extra
     return {
       stdout: '',
       elapsedMs: Math.round((performance.now() - start) * 10) / 10,

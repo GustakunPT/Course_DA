@@ -9,9 +9,11 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // Os CSV vêm da pasta dados/; tudo o resto (ex.: o pandas na CDN) usa o fetch verdadeiro.
 const fetchReal = globalThis.fetch;
+let pedidosBicicletas = 0;
 vi.stubGlobal('fetch', async (url: string | URL | Request, init?: RequestInit) => {
   const texto = typeof url === 'string' ? url : url instanceof URL ? url.href : url.url;
   if (texto.startsWith('/dados/')) {
+    if (texto === '/dados/bicicletas_viagens_sujas.csv') pedidosBicicletas++;
     return new Response(readFileSync(new URL(`../../dados/${texto.slice(7)}`, import.meta.url), 'utf-8'));
   }
   return fetchReal(url, init);
@@ -38,7 +40,7 @@ describe('desafios Python e pandas', () => {
     '%s: a solução passa em todas as verificações',
     async (_id, l) => {
       const ch = l.pythonChallenge!;
-      const res = await runPythonCode(ch.solutionCode, ch.checks);
+      const res = await runPythonCode(ch.solutionCode, ch.checks, undefined, l.ficheirosDados);
       expect(res.error).toBeUndefined();
       const falhadas = (res.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`);
       expect(falhadas).toEqual([]);
@@ -50,7 +52,7 @@ describe('desafios Python e pandas', () => {
 
   const treinos = allTracks
     .flatMap((t) => t.lessons)
-    .flatMap((l) => (l.practice ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
+    .flatMap((l) => (l.practice ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch, l] as const));
 
   it('a trilha Python tem pelo menos 2 treinos em cada etapa de py-01 a py-09', () => {
     const python = allTracks.find((t) => t.id === 'python')!;
@@ -59,17 +61,28 @@ describe('desafios Python e pandas', () => {
     }
   });
 
-  it.each(treinos)('%s: a solução passa e o código inicial não', async (_nome, ch) => {
-    const certo = await runPythonCode(ch.solutionCode, ch.checks);
+  it.each(treinos)('%s: a solução passa e o código inicial não', async (_nome, ch, l) => {
+    const certo = await runPythonCode(ch.solutionCode, ch.checks, undefined, l.ficheirosDados);
     expect(certo.error).toBeUndefined();
     expect((certo.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`)).toEqual([]);
-    const inicial = await runPythonCode(ch.starterCode, ch.checks);
+    const inicial = await runPythonCode(ch.starterCode, ch.checks, undefined, l.ficheirosDados);
     expect(!inicial.error && inicial.checks!.every((c) => c.passed)).toBe(false);
+  }, 120_000);
+
+  it('ficheiros extra carregam uma só vez e só quando pedidos', async () => {
+    pedidosBicicletas = 0;
+    await runPythonCode('x = 1', []);
+    expect(pedidosBicicletas).toBe(0);
+    const a = await runPythonCode('import pandas as pd\nn = len(pd.read_csv("dados/bicicletas_viagens_sujas.csv"))', [{ label: 'n', expr: 'n > 19000', actualExpr: 'n', hint: '' }], undefined, ['bicicletas_viagens_sujas.csv']);
+    const b = await runPythonCode('y = 2', [], undefined, ['bicicletas_viagens_sujas.csv']);
+    expect(a.checks![0].passed).toBe(true);
+    expect(b.error).toBeUndefined();
+    expect(pedidosBicicletas).toBeLessThanOrEqual(1);
   }, 120_000);
 
   it('os gráficos matplotlib voltam como PNG', async () => {
     const l = licoes.find((x) => x.id === 'bi-07-graficos-matplotlib')!;
-    const res = await runPythonCode(l.pythonChallenge!.solutionCode, l.pythonChallenge!.checks);
+    const res = await runPythonCode(l.pythonChallenge!.solutionCode, l.pythonChallenge!.checks, undefined, l.ficheirosDados);
     expect(res.images).toHaveLength(1);
     expect(res.images![0].startsWith('iVBORw0KGgo')).toBe(true); // assinatura PNG em base64
   }, 120_000);
@@ -88,7 +101,7 @@ unidades_por_categoria = {"Padaria": 6, "Laticínios": 4, "Mercearia": 3, "Charc
 produtos_caros = ["Azeite", "Café", "Queijo"]`],
   ])('%s: resultados escritos à mão não passam', async (id, codigo) => {
     const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
-    const res = await runPythonCode(codigo, ch.checks);
+    const res = await runPythonCode(codigo, ch.checks, undefined, licoes.find((l) => l.id === id)!.ficheirosDados);
     expect(res.error).toBeUndefined();
     expect(res.checks!.some((c) => !c.passed)).toBe(true);
   }, 120_000);
@@ -97,7 +110,7 @@ produtos_caros = ["Azeite", "Café", "Queijo"]`],
     '%s: o código inicial ainda não passa',
     async (_id, l) => {
       const ch = l.pythonChallenge!;
-      const res = await runPythonCode(ch.starterCode, ch.checks);
+      const res = await runPythonCode(ch.starterCode, ch.checks, undefined, l.ficheirosDados);
       const todasCertas = !res.error && (res.checks ?? []).length > 0 && res.checks!.every((c) => c.passed);
       expect(todasCertas).toBe(false);
     },

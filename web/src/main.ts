@@ -1185,7 +1185,7 @@ async function executeWorkbench(): Promise<void> {
     state.output = { kind: 'loading', statusMessage: statusMsg };
     const statusEl = document.querySelector('.output-panel .measured');
     if (statusEl) statusEl.textContent = statusMsg;
-  });
+  }, currentLesson().ficheirosDados ?? []);
 
   if (pyRes.error) {
     state.output = {

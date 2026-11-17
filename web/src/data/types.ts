@@ -65,6 +65,8 @@ export interface Lesson {
   engine: EngineKind;
   exampleCode: string;
   pythonChallenge?: PythonChallengeSpec;
+  /** Ficheiros de /dados/ (além dos CSV da Mercearia) que o motor Python carrega a pedido para esta etapa. */
+  ficheirosDados?: string[];
   /** Exercícios de treino extra (opcionais): repetem o conceito com outros dados. */
   practice?: PythonChallengeSpec[];
   /** Exercícios de treino SQL extra (não contam para o progresso). */
