@@ -182,7 +182,7 @@ limpo.head()`,
         'Procura dados para as três nas fontes da tabela de referência e abre cada ficheiro antes de escolher.',
         'Fica com a pergunta cujos dados têm as colunas, o período e as linhas de que precisas.',
         'Lê a licença do conjunto e anota a fonte, o link, a data em que descarregaste e a licença.',
-        'Cria a pasta do projeto com dados/, cadernos/, README.md e .gitignore, corre git init e faz o primeiro commit.',
+        'Cria a pasta do projeto com dados/, cadernos/, README.md e .gitignore, corre git init -b main (o ramo fica logo a chamar-se main, como no GitHub) e faz o primeiro commit.',
         'Escreve no README a pergunta, quem decide e de onde vêm os dados.',
       ],
       proPractice: 'Numa entrevista perguntam quase sempre "porque escolheste este projeto?". A melhor resposta é a pergunta e quem a usaria: "Queria saber em que meses um alojamento do Algarve precisa de mais pessoal, e os dados de dormidas por mês respondem a isso."',
@@ -201,7 +201,7 @@ limpo.head()`,
 mkdir turismo-algarve
 cd turismo-algarve
 mkdir dados cadernos
-git init
+git init -b main
 
 # --- Ficheiro .gitignore (cria-o no VS Code, na raiz do projeto) ---
 .ipynb_checkpoints/
@@ -266,7 +266,7 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
         'Primeiro olhar: df.shape (linhas e colunas), df.dtypes (tipos), df.head() e df.sample(10). Uma coluna de números lida como object quase sempre esconde vírgulas, espaços ou texto como "n.d.".',
         'Ficheiros portugueses: muitos usam ponto e vírgula e vírgula decimal, por isso lês com pd.read_csv(..., sep=";", decimal=","). Se os acentos aparecerem estragados, experimenta encoding="latin-1"; se houver linhas de título antes da tabela, usa skiprows=.',
         'Valores em falta: df.isna().sum() por coluna. Decides caso a caso (tirar a linha, deixar vazio ou preencher) e escreves porquê. Trocar vazios por 0 muda as médias.',
-        'Duplicados: df.duplicated().sum() para linhas inteiras e df.duplicated(subset=[...]).sum() para a chave que devia ser única (por exemplo município e mês).',
+        'Duplicados: df.duplicated().sum() para linhas inteiras e df.duplicated(subset=[...]).sum() para a chave que devia ser única. Escolhe-a com cuidado: com vários anos de dados, a chave é município, ano e mês; só com município e mês apagavas todos os anos menos o primeiro.',
         'Cada regra fica numa célula de texto com o motivo, seguida da célula de código que a aplica e conta as linhas antes e depois, como na etapa 01. A limpeza acaba num ficheiro novo em dados/ e o original fica intacto.',
       ],
       beginnerSteps: [
@@ -284,7 +284,7 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
         { syntax: 'pd.read_csv(f, sep=";", decimal=",")', meaning: 'Lê um CSV no formato português (ponto e vírgula e vírgula decimal)', example: 'pd.read_csv("../dados/dormidas.csv", sep=";", decimal=",")' },
         { syntax: 'df.shape, df.dtypes, df.sample(10)', meaning: 'Tamanho, tipos e uma amostra ao acaso', example: '(1200, 5)' },
         { syntax: 'df.isna().sum()', meaning: 'Vazios por coluna', example: 'dormidas    37' },
-        { syntax: 'df.duplicated(subset=["municipio", "mes"]).sum()', meaning: 'Repetidos na chave que devia ser única', example: '12' },
+        { syntax: 'df.duplicated(subset=["municipio", "ano", "mes"]).sum()', meaning: 'Repetidos na chave que devia ser única (com vários anos, o ano faz parte da chave)', example: '12' },
         { syntax: 'pd.to_numeric(s, errors="coerce")', meaning: 'Converte para número; o que não for número fica NaN (conta-os antes e depois)', example: '"n.d." passa a NaN' },
         { syntax: 'df.to_csv("../dados/limpo.csv", index=False)', meaning: 'Guarda o resultado sem tocar no original', example: 'dados/limpo.csv' },
       ],
@@ -303,9 +303,10 @@ print("Linhas repetidas:", df.duplicated().sum())
 df.sample(10, random_state=1)
 
 # Segunda célula: uma regra, com o motivo e a contagem
-# Regra 1: cada município e mês aparece uma vez (fica a primeira ocorrência)
+# Regra 1: cada município aparece uma vez por ano e mês (fica a primeira ocorrência).
+# O ano entra na chave: só com município e mês apagavas todos os anos menos o primeiro.
 antes = len(df)
-df = df.drop_duplicates(subset=["municipio", "mes"])
+df = df.drop_duplicates(subset=["municipio", "ano", "mes"])
 print("Saíram", antes - len(df), "linhas repetidas")`,
       projectSpec: {
         entregaveis: [
@@ -368,7 +369,7 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
       commonPitfall: 'Concluir mais do que os dados dizem: "o turismo faz subir as rendas" quando só viste que as duas coisas sobem nos mesmos municípios. Ou cortar o eixo das barras para a diferença parecer maior: um recrutador atento repara.',
       referenceTitle: 'Do número à recomendação',
       referenceRows: [
-        { syntax: 'df.groupby("mes")["dormidas"].sum()', meaning: 'Total por grupo', example: 'Dormidas por mês' },
+        { syntax: 'df.groupby("mes")["dormidas"].sum().sort_index()', meaning: 'Total de cada mês do calendário, com todos os anos somados. Com mes como número (1 a 12), as barras ficam por ordem; com nomes, ficavam por ordem alfabética', example: 'Dormidas de janeiro a dezembro' },
         { syntax: 'pico / media', meaning: 'Quantas vezes um valor está acima da referência', example: '2,3 vezes um mês médio' },
         { syntax: 'ax.bar(x, y); ax.set_ylim(bottom=0)', meaning: 'Barras com o eixo no zero', example: 'Quantidades por mês' },
         { syntax: 'ax.set_title("Conclusão em frase")', meaning: 'O título diz o que o gráfico mostra', example: '"Agosto vale mais do dobro de um mês médio"' },
@@ -382,29 +383,34 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Colunas do ficheiro limpo: municipio, ano, mes (número de 1 a 12) e dormidas
 df = pd.read_csv("../dados/limpo.csv")
+MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+         "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
 
-# 1) O número que responde à pergunta, com uma comparação
-por_mes = df.groupby("mes")["dormidas"].sum()
+# 1) O número que responde à pergunta, com uma comparação.
+# Total de cada mês do calendário, com todos os anos somados. mes é um número,
+# por isso sort_index() põe os meses por ordem (com nomes, ficavam por ordem alfabética).
+por_mes = df.groupby("mes")["dormidas"].sum().sort_index()
 media = por_mes.mean()
-pico = por_mes.idxmax()
+pico = MESES[por_mes.idxmax() - 1]
 vezes = f"{por_mes.max() / media:.1f}".replace(".", ",")
 print(f"{pico}: {vezes} vezes a média mensal")
 
 # 2) Um gráfico honesto: barras, eixo no zero, conclusão no título
 fig, ax = plt.subplots(figsize=(8, 4))
-ax.bar(por_mes.index.astype(str), por_mes.values)
+ax.bar([MESES[m - 1][:3] for m in por_mes.index], por_mes.values)
 ax.axhline(media, linestyle="--", color="grey", label="Média mensal")
 ax.set_ylim(bottom=0)
-ax.set_title(f"{pico} tem {vezes} vezes as dormidas de um mês médio")
+ax.set_title(f"{pico.capitalize()} tem {vezes} vezes as dormidas de um mês médio")
 ax.set_xlabel("Mês")
-ax.set_ylabel("Dormidas")
+ax.set_ylabel("Dormidas (todos os anos somados)")
 ax.legend()
 Path("../figuras").mkdir(exist_ok=True)
 fig.savefig("../figuras/dormidas_por_mes.png", dpi=150, bbox_inches="tight")
 
 # 3) A recomendação numa frase com decisão
-acima = ", ".join(str(m) for m in por_mes[por_mes > media].index)
+acima = ", ".join(MESES[m - 1] for m in por_mes[por_mes > media].index)
 print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pico em {pico}.")
 
 # 4) Numa célula de texto, os limites:
@@ -455,14 +461,14 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
         'A ordem do README segue o modelo do Nível Profissional: título com a pergunta, ## Pergunta, ## Conclusões (3 a 5 frases com números e o gráfico), ## Dados (fonte, link, data de descarga e licença), ## Limites, ## Como correr e ## Estrutura.',
         'Números em formato português: 1 234 567 dormidas, 12,5%, 3 456,78 €. Tira-os do caderno, não os escrevas de memória: um número que não bate certo com o caderno tira credibilidade a tudo o resto.',
         '"Como correr" tem de funcionar num computador limpo: um requirements.txt com as bibliotecas (pandas, matplotlib, jupyter), os comandos por ordem e, se os dados não estiverem no repositório, de onde se descarregam.',
-        'Commits com mensagens que contam a história: "Limpeza: tira 12 linhas repetidas por município e mês" diz muito mais do que "update" ou "final2". Um commit por passo.',
+        'Commits com mensagens que contam a história: "Limpeza: tira 12 linhas repetidas por município, ano e mês" diz muito mais do que "update" ou "final2". Um commit por passo.',
         'O repositório é público e tem um nome que diz o tema (turismo-algarve, não projeto-final-v3). No teu perfil do GitHub, destaca-o em "Customize your pins" e escreve uma descrição de uma linha.',
       ],
       beginnerSteps: [
         'Cria o requirements.txt com as bibliotecas principais que usaste.',
         'Escreve o README pela ordem da referência, com as conclusões tiradas do caderno e o gráfico de figuras/.',
         'Corre git log --oneline: se as mensagens não contam o que fizeste, os próximos commits passam a contar.',
-        'Cria o repositório público no GitHub, liga-o com git remote add origin e envia com git push -u origin main.',
+        'Cria o repositório público no GitHub vazio, sem README nem licença (senão o primeiro envio é recusado). Depois, no terminal: git branch -M main (garante que o ramo se chama main), git remote add origin com o link do repositório e git push -u origin main.',
         'Abre o repositório numa janela privada do browser: o README aparece, o gráfico carrega e os links funcionam?',
         'Cola o link aqui em baixo e mostra o projeto a alguém, de cronómetro na mão: 2 minutos chegam?',
       ],
@@ -475,7 +481,7 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
         { syntax: '## Dados', meaning: 'Fonte, link, data de descarga, licença e linhas que saíram na limpeza', example: 'INE, descarregado a 17/11/2026' },
         { syntax: '## Limites', meaning: 'O que os dados não permitem concluir', example: 'Associação, não causa' },
         { syntax: '## Como correr', meaning: 'Comandos para repetir tudo num computador limpo', example: 'pip install -r requirements.txt' },
-        { syntax: 'git remote add origin <link> e git push -u origin main', meaning: 'Liga o repositório local ao GitHub e envia os commits', example: 'https://github.com/utilizador/turismo-algarve' },
+        { syntax: 'git branch -M main, git remote add origin <link> e git push -u origin main', meaning: 'Dá o nome main ao ramo, liga o repositório local ao do GitHub (criado vazio, sem README nem licença) e envia os commits', example: 'git remote add origin https://github.com/utilizador/turismo-algarve.git' },
       ],
       engine: 'projeto',
       exampleCode: `<!-- README.md: números de exemplo, troca-os pelos do teu caderno -->
