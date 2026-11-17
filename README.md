@@ -17,7 +17,7 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
-- **7 Trilhas de Analista de Dados (67 etapas do Zero Absoluto ao Nível Profissional):**
+- **8 Trilhas de Analista de Dados (72 etapas do Zero Absoluto ao projeto final próprio):**
   1. **Python do Zero Absoluto à Caixa Registadora** (inclui a etapa 01 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 02 a 10 têm 2 exercícios de treino extra cada, uma explicação longa e um exemplo de erro típico com a mensagem do Python, a etapa 11 é uma revisão geral de todos os conceitos e a 12 é o projeto da Caixa Registadora)
   2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais; 2 treinos e 3 perguntas de quiz por etapa, a etapa 10 treina a matriz RFM e a 11 é uma revisão geral: o relatório por cidade)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser; 2 treinos e 3 perguntas de quiz por etapa, uma etapa 08 com NumPy, `pd.crosstab`, quantis e datas, as ferramentas que a trilha de Estatística usa, e a 09 é uma revisão geral: faturação por categoria e trimestre)
@@ -25,6 +25,7 @@ A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, co
   5. **Visualização, Excel/DAX e Power BI** (Curva ABC, relatório executivo, gráficos matplotlib desenhados no browser, Star Schema, DAX, prática guiada de Excel e Power BI com folha de respostas corrigida na app e inteligência de tempo: acumulado do ano, mês anterior e média móvel em DAX, Excel e pandas)
   6. **Estatística para Analistas** (média vs mediana, IQR/outliers, probabilidade condicional e Bayes, paradoxo de Simpson, correlação, intervalos de confiança, simulação e bootstrap com histogramas, teste de permutação, testes A/B de médias e de proporções, tamanho de amostra, qui-quadrado e ANOVA, regressão linear simples e múltipla, séries temporais (tendência, sazonalidade semanal e previsão simples) e perguntas rápidas de entrevista; cada etapa tem um desafio curto e treinos para as partes seguintes)
   7. **Prática Profissional: ETL, Testes de Dados, Coortes e Entrevista Técnica** (arquitetura medalhão bronze/silver/gold, testes de qualidade de dados, retenção, coortes e LTV, SQL mais rápido com índices, perguntas clássicas de entrevista com `RANK` e `LAG`, caso final para a direção, RGPD na prática (pseudonimização, minimização e grupos pequenos), Projeto Final guiado: SQL + pandas + gráfico + recomendação, e o README de portefólio gerado a partir dos dados)
+  8. **Projeto final: os teus dados, a tua pergunta, o teu portefólio** (a etapa 01 é uma limpeza a sério, corrigida no browser, de 20 300 viagens de bicicletas partilhadas com 2 treinos e 3 perguntas de quiz; as etapas 02 a 05 são o teu próprio projeto com dados públicos portugueses, feito no teu computador em Jupyter ou VS Code e publicado no GitHub: escolher a pergunta e os dados, explorar e limpar, analisar e recomendar, e publicar. A app mostra o que entregar, uma lista para marcar e uma grelha de autoavaliação, mas não corrige este trabalho: as etapas concluídas aparecem como "Feito por ti, não corrigido")
 - **Painéis 100% Redimensionáveis na Página:** divisórias verticais e horizontais arrastáveis (índice lateral, lição vs editor e altura do editor vs consola), modos rápidos (*Recolher índice*, *Foco leitura*, *Divisão 50/50*, *Foco código* e *Repor painéis*) com memória no navegador.
 - **Explorador Analítico CSV & Auditoria de Qualidade** (`26 902,89 €` em 5 078 vendas, filtros por cidade e categoria e diagnóstico de `vendas_sujas.csv`).
 - **Referência Rápida W3** com pesquisa instantânea e botão *Testar na bancada*.
@@ -92,7 +93,7 @@ Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os
 ```bash
 pip install -r requirements-dev.txt
 pytest tests                       # Python: gerador, auditoria e gráficos
-cd web && npm test                 # Web: motores, API de sync e as 67 etapas e os treinos
+cd web && npm test                 # Web: motores, API de sync e as 72 etapas e os treinos
 ```
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
@@ -124,7 +125,7 @@ mostrar as respostas. Se a pasta `dados/` estiver vazia, corre primeiro `python 
 
 O projeto tem dois percursos que se completam:
 
-- **A app** (`web/`, publicada na Vercel) é o percurso principal: 67 etapas com desafios corrigidos e treinos.
+- **A app** (`web/`, publicada na Vercel) é o percurso principal: 72 etapas com desafios corrigidos e treinos, que acabam no teu próprio projeto, feito no teu computador e autoavaliado.
 - **O curso local** (`licoes/`, `exercicios/` e `cadernos/`) dá mais leitura e prática no teu computador, com o
   VS Code, o terminal e o Git a sério.
 

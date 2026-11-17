@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 8 trilhas e 68 etapas', () => {
+  it('tem 8 trilhas e 72 etapas', () => {
     expect(allTracks).toHaveLength(8);
-    expect(totalLessonsCount).toBe(68);
+    expect(totalLessonsCount).toBe(72);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
@@ -45,11 +45,19 @@ describe('estrutura do currículo', () => {
     expect(allTracks.find((t) => t.id === 'estatistica')!.lessons[0].id).toBe('bi-01-media-mediana');
   });
 
-  it('todas as etapas têm pelo menos um treino, exceto a introdução e o projeto da trilha Python', () => {
+  it('todas as etapas têm pelo menos um treino, exceto a introdução, o projeto da trilha Python e as etapas de projeto', () => {
     const semTreino = todas
       .filter((l) => !(l.practice?.length || l.practiceSql?.length || l.practiceGit?.length))
       .map((l) => l.id);
-    expect(semTreino).toEqual(['py-00-pensamento', 'py-11-revisao', 'py-10-caixa-csv']);
+    expect(semTreino).toEqual([
+      'py-00-pensamento',
+      'py-11-revisao',
+      'py-10-caixa-csv',
+      'pf-02-pergunta-dados',
+      'pf-03-explorar-limpar',
+      'pf-04-analisar-recomendar',
+      'pf-05-publicar',
+    ]);
   });
 
   it('a trilha Pandas tem 2 treinos por etapa e os desafios de estatística ficaram curtos', () => {
@@ -96,6 +104,30 @@ describe('estrutura do currículo', () => {
       expect(l.pythonChallenge).toBeDefined();
       expect(l.pythonChallenge!.checks.length).toBeGreaterThan(0);
     }
+    if (l.engine === 'projeto') {
+      const spec = l.projectSpec;
+      expect(spec).toBeDefined();
+      expect(spec!.entregaveis.length).toBeGreaterThanOrEqual(2);
+      expect(spec!.lista.length).toBeGreaterThanOrEqual(4);
+      expect(spec!.lista.length).toBeLessThanOrEqual(8);
+      expect(spec!.grelha.length).toBeGreaterThanOrEqual(4);
+      expect(spec!.grelha.length).toBeLessThanOrEqual(6);
+      expect(l.pythonChallenge).toBeUndefined();
+      expect(l.sqlChallenge).toBeUndefined();
+      expect(l.gitChallenge).toBeUndefined();
+    }
+  });
+
+  it('a trilha 8 tem as etapas 02 a 05 de projeto, e só a 05 pede o link do GitHub', () => {
+    const t = allTracks.find((x) => x.id === 'projeto-final')!;
+    const projeto = t.lessons.slice(1);
+    expect(projeto.map((l) => [l.id, l.code, l.engine])).toEqual([
+      ['pf-02-pergunta-dados', '02', 'projeto'],
+      ['pf-03-explorar-limpar', '03', 'projeto'],
+      ['pf-04-analisar-recomendar', '04', 'projeto'],
+      ['pf-05-publicar', '05', 'projeto'],
+    ]);
+    expect(projeto.filter((l) => l.projectSpec?.pedirLinkGithub).map((l) => l.id)).toEqual(['pf-05-publicar']);
   });
 });
 
