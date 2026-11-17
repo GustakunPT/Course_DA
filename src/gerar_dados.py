@@ -204,6 +204,16 @@ ESTACOES = [
     "Estação Parque Verde", "Estação Hospital", "Estação Avenida da Liberdade", "Estação Cais do Sodré",
 ]
 
+# Popularidade de cada estação (mesma ordem de ESTACOES): a Central, junto aos comboios,
+# é a mais usada; as do parque e do farol, longe do centro, são as menos usadas.
+PESOS_ESTACOES = [30, 7, 10, 18, 13, 8, 9, 3, 4, 7, 12, 11]
+
+# Peso de cada hora do dia (0 a 23) no início das viagens. Nos dias úteis há dois picos
+# de quem vai e volta do trabalho (8 h e 17-18 h); ao fim de semana as viagens começam
+# mais tarde e espalham-se pela tarde. De madrugada quase não há viagens.
+PESOS_HORA_UTIL = [1, 0.5, 0.3, 0.3, 0.5, 1.5, 5, 14, 24, 11, 5, 5, 6, 5, 5, 6, 10, 16, 15, 8, 5, 4, 3, 2]
+PESOS_HORA_FIM_DE_SEMANA = [2, 1.5, 1, 0.5, 0.5, 0.5, 1, 2, 3, 5, 7, 8, 8, 8, 7, 7, 6, 6, 5, 4, 3, 3, 2, 2]
+
 
 def _sem_acentos(texto):
     return "".join(c for c in unicodedata.normalize("NFD", texto) if unicodedata.category(c) != "Mn")
@@ -236,20 +246,29 @@ def gerar_viagens_bicicletas(n=20000):
     sem outros problemas, para as contagens não dependerem da ordem.
     """
     rng = random.Random(SEMENTE + 200)
+    # A hora do dia e as estações vêm de um gerador à parte, com pesos realistas. O gerador
+    # principal continua a fazer exatamente as mesmas chamadas, por isso os problemas
+    # plantados (e as suas contagens) não mudam.
+    rng_perfil = random.Random(SEMENTE + 201)
     inicio_ano = datetime(2025, 1, 1)
 
     # Viagens boas, já limpas
     base = []
     for _ in range(n):
-        inicio = inicio_ano + timedelta(minutes=rng.randrange(365 * 24 * 60))
+        dia = inicio_ano + timedelta(days=rng.randrange(365 * 24 * 60) // (24 * 60))
+        pesos_hora = PESOS_HORA_FIM_DE_SEMANA if dia.weekday() >= 5 else PESOS_HORA_UTIL
+        hora = rng_perfil.choices(range(24), weights=pesos_hora)[0]
+        inicio = dia + timedelta(hours=hora, minutes=rng_perfil.randrange(60))
         duracao = rng.randint(3, 90)
         tipo = "Anual" if rng.random() < 0.6 else "Ocasional"
         valor = 0.0 if tipo == "Anual" else rng.randint(1, 12) * 0.5
+        rng.choice(ESTACOES), rng.choice(ESTACOES)  # mantém a sequência do gerador principal
+        partida, chegada = rng_perfil.choices(ESTACOES, weights=PESOS_ESTACOES, k=2)
         base.append({
             "inicio": inicio,
             "fim": inicio + timedelta(minutes=duracao),
-            "partida": rng.choice(ESTACOES),
-            "chegada": rng.choice(ESTACOES),
+            "partida": partida,
+            "chegada": chegada,
             "duracao": duracao,
             "tipo": tipo,
             "valor": valor,

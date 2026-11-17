@@ -88,7 +88,7 @@ print(relatorio)`,
     },
     {
       title: 'Primeira análise dos dados limpos',
-      description: 'Com os dados limpos, responde a duas perguntas: a que hora do dia (0 a 23) começam mais viagens e de que estação partem mais viagens. Primeiro limpa dados/bicicletas_viagens_sujas.csv com as mesmas regras do desafio principal e guarda o resultado em limpo (podes colar aqui a tua limpeza). Depois guarda em hora_de_ponta a hora com mais inícios (.dt.hour, .value_counts() e .idxmax()) e em estacao_mais_usada o nome oficial da estação de partida com mais viagens. Os dados são inventados e as horas quase empatam, por isso não estranhes a resposta: só bate certo se a limpeza estiver completa.',
+      description: 'Com os dados limpos, responde a duas perguntas da rede de bicicletas: a que hora do dia (0 a 23) começam mais viagens e de que estação partem mais viagens. Primeiro limpa dados/bicicletas_viagens_sujas.csv com as mesmas regras do desafio principal e guarda o resultado em limpo (podes colar aqui a tua limpeza). Depois guarda em hora_de_ponta a hora com mais inícios (.dt.hour, .value_counts() e .idxmax()), em viagens_hora_de_ponta quantas viagens começaram nessa hora e em estacao_mais_usada o nome oficial da estação de partida com mais viagens. Antes de dar a resposta, olha para a contagem por hora inteira: há um pico de manhã e outro ao fim da tarde, de quem vai e volta do trabalho.',
       starterCode: `import pandas as pd
 
 ${ESTACOES_CANONICAS}
@@ -100,8 +100,9 @@ limpo = None
 
 # 2) A primeira análise
 hora_de_ponta = None
+viagens_hora_de_ponta = None
 estacao_mais_usada = None
-print(hora_de_ponta, estacao_mais_usada)`,
+print(hora_de_ponta, viagens_hora_de_ponta, estacao_mais_usada)`,
       solutionCode: `import pandas as pd
 
 ${ESTACOES_CANONICAS}
@@ -133,14 +134,16 @@ limpo = df[df["fim"] >= df["inicio"]]
 # 2) A primeira análise
 por_hora = limpo["inicio"].dt.hour.value_counts()
 hora_de_ponta = int(por_hora.idxmax())
+viagens_hora_de_ponta = int(por_hora.max())
 estacao_mais_usada = limpo["estacao_partida"].value_counts().idxmax()
-print("Hora de ponta:", hora_de_ponta, "com", por_hora.max(), "viagens")
+print("Hora de ponta:", hora_de_ponta, "com", viagens_hora_de_ponta, "viagens")
 print("Estação mais usada:", estacao_mais_usada)
 por_hora.sort_index()`,
       checks: [
-        { label: 'hora_de_ponta: 5, ou seja, das 5h00 às 5h59 (850 viagens)', expr: 'int(hora_de_ponta) == 5', actualExpr: 'hora_de_ponta', hint: 'limpo["inicio"].dt.hour.value_counts().idxmax(). Se te dá outra hora, a limpeza ainda deixa passar duplicados ou viagens impossíveis.' },
-        { label: 'estacao_mais_usada: "Estação Universidade" (1 720 partidas)', expr: 'estacao_mais_usada == "Estação Universidade"', actualExpr: 'estacao_mais_usada', hint: 'limpo["estacao_partida"].value_counts().idxmax(), depois de trocar as variantes pelo nome oficial.' },
-        { label: 'A análise funciona com outro lote', expr: `(lambda r: int(r["hora_de_ponta"]) == 8 and r["estacao_mais_usada"] == "Estação Farol")(correr_com(viagens=${LOTE_ANALISE}))`, actualExpr: `(lambda r: (r.get("hora_de_ponta"), r.get("estacao_mais_usada")))(correr_com(viagens=${LOTE_ANALISE}))`, hint: 'Num lote com 2 viagens às 8h a partir do Farol, uma às 17h repetida e outra às 17h impossível, a hora de ponta é 8 e a estação é a Estação Farol.' },
+        { label: 'hora_de_ponta: 8, ou seja, das 8h00 às 8h59', expr: 'int(hora_de_ponta) == 8', actualExpr: 'hora_de_ponta', hint: 'limpo["inicio"].dt.hour.value_counts().idxmax(): a hora com mais inícios de viagem.' },
+        { label: 'viagens_hora_de_ponta: 2 303 viagens (a seguir vêm as 17h, com 1 776)', expr: 'int(viagens_hora_de_ponta) == 2303', actualExpr: 'viagens_hora_de_ponta', hint: 'limpo["inicio"].dt.hour.value_counts().max(). Se te dá outro número, a limpeza ainda deixa passar duplicados ou viagens impossíveis.' },
+        { label: 'estacao_mais_usada: "Estação Central" (4 467 partidas)', expr: 'estacao_mais_usada == "Estação Central"', actualExpr: 'estacao_mais_usada', hint: 'limpo["estacao_partida"].value_counts().idxmax(), depois de trocar as variantes pelo nome oficial.' },
+        { label: 'A análise funciona com outro lote', expr: `(lambda r: int(r["hora_de_ponta"]) == 8 and int(r["viagens_hora_de_ponta"]) == 2 and r["estacao_mais_usada"] == "Estação Farol")(correr_com(viagens=${LOTE_ANALISE}))`, actualExpr: `(lambda r: (r.get("hora_de_ponta"), r.get("viagens_hora_de_ponta"), r.get("estacao_mais_usada")))(correr_com(viagens=${LOTE_ANALISE}))`, hint: 'Num lote com 2 viagens às 8h a partir do Farol, uma às 17h repetida e outra às 17h impossível, a hora de ponta é 8 (2 viagens) e a estação é a Estação Farol.' },
       ],
     },
   ],
