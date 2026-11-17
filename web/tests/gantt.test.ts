@@ -8,7 +8,7 @@ describe('cronograma Gantt por tema e etapa', () => {
   it('encadeia temas (c/ buffer por etapa e por tema) de forma contínua', () => {
     const model = buildGanttModel(allTracks, {}, 360);
     expect(model.groups).toHaveLength(allTracks.length);
-    expect(model.totalLessons).toBe(79);
+    expect(model.totalLessons).toBe(80);
     expect(model.completedLessonsCount).toBe(0);
     expect(model.completedCourseMinutes).toBe(0);
     expect(model.progressTimePct).toBe(0);

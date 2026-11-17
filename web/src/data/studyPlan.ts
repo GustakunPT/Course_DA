@@ -19,6 +19,7 @@ const EXPLICIT_MINUTES: Record<string, number> = {
   'pf-03-explorar-limpar': 150,
   'pf-04-analisar-recomendar': 150,
   'pf-05-publicar': 90,
+  'pf-08-portfolio-3-projetos': 150,
   'pf-06-cv-linkedin': 60,
   'pf-07-anuncios-entrevista': 60,
 };

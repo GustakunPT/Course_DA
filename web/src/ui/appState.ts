@@ -3,6 +3,7 @@ import type { AbaEscrita } from './mobileEditor';
 import type { MerceariaDataset } from '../engines/csvEngine';
 import type { GitRepoState } from '../engines/gitEngine';
 import type { UserProgressMap } from '../data/progress';
+import type { DiagnosticProfile } from '../data/diagnostic';
 import type { LessonTimeMap } from '../data/timeTracker';
 import type { LayoutPrefs } from './layout';
 import type { OutputViewModel } from './outputView';
@@ -59,4 +60,7 @@ export interface AppState {
   ganttCollapsedTracks: Set<string>;
   lessonTimes: LessonTimeMap;
   timerPaused: boolean;
+  showDiagnosticModal: boolean;
+  diagnostic: DiagnosticProfile | null;
+  diagnosticDraft: DiagnosticProfile;
 }

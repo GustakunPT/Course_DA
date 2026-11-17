@@ -9,6 +9,14 @@ import {
   getTrackMinutes,
 } from './data/studyPlan';
 import { formatTimerClock, loadSavedLessonTimes, saveLessonTimes } from './data/timeTracker';
+import {
+  clearSavedDiagnostic,
+  evaluateDiagnosticPlan,
+  loadSavedDiagnostic,
+  saveDiagnostic,
+  type BackgroundLevel,
+} from './data/diagnostic';
+import { getCourseMinutes } from './data/studyPlan';
 import type { EngineKind, GitChallengeSpec, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
@@ -47,7 +55,7 @@ import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
 import { downloadTextFile, escapeHtml } from './ui/html';
 import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
-import { renderProgressModal, renderThemeModal } from './ui/modals';
+import { renderDiagnosticModal, renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
 import { chaveLista, ESTADO_PROJETO, etapaProjetoCompleta, linkGithubValido, mensagemLink, renderPainelProjeto } from './ui/projectPanel';
 import {
@@ -62,6 +70,8 @@ import {
 } from './ui/mobileEditor';
 import { applyTheme, loadSavedTheme, THEME_OPTIONS, type ThemeId } from './ui/theme';
 import { applyFontSize, FONT_SIZE_OPTIONS, type FontSizeId, loadSavedFontSize, NORMAL, renderFontSizeMenu, saveFontSize } from './ui/fontSize';
+
+const savedDiagnostic = loadSavedDiagnostic();
 
 const state: AppState = {
   view: 'academia',
@@ -101,11 +111,19 @@ const state: AppState = {
   mobileEditor: null,
   fontSize: loadSavedFontSize(),
   showFontMenu: false,
-  ganttPaceMinutes: 360,
+  ganttPaceMinutes: savedDiagnostic ? savedDiagnostic.hoursPerWeek * 60 : 360,
   ganttFilterStatus: 'all',
   ganttCollapsedTracks: new Set(),
   lessonTimes: loadSavedLessonTimes(),
   timerPaused: false,
+  showDiagnosticModal: false,
+  diagnostic: savedDiagnostic,
+  diagnosticDraft: savedDiagnostic ?? {
+    background: 'zero',
+    hoursPerWeek: 6,
+    targetMonths: 6,
+    updatedAt: '',
+  },
 };
 
 applyTheme(state.theme);
@@ -824,6 +842,17 @@ function renderAcademyWorkspace(): string {
           <p class="lesson-lede">${escapeHtml(lesson.lede)}</p>
         </header>
 
+        ${
+          lesson.id === 'py-00-pensamento' && !state.diagnostic
+            ? `<div class="gantt-diag-strip">
+                <div class="gantt-diag-info">
+                  <strong>Novo na academia?</strong> <span class="measured">Define a tua bagagem, horas por semana e prazo alvo em 30 segundos para personalizar o Cronograma Gantt.</span>
+                </div>
+                <button type="button" class="btn btn-primary" data-action="open-diagnostic-modal">🎯 Fazer diagnóstico</button>
+              </div>`
+            : ''
+        }
+
         <section class="analogy-box" aria-label="Analogia prática">
           <h2>${escapeHtml(lesson.analogyTitle)}</h2>
           <p>${escapeHtml(lesson.analogyBody)}</p>
@@ -1114,6 +1143,7 @@ function renderApp(): void {
       collapsedTracks: state.ganttCollapsedTracks,
       currentLessonId: state.lessonId,
       lessonTimes: state.lessonTimes,
+      diagnostic: state.diagnostic,
     });
   } else {
     mainContent = renderCheatsheetHtml(state.refQuery, state.refCategory);
@@ -1213,6 +1243,7 @@ function renderApp(): void {
       </main>
       ${state.showProgressModal ? renderProgressModal(state) : ''}
       ${state.showThemeModal ? renderThemeModal(state) : ''}
+      ${state.showDiagnosticModal ? renderDiagnosticModal(state) : ''}
       ${ecraAberto ? renderEcraDeEscritaAtual() : ''}
     </div>
   `;
@@ -1531,6 +1562,36 @@ function attachDomListeners(): void {
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
       renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-diag-bg]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bg = btn.dataset.diagBg as BackgroundLevel;
+      if (bg === 'zero' || bg === 'negocio' || bg === 'tech') {
+        state.diagnosticDraft = { ...state.diagnosticDraft, background: bg };
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-diag-hours]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const hrs = Number(btn.dataset.diagHours);
+      if (Number.isFinite(hrs) && hrs > 0) {
+        state.diagnosticDraft = { ...state.diagnosticDraft, hoursPerWeek: hrs };
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-diag-months]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const m = Number(btn.dataset.diagMonths);
+      if (Number.isFinite(m) && m > 0) {
+        state.diagnosticDraft = { ...state.diagnosticDraft, targetMonths: m };
+        renderApp();
+      }
     });
   });
 
@@ -2095,11 +2156,13 @@ function attachDomListeners(): void {
         renderApp();
       } else if (act === 'confirm-clear-progress') {
         clearAllUserProgress();
+        clearSavedDiagnostic();
         state.completedLessons = {};
         state.editorDrafts = {};
         state.quizSelection = {};
         state.practiceDone = new Set();
         state.lessonTimes = {};
+        state.diagnostic = null;
         state.helpedInSession.clear();
         state.generatedProgressCode = '';
         state.confirmClearProgress = false;
@@ -2131,6 +2194,38 @@ function attachDomListeners(): void {
         renderApp();
       } else if (act === 'gantt-collapse-all') {
         state.ganttCollapsedTracks = new Set(allTracks.map((t) => t.id));
+        renderApp();
+      } else if (act === 'open-diagnostic-modal') {
+        state.showProgressModal = false;
+        state.diagnosticDraft = state.diagnostic ?? state.diagnosticDraft;
+        state.showDiagnosticModal = true;
+        renderApp();
+      } else if (act === 'close-diagnostic-modal') {
+        state.showDiagnosticModal = false;
+        renderApp();
+      } else if (act === 'close-diagnostic-backdrop') {
+        if (ev.target === el) {
+          state.showDiagnosticModal = false;
+          renderApp();
+        }
+      } else if (act === 'apply-diagnostic-only' || act === 'apply-diagnostic-and-go') {
+        const saved = { ...state.diagnosticDraft, updatedAt: new Date().toISOString() };
+        state.diagnostic = saved;
+        saveDiagnostic(saved);
+        state.ganttPaceMinutes = saved.hoursPerWeek * 60;
+        state.showDiagnosticModal = false;
+        if (act === 'apply-diagnostic-and-go') {
+          const plan = evaluateDiagnosticPlan(saved, getCourseMinutes(allTracks));
+          const loc = locateLesson(plan.startTrackId, plan.startLessonId);
+          if (loc) {
+            state.trackId = loc.trackId;
+            state.lessonId = loc.lessonId;
+          }
+          state.view = 'academia';
+          state.wbTab = 'challenge';
+          state.practiceIdx = 0;
+          state.output = { kind: 'empty' };
+        }
         renderApp();
       }
     });
@@ -2430,6 +2525,7 @@ window.setInterval(() => {
     document.visibilityState !== 'visible' ||
     state.showProgressModal ||
     state.showThemeModal ||
+    state.showDiagnosticModal ||
     Date.now() - lastStudyActivityAt > 180_000
   ) {
     return;

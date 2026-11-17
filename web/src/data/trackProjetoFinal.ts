@@ -641,6 +641,79 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
       },
     },
     {
+      id: 'pf-08-portfolio-3-projetos',
+      code: '07',
+      title: 'Portefólio sólido: fechar 3 a 4 projetos completos no GitHub',
+      lede: 'Um projeto único mostra que completaste um exercício; 3 a 4 repositórios completos — de setores diferentes, do dado bruto sujo à recomendação de negócio — provam consistência a qualquer recrutador.',
+      analogyTitle: 'A carteira de obras de um arquiteto',
+      analogyBody: 'Ninguém contrata um arquiteto por uma única maquete: quer ver 3 ou 4 projetos reais, para clientes diferentes, do terreno em bruto até à planta final. No GitHub é igual: o teu projeto próprio mais os casos que trabalhaste no curso formam um portefólio de 3 a 4 peças completas.',
+      concepts: [
+        'Os 4 pilares do portefólio completo (do dado bruto à recomendação): 1) Projeto próprio em dados públicos PT (etapas 03–06); 2) Mobilidade urbana — 20 300 viagens de bicicletas sujas; 3) E-commerce — diagnóstico da queda de março (2 700 pedidos em SQL, pandas, estatística e Excel/Power BI); 4) Varejo & BI — Mercearia do Bairro (SQL + Star Schema + DAX).',
+        'Qualidade acima de quantidade: evita 10 cadernos soltos de tutoriais sem README (Tutorial Hell) ou modelos de Machine Learning prematuros sem pergunta de negócio clara.',
+        'Cada repositório responde às 3 perguntas da direção: "Qual foi o número?", "O que está nos limites?" e "E daí? Que decisão tomar na segunda-feira?".',
+        'No teu perfil do GitHub, usa "Customize your pins" para fixar os 3–4 melhores repositórios logo no topo, cada um com uma descrição de uma linha e gráfico visível no README.',
+      ],
+      beginnerSteps: [
+        'Confirma que o teu projeto próprio da etapa Publicar já está público, com README curto, gráfico e licença.',
+        'Escolhe mais 2 a 3 casos (por exemplo: Bicicletas 20 300 viagens, Loja Online em março e Mercearia/Power BI) e publica cada um num repositório próprio no GitHub.',
+        'Em cada repositório garante a mesma estrutura limpa: dados/ (ou link), cadernos/ ou sql/, figuras/ e README.md com Pergunta, Conclusões com números, Limites e Como correr.',
+        'Fixa os 3–4 repositórios no topo do teu perfil do GitHub (Pins) e testa abrir cada link numa janela privada.',
+      ],
+      proPractice: 'Ter 3 projetos completos de domínios diferentes (ex.: turismo, mobilidade e e-commerce) mostra versatilidade: em qualquer entrevista consegues puxar o caso mais próximo do setor da empresa.',
+      commonPitfall: 'Subir 8 ficheiros de exercícios soltos como "aula_1.ipynb" sem pergunta, sem limpeza documentada e sem recomendação de negócio — isso mostra apenas que seguiste aulas (Tutorial Hell), não que sabes analisar um problema real.',
+      referenceTitle: 'Mapa dos 3 a 4 projetos completos para o teu GitHub',
+      referenceRows: [
+        { syntax: 'Projeto 1: Dados públicos PT (teu tema)', meaning: 'Turismo, mobilidade, saúde ou energia (etapas 03–06)', example: 'Python + pandas + matplotlib + decisão' },
+        { syntax: 'Projeto 2: Rede de Bicicletas (20 300 viagens)', meaning: 'Limpeza auditada (300 dup, 200 dur, 150 datas) + horas de ponta (8h/17h)', example: 'dados/bicicletas_viagens_sujas.csv' },
+        { syntax: 'Projeto 3: E-commerce — Queda em Março (2 700 pedidos)', meaning: 'SQL + pandas + teste z (App 44,85% cancel.) + Tabela Dinâmica / DAX', example: 'dados/loja_online_pedidos.csv' },
+        { syntax: 'Projeto 4: Varejo & BI — Mercearia do Bairro', meaning: '5 078 vendas + Star Schema + medidas DAX + Curva ABC + relatório executivo', example: 'SQL + Excel/Power BI + Python' },
+      ],
+      engine: 'projeto',
+      exampleCode: `<!-- Estrutura recomendada no teu perfil GitHub (Pins no topo) -->
+1. turismo-algarve-sazonalidade
+   "Em que meses reforçar pessoal no Algarve? Dados INE (CC BY 4.0) · Python, pandas, matplotlib"
+
+2. mobilidade-bicicletas-limpeza-procura
+   "Auditoria de 20 300 viagens partilhadas e picos de procura por estação · Python, pandas"
+
+3. ecommerce-diagnostico-cancelamentos
+   "Porque caiu a faturação -17,4% em março? SQL, pandas, teste z e Power BI (DAX)"
+
+4. varejo-star-schema-curva-abc
+   "Modelo Star Schema, DAX e Curva ABC para 5 078 transações · SQL, Excel, Power BI"`,
+      projectSpec: {
+        entregaveis: [
+          '3 a 4 repositórios públicos completos no GitHub, cada um de um setor/tema distinto.',
+          'Cada repositório com README executivo (Pergunta, Conclusões com números, Dados/Licença, Limites, Como correr) e pelo menos um gráfico ou captura de dashboard.',
+          'Perfil do GitHub com os 3 a 4 projetos fixados no topo (Customize your pins).',
+        ],
+        lista: [
+          'Tenho pelo menos 3 repositórios públicos no GitHub, de setores ou perguntas diferentes.',
+          'Todos os projetos vão do dado bruto sujo até à recomendação prática ("e daí? que decisão tomar?").',
+          'Cada README abre com a pergunta, números em formato português, gráfico visível e secção de limites.',
+          'Evitei repositórios com código solto de tutoriais ou modelos de Machine Learning sem contexto de negócio.',
+          'Fixei os 3–4 projetos no topo do meu perfil do GitHub e verifiquei que todos os links e imagens carregam.',
+        ],
+        grelha: [
+          { criterio: 'Consistência (3–4 projetos)', bom: '3 ou 4 projetos completos de áreas distintas (ex.: setor público, mobilidade, e-commerce, varejo).', aMelhorar: 'Apenas 1 projeto ou 10 pastas de exercícios incompletos sem README.' },
+          { criterio: 'Foco no negócio', bom: 'Cada projeto responde a "quem decide?" e fecha com uma ação concreta sustentada por números.', aMelhorar: 'Mostra código ou modelos complexos sem explicar o impacto para o negócio.' },
+          { criterio: 'Do bruto ao visual', bom: 'Limpeza documentada, validação cruzada e gráfico/dashboard claro à vista no topo do README.', aMelhorar: 'Só o ficheiro final ou apenas tabelas impressas sem gráfico.' },
+          { criterio: 'Curadoria do perfil', bom: 'Os 3–4 melhores projetos estão fixados nos Pins do GitHub com descrições de 1 linha.', aMelhorar: 'Perfil desarrumado com repositórios de teste ou sem descrição.' },
+        ],
+      },
+      quiz: {
+        question: 'Um recrutador compara dois perfis júnior no GitHub: o Perfil A tem 12 repositórios de aulas e modelos de Machine Learning copiados sem README; o Perfil B tem 3 projetos completos em SQL, pandas e Power BI com limpeza documentada, gráficos e decisão de negócio. Qual passa à entrevista?',
+        options: [
+          'O Perfil A, porque tem mais repositórios e já mostra Machine Learning.',
+          'O Perfil B, porque prova autonomia do dado bruto até à decisão de negócio sem cair em Tutorial Hell.',
+          'Nenhum dos dois, porque um analista júnior precisa de pelo menos 10 projetos.',
+          'O Perfil A, porque os recrutadores procuram primeiro código de redes neuronais.',
+        ],
+        correctIndex: 1,
+        explanation: 'Para Analista de Dados Júnior, 3 a 4 projetos completos que dominam limpeza, SQL, estatística básica, visualização e decisão de negócio valem muito mais do que muitos tutoriais copiados ou ML prematuro.',
+      },
+    },
+    {
       id: 'pf-06-cv-linkedin',
       code: '06',
       title: 'CV de analista e LinkedIn: projetos com números',
@@ -654,9 +727,9 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
         'LinkedIn alinhado com o CV: título claro ("Analista de Dados Júnior | SQL · Python · Pandas · Power BI"), secção Sobre com 3 parágrafos curtos (o que resolves, 2 projetos com números, que vaga procuras) e projetos nos Destaques com imagem do gráfico e link do GitHub.',
       ],
       beginnerSteps: [
-        'Escolhe 2 projetos (o teu projeto próprio da etapa Publicar e o desafio das bicicletas ou da mercearia) e escreve 2 linhas para cada um com a fórmula Ação + Ferramenta + Número.',
+        'Escolhe os teus 3 melhores projetos publicados no GitHub e escreve 2 linhas para cada um com a fórmula Ação + Ferramenta + Número.',
         'Monta um CV de 1 página em formato simples (Google Docs ou Word exportado para PDF) com links clicáveis para o GitHub e o LinkedIn.',
-        'Atualiza o título e o "Sobre" do LinkedIn, e adiciona o link do repositório publicado na secção Destaques (Featured) com o gráfico do README.',
+        'Atualiza o título e o "Sobre" do LinkedIn, e adiciona os links dos repositórios publicados na secção Destaques (Featured) com imagem do gráfico.',
       ],
       proPractice: 'Se vens de outra área (comércio, hotelaria, saúde, administração), não escondas essa experiência: ela dá-te contexto de negócio que muitos recém-licenciados não têm. Liga-a a métricas, prazos e resolução de problemas.',
       commonPitfall: 'Listar 15 ferramentas que só viste num vídeo de 10 minutos, ou escrever "Projeto final de curso" sem dizer que problema resolveste nem que número encontraste.',
@@ -681,8 +754,11 @@ Experiência prévia em [a tua área anterior], habituado a trabalhar com prazos
 - Limpei 1 200 registos oficiais do INE com Python/pandas, removendo 49 linhas inválidas e documentando as regras.
 - Mostrei que agosto tem 2,3x as dormidas de um mês médio e entreguei recomendação de reforço de equipa com gráfico em matplotlib.
 
-**Diagnóstico de queda de faturação (loja online)** — Python, SQLite, Estatística
+**Diagnóstico de queda de faturação (loja online)** — github.com/teu-utilizador/ecommerce-cancelamentos
 - Cruzei 2 700 pedidos em SQL e pandas e identifiquei um salto de 3,4% para 44,9% nos cancelamentos da App (p < 0,001).
+
+**Mobilidade Urbana: procura em 20 300 viagens** — github.com/teu-utilizador/mobilidade-bicicletas
+- Auditei 20 300 registos sujos em pandas (650 inválidos removidos) e identifiquei as 3 estações e horas de ponta (8h e 17h).
 
 ## Experiência Profissional
 **[Cargo anterior] · [Empresa]** (AAAA–AAAA)

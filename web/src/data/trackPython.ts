@@ -16,7 +16,8 @@ export const pythonTrack: Track = {
       analogyBody: 'Se disseres a uma pessoa "faz as contas do dia", ela percebe. Mas um computador precisa da receita exata: 1) abre o caderno de vendas, 2) multiplica a quantidade pelo preço de cada linha, 3) soma tudo, 4) mostra o total no ecrã. Essa sequência de passos chama-se algoritmo.',
       concepts: [
         'Entrada (Input) -> Processamento (Regras e Contas) -> Saída (Resultado ou Gráfico): todo o trabalho de dados segue estas 3 etapas.',
-        'Porque usamos Python, SQL, Pandas, Git e BI? SQL tira dados da base de dados; Python e Pandas limpam e automatizam; Git guarda o histórico; Power BI apresenta à direção.',
+        'Os 4 pilares do percurso por ordem certa: 1) Negócio, KPIs e Excel; 2) Extração com SQL (a mais cobrada em entrevistas); 3) Estatística aplicada e Python/Pandas; 4) Visualização (Power BI/DAX) e 3–4 projetos completos no GitHub.',
+        'Os 3 riscos a evitar desde o primeiro dia: 1) Tutorial Hell (ver horas de aulas sem resolver problemas reais); 2) Foco prematuro em Machine Learning antes de dominar SQL e análise exploratória; 3) Ignorar o contexto de negócio ("e daí? que decisão tomar?").',
         'Errar faz parte do trabalho diário: até um analista sénior vê mensagens de erro todos os dias — a diferença é que lê a última linha do erro com calma para corrigir.',
       ],
       beginnerSteps: [

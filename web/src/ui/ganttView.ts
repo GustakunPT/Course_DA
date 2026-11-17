@@ -1,5 +1,11 @@
 import type { UserProgressMap } from '../data/progress';
 import {
+  evaluateDiagnosticPlan,
+  FOUR_PILLARS,
+  THREE_RISKS,
+  type DiagnosticProfile,
+} from '../data/diagnostic';
+import {
   formatHoursApproxPt,
   formatMinutesPt,
   getLessonBaseMinutes,
@@ -91,9 +97,10 @@ export interface GanttModel {
 
 export const GANTT_PACE_OPTIONS = [
   { minutes: 240, label: '4 h/sem' },
-  { minutes: 300, label: '5 h/sem' },
   { minutes: 360, label: '6 h/sem (10 sem.)' },
+  { minutes: 480, label: '8 h/sem' },
   { minutes: 600, label: '10 h/sem' },
+  { minutes: 720, label: '12 h/sem' },
 ];
 
 const TRACK_PALETTE: Record<string, { color: string; soft: string }> = {
@@ -323,6 +330,7 @@ export interface GanttRenderOptions {
   collapsedTracks: Set<string>;
   currentLessonId: string;
   lessonTimes?: LessonTimeMap;
+  diagnostic?: DiagnosticProfile | null;
 }
 
 export function renderGanttHtml(
@@ -566,6 +574,45 @@ export function renderGanttHtml(
             <button type="button" class="btn" data-action="gantt-collapse-all">Só temas</button>
           </div>
         </div>
+
+        ${(() => {
+          const diagEval = opts.diagnostic
+            ? evaluateDiagnosticPlan(opts.diagnostic, model.totalCourseMinutes)
+            : null;
+          return `
+            <div class="gantt-diag-strip ${diagEval ? (diagEval.fitsTarget ? 'is-ok' : 'is-tight') : ''}">
+              <div class="gantt-diag-info">
+                ${
+                  diagEval && opts.diagnostic
+                    ? `<strong>${escapeHtml(diagEval.routeTitle)}</strong> · <span>Meta: ${opts.diagnostic.targetMonths} meses (${opts.diagnostic.hoursPerWeek} h/sem)</span> · <span class="measured">${escapeHtml(diagEval.verdictLabel)}</span>`
+                    : `<strong>Diagnóstico inicial:</strong> <span class="measured">Define a tua bagagem, horas por semana e prazo alvo para ajustar este cronograma ao teu ritmo.</span>`
+                }
+              </div>
+              <button type="button" class="btn btn-primary" data-action="open-diagnostic-modal">
+                ${diagEval ? 'Ajustar diagnóstico' : 'Fazer diagnóstico (30 s)'}
+              </button>
+            </div>
+            <details class="study-plan-panel">
+              <summary><strong>Os 4 pilares do percurso e 3 riscos a evitar</strong></summary>
+              <div class="diag-pillars-grid" style="margin-top:8px;">
+                ${FOUR_PILLARS.map(
+                  (p) => `
+                    <div class="diag-pillar-card">
+                      <strong>Pilar ${p.num}: ${escapeHtml(p.title)}</strong>
+                      <p>${escapeHtml(p.detail)}</p>
+                      <span class="measured">${escapeHtml(p.tracks)}</span>
+                    </div>
+                  `,
+                ).join('')}
+              </div>
+              <ul class="prose-list diag-risks-list" style="margin-top:10px;">
+                ${THREE_RISKS.map(
+                  (r) => `<li><strong>Evitar ${escapeHtml(r.title)}:</strong> ${escapeHtml(r.guard)}</li>`,
+                ).join('')}
+              </ul>
+            </details>
+          `;
+        })()}
       </section>
 
       <section class="seam-panel gantt-board-panel">

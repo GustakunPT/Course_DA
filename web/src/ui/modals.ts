@@ -1,5 +1,13 @@
 import { allTracks, totalLessonsCount } from '../data/curriculum';
 import {
+  BACKGROUND_OPTIONS,
+  evaluateDiagnosticPlan,
+  FOUR_PILLARS,
+  HOURS_OPTIONS,
+  TARGET_MONTHS_OPTIONS,
+  THREE_RISKS,
+} from '../data/diagnostic';
+import {
   formatHoursApproxPt,
   formatMinutesPt,
   getCourseMinutes,
@@ -228,6 +236,7 @@ export function renderProgressModal(state: AppState): string {
         <div class="modal-actions-row">
           <div class="action-pair" style="flex-wrap:wrap;">
             <button type="button" class="btn btn-primary" data-action="open-gantt-view">Ver Cronograma Gantt</button>
+            <button type="button" class="btn" data-action="open-diagnostic-modal">Diagnóstico &amp; Meta</button>
             <button type="button" class="btn" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
             <button type="button" class="btn" data-action="export-progress-json">Backup (.json)</button>
             <button type="button" class="btn" data-action="trigger-import-json">Restaurar (.json)</button>
@@ -240,6 +249,113 @@ export function renderProgressModal(state: AppState): string {
                    <button type="button" class="btn" data-action="cancel-clear-progress">Cancelar</button>`
                 : `<button type="button" class="btn" data-action="ask-clear-progress">Limpar progresso</button>`
             }
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function renderDiagnosticModal(state: AppState): string {
+  const draft = state.diagnosticDraft;
+  const plan = evaluateDiagnosticPlan(draft, getCourseMinutes(allTracks));
+
+  return `
+    <div class="modal-backdrop" data-action="close-diagnostic-backdrop" role="dialog" aria-modal="true" aria-labelledby="diag-modal-title">
+      <div class="progress-modal diag-modal">
+        <div class="workbench-toolbar">
+          <div>
+            <span class="badge-chip">Diagnóstico inicial · 3 perguntas</span>
+            <h2 id="diag-modal-title">Onde estás hoje e qual é a tua meta?</h2>
+            <p class="measured">Ajusta o ritmo do Cronograma Gantt ao teu tempo real e define o ponto de partida sem perderes o foco de negócio.</p>
+          </div>
+          <button type="button" class="btn" data-action="close-diagnostic-modal" aria-label="Fechar diagnóstico">Fechar</button>
+        </div>
+
+        <div class="diag-section">
+          <strong>1. Bagagem prévia</strong>
+          <div class="diag-options-grid">
+            ${BACKGROUND_OPTIONS.map((opt) => {
+              const active = draft.background === opt.id;
+              return `
+                <button
+                  type="button"
+                  class="theme-option-card ${active ? 'is-active' : ''}"
+                  data-diag-bg="${opt.id}"
+                  aria-pressed="${active}"
+                >
+                  <strong>${escapeHtml(opt.label)}</strong>
+                  <span class="theme-option-desc">${escapeHtml(opt.hint)}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="diag-row-split">
+          <div class="diag-section">
+            <strong>2. Horas por semana disponíveis</strong>
+            <div class="action-pair" style="flex-wrap:wrap;">
+              ${HOURS_OPTIONS.map(
+                (h) => `
+                  <button
+                    type="button"
+                    class="mode-btn"
+                    aria-selected="${draft.hoursPerWeek === h}"
+                    data-diag-hours="${h}"
+                  >${h} h/sem</button>
+                `,
+              ).join('')}
+            </div>
+          </div>
+
+          <div class="diag-section">
+            <strong>3. Prazo alvo para aplicar às vagas</strong>
+            <div class="action-pair" style="flex-wrap:wrap;">
+              ${TARGET_MONTHS_OPTIONS.map(
+                (m) => `
+                  <button
+                    type="button"
+                    class="mode-btn"
+                    aria-selected="${draft.targetMonths === m}"
+                    data-diag-months="${m}"
+                  >${m} meses</button>
+                `,
+              ).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-verdict ${plan.fitsTarget ? 'is-ok' : 'is-tight'}">
+          <strong>${escapeHtml(plan.routeTitle)}</strong>
+          <p>${escapeHtml(plan.verdictLabel)} (${plan.courseHours} h do curso c/ margem + ${plan.portfolioHours} h para 3–4 projetos completos no GitHub = ${plan.totalPlanHours} h totais).</p>
+          <p class="measured">${escapeHtml(plan.routeNote)}</p>
+        </div>
+
+        <details class="study-plan-panel">
+          <summary><strong>Os 4 pilares do percurso e 3 riscos a evitar</strong></summary>
+          <div class="diag-pillars-grid" style="margin-top:8px;">
+            ${FOUR_PILLARS.map(
+              (p) => `
+                <div class="diag-pillar-card">
+                  <strong>Pilar ${p.num}: ${escapeHtml(p.title)}</strong>
+                  <p>${escapeHtml(p.detail)}</p>
+                  <span class="measured">${escapeHtml(p.tracks)}</span>
+                </div>
+              `,
+            ).join('')}
+          </div>
+          <ul class="prose-list diag-risks-list" style="margin-top:10px;">
+            ${THREE_RISKS.map(
+              (r) => `<li><strong>Evitar ${escapeHtml(r.title)}:</strong> ${escapeHtml(r.guard)}</li>`,
+            ).join('')}
+          </ul>
+        </details>
+
+        <div class="modal-actions-row">
+          <div class="action-pair" style="flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" data-action="apply-diagnostic-and-go">Aplicar ao Cronograma e ir para a etapa sugerida →</button>
+            <button type="button" class="btn" data-action="apply-diagnostic-only">Guardar só a meta</button>
           </div>
         </div>
       </div>

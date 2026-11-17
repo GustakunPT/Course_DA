@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 8 trilhas e 79 etapas', () => {
+  it('tem 8 trilhas e 80 etapas', () => {
     expect(allTracks).toHaveLength(8);
-    expect(totalLessonsCount).toBe(79);
+    expect(totalLessonsCount).toBe(80);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
@@ -58,6 +58,7 @@ describe('estrutura do currículo', () => {
       'pf-03-explorar-limpar',
       'pf-04-analisar-recomendar',
       'pf-05-publicar',
+      'pf-08-portfolio-3-projetos',
       'pf-06-cv-linkedin',
       'pf-07-anuncios-entrevista',
     ]);
@@ -122,7 +123,7 @@ describe('estrutura do currículo', () => {
     }
   });
 
-  it('a trilha 8 tem as etapas 02 a 08 de projeto, e só a etapa Publicar pede o link do GitHub', () => {
+  it('a trilha 8 tem as etapas 02 a 09 de projeto, e só a etapa Publicar pede o link do GitHub', () => {
     const t = allTracks.find((x) => x.id === 'projeto-final')!;
     const projeto = t.lessons.slice(1);
     expect(projeto.map((l) => [l.id, l.code, l.engine])).toEqual([
@@ -131,8 +132,9 @@ describe('estrutura do currículo', () => {
       ['pf-03-explorar-limpar', '04', 'projeto'],
       ['pf-04-analisar-recomendar', '05', 'projeto'],
       ['pf-05-publicar', '06', 'projeto'],
-      ['pf-06-cv-linkedin', '07', 'projeto'],
-      ['pf-07-anuncios-entrevista', '08', 'projeto'],
+      ['pf-08-portfolio-3-projetos', '07', 'projeto'],
+      ['pf-06-cv-linkedin', '08', 'projeto'],
+      ['pf-07-anuncios-entrevista', '09', 'projeto'],
     ]);
     expect(projeto.filter((l) => l.projectSpec?.pedirLinkGithub).map((l) => l.id)).toEqual(['pf-05-publicar']);
   });
