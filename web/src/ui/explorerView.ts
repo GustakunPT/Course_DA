@@ -147,6 +147,9 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
             <a href="/relatorios/relatorio_executivo_2025.md" download class="btn">
               Relatório Executivo (.md)
             </a>
+            <a href="/dados/loja_online_pedidos.csv" download class="btn">
+              Loja Online — Pedidos (.csv)
+            </a>
           </div>
         </div>
       </div>

@@ -148,6 +148,105 @@ print(soma_se_leite, faturacao_bebidas, contar_se_lisboa)`,
       ],
     },
   ],
+  'bi-20-excel-powerquery-limpeza': [
+    {
+      title: 'Reconciliar bruto vs líquido em pandas',
+      description: 'Confere o teu Power Query / Excel calculando em pandas, sobre dados/loja_online_pedidos.csv: bruto_total (todas as linhas), liquido_total (só estado == "Concluído"), diferenca_cancelada (bruto_total - liquido_total) e liquido_por_categoria (dicionário categoria -> soma líquida arredondada a 2 casas).',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+
+bruto_total = None
+liquido_total = None
+diferenca_cancelada = None
+liquido_por_categoria = None
+print(bruto_total, liquido_total, diferenca_cancelada, liquido_por_categoria)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+
+conc = df[df["estado"] == "Concluído"]
+bruto_total = round(float(df["valor"].sum()), 2)
+liquido_total = round(float(conc["valor"].sum()), 2)
+diferenca_cancelada = round(bruto_total - liquido_total, 2)
+liquido_por_categoria = conc.groupby("categoria")["valor"].sum().round(2).to_dict()
+print(bruto_total, liquido_total, diferenca_cancelada, liquido_por_categoria)`,
+      checks: [
+        { label: 'Totais reconciliados: 274 466,03 € bruto, 246 900,06 € líquido e 27 565,97 € cancelados', expr: 'abs(float(bruto_total) - 274466.03) < 0.05 and abs(float(liquido_total) - 246900.06) < 0.05 and abs(float(diferenca_cancelada) - 27565.97) < 0.05', actualExpr: '(bruto_total, liquido_total, diferenca_cancelada)', hint: 'Filtra df[df["estado"] == "Concluído"] para o líquido.' },
+        { label: 'liquido_por_categoria bate com Eletrónica 92 853,76 € e Escritório 60 919,36 €', expr: 'isinstance(liquido_por_categoria, dict) and abs(float(liquido_por_categoria["Eletrónica"]) - 92853.76) < 0.05 and abs(float(liquido_por_categoria["Escritório"]) - 60919.36) < 0.05', actualExpr: 'liquido_por_categoria', hint: 'conc.groupby("categoria")["valor"].sum().round(2).to_dict().' },
+      ],
+    },
+  ],
+  'bi-21-excel-dinamicas-procx': [
+    {
+      title: 'Pedido ambíguo: "Qual é a melhor região?"',
+      description: 'A direção faz uma pergunta ambígua sobre dados/loja_online_pedidos.csv: "Qual é a melhor região?". Antes de responder, define 3 critérios e calcula: regiao_maior_faturacao (soma de valor nos concluídos), regiao_maior_gasto_cliente (faturação concluída a dividir por cliente_id únicos) e regiao_menor_cancelamento (região com menor taxa de cancelamento em todos os pedidos).',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+
+regiao_maior_faturacao = None
+regiao_maior_gasto_cliente = None
+regiao_menor_cancelamento = None
+print(regiao_maior_faturacao, regiao_maior_gasto_cliente, regiao_menor_cancelamento)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+
+conc = df[df["estado"] == "Concluído"]
+por_reg = conc.groupby("regiao").agg(fat=("valor", "sum"), cli=("cliente_id", "nunique"))
+por_reg["gasto_cli"] = por_reg["fat"] / por_reg["cli"]
+
+regiao_maior_faturacao = str(por_reg["fat"].idxmax())
+regiao_maior_gasto_cliente = str(por_reg["gasto_cli"].idxmax())
+canc = df.assign(c=df["estado"] == "Cancelado").groupby("regiao")["c"].mean()
+regiao_menor_cancelamento = str(canc.idxmin())
+print(regiao_maior_faturacao, regiao_maior_gasto_cliente, regiao_menor_cancelamento)`,
+      checks: [
+        { label: 'Três respostas para três definições: Lisboa (total), Centro (por cliente) e Sul (menos cancelamentos)', expr: 'regiao_maior_faturacao == "Lisboa" and regiao_maior_gasto_cliente == "Centro" and regiao_menor_cancelamento == "Sul"', actualExpr: '(regiao_maior_faturacao, regiao_maior_gasto_cliente, regiao_menor_cancelamento)', hint: 'Usa .idxmax() para faturação total e gasto por cliente, e .idxmin() para a taxa de cancelamento.' },
+      ],
+    },
+  ],
+  'bi-22-powerbi-dax-relatorio': [
+    {
+      title: 'Medidas DAX de contexto em pandas',
+      description: 'Reproduz o painel do Power BI em pandas sobre dados/loja_online_pedidos.csv: calcula fat_jan, fat_fev, fat_mar (faturação líquida em 2025-01, 2025-02, 2025-03 arredondadas a 2 casas) e taxa_cancel_app_pct (taxa de cancelamento % no canal "App" no trimestre inteiro, 2 casas).',
+      starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+df["mes"] = df["data"].str.slice(0, 7)
+
+fat_jan = None
+fat_fev = None
+fat_mar = None
+taxa_cancel_app_pct = None
+print(fat_jan, fat_fev, fat_mar, taxa_cancel_app_pct)`,
+      solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+df["mes"] = df["data"].str.slice(0, 7)
+
+conc = df[df["estado"] == "Concluído"]
+por_mes = conc.groupby("mes")["valor"].sum().round(2)
+fat_jan = float(por_mes["2025-01"])
+fat_fev = float(por_mes["2025-02"])
+fat_mar = float(por_mes["2025-03"])
+
+app = df[df["canal"] == "App"]
+taxa_cancel_app_pct = round(float((app["estado"] == "Cancelado").mean() * 100), 2)
+print(fat_jan, fat_fev, fat_mar, taxa_cancel_app_pct)`,
+      checks: [
+        { label: 'Meses: jan 85 277,82 €, fev 88 492,11 € e mar 73 130,13 €', expr: 'abs(float(fat_jan) - 85277.82) < 0.05 and abs(float(fat_fev) - 88492.11) < 0.05 and abs(float(fat_mar) - 73130.13) < 0.05', actualExpr: '(fat_jan, fat_fev, fat_mar)', hint: 'Agrupa os pedidos Concluído por mes e soma valor.' },
+        { label: 'taxa_cancel_app_pct no trimestre (17,49%)', expr: 'abs(float(taxa_cancel_app_pct) - 17.49) < 0.05', actualExpr: 'taxa_cancel_app_pct', hint: 'Filtra canal == "App" e calcula a média de (estado == "Cancelado") * 100.' },
+      ],
+    },
+  ],
   'pro-01-pipeline-etl': [
     {
       title: 'Camada Gold: um agregado reconciliado',
@@ -391,6 +490,61 @@ print(frase_cv, len(frase_cv))`,
         { label: 'Até 200 caracteres, com SQL e Python', expr: 'isinstance(frase_cv, str) and 30 <= len(frase_cv) <= 200 and "SQL" in frase_cv and "Python" in frase_cv', actualExpr: 'len(frase_cv) if isinstance(frase_cv, str) else frase_cv', hint: 'Uma só frase, curta, com as ferramentas pelo nome.' },
         { label: 'Começa por uma ação e mostra o resultado com %', expr: 'frase_cv.split()[0].endswith("ei") and f"{quota_top2}%" in frase_cv and str(linhas) in frase_cv', actualExpr: 'frase_cv.split()[0] if isinstance(frase_cv, str) else None', hint: 'Começa por "Analisei", "Construí" ou "Mostrei" e usa {linhas} e {quota_top2}% numa f-string.' },
         { label: 'Os números vêm das variáveis', expr: '"41.5%" in correr_com(quota_top2=41.5)["frase_cv"]', actualExpr: 'correr_com(quota_top2=41.5).get("frase_cv")', hint: 'Escreve a frase como f-string com {quota_top2}.' },
+      ],
+    },
+  ],
+  'pro-12-desafio-recrutamento': [
+    {
+      title: 'Exame misto (SQL + Estatística): confirmar o salto na App',
+      description: 'Carrega dados/loja_online_pedidos.csv para uma tabela SQLite "pedidos", usa SQL para contar n_fev, canc_fev, n_mar e canc_mar (apenas canal = "App" nos meses 2025-02 e 2025-03) e calcula o teste z de duas proporções (z_stat, arredondado a 2 casas) para provar que o salto nos cancelamentos não é acaso.',
+      starterCode: `import math
+import sqlite3
+import pandas as pd
+
+con = sqlite3.connect(":memory:")
+pd.read_csv("dados/loja_online_pedidos.csv").to_sql("pedidos", con, index=False)
+
+# Usa SQL em con para obter n_fev, canc_fev, n_mar, canc_mar no canal 'App'
+n_fev = None
+canc_fev = None
+n_mar = None
+canc_mar = None
+z_stat = None
+
+print(n_fev, canc_fev, n_mar, canc_mar, z_stat)`,
+      solutionCode: `import math
+import sqlite3
+import pandas as pd
+
+con = sqlite3.connect(":memory:")
+pd.read_csv("dados/loja_online_pedidos.csv").to_sql("pedidos", con, index=False)
+
+sql = """
+SELECT
+  SUBSTR(data, 1, 7) AS mes,
+  COUNT(*) AS total,
+  SUM(CASE WHEN estado = 'Cancelado' THEN 1 ELSE 0 END) AS cancelados
+FROM pedidos
+WHERE canal = 'App' AND SUBSTR(data, 1, 7) IN ('2025-02', '2025-03')
+GROUP BY mes
+ORDER BY mes
+"""
+res = pd.read_sql_query(sql, con).set_index("mes")
+n_fev = int(res.loc["2025-02", "total"])
+canc_fev = int(res.loc["2025-02", "cancelados"])
+n_mar = int(res.loc["2025-03", "total"])
+canc_mar = int(res.loc["2025-03", "cancelados"])
+
+p1 = canc_fev / n_fev
+p2 = canc_mar / n_mar
+p_pool = (canc_fev + canc_mar) / (n_fev + n_mar)
+se = math.sqrt(p_pool * (1 - p_pool) * (1 / n_fev + 1 / n_mar))
+z_stat = round((p2 - p1) / se, 2)
+
+print(n_fev, canc_fev, n_mar, canc_mar, z_stat)`,
+      checks: [
+        { label: 'Contagens SQL corretas para a App (fev: 14/417, mar: 174/388)', expr: 'n_fev == 417 and canc_fev == 14 and n_mar == 388 and canc_mar == 174', actualExpr: '(n_fev, canc_fev, n_mar, canc_mar)', hint: 'Agrupa por SUBSTR(data, 1, 7) com WHERE canal = \'App\' e conta os Cancelado com SUM(CASE WHEN ...).' },
+        { label: 'z_stat acima de 13 (diferença estatisticamente significativa, p < 0.001)', expr: 'isinstance(z_stat, (int, float)) and abs(float(z_stat) - 13.84) < 0.1', actualExpr: 'z_stat', hint: 'p_pool = (canc_fev + canc_mar) / (n_fev + n_mar); se = sqrt(p_pool*(1-p_pool)*(1/n_fev + 1/n_mar)); z = (p2 - p1)/se.' },
       ],
     },
   ],

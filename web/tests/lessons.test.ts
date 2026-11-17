@@ -30,9 +30,9 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 8 trilhas e 72 etapas', () => {
+  it('tem 8 trilhas e 79 etapas', () => {
     expect(allTracks).toHaveLength(8);
-    expect(totalLessonsCount).toBe(72);
+    expect(totalLessonsCount).toBe(79);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
@@ -53,10 +53,13 @@ describe('estrutura do currículo', () => {
       'py-00-pensamento',
       'py-11-revisao',
       'py-10-caixa-csv',
+      'pf-00-preparar-computador',
       'pf-02-pergunta-dados',
       'pf-03-explorar-limpar',
       'pf-04-analisar-recomendar',
       'pf-05-publicar',
+      'pf-06-cv-linkedin',
+      'pf-07-anuncios-entrevista',
     ]);
   });
 
@@ -86,6 +89,7 @@ describe('estrutura do currículo', () => {
     expect(JSON.stringify(allTracks)).not.toContain('bicicletas_viagens_limpas');
     expect(existsSync(new URL('../public/dados/bicicletas_viagens_limpas.csv', import.meta.url))).toBe(false);
     expect(existsSync(new URL('../public/dados/bicicletas_viagens_sujas.csv', import.meta.url))).toBe(true);
+    expect(existsSync(new URL('../public/dados/loja_online_pedidos.csv', import.meta.url))).toBe(true);
   });
 
   it('os ids das etapas são únicos', () => {
@@ -118,14 +122,17 @@ describe('estrutura do currículo', () => {
     }
   });
 
-  it('a trilha 8 tem as etapas 02 a 05 de projeto, e só a 05 pede o link do GitHub', () => {
+  it('a trilha 8 tem as etapas 02 a 08 de projeto, e só a etapa Publicar pede o link do GitHub', () => {
     const t = allTracks.find((x) => x.id === 'projeto-final')!;
     const projeto = t.lessons.slice(1);
     expect(projeto.map((l) => [l.id, l.code, l.engine])).toEqual([
-      ['pf-02-pergunta-dados', '02', 'projeto'],
-      ['pf-03-explorar-limpar', '03', 'projeto'],
-      ['pf-04-analisar-recomendar', '04', 'projeto'],
-      ['pf-05-publicar', '05', 'projeto'],
+      ['pf-00-preparar-computador', '02', 'projeto'],
+      ['pf-02-pergunta-dados', '03', 'projeto'],
+      ['pf-03-explorar-limpar', '04', 'projeto'],
+      ['pf-04-analisar-recomendar', '05', 'projeto'],
+      ['pf-05-publicar', '06', 'projeto'],
+      ['pf-06-cv-linkedin', '07', 'projeto'],
+      ['pf-07-anuncios-entrevista', '08', 'projeto'],
     ]);
     expect(projeto.filter((l) => l.projectSpec?.pedirLinkGithub).map((l) => l.id)).toEqual(['pf-05-publicar']);
   });

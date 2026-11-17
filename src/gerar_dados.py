@@ -358,6 +358,82 @@ def escrever_bicicletas():
     return len(sujas), len(limpas), contagens
 
 
+COLUNAS_LOJA_ONLINE = [
+    "pedido_id",
+    "data",
+    "canal",
+    "categoria",
+    "regiao",
+    "estado",
+    "quantidade",
+    "preco_unit",
+    "cliente_id",
+]
+
+
+def gerar_loja_online_pedidos():
+    """Gera ~2 700 pedidos (jan-mar 2025) de uma loja online para o desafio de recrutamento.
+
+    História nos dados: em março a taxa de cancelamento na App dispara a partir de 2025-03-10,
+    enquanto a Web e o ticket médio dos pedidos concluídos mantêm-se estáveis.
+    """
+    rng = random.Random(202503)
+    categorias = [
+        ("Eletrónica", 115.0),
+        ("Casa", 62.0),
+        ("Escritório", 74.0),
+        ("Desporto", 54.0),
+    ]
+    regioes = ["Lisboa", "Norte", "Centro", "Sul"]
+    linhas = []
+    pedido_num = 1
+
+    meses = [
+        (1, 31, 900),
+        (2, 28, 900),
+        (3, 31, 900),
+    ]
+    for mes, n_dias, n_pedidos in meses:
+        for _ in range(n_pedidos):
+            dia = rng.randint(1, n_dias)
+            data_str = f"2025-{mes:02d}-{dia:02d}"
+            canal = "Web" if rng.random() < 0.55 else "App"
+            cat, base_preco = rng.choice(categorias)
+            regiao = rng.choice(regioes)
+            quantidade = 1 if rng.random() < 0.72 else 2
+            preco_unit = round(base_preco * rng.uniform(0.75, 1.30), 2)
+            cliente_id = f"CL-{rng.randint(1001, 1650)}"
+
+            # Em março, a partir do dia 10, os cancelamentos na App disparam (bug de checkout).
+            if mes == 3 and canal == "App" and dia >= 10:
+                prob_cancel = 0.62
+            else:
+                prob_cancel = 0.04
+            estado = "Cancelado" if rng.random() < prob_cancel else "Concluído"
+
+            linhas.append(
+                {
+                    "pedido_id": f"PED-{pedido_num:05d}",
+                    "data": data_str,
+                    "canal": canal,
+                    "categoria": cat,
+                    "regiao": regiao,
+                    "estado": estado,
+                    "quantidade": quantidade,
+                    "preco_unit": f"{preco_unit:.2f}",
+                    "cliente_id": cliente_id,
+                }
+            )
+            pedido_num += 1
+
+    linhas.sort(key=lambda r: (r["data"], r["pedido_id"]))
+    with open(PASTA_DADOS / "loja_online_pedidos.csv", "w", newline="", encoding="utf-8") as f:
+        escritor = csv.DictWriter(f, fieldnames=COLUNAS_LOJA_ONLINE)
+        escritor.writeheader()
+        escritor.writerows(linhas)
+    return len(linhas)
+
+
 def main():
     random.seed(SEMENTE)
     PASTA_DADOS.mkdir(exist_ok=True)
@@ -366,12 +442,14 @@ def main():
     _, n_vendas = gerar_vendas(n_clientes)
     _, n_sazonais = gerar_vendas_sazonais(n_clientes)
     n_sujas, n_limpas, _ = escrever_bicicletas()
+    n_loja = gerar_loja_online_pedidos()
     print(f"Dados criados em {PASTA_DADOS}")
     print(
         f"  produtos: {len(PRODUTOS)} | clientes: {n_clientes} | "
         f"vendas base: {n_vendas} | vendas sazonais: {n_sazonais}"
     )
     print(f"  bicicletas: {n_sujas} viagens sujas | {n_limpas} viagens limpas")
+    print(f"  loja_online_pedidos: {n_loja} pedidos")
 
 
 if __name__ == "__main__":

@@ -164,6 +164,93 @@ limpo.head()`,
       },
     },
     {
+      id: 'pf-00-preparar-computador',
+      code: '02',
+      title: 'Preparar o computador: Python, VS Code, Jupyter e Git',
+      lede: 'Até aqui corriste tudo no browser. Antes de começares o teu projeto próprio, instalas Python, VS Code (com Jupyter) e Git no teu computador, crias conta no GitHub e aprendes a resolver os 4 erros mais comuns no Windows.',
+      analogyTitle: 'Montar a bancada antes de cozinhar',
+      analogyBody: 'Não precisas de uma cozinha profissional, mas precisas de faca afiada, tábua e fogão a funcionar antes de ligar o lume. Instalar o Python com PATH, criar uma pasta .venv e ligar o Git ao GitHub leva 20 minutos e evita que bloqueies a meio do projeto.',
+      concepts: [
+        'Python 3 no Windows: descarrega de python.org (ou winget install Python.Python.3.12) e marca obrigatoriamente "Add Python to PATH" no primeiro ecrã do instalador. Confirma com python --version (ou py --version no Windows).',
+        'Ambiente virtual (.venv) por projeto: evita conflitos entre bibliotecas. No terminal, cria com python -m venv .venv, ativa (.venv\\Scripts\\Activate.ps1 no PowerShell ou source .venv/bin/activate no Git Bash/macOS) e instala pandas, matplotlib e jupyter.',
+        'VS Code + extensões Python e Jupyter: abre a pasta do projeto no VS Code, cria um ficheiro .ipynb e escolhe o kernel .venv no canto superior direito.',
+        'Git e conta no GitHub: instala o Git (git-scm.com; no Windows traz o Git Bash e o Git Credential Manager), configura user.name e user.email e cria uma conta gratuita em github.com.',
+        'Erros comuns no Windows: 1) "\'python\' is not recognized" -> faltou Add Python to PATH; 2) "PSSecurityException / running scripts is disabled" no PowerShell -> corre Set-ExecutionPolicy -Scope CurrentUser RemoteSigned (ou usa Git Bash); 3) ModuleNotFoundError no caderno -> escolheste o Python global em vez do kernel .venv.',
+      ],
+      beginnerSteps: [
+        'Instala o Python 3 (marcando "Add Python to PATH" no Windows) e confirma no terminal com python --version.',
+        'Instala o Git (git-scm.com), o VS Code e cria a tua conta gratuita no GitHub.',
+        'No VS Code, instala as extensões oficiais "Python" e "Jupyter" da Microsoft.',
+        'Cria uma pasta de teste, faz python -m venv .venv, ativa o ambiente e corre pip install pandas matplotlib jupyter.',
+        'Abre um ficheiro teste.ipynb no VS Code, escolhe o kernel .venv e corre import pandas as pd; print(pd.__version__).',
+      ],
+      proPractice: 'Usa sempre um .venv por projeto e nunca instales pacotes no Python global do sistema: quando partilhas o código, pip freeze ou requirements.txt garante que outra pessoa corre exatamente as mesmas bibliotecas.',
+      commonPitfall: 'Instalar Python no Windows sem marcar "Add Python to PATH", ou instalar pandas no terminal global e depois no VS Code usar outro Python no notebook (dando ModuleNotFoundError).',
+      referenceTitle: 'Comandos de arranque e erros típicos no Windows',
+      referenceRows: [
+        { syntax: 'python --version  (ou py --version)', meaning: 'Confirma que o Python está instalado e no PATH', example: 'Python 3.12.x' },
+        { syntax: 'python -m venv .venv', meaning: 'Cria o ambiente virtual isolado na pasta do projeto', example: 'Pasta .venv/' },
+        { syntax: '.venv\\Scripts\\Activate.ps1  (ou source .venv/Scripts/activate no Git Bash)', meaning: 'Ativa o ambiente virtual no Windows antes de instalar pacotes', example: 'Aparece (.venv) no início da linha' },
+        { syntax: 'Set-ExecutionPolicy -Scope CurrentUser RemoteSigned', meaning: 'Resolve o erro PSSecurityException ao ativar .venv no PowerShell do Windows', example: 'Corre uma única vez' },
+        { syntax: 'pip install pandas matplotlib jupyter', meaning: 'Instala as 3 bibliotecas base do projeto final dentro do .venv', example: 'Com (.venv) ativo' },
+        { syntax: 'git config --global user.name "O Teu Nome" && git config --global user.email "teu@email.pt"', meaning: 'Identifica os teus commits antes de fazeres o primeiro git commit', example: 'Igual ao email do GitHub' },
+      ],
+      engine: 'projeto',
+      exampleCode: `# --- 1. Verificar Python e Git (PowerShell ou Git Bash) ---
+python --version
+git --version
+
+# --- 2. Configurar Git (só na primeira vez neste computador) ---
+git config --global user.name "Ana Silva"
+git config --global user.email "ana.silva@exemplo.pt"
+
+# --- 3. Se o PowerShell bloquear Activate.ps1 (Windows): ---
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+# --- 4. Criar e ativar .venv numa pasta de teste ---
+mkdir teste-ambiente
+cd teste-ambiente
+python -m venv .venv
+# PowerShell: .venv\\Scripts\\Activate.ps1
+# Git Bash:   source .venv/Scripts/activate
+# macOS/Linux: source .venv/bin/activate
+pip install pandas matplotlib jupyter
+
+# --- 5. Confirmar que o pandas funciona ---
+python -c "import pandas as pd, matplotlib; print('Pronto:', pd.__version__)"`,
+      projectSpec: {
+        entregaveis: [
+          'Python 3, VS Code (com extensões Python + Jupyter) e Git instalados e a responder no terminal.',
+          'Conta criada no GitHub e git config configurado com nome e email.',
+          'Um ambiente .venv de teste onde import pandas e matplotlib correm sem erros num notebook .ipynb.',
+        ],
+        lista: [
+          'python --version (ou py --version) e git --version funcionam no terminal sem erros.',
+          'Configurei git config --global user.name e user.email com o mesmo email da minha conta GitHub.',
+          'Consegui criar e ativar um ambiente virtual .venv (e resolvi o ExecutionPolicy no Windows, se apareceu).',
+          'Instalei pandas, matplotlib e jupyter dentro do .venv e escolhi esse kernel no VS Code.',
+          'Corri import pandas as pd numa célula de um ficheiro .ipynb sem ModuleNotFoundError.',
+        ],
+        grelha: [
+          { criterio: 'Python no PATH', bom: 'python --version e pip funcionam diretamente no terminal.', aMelhorar: 'Só abre pela Microsoft Store ou dá "\'python\' is not recognized".' },
+          { criterio: 'Ambiente isolado (.venv)', bom: 'Pacotes instalados dentro de .venv, e o VS Code usa o kernel .venv no .ipynb.', aMelhorar: 'Instala pacotes globalmente ou o caderno usa outro Python e falha ao importar pandas.' },
+          { criterio: 'Git e GitHub prontos', bom: 'git --version funciona, user.name/email configurados e conta no GitHub criada.', aMelhorar: 'Deixa para configurar o Git na véspera de publicar e bloqueia no primeiro commit.' },
+          { criterio: 'Autonomia no Windows', bom: 'Sabe resolver PSSecurityException ou usar Git Bash em alternativa ao PowerShell.', aMelhorar: 'Bloqueia no primeiro erro de permissão de scripts sem saber o comando.' },
+        ],
+      },
+      quiz: {
+        question: 'Instalaste o pandas no terminal dentro do .venv, mas quando corres import pandas as pd num caderno .ipynb no VS Code aparece ModuleNotFoundError. Qual é a causa mais provável?',
+        options: [
+          'O pandas não funciona em ficheiros .ipynb, só em .py.',
+          'O notebook no VS Code está a usar o kernel do Python global em vez do kernel do .venv.',
+          'Faltou reiniciar o computador depois do pip install.',
+          'Tens de instalar o pandas com sudo ou como Administrador.',
+        ],
+        correctIndex: 1,
+        explanation: 'No VS Code, cada caderno .ipynb escolhe o seu kernel no canto superior direito. Se ficar o Python global em vez de .venv, o caderno não vê as bibliotecas instaladas dentro do .venv.',
+      },
+    },
+    {
       id: 'pf-02-pergunta-dados',
       code: '02',
       title: 'O teu projeto: escolher a pergunta e os dados',
@@ -171,30 +258,31 @@ limpo.head()`,
       analogyTitle: 'A planta antes da obra',
       analogyBody: 'Ninguém começa uma casa a comprar tijolos. Primeiro decide-se para quem é, quantos quartos tem e quanto custa; só depois se escolhe o terreno. Na análise de dados, a pergunta é a planta e os dados são o terreno: se o terreno não serve, muda-se de terreno ou ajusta-se a planta antes de começar a cavar.',
       concepts: [
+        'Antes de começares, espreita o projeto de exemplo completo e publicado do curso (Turismo no Algarve) em github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve: vês logo o README, os dois cadernos e o gráfico final.',
         'Um tema não é uma pergunta. "Turismo no Algarve" é um tema; "Em que meses deve um alojamento do Algarve reforçar o pessoal?" é uma pergunta com decisão. Começa por "onde", "quando", "quanto" ou "qual" e diz quem decide.',
+        'Ideias de perguntas por tema para te inspirares: Turismo (quando reforçar equipa), Mobilidade (em que horas há mais falhas ou procura de transportes), Saúde (que especialidades ou unidades têm maior tempo de espera) e Energia (que distritos ou meses têm maior consumo ou produção renovável).',
         'Antes de te comprometeres, abre o ficheiro e confirma que os dados respondem: têm as colunas de que precisas (o quê, onde, quando), o período certo e linhas suficientes para comparar? Se não, ajusta a pergunta agora, não na véspera de publicar.',
-        'Dados abertos não são todos iguais: cada conjunto tem a sua licença (CC BY pede que cites a fonte, CC0 deixa usar sem condições) e alguns dizem "licença não especificada". Lê-a na página do conjunto e escreve-a no README. Se não permitir publicar o ficheiro, publicas só o código e o link de onde se descarrega.',
+        'Dados abertos não são todos iguais: cada conjunto tem a sua licença (ex.: CC BY 4.0 no INE / dados.gov.pt, CC0 na CM Porto). Lê-a na página do conjunto e escreve o nome exato da licença no README.',
         'A estrutura do repositório é a do curso: dados/ (os ficheiros originais, nunca editados à mão), cadernos/ (a análise em Jupyter), README.md (pergunta, dados, conclusões) e .gitignore (o que não vai para o GitHub).',
-        'Dados pessoais nunca vão para um repositório público. Ficheiros muito grandes também não: o GitHub avisa a partir de 50 MB e recusa ficheiros com mais de 100 MB. Nesses casos fica o link e as instruções para os descarregar.',
       ],
       beginnerSteps: [
-        'Escreve três temas que te interessam (por exemplo habitação, turismo e transportes) e, para cada um, uma pergunta com decisão.',
-        'Procura dados para as três nas fontes da tabela de referência e abre cada ficheiro antes de escolher.',
-        'Fica com a pergunta cujos dados têm as colunas, o período e as linhas de que precisas.',
-        'Lê a licença do conjunto e anota a fonte, o link, a data em que descarregaste e a licença.',
-        'Cria a pasta do projeto com dados/, cadernos/, README.md e .gitignore, corre git init -b main (o ramo fica logo a chamar-se main, como no GitHub) e faz o primeiro commit.',
-        'Escreve no README a pergunta, quem decide e de onde vêm os dados.',
+        'Abre o projeto de exemplo em github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve para veres como fica o resultado final.',
+        'Escolhe um tema (turismo, mobilidade, saúde, energia ou outro que conheças) e escreve uma pergunta com decisão e quem decide.',
+        'Procura dados para a tua pergunta nas fontes da tabela de referência e abre o ficheiro antes de escolher.',
+        'Confirma que o ficheiro tem as colunas, o período e linhas suficientes, e anota a fonte, o link, a data e a licença exata.',
+        'Cria a pasta do projeto com dados/, cadernos/, README.md e .gitignore, corre git init -b main e faz o primeiro commit.',
+        'Escreve no README a pergunta, quem decide e de onde vêm os dados com a licença concreta.',
       ],
       proPractice: 'Numa entrevista perguntam quase sempre "porque escolheste este projeto?". A melhor resposta é a pergunta e quem a usaria: "Queria saber em que meses um alojamento do Algarve precisa de mais pessoal, e os dados de dormidas por mês respondem a isso."',
       commonPitfall: 'Escolher primeiro os dados "porque são interessantes" e procurar depois uma pergunta: acabas com um projeto que descreve colunas e não ajuda ninguém a decidir. Outro erro comum é escolher um conjunto com 30 linhas, onde nenhuma conclusão se aguenta.',
-      referenceTitle: 'Onde encontrar dados públicos portugueses',
+      referenceTitle: 'Fontes abertas e ideias de perguntas por tema',
       referenceRows: [
-        { syntax: 'https://dados.gov.pt/pt/datasets/', meaning: 'Portal nacional de dados abertos, com milhares de conjuntos de organismos públicos e municípios. Dá para filtrar por formato (CSV). A licença aparece em cada conjunto e varia: há conjuntos com "licença não especificada".', example: 'Pesquisa "turismo", "habitação" ou "energia"' },
-        { syntax: 'https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_base_dados', meaning: 'Base de Dados do INE: indicadores oficiais (população, emprego, turismo, preços, habitação) por região e município. Cada quadro exporta para CSV ou Excel. Os indicadores do INE também estão em dados.gov.pt, com licença CC BY 4.0.', example: 'Dormidas em alojamento turístico por região' },
-        { syntax: 'https://dadosabertos.cm-porto.pt/', meaning: 'Dados abertos da Câmara Municipal do Porto: trânsito, transportes (STCP) e outros conjuntos da cidade, vários em CSV e a maioria com licença CC0.', example: 'Condicionamentos de trânsito' },
-        { syntax: 'https://www.pordata.pt/', meaning: 'Boa para descobrir indicadores e exportar para Excel, mas os termos de utilização não dão uma licença aberta. Usa-a para encontrar o número e descarrega o ficheiro da fonte indicada em cada quadro (muitas vezes o INE).', example: 'Fontes/Entidades: INE, PORDATA' },
-        { syntax: 'Licença do conjunto', meaning: 'Confirma-a sempre na página de cada conjunto antes de publicar o ficheiro, e escreve-a no README.', example: 'Fonte: INE, licença CC BY 4.0' },
-        { syntax: '"Quando / onde / quanto … para decidir …?"', meaning: 'Molde de uma pergunta com decisão e alguém que a toma', example: '"Em que meses deve um alojamento do Algarve reforçar o pessoal?"' },
+        { syntax: 'Exemplo completo publicado no GitHub', meaning: 'Repositório de referência do curso (dados, 2 cadernos, gráfico e README)', example: 'https://github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve' },
+        { syntax: 'Turismo — INE / dados.gov.pt (CC BY 4.0)', meaning: 'Dormidas em alojamento turístico por município e mês', example: '"Em que meses deve um alojamento do Algarve reforçar o pessoal?"' },
+        { syntax: 'Mobilidade — dadosabertos.cm-porto.pt (CC0) / dados.gov.pt', meaning: 'Viagens, validações ou condicionamentos de trânsito por zona e hora', example: '"Em que troços e horas concentrar manutenção sem travar a hora de ponta?"' },
+        { syntax: 'Saúde — dados.gov.pt / Transparência SNS (CC BY 4.0)', meaning: 'Tempos médios de espera ou atendimentos por hospital e especialidade', example: '"Que hospitais têm maior diferença face à meta de espera em cirurgia?"' },
+        { syntax: 'Energia — dados.gov.pt / DGEG (CC BY 4.0)', meaning: 'Consumo elétrico ou produção renovável por distrito e mês', example: '"Em que meses o peso solar reduz mais a dependência de outras fontes?"' },
+        { syntax: 'https://www.pordata.pt/ e https://www.ine.pt/', meaning: 'Usa a PORDATA para descobrir indicadores, mas descarrega da fonte original (INE / dados.gov.pt) para teres licença aberta clara', example: 'Confirma sempre a licença na página do conjunto' },
       ],
       engine: 'projeto',
       exampleCode: `# --- No terminal (Git Bash no Windows, Terminal no macOS ou Linux) ---
@@ -215,8 +303,8 @@ Em que meses deve um alojamento do Algarve reforçar o pessoal?
 Quem decide: o gestor de um alojamento local.
 
 ## Dados
-dados/dormidas_algarve.csv, descarregado do INE a 17/11/2026.
-Licença: a que está escrita na página do conjunto.
+dados/dormidas_algarve_bruto.csv, descarregado do INE (via dados.gov.pt) a 17/11/2026.
+Licença: CC BY 4.0.
 
 # --- Põe o CSV em dados/ e volta ao terminal ---
 git add .
@@ -267,7 +355,7 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
         'Ficheiros portugueses: muitos usam ponto e vírgula e vírgula decimal, por isso lês com pd.read_csv(..., sep=";", decimal=","). Se os acentos aparecerem estragados, experimenta encoding="latin-1"; se houver linhas de título antes da tabela, usa skiprows=.',
         'Valores em falta: df.isna().sum() por coluna. Decides caso a caso (tirar a linha, deixar vazio ou preencher) e escreves porquê. Trocar vazios por 0 muda as médias.',
         'Duplicados: df.duplicated().sum() para linhas inteiras e df.duplicated(subset=[...]).sum() para a chave que devia ser única. Escolhe-a com cuidado: com vários anos de dados, a chave é município, ano e mês; só com município e mês apagavas todos os anos menos o primeiro.',
-        'Cada regra fica numa célula de texto com o motivo, seguida da célula de código que a aplica e conta as linhas antes e depois, como na etapa 01. A limpeza acaba num ficheiro novo em dados/ e o original fica intacto.',
+        'Ponto de verificação a meio (5 sinais de que os dados estão prontos): 1) chave única sem duplicados; 2) números e datas com o tipo certo (não object); 3) categorias sem grafias repetidas; 4) vazios/impossíveis contados e documentados; 5) ficheiro limpo gravado à parte e caderno corre do início ao fim após reiniciar o kernel.',
       ],
       beginnerSteps: [
         'Abre o Jupyter (ou o VS Code) na pasta do projeto e cria cadernos/01_explorar_limpar.ipynb.',
@@ -315,12 +403,11 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
           'O ficheiro limpo guardado em dados/ com outro nome, com o original intacto.',
         ],
         lista: [
-          'Mostrei no caderno a forma, os tipos, os vazios e os duplicados dos meus dados.',
-          'Escrevi cada regra de limpeza numa célula de texto, com o motivo, antes do código que a aplica.',
-          'Contei as linhas que cada regra tirou e juntei as contagens num relatório.',
-          'Confirmei que as colunas de números e de datas têm o tipo certo depois da limpeza.',
-          'Não editei o ficheiro original: o resultado está noutro ficheiro em dados/.',
-          'Reiniciei o kernel, corri o caderno do início ao fim sem erros e fiz commit.',
+          'Sinal 1 (Forma e chave): mostrei shape/head, eliminei duplicados e confirmei df.duplicated(subset=[...]).sum() == 0.',
+          'Sinal 2 (Tipos): todas as colunas numéricas e de datas têm tipo numérico ou datetime (sem vírgulas em texto).',
+          'Sinal 3 (Categorias): conferi value_counts() para garantir que não há espaços ou maiúsculas/minúsculas duplicadas.',
+          'Sinal 4 (Vazios e regras): cada remoção ou preenchimento tem o motivo escrito e o total de linhas antes/depois batido.',
+          'Sinal 5 (Reprodutível): o original está intacto, o limpo está noutro ficheiro em dados/ e o caderno corre do zero após reiniciar o kernel.',
         ],
         grelha: [
           { criterio: 'Exploração', bom: 'Forma, tipos, vazios e duplicados à vista, com uma frase sobre o que cada um quer dizer.', aMelhorar: 'Só um df.head(), sem olhar para os tipos nem para os vazios.' },
@@ -458,7 +545,7 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
       analogyTitle: 'O currículo de uma página',
       analogyBody: 'Um recrutador lê um currículo em segundos e só chama para entrevista se a primeira página o convencer. O README é a primeira página do teu projeto: em cima, o que descobriste; a seguir, de onde vêm os dados e como confirmar; o resto fica nos cadernos, para quem quiser ver mais.',
       concepts: [
-        'A ordem do README segue o modelo do Nível Profissional: título com a pergunta, ## Pergunta, ## Conclusões (3 a 5 frases com números e o gráfico), ## Dados (fonte, link, data de descarga e licença), ## Limites, ## Como correr e ## Estrutura.',
+        'A ordem do README segue o modelo do exemplo publicado (github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve): título com a pergunta, ## Pergunta, ## Conclusões, ## Dados (fonte, link, data e licença concreta), ## Limites, ## Como correr e ## Estrutura.',
         'Números em formato português: 1 234 567 dormidas, 12,5%, 3 456,78 €. Tira-os do caderno, não os escrevas de memória: um número que não bate certo com o caderno tira credibilidade a tudo o resto.',
         '"Como correr" tem de funcionar num computador limpo: um requirements.txt com as bibliotecas (pandas, matplotlib, jupyter), os comandos por ordem e, se os dados não estiverem no repositório, de onde se descarregam.',
         'Commits com mensagens que contam a história: "Limpeza: tira 12 linhas repetidas por município, ano e mês" diz muito mais do que "update" ou "final2". Um commit por passo.',
@@ -499,9 +586,9 @@ Quem decide: o gestor de um alojamento local.
 ![Dormidas por mês](figuras/dormidas_por_mes.png)
 
 ## Dados
-- Fonte: INE, Base de Dados (link para o quadro usado).
-- Descarregado a 17/11/2026. Licença: a da página do conjunto.
-- 1 151 linhas depois da limpeza (saíram 37 sem valor e 12 repetidas).
+- Fonte: INE, Base de Dados via dados.gov.pt (link para o quadro usado).
+- Descarregado a 17/11/2026. Licença: CC BY 4.0.
+- 562 linhas depois da limpeza de 586 registos iniciais (saíram 10 duplicadas e 14 sem valor).
 
 ## Limites
 Mostra quando há mais dormidas, não porquê. Só cobre os anos do ficheiro.
@@ -551,6 +638,163 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
         ],
         correctIndex: 1,
         explanation: 'Em 2 minutos o recrutador quer saber se fazes perguntas úteis e chegas a respostas com números. A instalação e as bibliotecas são para quem vai correr o projeto e ficam mais abaixo; o código está nos cadernos.',
+      },
+    },
+    {
+      id: 'pf-06-cv-linkedin',
+      code: '06',
+      title: 'CV de analista e LinkedIn: projetos com números',
+      lede: 'Transformas o projeto que acabaste de publicar num CV de 1 página e num perfil de LinkedIn que passam pela triagem em 10 segundos — com resultados e números em vez de listas de ferramentas.',
+      analogyTitle: 'A ementa vs o prato pronto',
+      analogyBody: 'Escrever "Python, SQL, Power BI" numa lista é mostrar os ingredientes crus. Escrever "Analisei 20 300 viagens com pandas e identifiquei 3 estações que concentram 42% da procura" é servir o prato pronto: quem recruta vê logo o que consegues entregar.',
+      concepts: [
+        'Fórmula de cada linha de projeto no CV: Ação (verbo no passado) + Dados/Ferramenta + Resultado com número. Ex.: "Limpei e analisei 1 151 registos do INE com pandas e mostrei que junho a setembro concentram 61% das dormidas."',
+        '1 página chega para analista júnior: nome, contacto + link do GitHub e LinkedIn, 2 a 3 projetos com números e link direto, experiência anterior (mesmo noutra área, destacando organização, atendimento ou metas) e formação.',
+        'Evita barras de percentagem ("SQL: 80%"), fotos grandes ou tabelas complexas: os sistemas de triagem (ATS) lêem melhor texto simples em PDF.',
+        'LinkedIn alinhado com o CV: título claro ("Analista de Dados Júnior | SQL · Python · Pandas · Power BI"), secção Sobre com 3 parágrafos curtos (o que resolves, 2 projetos com números, que vaga procuras) e projetos nos Destaques com imagem do gráfico e link do GitHub.',
+      ],
+      beginnerSteps: [
+        'Escolhe 2 projetos (o teu projeto próprio da etapa Publicar e o desafio das bicicletas ou da mercearia) e escreve 2 linhas para cada um com a fórmula Ação + Ferramenta + Número.',
+        'Monta um CV de 1 página em formato simples (Google Docs ou Word exportado para PDF) com links clicáveis para o GitHub e o LinkedIn.',
+        'Atualiza o título e o "Sobre" do LinkedIn, e adiciona o link do repositório publicado na secção Destaques (Featured) com o gráfico do README.',
+      ],
+      proPractice: 'Se vens de outra área (comércio, hotelaria, saúde, administração), não escondas essa experiência: ela dá-te contexto de negócio que muitos recém-licenciados não têm. Liga-a a métricas, prazos e resolução de problemas.',
+      commonPitfall: 'Listar 15 ferramentas que só viste num vídeo de 10 minutos, ou escrever "Projeto final de curso" sem dizer que problema resolveste nem que número encontraste.',
+      referenceTitle: 'Antes e depois no CV e LinkedIn',
+      referenceRows: [
+        { syntax: 'Fraco: "Conhecimentos em Python, pandas e SQL."', meaning: 'Não prova que sabes aplicar a ferramenta a um problema real', example: 'Lista solta sem contexto' },
+        { syntax: 'Forte: "Analisei 2 700 pedidos com SQL e pandas e isolei uma falha na App que explicava -17,4% na faturação."', meaning: 'Mostra ação, dados, ferramenta e impacto mensurável', example: 'Passa na triagem em segundos' },
+        { syntax: 'Título LinkedIn: "Analista de Dados Júnior | SQL · Python · Power BI"', meaning: 'Aparece nas pesquisas dos recrutadores pelas palavras-chave certas', example: 'Evita títulos vagos como "Em transição de carreira"' },
+        { syntax: 'Destaques (Featured) no LinkedIn', meaning: 'Mostra o gráfico e o link do GitHub logo no topo do perfil', example: '1 clique para ver o teu trabalho' },
+      ],
+      engine: 'projeto',
+      exampleCode: `<!-- Modelo de CV (1 página, exportar para PDF) -->
+# O Teu Nome
+Lisboa / Remoto · email@exemplo.pt · linkedin.com/in/teu-perfil · github.com/teu-utilizador
+
+## Resumo
+Analista de Dados Júnior com prática em SQL, Python (pandas), Excel e Power BI.
+Experiência prévia em [a tua área anterior], habituado a trabalhar com prazos e indicadores.
+
+## Projetos de Análise de Dados
+**Turismo no Algarve: planeamento sazonal** — github.com/teu-utilizador/turismo-algarve
+- Limpei 1 200 registos oficiais do INE com Python/pandas, removendo 49 linhas inválidas e documentando as regras.
+- Mostrei que agosto tem 2,3x as dormidas de um mês médio e entreguei recomendação de reforço de equipa com gráfico em matplotlib.
+
+**Diagnóstico de queda de faturação (loja online)** — Python, SQLite, Estatística
+- Cruzei 2 700 pedidos em SQL e pandas e identifiquei um salto de 3,4% para 44,9% nos cancelamentos da App (p < 0,001).
+
+## Experiência Profissional
+**[Cargo anterior] · [Empresa]** (AAAA–AAAA)
+- [1 a 2 pontos curtos com números, metas ou melhoria de processos]
+
+## Competências & Formação
+SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Power BI (DAX, Star Schema) · Git/GitHub`,
+      projectSpec: {
+        entregaveis: [
+          'Um CV em PDF de 1 página com 2 a 3 projetos descritos com ação, ferramenta, número e link clicável.',
+          'Perfil de LinkedIn atualizado: título profissional, resumo "Sobre" curto e projeto fixado nos Destaques.',
+        ],
+        lista: [
+          'O meu CV cabe numa só página e está guardado em PDF com nome profissional (ex.: CV_Nome_AnalistaDados.pdf).',
+          'Cada projeto no CV tem um link clicável para o GitHub e pelo menos um número concreto descoberto na análise.',
+          'Não uso barras de percentagem para competências nem listo ferramentas que não consigo usar numa entrevista.',
+          'O título do meu LinkedIn inclui "Analista de Dados" e as ferramentas principais (SQL, Python, Power BI/Excel).',
+          'O meu projeto próprio publicado no GitHub está nos Destaques do LinkedIn com o link do repositório.',
+        ],
+        grelha: [
+          { criterio: 'Impacto nos projetos', bom: 'Cada ponto começa com verbo de ação no passado, cita a ferramenta e fecha com um número e decisão.', aMelhorar: 'Diz apenas "Fiz um projeto sobre turismo" ou lista bibliotecas sem resultados.' },
+          { criterio: 'Clareza e formato', bom: '1 página limpa, sem erros ortográficos, links clicáveis e fácil de ler em 10 segundos.', aMelhorar: '2–3 páginas, foto enorme, barras de "Python 75%" ou texto corrido sem secções.' },
+          { criterio: 'Alinhamento CV–LinkedIn', bom: 'As datas, projetos e palavras-chave do LinkedIn batem certo com o CV e o GitHub.', aMelhorar: 'LinkedIn vazio ou desatualizado face ao CV enviado.' },
+          { criterio: 'Honestidade técnica', bom: 'Só inclui competências que consegues explicar e demonstrar num teste ao vivo.', aMelhorar: 'Inclui tecnologias que nunca usaste só para encher.' },
+        ],
+      },
+      quiz: {
+        question: 'Qual destas descrições de projeto num CV chama mais a atenção de um recrutador para Analista de Dados Júnior?',
+        options: [
+          'Concluí um curso intensivo de Python, pandas, SQL e Power BI com 70 etapas.',
+          'Projeto de vendas: usei Jupyter Notebook, pandas, groupby e matplotlib.',
+          'Analisei 20 300 viagens de bicicleta com pandas, limpei 650 registos inválidos e identifiquei as 3 estações com 40% da procura.',
+          'Tenho conhecimentos de nível 4/5 em Excel e 3/5 em SQL.',
+        ],
+        correctIndex: 2,
+        explanation: 'Recrutadores procuram evidência do que fizeste com os dados: escala (20 300 viagens), método (limpeza + análise) e resultado concreto com número.',
+      },
+    },
+    {
+      id: 'pf-07-anuncios-entrevista',
+      code: '07',
+      title: 'Ler anúncios, entrevista comportamental e pitch de 2 minutos',
+      lede: 'Sabes filtrar anúncios de emprego sem te autoexcluires, preparas as 4 respostas comportamentais mais pedidas com o método STAR e ensaias o pitch de 2 minutos do teu projeto.',
+      analogyTitle: 'A lista de compras vs o essencial do jantar',
+      analogyBody: 'Um anúncio de emprego é escrito como uma lista de desejos ideal, não como um exame eliminatório. Se cumpres 60% a 70% dos requisitos principais (quase sempre SQL, Excel/BI e saber comunicar), deves candidatar-te.',
+      concepts: [
+        'Como ler um anúncio em 3 minutos: separa os requisitos reais (os primeiros 3–4 pontos, quase sempre SQL, Excel/Power BI e comunicação) da lista de desejos ("valoriza-se Spark/Airflow/3 anos de experiência").',
+        'O pitch de 2 minutos do teu projeto segue 4 passos: 1) Pergunta e quem decide; 2) Dados e um problema real que limpaste; 3) Resultado principal com número e recomendação; 4) Um limite que encontraste.',
+        'Entrevista comportamental com método STAR: Situação (1 frase), Tarefa (o que tinhas de resolver), Ação (o que TU fizeste nos dados) e Resultado (o número ou decisão que saiu).',
+        'No fim da entrevista, faz sempre 2 perguntas inteligentes: mostra interesse no negócio e ajuda-te a perceber se a equipa tem boas práticas.',
+      ],
+      beginnerSteps: [
+        'Escolhe 3 anúncios reais de Analista de Dados Júnior e sublinha o que pedem em comum (repara quantas vezes aparece SQL + Excel/BI + comunicação).',
+        'Escreve e grava no telemóvel o pitch de 2 minutos do teu projeto próprio da etapa Publicar (cronometra: tem de caber entre 90 e 120 segundos).',
+        'Prepara 3 histórias curtas no formato STAR: um problema de dados sujos, um número que não batia certo e como explicaste uma conclusão a alguém não técnico.',
+        'Anota 2 perguntas para fazeres ao entrevistador no final.',
+      ],
+      proPractice: 'Nas entrevistas técnicas e comportamentais, dizer "Não sei de cor a sintaxe exata, mas sei que resolveria com uma Window Function e validaria os nulos" vale muito mais do que inventar uma resposta.',
+      commonPitfall: 'Desistir de uma candidatura porque pede "2 anos de experiência" quando o resto encaixa, ou passar 5 minutos a explicar o código do projeto sem nunca dizer a conclusão de negócio.',
+      referenceTitle: 'Guião rápido para a entrevista',
+      referenceRows: [
+        { syntax: 'Pitch (0:00–0:30): Pergunta + Dados', meaning: 'Qual era o problema, quem decidia e que dados usaste', example: '"Queria saber em que meses reforçar equipa no Algarve usando dados do INE."' },
+        { syntax: 'Pitch (0:30–1:30): Limpeza + Descoberta', meaning: 'Um desafio nos dados e o resultado principal com número', example: '"Tirei 49 linhas inválidas e vi que agosto tem 2,3x um mês médio."' },
+        { syntax: 'Pitch (1:30–2:00): Recomendação + Limite', meaning: 'O que fazer na prática e o que os dados não provam', example: '"Recomendo reforço de junho a setembro; os dados não explicam a causa."' },
+        { syntax: 'STAR: Situação · Tarefa · Ação · Resultado', meaning: 'Estrutura de 60–90 segundos para perguntas comportamentais', example: 'Foca 60% do tempo na Ação e no Resultado' },
+      ],
+      engine: 'projeto',
+      exampleCode: `<!-- Guião do Pitch de 2 minutos (adapta ao teu projeto) -->
+[0:00 - 0:25 | Pergunta e Dados]
+"No meu projeto mais recente quis responder a uma pergunta prática: em que meses deve um alojamento no Algarve reforçar a equipa? Usei dados oficiais do INE com dormidas mensais por município."
+
+[0:25 - 1:15 | Limpeza e Análise]
+"Logo na exploração encontrei 37 linhas sem valor e 12 duplicadas por município e mês. Documentei a remoção em Python/pandas e calculei a sazonalidade face à média mensal."
+
+[1:15 - 1:45 | Resultado e Recomendação]
+"O resultado foi claro: agosto tem 2,3 vezes as dormidas de um mês médio, e de junho a setembro ficam sempre acima da média. A recomendação prática é concentrar contratações sazonais nesses 4 meses."
+
+[1:45 - 2:00 | Limite e Próximo Passo]
+"O limite é que estes dados mostram quando há procura, mas não os preços nem o lucro líquido — esse seria o meu próximo cruzamento se tivesse acesso aos dados internos da empresa."
+
+<!-- 2 Perguntas para fazeres no fim da entrevista -->
+1. "Qual é o maior problema de qualidade de dados ou reporting que a equipa quer resolver nos próximos 3 meses?"
+2. "Como costumam validar se os números de um novo dashboard batem certo com a base de dados?"`,
+      projectSpec: {
+        entregaveis: [
+          'Guião escrito e ensaiado (em 90–120 segundos) do pitch do teu projeto próprio.',
+          'Notas de 3 histórias STAR para perguntas comportamentais + 2 perguntas para o entrevistador.',
+        ],
+        lista: [
+          'Li pelo menos 3 anúncios reais de Analista de Dados Júnior e identifiquei as ferramentas e competências pedidas em comum.',
+          'Cronometrei o pitch do meu projeto: cabe em 2 minutos e abre com a pergunta e a conclusão com número.',
+          'No pitch digo pelo menos um problema de limpeza que resolvi e um limite dos dados.',
+          'Tenho 3 histórias escritas no formato STAR (incluindo "como lidei com um número que não batia certo").',
+          'Tenho 2 perguntas preparadas para fazer à empresa no final da entrevista.',
+        ],
+        grelha: [
+          { criterio: 'Pitch em 2 minutos', bom: 'Vai direto à pergunta, mostra 1–2 números concretos, dá recomendação e reconhece um limite.', aMelhorar: 'Perde-se a explicar imports ou demora mais de 3 minutos sem dizer a conclusão.' },
+          { criterio: 'Histórias STAR', bom: 'Mostram o que TU fizeste passo a passo nos dados e fecham com o impacto ou aprendizagem.', aMelhorar: 'Respostas genéricas ("sou muito perfecionista") sem exemplo concreto.' },
+          { criterio: 'Leitura de anúncios', bom: 'Distingue requisitos centrais (SQL, BI, comunicação) de extras e candidata-se com 60–70% de encaixe.', aMelhorar: 'Espera cumprir 100% da lista de desejos antes de enviar o primeiro CV.' },
+          { criterio: 'Postura de analista', bom: 'Faz perguntas sobre o negócio e qualidade dos dados da equipa no fim da conversa.', aMelhorar: 'Não tem nenhuma pergunta para fazer ao entrevistador.' },
+        ],
+      },
+      quiz: {
+        question: 'Um anúncio para Analista de Dados Júnior pede SQL, Excel, Power BI, comunicação com equipas de negócio e "valoriza-se experiência com Spark e Airflow". Dominas SQL, Excel, Power BI e Python, mas nunca usaste Spark nem Airflow. O que deves fazer?',
+        options: [
+          'Não te candidatar e estudar Spark e Airflow durante mais 3 meses primeiro.',
+          'Escrever no CV que tens experiência profissional com Spark e Airflow.',
+          'Candidatar-te já, destacando os teus projetos em SQL, Power BI e Python, porque cumpres os requisitos principais.',
+          'Enviar o CV sem mencionar projetos, apenas com a lista de ferramentas.',
+        ],
+        correctIndex: 2,
+        explanation: '"Valoriza-se" significa extra desejável, não obrigatório. Os requisitos principais de um analista júnior são SQL, Excel/BI e comunicação; cumprir 60–70% do anúncio é o ponto certo para avançar.',
       },
     },
   ],

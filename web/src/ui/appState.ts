@@ -3,13 +3,14 @@ import type { AbaEscrita } from './mobileEditor';
 import type { MerceariaDataset } from '../engines/csvEngine';
 import type { GitRepoState } from '../engines/gitEngine';
 import type { UserProgressMap } from '../data/progress';
+import type { LessonTimeMap } from '../data/timeTracker';
 import type { LayoutPrefs } from './layout';
 import type { OutputViewModel } from './outputView';
 import type { ThemeId } from './theme';
 
 // Estado global da aplicação, partilhado entre main.ts e as vistas.
 
-export type ViewMode = 'academia' | 'explorador' | 'referencia';
+export type ViewMode = 'academia' | 'explorador' | 'referencia' | 'cronograma';
 export type WorkbenchTab = 'challenge' | 'example' | 'sqlfree';
 
 export interface AppState {
@@ -53,4 +54,9 @@ export interface AppState {
   mobileEditor: AbaEscrita | null;
   fontSize: FontSizeId;
   showFontMenu: boolean;
+  ganttPaceMinutes: number;
+  ganttFilterStatus: 'all' | 'todo' | 'done';
+  ganttCollapsedTracks: Set<string>;
+  lessonTimes: LessonTimeMap;
+  timerPaused: boolean;
 }

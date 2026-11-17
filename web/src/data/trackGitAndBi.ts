@@ -2108,6 +2108,229 @@ print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
         explanation: 'O índice multiplica: 1,5 quer dizer 50% acima de um dia médio. A tendência dá o nível; o índice ajusta-o ao dia da semana.',
       },
     },
+    {
+      id: 'bi-20-excel-powerquery-limpeza',
+      code: '20',
+      title: 'Prática Excel & Power Query: importar, limpar e reconciliar dados novos',
+      lede: 'Descarregas loja_online_pedidos.csv (no Explorador CSV), importas para o Excel com Power Query (ou Calc / Google Sheets no Mac/Linux), corriges o separador decimal inglês e reconcilias valor bruto vs faturação líquida na folha de respostas.',
+      analogyTitle: 'A alfândega antes do armazém',
+      analogyBody: 'Um CSV vindo de outro sistema traz pontos nos preços ("115.40") quando o teu Excel em português espera vírgulas ("115,40"). O Power Query funciona como a alfândega: converte os tipos na entrada para nunca mais multiplicares preços por 100 sem querer.',
+      concepts: [
+        'Importar com região certa: no Excel (Dados > De Texto/CSV > Transformar Dados), escolhe "Alterar Tipo > Com Localidade > Inglês (Estados Unidos)" na coluna preco_unit para que 115.40 não vire 11540 ou erro.',
+        'Reconciliação de estados: antes de somar vendas, confirma sempre o peso de cada estado (Concluído vs Cancelado). Somar tudo sem filtrar inflaciona a faturação.',
+        'Alternativas fora do Windows: todas as fórmulas desta etapa (SOMA, SOMA.SE.S / SUMIFS, CONTAR.SE.S / COUNTIFS) funcionam também no Excel Web, Google Sheets e LibreOffice Calc (macOS/Linux).',
+      ],
+      beginnerSteps: [
+        'Vai ao separador "Explorador CSV" e descarrega loja_online_pedidos.csv (ou usa dados/loja_online_pedidos.csv do repositório).',
+        'Importa para uma folha Excel como Tabela (Ctrl + T) e confirma que preco_unit ficou número decimal (entre ~40 e ~150, não milhares).',
+        'Cria a coluna Valor = [@quantidade]*[@preco_unit].',
+        'Calcula: valor bruto total (todas as 2 700 linhas), faturação líquida (só estado = "Concluído"), pedidos concluídos, pedidos cancelados e taxa de cancelamento global (%).',
+        'Preenche os 5 valores na folha de respostas ao lado e carrega em Executar.',
+      ],
+      proPractice: 'Em equipas de BI, o Power Query grava os passos de limpeza num guião repetível: no mês seguinte basta substituir o CSV e clicar em "Atualizar Tudo" (Refresh All).',
+      commonPitfall: 'Abrir o CSV com duplo clique no Windows em português: o Excel usa ponto e vírgula como separador e mete todas as colunas na coluna A, ou troca pontos por datas (ex.: "10.03" vira 10 de março). Usa sempre Dados > De Texto/CSV.',
+      referenceTitle: 'Importar e reconciliar no Excel (PT / EN)',
+      referenceRows: [
+        { syntax: 'Dados > Obter Dados > De Texto/CSV', meaning: 'Importa UTF-8 com delimitador vírgula sem estragar acentos', example: 'Origem: 65001: Unicode (UTF-8)' },
+        { syntax: 'Power Query: Alterar Tipo com Localidade (Inglês EUA)', meaning: 'Lê 115.40 corretamente num Windows em português', example: 'Tipo: Número Decimal' },
+        { syntax: '=CONTAR.SE(Pedidos[estado]; "Concluído")  (EN: COUNTIF)', meaning: 'Conta pedidos com um critério', example: '2 432 pedidos' },
+        { syntax: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor])  (EN: SUMIF)', meaning: 'Soma Valor apenas para linhas concluídas', example: '246 900,06 €' },
+      ],
+      engine: 'python',
+      ficheirosDados: ['loja_online_pedidos.csv'],
+      exampleCode: `# Conferência rápida em pandas para comparares com o teu Excel / Power Query:
+import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["Valor"] = df["quantidade"] * df["preco_unit"]
+print(df.groupby("estado").agg(pedidos=("pedido_id", "count"), valor_eur=("Valor", "sum")).round(2))`,
+      pythonChallenge: {
+        description: 'Folha de respostas (Excel / Power Query sobre loja_online_pedidos.csv): substitui cada None pelos 5 números que calculaste na tua folha (euros e % com 2 casas decimais).',
+        starterCode: `# Folha de respostas: Excel & Power Query (loja_online_pedidos.csv)
+# Substitui cada None pelo número obtido na tua folha de cálculo.
+
+valor_bruto_total = None       # Soma de quantidade * preco_unit nas 2 700 linhas
+faturacao_liquida = None       # Soma apenas onde estado == "Concluído"
+pedidos_concluidos = None      # Contagem de estado == "Concluído"
+pedidos_cancelados = None      # Contagem de estado == "Cancelado"
+taxa_cancelamento_pct = None   # Cancelados / Total * 100 (2 casas)
+
+print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelados, taxa_cancelamento_pct)`,
+        solutionCode: `# Folha de respostas: Excel & Power Query (loja_online_pedidos.csv)
+valor_bruto_total = 274466.03
+faturacao_liquida = 246900.06
+pedidos_concluidos = 2432
+pedidos_cancelados = 268
+taxa_cancelamento_pct = 9.93
+
+print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelados, taxa_cancelamento_pct)`,
+        checks: [
+          { label: 'valor_bruto_total (274 466,03 €)', expr: 'abs(float(valor_bruto_total) - 274466.03) < 0.05', actualExpr: 'valor_bruto_total', hint: 'Soma [@quantidade]*[@preco_unit] nas 2 700 linhas. Se der milhões, o Excel leu o ponto decimal como separador de milhares!' },
+          { label: 'faturacao_liquida (246 900,06 €)', expr: 'abs(float(faturacao_liquida) - 246900.06) < 0.05', actualExpr: 'faturacao_liquida', hint: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor]).' },
+          { label: 'Contagens: 2 432 concluídos e 268 cancelados', expr: 'int(pedidos_concluidos) == 2432 and int(pedidos_cancelados) == 268', actualExpr: '(pedidos_concluidos, pedidos_cancelados)', hint: '=CONTAR.SE(Pedidos[estado]; "Concluído") e "Cancelado". A soma tem de dar 2 700.' },
+          { label: 'taxa_cancelamento_pct (9,93%)', expr: 'abs(float(taxa_cancelamento_pct) - 9.93) < 0.02', actualExpr: 'taxa_cancelamento_pct', hint: '268 / 2700 * 100 = 9.93%.' },
+        ],
+      },
+      quiz: {
+        question: 'Abres um CSV internacional no Excel em português e o preço "115.40" aparece como "11540" (cem vezes maior). Como corriges isto na importação?',
+        options: [
+          'Dividir a coluna toda por 100 à mão depois de importar.',
+          'Importar por Dados > De Texto/CSV e, no Power Query, usar "Alterar Tipo > Com Localidade > Inglês (EUA)" na coluna de preço.',
+          'Apagar os pontos com Ctrl+H antes de abrir o ficheiro.',
+          'Guardar o CSV em formato .txt e abrir no Bloco de Notas.',
+        ],
+        correctIndex: 1,
+        explanation: 'Definir a localidade Inglesa (EUA) no passo de conversão de tipo no Power Query ensina o Excel a ler o ponto como separador decimal de forma segura e repetível.',
+      },
+    },
+    {
+      id: 'bi-21-excel-dinamicas-procx',
+      code: '21',
+      title: 'Prática Excel: Tabelas Dinâmicas, SOMA.SE.S e vários critérios',
+      lede: 'Constróis uma Tabela Dinâmica cruzada (Região × Canal) e fórmulas SOMA.SE.S / MÉDIA.SE.S com múltiplos critérios sobre loja_online_pedidos.csv — no Excel, Calc ou Google Sheets.',
+      analogyTitle: 'A matriz que responde a 8 perguntas num clique',
+      analogyBody: 'Em vez de escrever 8 fórmulas SOMA.SE.S separadas para cruzar Região e Canal, uma Tabela Dinâmica gera a matriz inteira em 5 segundos — e deixa-te filtrar por estado ("Concluído") no topo.',
+      concepts: [
+        'SOMA.SE.S (SUMIFS) aceita quantos pares (intervalo_critério; critério) precisares: estado="Concluído", categoria="Eletrónica" e regiao="Lisboa".',
+        'MÉDIA.SE.S (AVERAGEIFS) calcula médias condicionadas (ex.: ticket médio apenas nos pedidos concluídos de uma categoria).',
+        'Tabela Dinâmica: coloca estado em Filtros (seleciona "Concluído"), regiao nas Linhas, canal nas Colunas e Soma de Valor nos Valores.',
+      ],
+      beginnerSteps: [
+        'Na tabela de loja_online_pedidos.csv (já com a coluna Valor), usa SOMA.SE.S para calcular a faturação concluída de Eletrónica em Lisboa.',
+        'Usa MÉDIA.SE.S para calcular o valor médio por pedido concluído na categoria Eletrónica.',
+        'Insere uma Tabela Dinâmica: Filtro = estado ("Concluído"), Linhas = regiao, Colunas = canal, Valores = Soma de Valor.',
+        'Lê na matriz: região líder no total, faturação Web em Lisboa e faturação App no Norte.',
+      ],
+      proPractice: 'Nunca metas valores totais e subtotais dentro dos dados antes de criar uma Tabela Dinâmica, ou vais duplicar todas as somas.',
+      commonPitfall: 'Esquecer o filtro de estado = "Concluído" na Tabela Dinâmica, misturando pedidos cancelados com receita efetiva.',
+      referenceTitle: 'Fórmulas multi-critério em Excel (PT / EN)',
+      referenceRows: [
+        { syntax: '=SOMA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica"; Reg; "Lisboa")', meaning: 'SUMIFS com 3 condições em simultâneo', example: '23 411,22 €' },
+        { syntax: '=MÉDIA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica")', meaning: 'AVERAGEIFS: média apenas nos pedidos válidos', example: '152,97 €' },
+        { syntax: 'Tabela Dinâmica: Filtro(estado) + Linhas(regiao) + Colunas(canal)', meaning: 'Cruza duas dimensões em matriz com totais automáticos', example: 'Web Lisboa = 40 301,95 €' },
+      ],
+      engine: 'python',
+      ficheirosDados: ['loja_online_pedidos.csv'],
+      exampleCode: `# Conferência em pandas da Tabela Dinâmica Região x Canal (apenas Concluído):
+import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["Valor"] = df["quantidade"] * df["preco_unit"]
+conc = df[df["estado"] == "Concluído"]
+print(conc.pivot_table(index="regiao", columns="canal", values="Valor", aggfunc="sum", margins=True).round(2))`,
+      pythonChallenge: {
+        description: 'Folha de respostas (Tabelas Dinâmicas e SOMA.SE.S sobre loja_online_pedidos.csv): preenche os 5 valores obtidos no Excel / Calc / Google Sheets.',
+        starterCode: `# Folha de respostas: Tabelas Dinâmicas & SOMA.SE.S (loja_online_pedidos.csv)
+eletronica_lisboa = None     # SOMA.SE.S: Concluído + Eletrónica + Lisboa
+ticket_medio_eletr = None    # MÉDIA.SE.S: média de Valor em Concluído + Eletrónica
+regiao_lider_total = None    # Região com maior soma na Tabela Dinâmica (ex.: "Lisboa")
+web_lisboa = None            # Cruzamento Lisboa x Web na Tabela Dinâmica (Concluído)
+app_norte = None             # Cruzamento Norte x App na Tabela Dinâmica (Concluído)
+
+print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app_norte)`,
+        solutionCode: `# Folha de respostas: Tabelas Dinâmicas & SOMA.SE.S (loja_online_pedidos.csv)
+eletronica_lisboa = 23411.22
+ticket_medio_eletr = 152.97
+regiao_lider_total = "Lisboa"
+web_lisboa = 40301.95
+app_norte = 24544.32
+
+print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app_norte)`,
+        checks: [
+          { label: 'eletronica_lisboa (23 411,22 €)', expr: 'abs(float(eletronica_lisboa) - 23411.22) < 0.05', actualExpr: 'eletronica_lisboa', hint: 'SOMA.SE.S com 3 critérios: estado="Concluído", categoria="Eletrónica" e regiao="Lisboa".' },
+          { label: 'ticket_medio_eletr (152,97 €)', expr: 'abs(float(ticket_medio_eletr) - 152.97) < 0.05', actualExpr: 'ticket_medio_eletr', hint: 'MÉDIA.SE.S sobre Valor com estado="Concluído" e categoria="Eletrónica".' },
+          { label: 'regiao_lider_total ("Lisboa")', expr: 'str(regiao_lider_total).strip().lower() == "lisboa"', actualExpr: 'regiao_lider_total', hint: 'Soma total por linha na Tabela Dinâmica (Lisboa tem 65 856,49 €).' },
+          { label: 'Matriz: Web Lisboa (40 301,95 €) e App Norte (24 544,32 €)', expr: 'abs(float(web_lisboa) - 40301.95) < 0.05 and abs(float(app_norte) - 24544.32) < 0.05', actualExpr: '(web_lisboa, app_norte)', hint: 'Confirma que filtraste a Tabela Dinâmica para estado = "Concluído".' },
+        ],
+      },
+      quiz: {
+        question: 'Numa Tabela Dinâmica com regiao nas linhas e Soma de Valor nos valores, os números parecem cerca de 10% mais altos do que a faturação líquida em SQL. O que provavelmente faltou?',
+        options: [
+          'Ordenar a Tabela Dinâmica de Z para A.',
+          'Colocar a coluna estado nos Filtros da Tabela Dinâmica e selecionar apenas "Concluído".',
+          'Mudar o formato da célula para Moeda (€).',
+          'Usar PROCV em vez de PROCX.',
+        ],
+        correctIndex: 1,
+        explanation: 'Sem o filtro estado = "Concluído", a Tabela Dinâmica soma também os pedidos cancelados (~10% do total).',
+      },
+    },
+    {
+      id: 'bi-22-powerbi-dax-relatorio',
+      code: '22',
+      title: 'Prática Power BI: medidas DAX (CALCULATE, DIVIDE, %) e opções sem Windows',
+      lede: 'Importas loja_online_pedidos.csv no Power BI Desktop (Windows), crias 4 medidas DAX com CALCULATE e DIVIDE e verificas os resultados na app. Se usas Mac ou Linux, aprendes como reproduzir o mesmo raciocínio sem bloquear.',
+      analogyTitle: 'O painel de controlo com filtros dinâmicos',
+      analogyBody: 'Uma fórmula de Excel calcula um número fixo numa célula; uma medida DAX calcula um indicador dinâmico que muda conforme o utilizador clica num cartão ou segmentação de canal, mês ou categoria.',
+      concepts: [
+        'Power BI Desktop corre nativamente apenas em Windows. Em macOS/Linux podes: usar Power BI Service no browser (com ficheiro já criado ou conta escolar/trabalho), uma máquina virtual Windows, ou treinar as mesmas medidas em Excel Power Pivot / pandas.',
+        'CALCULATE(expressão, filtro) muda o contexto de filtro da medida — por exemplo, isola apenas estado = "Concluído" ou canal = "Web" independentemente do visual.',
+        'DIVIDE(numerador, denominador) evita erros #DIV/0! quando um filtro não tem pedidos.',
+        'Medidas base reutilizáveis: cria primeiro [Faturação Líquida] e reutiliza-a dentro de [Quota Web %] em vez de repetir SUMX.',
+      ],
+      beginnerSteps: [
+        'Abre o Power BI Desktop (Windows) > Obter Dados > Texto/CSV > loja_online_pedidos.csv (confirma que preco_unit é Decimal com localidade Inglês EUA).',
+        'Cria a medida base: Faturação Líquida = CALCULATE(SUMX(pedidos, pedidos[quantidade] * pedidos[preco_unit]), pedidos[estado] = "Concluído").',
+        'Cria Taxa Cancelamento % = DIVIDE(CALCULATE(COUNTROWS(pedidos), pedidos[estado] = "Cancelado"), COUNTROWS(pedidos)) * 100.',
+        'Cria Quota Web % = DIVIDE(CALCULATE([Faturação Líquida], pedidos[canal] = "Web"), [Faturação Líquida]) * 100.',
+        'Cria Clientes Concluídos = CALCULATE(DISTINCTCOUNT(pedidos[cliente_id]), pedidos[estado] = "Concluído") e põe [Faturação Líquida] por categoria numa matriz para ler a líder.',
+      ],
+      proPractice: 'Nunca guardes colunas calculadas para rácios (como Ticket Médio ou Taxa de Cancelamento %): rácios têm de ser sempre Medidas DAX para recalcularem corretamente quando o utilizador filtra por mês ou região.',
+      commonPitfall: 'Escrever [Cancelados] / [Total] numa coluna calculada em vez de numa Medida: a soma das percentagens linha a linha dá resultados disparatados ao agregar por mês.',
+      referenceTitle: 'Medidas DAX essenciais no Power BI',
+      referenceRows: [
+        { syntax: 'CALCULATE(SUMX(pedidos, pedidos[quantidade]*pedidos[preco_unit]), pedidos[estado]="Concluído")', meaning: 'Faturação líquida ignorando cancelamentos', example: '246 900,06 €' },
+        { syntax: 'DIVIDE(CALCULATE(COUNTROWS(pedidos), pedidos[estado]="Cancelado"), COUNTROWS(pedidos)) * 100', meaning: 'Taxa de cancelamento % segura', example: '9,93%' },
+        { syntax: 'DIVIDE(CALCULATE([Faturação Líquida], pedidos[canal]="Web"), [Faturação Líquida]) * 100', meaning: 'Peso percentual do canal Web na faturação', example: '60,06%' },
+        { syntax: 'CALCULATE(DISTINCTCOUNT(pedidos[cliente_id]), pedidos[estado]="Concluído")', meaning: 'Clientes únicos com pelo menos 1 pedido concluído', example: '632 clientes' },
+      ],
+      engine: 'python',
+      ficheirosDados: ['loja_online_pedidos.csv'],
+      exampleCode: `# Em Mac/Linux (ou para reconciliar o Power BI): as mesmas 4 medidas em pandas
+import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["valor"] = df["quantidade"] * df["preco_unit"]
+conc = df[df["estado"] == "Concluído"]
+print("Faturação líquida:", round(conc["valor"].sum(), 2))
+print("Quota Web %:", round(conc.loc[conc["canal"] == "Web", "valor"].sum() / conc["valor"].sum() * 100, 2))
+print("Por categoria:", conc.groupby("categoria")["valor"].sum().round(2).to_dict())`,
+      pythonChallenge: {
+        description: 'Folha de respostas (Power BI DAX sobre loja_online_pedidos.csv): preenche os 5 valores calculados pelas tuas medidas DAX e matriz por categoria.',
+        starterCode: `# Folha de respostas: Power BI DAX (loja_online_pedidos.csv)
+faturacao_web = None          # CALCULATE([Faturação Líquida], pedidos[canal] = "Web")
+quota_web_pct = None          # [Quota Web %] arredondada a 2 casas
+clientes_concluidos = None    # [Clientes Concluídos] (DISTINCTCOUNT)
+categoria_lider = None        # Categoria com maior [Faturação Líquida] (ex.: "Casa")
+faturacao_cat_lider = None    # Valor da [Faturação Líquida] nessa categoria
+
+print(faturacao_web, quota_web_pct, clientes_concluidos, categoria_lider, faturacao_cat_lider)`,
+        solutionCode: `# Folha de respostas: Power BI DAX (loja_online_pedidos.csv)
+faturacao_web = 148276.61
+quota_web_pct = 60.06
+clientes_concluidos = 632
+categoria_lider = "Eletrónica"
+faturacao_cat_lider = 92853.76
+
+print(faturacao_web, quota_web_pct, clientes_concluidos, categoria_lider, faturacao_cat_lider)`,
+        checks: [
+          { label: 'faturacao_web (148 276,61 €) e quota_web_pct (60,06%)', expr: 'abs(float(faturacao_web) - 148276.61) < 0.05 and abs(float(quota_web_pct) - 60.06) < 0.05', actualExpr: '(faturacao_web, quota_web_pct)', hint: 'CALCULATE([Faturação Líquida], pedidos[canal] = "Web") a dividir por [Faturação Líquida] * 100.' },
+          { label: 'clientes_concluidos (632 clientes únicos)', expr: 'int(clientes_concluidos) == 632', actualExpr: 'clientes_concluidos', hint: 'DISTINCTCOUNT(pedidos[cliente_id]) filtrado por estado = "Concluído" (sem o filtro dá 637).' },
+          { label: 'categoria_lider ("Eletrónica") com 92 853,76 €', expr: 'str(categoria_lider).strip() == "Eletrónica" and abs(float(faturacao_cat_lider) - 92853.76) < 0.05', actualExpr: '(categoria_lider, faturacao_cat_lider)', hint: 'Coloca pedidos[categoria] numa matriz com [Faturação Líquida] e ordena de maior para menor.' },
+        ],
+      },
+      quiz: {
+        question: 'Porque é que no Power BI deves criar "Taxa de Cancelamento %" como Medida DAX com DIVIDE e não como Coluna Calculada?',
+        options: [
+          'Porque colunas calculadas não aceitam números decimais.',
+          'Porque uma Medida recalcula dinamicamente o numerador e o denominador quando o utilizador filtra por mês, canal ou região.',
+          'Porque a função DIVIDE dá erro dentro de medidas.',
+          'Porque as colunas calculadas só funcionam em Linux.',
+        ],
+        correctIndex: 1,
+        explanation: 'Somar ou fazer a média de percentagens pré-calculadas linha a linha está errado (efeito de tamanhos diferentes). Uma Medida calcula sempre SUM/COUNT no contexto dos filtros atuais do relatório.',
+      },
+    },
   ],
 };
 
@@ -2343,5 +2566,11 @@ export const cheatsheets: CheatsheetEntry[] = [
     topic: 'Acumulado do ano e ano anterior',
     syntax: 'Faturação YTD = TOTALYTD([Faturacao], calendario[data])\nFaturação Ano Anterior = CALCULATE([Faturacao], SAMEPERIODLASTYEAR(calendario[data]))',
     description: 'Funções de tempo do DAX. Precisam de uma tabela calendário marcada como tabela de datas e ligada às vendas.',
+  },
+  {
+    category: 'SQL',
+    topic: 'Datas noutros motores SQL (além de SQLite)',
+    syntax: "-- SQLite:     strftime('%Y-%m', data)\n-- PostgreSQL: TO_CHAR(data, 'YYYY-MM')  ou  DATE_TRUNC('month', data)\n-- BigQuery:   FORMAT_DATE('%Y-%m', data)\n-- SQL Server: FORMAT(data, 'yyyy-MM')",
+    description: 'A lógica de agrupar por mês é igual em todo o lado; só muda o nome da função de data de cada motor.',
   },
 ];

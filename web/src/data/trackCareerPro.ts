@@ -719,6 +719,7 @@ ORDER BY ltv_eur DESC;`,
         'EXPLAIN QUERY PLAN mostra como o motor SQL vai executar a consulta (SEARCH com índice vs SCAN da tabela completa).',
         'Filtros SARGable (Search Argument Able): mantém a coluna isolada no lado esquerdo do operador (data >= \'2025-09-01\' em vez de SUBSTR(data, 1, 7) = \'2025-09\'). Em SQL o texto leva aspas simples; as aspas duplas são para nomes de colunas.',
         'SELECT apenas das colunas necessárias e filtragem antes de JOINs pesados reduzem uso de memória.',
+        'Sintaxe de datas noutros motores (além do SQLite): no dia a dia vais encontrar PostgreSQL (DATE_TRUNC(\'month\', data) ou TO_CHAR), BigQuery (FORMAT_DATE(\'%Y-%m\', data)) e SQL Server (FORMAT(data, \'yyyy-MM\')). O filtro por intervalo (>= e <=) funciona igual em todos.',
       ],
       beginnerSteps: [
         'Evita envolver colunas indexadas em funções dentro do WHERE.',
@@ -729,9 +730,10 @@ ORDER BY ltv_eur DESC;`,
       commonPitfall: 'Aplicar YEAR(data) = 2025 ou SUBSTR(data, 1, 4) = \'2025\' no WHERE de uma tabela gigante, inutilizando o índice da coluna data.',
       referenceTitle: 'Boas práticas de otimização SQL',
       referenceRows: [
-        { syntax: "WHERE data BETWEEN '2025-09-01' AND '2025-09-30'", meaning: 'Rápido (SARGable): aproveita índice de data', example: 'Pesquisa direta por intervalo' },
+        { syntax: "WHERE data BETWEEN '2025-09-01' AND '2025-09-30'", meaning: 'Rápido (SARGable): aproveita índice de data em qualquer motor SQL', example: 'Pesquisa direta por intervalo' },
         { syntax: "WHERE SUBSTR(data, 1, 7) = '2025-09'", meaning: 'Lento em tabelas gigantes: calcula função linha a linha', example: 'Obriga a Full Scan' },
         { syntax: 'CREATE INDEX idx_vendas_data ON vendas(data);', meaning: 'Cria índice B-Tree na coluna data', example: 'Acelera filtros e ordenações' },
+        { syntax: "SQLite: strftime('%Y-%m', data) | Postgres: TO_CHAR(data, 'YYYY-MM') | BigQuery: FORMAT_DATE('%Y-%m', data)", meaning: 'Equivalentes para extrair ano-mês noutros motores reais', example: '2025-09' },
       ],
       engine: 'sql',
       exampleCode: `-- Compara a consulta otimizada por intervalo direto em Setembro de 2025:
@@ -1419,6 +1421,117 @@ print(readme)`,
         ],
         correctIndex: 3,
         explanation: 'Quem lê quer saber o que descobriste e porque importa. O método e o tamanho dos dados vêm depois.',
+      },
+    },
+    {
+      id: 'pro-12-desafio-recrutamento',
+      code: '12',
+      title: 'Desafio de recrutamento simulado: "Porque é que as vendas caíram em março?"',
+      lede: 'Num processo de seleção real não recebes um enunciado com 7 passos: recebes um pedido vago ("A faturação caiu em março, descobre porquê") e um ficheiro novo. Tempo estimado: 2 a 3 horas no computador (ou 45–60 min aqui), sem pistas de código.',
+      analogyTitle: 'O teste técnico para casa (take-home)',
+      analogyBody: 'As empresas dão um ficheiro com 2 000 a 5 000 linhas e uma pergunta aberta para ver se sabes decompor um problema: primeiro confirmar se a queda é real, depois separar tráfego, taxa de cancelamento, canal e ticket médio, e por fim entregar uma recomendação clara em 10 linhas.',
+      concepts: [
+        'Decompor um pedido vago: Faturação = Pedidos tentados × (1 - Taxa de cancelamento) × Ticket médio. Mede cada peça separadamente.',
+        'Filtrar pelo estado certo: somar pedidos "Cancelado" esconde a queda real ou distorce o diagnóstico.',
+        'Segmentar por canal, categoria e dia: uma queda abrupta num único canal a partir de um dia específico aponta para uma falha técnica (checkout/pagamento) e não para sazonalidade.',
+        'Comunicar para quem decide: abre o relatório com o diagnóstico e o número principal, mostra a evidência (canal, taxa antes/depois, ticket) e fecha com o próximo passo concreto.',
+      ],
+      beginnerSteps: [
+        'Lê dados/loja_online_pedidos.csv e espreita as colunas, os valores de estado, canal e os meses disponíveis.',
+        'Calcula a faturação líquida (apenas estado == "Concluído") de fevereiro (2025-02) e março (2025-03) e a variação percentual.',
+        'Compara o número de pedidos tentados, o ticket médio dos concluídos e a taxa de cancelamento por mês e por canal (App vs Web).',
+        'Escreve relatorio com as secções ## Diagnóstico, ## Evidência e ## Recomendação usando os números calculados.',
+      ],
+      proPractice: 'Num teste real de recrutamento, nunca entregues só um caderno cheio de código: entrega um resumo executivo de meia página no topo (ou num PDF/README curto) e deixa o código limpo por baixo.',
+      commonPitfall: 'Somar quantidade * preco_unit sem filtrar estado == "Concluído", ou concluir que "os clientes deixaram de comprar" quando o número de tentativas até se manteve igual.',
+      referenceTitle: 'Roteiro de diagnóstico comercial',
+      referenceRows: [
+        { syntax: 'df[df["estado"] == "Concluído"]', meaning: 'Isola a faturação real, excluindo cancelamentos', example: 'conc = df[df["estado"] == "Concluído"]' },
+        { syntax: 'df.assign(cancel=df["estado"] == "Cancelado").pivot_table(...)', meaning: 'Cruza taxa de cancelamento por mês e canal', example: 'pivot_table(index="mes", columns="canal", values="cancel", aggfunc="mean")' },
+        { syntax: '(fat_mar - fat_fev) / fat_fev * 100', meaning: 'Variação percentual mês a mês', example: '-17.36%' },
+        { syntax: '## Diagnóstico / ## Evidência / ## Recomendação', meaning: 'Estrutura executiva para entregar conclusões escritas', example: 'Usar f-string com números reais' },
+      ],
+      engine: 'python',
+      ficheirosDados: ['loja_online_pedidos.csv'],
+      exampleCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+print("Linhas:", len(df), "| Meses:", sorted(df["data"].str.slice(0, 7).unique()))
+print(df["estado"].value_counts())
+print(df["canal"].value_counts())
+df.head(5)`,
+      pythonChallenge: {
+        description: 'Investiga dados/loja_online_pedidos.csv sem pistas de código (tempo estimado: 45–60 min aqui, ou 2–3 h no teu computador) e responde à pergunta da direção: "Porque é que a faturação caiu em março?". Calcula:\n1) fat_fev e fat_mar: faturação líquida (apenas estado == "Concluído") em 2025-02 e 2025-03 (arredondadas a 2 casas), e variacao_pct (variação % de fev para mar, arredondada a 2 casas).\n2) canal_problema: nome do canal onde ocorreu a queda ("App" ou "Web"), taxa_cancel_app_fev e taxa_cancel_app_mar (taxa de cancelamento % na App em fev e mar, 2 casas).\n3) ticket_medio_fev e ticket_medio_mar: média do valor por pedido concluído em fev e mar (2 casas).\n4) relatorio: texto com as secções ## Diagnóstico, ## Evidência e ## Recomendação que inclua o canal afetado, a variação %, as duas taxas de cancelamento e um próximo passo prático.',
+        starterCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+
+# Sem pistas: investiga os dados e calcula os indicadores + relatório escrito.
+fat_fev = None
+fat_mar = None
+variacao_pct = None
+canal_problema = None
+taxa_cancel_app_fev = None
+taxa_cancel_app_mar = None
+ticket_medio_fev = None
+ticket_medio_mar = None
+relatorio = None
+
+print(fat_fev, fat_mar, variacao_pct, canal_problema)`,
+        solutionCode: `import pandas as pd
+
+df = pd.read_csv("dados/loja_online_pedidos.csv")
+df["mes"] = df["data"].str.slice(0, 7)
+df["valor"] = df["quantidade"] * df["preco_unit"]
+
+conc = df[df["estado"] == "Concluído"]
+por_mes = conc.groupby("mes")["valor"].agg(["sum", "mean"])
+
+fat_fev = round(float(por_mes.loc["2025-02", "sum"]), 2)
+fat_mar = round(float(por_mes.loc["2025-03", "sum"]), 2)
+variacao_pct = round((fat_mar - fat_fev) / fat_fev * 100, 2)
+
+ticket_medio_fev = round(float(por_mes.loc["2025-02", "mean"]), 2)
+ticket_medio_mar = round(float(por_mes.loc["2025-03", "mean"]), 2)
+
+canc = df.assign(c=df["estado"] == "Cancelado").pivot_table(
+    index="mes", columns="canal", values="c", aggfunc="mean"
+) * 100
+taxa_cancel_app_fev = round(float(canc.loc["2025-02", "App"]), 2)
+taxa_cancel_app_mar = round(float(canc.loc["2025-03", "App"]), 2)
+
+fat_canal = conc.pivot_table(index="mes", columns="canal", values="valor", aggfunc="sum")
+quedas = fat_canal.loc["2025-03"] - fat_canal.loc["2025-02"]
+canal_problema = str(quedas.idxmin())
+
+relatorio = f"""## Diagnóstico
+A faturação líquida caiu {variacao_pct}% de fevereiro ({fat_fev:.2f} €) para março ({fat_mar:.2f} €), puxada pelo canal {canal_problema}.
+
+## Evidência
+- O ticket médio manteve-se estável ({ticket_medio_fev:.2f} € em fev vs {ticket_medio_mar:.2f} € em mar) e o volume de tentativas não caiu.
+- Na {canal_problema}, a taxa de cancelamento subiu de {taxa_cancel_app_fev}% em fevereiro para {taxa_cancel_app_mar}% em março (com salto abrupto a partir de 2025-03-10).
+
+## Recomendação
+Rever de imediato o fluxo de checkout e pagamentos na {canal_problema} a partir de 10 de março para recuperar os pedidos perdidos.
+"""
+print(relatorio)`,
+        checks: [
+          { label: 'fat_fev (88 492,11 €), fat_mar (73 130,13 €) e variacao_pct (-17,36%)', expr: 'math.isclose(float(fat_fev), 88492.11, abs_tol=0.05) and math.isclose(float(fat_mar), 73130.13, abs_tol=0.05) and math.isclose(float(variacao_pct), -17.36, abs_tol=0.05)', actualExpr: '(fat_fev, fat_mar, variacao_pct)', hint: 'Filtra estado == "Concluído" antes de somar quantidade * preco_unit.' },
+          { label: 'canal_problema ("App") e taxas de cancelamento (3.36% -> 44.85%)', expr: 'canal_problema == "App" and math.isclose(float(taxa_cancel_app_fev), 3.36, abs_tol=0.05) and math.isclose(float(taxa_cancel_app_mar), 44.85, abs_tol=0.05)', actualExpr: '(canal_problema, taxa_cancel_app_fev, taxa_cancel_app_mar)', hint: 'Calcula a percentagem de pedidos com estado == "Cancelado" dentro do canal App em 2025-02 e 2025-03.' },
+          { label: 'ticket_medio_fev (102.18 €) e ticket_medio_mar (102.57 €)', expr: 'math.isclose(float(ticket_medio_fev), 102.18, abs_tol=0.05) and math.isclose(float(ticket_medio_mar), 102.57, abs_tol=0.05)', actualExpr: '(ticket_medio_fev, ticket_medio_mar)', hint: 'Média de quantidade * preco_unit nos pedidos concluídos de cada mês.' },
+          { label: 'relatorio escrito com as 3 secções, o canal e os números', expr: 'isinstance(relatorio, str) and all(s in relatorio for s in ["## Diagnóstico", "## Evidência", "## Recomendação"]) and canal_problema in relatorio and f"{variacao_pct}" in relatorio and f"{taxa_cancel_app_mar}" in relatorio', actualExpr: 'relatorio[:120] if isinstance(relatorio, str) else relatorio', hint: 'Usa uma f-string com ## Diagnóstico, ## Evidência e ## Recomendação e inclui {canal_problema}, {variacao_pct} e {taxa_cancel_app_mar}.' },
+        ],
+      },
+      quiz: {
+        question: 'Ao investigar uma queda súbita de faturação em março, notas que o número de pedidos tentados e o ticket médio não mudaram, mas os cancelamentos na App subiram de 3,4% para 44,9% a partir de 10 de março. Qual é o diagnóstico mais provável?',
+        options: [
+          'Os clientes perderam interesse nos produtos da loja.',
+          'Os preços estão demasiado altos face à concorrência.',
+          'Uma falha técnica ou de pagamento na App a partir de 10 de março está a impedir a conclusão dos pedidos.',
+          'É um efeito normal de sazonalidade entre fevereiro e março.',
+        ],
+        correctIndex: 2,
+        explanation: 'Quando a procura (tentativas) e o ticket se mantêm, mas os cancelamentos disparam num único canal a partir de um dia específico, a causa provável é técnica ou operacional (ex.: bug no checkout da App) e não comercial.',
       },
     },
   ],

@@ -1,0 +1,563 @@
+municipio,ano,mes,dormidas
+Albufeira,2022,1,258242
+Loulé,2022,1,94364
+Lagos,2022,1,65203
+Faro,2022,1,45419
+Tavira,2022,1,40903
+Lagoa,2022,1,38195
+Vila Real de Santo António,2022,1,38193
+Silves,2022,1,24564
+Olhão,2022,1,16261
+Castro Marim,2022,1,9134
+Vila do Bispo,2022,1,8660
+Aljezur,2022,1,6215
+Monchique,2022,1,4461
+São Brás de Alportel,2022,1,2000
+Alcoutim,2022,1,714
+Albufeira,2022,2,301758
+Loulé,2022,2,124162
+Portimão,2022,2,104950
+Lagos,2022,2,84260
+Faro,2022,2,56496
+Tavira,2022,2,52177
+Lagoa,2022,2,48454
+Vila Real de Santo António,2022,2,44688
+Silves,2022,2,30629
+Olhão,2022,2,20358
+Castro Marim,2022,2,10828
+Vila do Bispo,2022,2,9646
+Monchique,2022,2,5173
+São Brás de Alportel,2022,2,2413
+Alcoutim,2022,2,820
+Albufeira,2022,3,409116
+Loulé,2022,3,170083
+Portimão,2022,3,144814
+Lagos,2022,3,115102
+Faro,2022,3,76406
+Tavira,2022,3,69659
+Lagoa,2022,3,65239
+Vila Real de Santo António,2022,3,64698
+Silves,2022,3,44587
+Olhão,2022,3,27925
+Castro Marim,2022,3,15031
+Vila do Bispo,2022,3,13824
+Aljezur,2022,3,10237
+Monchique,2022,3,7807
+São Brás de Alportel,2022,3,3506
+Alcoutim,2022,3,1212
+Albufeira,2022,4,642481
+Loulé,2022,4,250303
+Portimão,2022,4,206869
+Lagos,2022,4,170636
+Faro,2022,4,122687
+Tavira,2022,4,99990
+Lagoa,2022,4,99878
+Vila Real de Santo António,2022,4,90066
+Silves,2022,4,62650
+Olhão,2022,4,42737
+Castro Marim,2022,4,22462
+Vila do Bispo,2022,4,21525
+Aljezur,2022,4,14951
+Monchique,2022,4,11071
+São Brás de Alportel,2022,4,5361
+Alcoutim,2022,4,1721
+Albufeira,2022,5,820175
+Portimão,2022,5,255291
+Lagos,2022,5,214997
+Faro,2022,5,147321
+Tavira,2022,5,135785
+Lagoa,2022,5,122832
+Vila Real de Santo António,2022,5,111986
+Silves,2022,5,81376
+Olhão,2022,5,53954
+Vila do Bispo,2022,5,26366
+Aljezur,2022,5,18873
+Monchique,2022,5,14232
+São Brás de Alportel,2022,5,6838
+Alcoutim,2022,5,2205
+Albufeira,2022,6,977576
+Loulé,2022,6,409913
+Portimão,2022,6,353784
+Lagos,2022,6,272276
+Faro,2022,6,193701
+Tavira,2022,6,170350
+Lagoa,2022,6,169796
+Vila Real de Santo António,2022,6,143013
+Silves,2022,6,101808
+Olhão,2022,6,65051
+Castro Marim,2022,6,35351
+Vila do Bispo,2022,6,32296
+Aljezur,2022,6,24583
+Monchique,2022,6,18797
+São Brás de Alportel,2022,6,8385
+Alcoutim,2022,6,2866
+Albufeira,2022,7,1403193
+Loulé,2022,7,513833
+Portimão,2022,7,444101
+Lagos,2022,7,361243
+Faro,2022,7,256324
+Tavira,2022,7,229647
+Lagoa,2022,7,210817
+Vila Real de Santo António,2022,7,206619
+Silves,2022,7,130378
+Olhão,2022,7,86002
+Castro Marim,2022,7,50158
+Vila do Bispo,2022,7,44359
+Aljezur,2022,7,34479
+Monchique,2022,7,25081
+São Brás de Alportel,2022,7,11674
+Alcoutim,2022,7,3962
+Albufeira,2022,8,1733975
+Loulé,2022,8,664912
+Portimão,2022,8,547819
+Lagos,2022,8,470774
+Tavira,2022,8,285788
+Lagoa,2022,8,268975
+Vila Real de Santo António,2022,8,251524
+Silves,2022,8,167365
+Olhão,2022,8,116336
+Castro Marim,2022,8,62112
+Vila do Bispo,2022,8,56964
+Aljezur,2022,8,41148
+Monchique,2022,8,29094
+São Brás de Alportel,2022,8,13795
+Alcoutim,2022,8,4790
+Albufeira,2022,9,1043977
+Loulé,2022,9,432130
+Portimão,2022,9,359377
+Lagos,2022,9,279914
+Faro,2022,9,201026
+Tavira,2022,9,169890
+Lagoa,2022,9,173396
+Vila Real de Santo António,2022,9,156304
+Silves,2022,9,102754
+Olhão,2022,9,72736
+Castro Marim,2022,9,40231
+Vila do Bispo,2022,9,35986
+Aljezur,2022,9,27114
+Monchique,2022,9,18837
+São Brás de Alportel,2022,9,8942
+Alcoutim,2022,9,2916
+Albufeira,2022,10,691566
+Loulé,2022,10,293030
+Portimão,2022,10,237353
+Lagos,2022,10,198222
+Faro,2022,10,136907
+Tavira,2022,10,122717
+Lagoa,2022,10,117315
+Vila Real de Santo António,2022,10,106879
+Silves,2022,10,68849
+Olhão,2022,10,47067
+Castro Marim,2022,10,24538
+Vila do Bispo,2022,10,24145
+Aljezur,2022,10,17265
+Monchique,2022,10,12653
+São Brás de Alportel,2022,10,5700
+Alcoutim,2022,10,1909
+Albufeira,2022,11,335582
+Loulé,2022,11,129721
+Portimão,2022,11,102778
+Lagos,2022,11,90980
+Faro,2022,11,60642
+Tavira,2022,11,54162
+Lagoa,2022,11,53820
+Vila Real de Santo António,2022,11,47215
+Silves,2022,11,31358
+Olhão,2022,11,22475
+Castro Marim,2022,11,11270
+Vila do Bispo,2022,11,10749
+Aljezur,2022,11,7700
+Monchique,2022,11,5653
+São Brás de Alportel,2022,11,2635
+Alcoutim,2022,11,888
+Albufeira,2022,12,251820
+Portimão,2022,12,81577
+Lagos,2022,12,67034
+Faro,2022,12,45460
+Tavira,2022,12,40449
+Lagoa,2022,12,39867
+Vila Real de Santo António,2022,12,35941
+Silves,2022,12,25345
+Olhão,2022,12,16861
+Castro Marim,2022,12,9207
+Vila do Bispo,2022,12,7933
+Aljezur,2022,12,6042
+Monchique,2022,12,4392
+São Brás de Alportel,2022,12,2122
+Alcoutim,2022,12,676
+Albufeira,2023,1,261851
+Loulé,2023,1,107392
+Portimão,2023,1,84893
+Lagos,2023,1,73880
+Faro,2023,1,49418
+Tavira,2023,1,46087
+Lagoa,2023,1,44150
+Vila Real de Santo António,2023,1,37916
+Silves,2023,1,25666
+Olhão,2023,1,18209
+Castro Marim,2023,1,9867
+Vila do Bispo,2023,1,9303
+Aljezur,2023,1,6519
+Monchique,2023,1,5010
+São Brás de Alportel,2023,1,2152
+Alcoutim,2023,1,779
+Albufeira,2023,2,307086
+Loulé,2023,2,134682
+Portimão,2023,2,106534
+Lagos,2023,2,89666
+Faro,2023,2,61703
+Tavira,2023,2,54503
+Lagoa,2023,2,51942
+Vila Real de Santo António,2023,2,46820
+Silves,2023,2,33610
+Olhão,2023,2,22026
+Castro Marim,2023,2,11297
+Aljezur,2023,2,8110
+Monchique,2023,2,5576
+São Brás de Alportel,2023,2,2760
+Alcoutim,2023,2,890
+Loulé,2023,3,190330
+Portimão,2023,3,148582
+Lagos,2023,3,128136
+Faro,2023,3,82057
+Tavira,2023,3,78605
+Lagoa,2023,3,69782
+Vila Real de Santo António,2023,3,64323
+Silves,2023,3,47039
+Olhão,2023,3,29591
+Castro Marim,2023,3,16320
+Vila do Bispo,2023,3,14908
+Aljezur,2023,3,11068
+Monchique,2023,3,7879
+São Brás de Alportel,2023,3,3950
+Alcoutim,2023,3,1260
+Albufeira,2023,4,667256
+Loulé,2023,4,257940
+Portimão,2023,4,224506
+Lagos,2023,4,173354
+Faro,2023,4,131814
+Lagoa,2023,4,108623
+Vila Real de Santo António,2023,4,99154
+Silves,2023,4,69654
+Olhão,2023,4,44107
+Castro Marim,2023,4,24915
+Vila do Bispo,2023,4,21707
+Aljezur,2023,4,16098
+Monchique,2023,4,12545
+São Brás de Alportel,2023,4,5478
+Alcoutim,2023,4,1934
+Albufeira,2023,5,863231
+Loulé,2023,5,345609
+Portimão,2023,5,293027
+Lagos,2023,5,222985
+Faro,2023,5,165262
+Tavira,2023,5,141345
+Lagoa,2023,5,136278
+Vila Real de Santo António,2023,5,122202
+Silves,2023,5,87002
+Olhão,2023,5,55397
+Castro Marim,2023,5,31567
+Vila do Bispo,2023,5,29027
+Aljezur,2023,5,20700
+Monchique,2023,5,15244
+São Brás de Alportel,2023,5,7096
+Alcoutim,2023,5,2282
+Albufeira,2023,6,1078998
+Loulé,2023,6,431820
+Portimão,2023,6,368116
+Lagos,2023,6,297935
+Faro,2023,6,193086
+Tavira,2023,6,184211
+Lagoa,2023,6,179759
+Vila Real de Santo António,2023,6,153202
+Silves,2023,6,108649
+Olhão,2023,6,70116
+Castro Marim,2023,6,39033
+Vila do Bispo,2023,6,36043
+Aljezur,2023,6,26785
+Monchique,2023,6,20453
+São Brás de Alportel,2023,6,8975
+Alcoutim,2023,6,2945
+Albufeira,2023,7,1457460
+Loulé,2023,7,586373
+Lagos,2023,7,379703
+Faro,2023,7,279776
+Tavira,2023,7,239970
+Lagoa,2023,7,226989
+Vila Real de Santo António,2023,7,209801
+Silves,2023,7,152259
+Olhão,2023,7,93304
+Castro Marim,2023,7,54354
+Vila do Bispo,2023,7,49950
+Aljezur,2023,7,33986
+Monchique,2023,7,27005
+São Brás de Alportel,2023,7,11731
+Alcoutim,2023,7,3956
+Albufeira,2023,8,1839136
+Loulé,2023,8,736774
+Portimão,2023,8,630782
+Lagos,2023,8,502943
+Faro,2023,8,341010
+Tavira,2023,8,304568
+Lagoa,2023,8,295115
+Vila Real de Santo António,2023,8,258499
+Silves,2023,8,180696
+Olhão,2023,8,116446
+Castro Marim,2023,8,63465
+Vila do Bispo,2023,8,61680
+Aljezur,2023,8,44400
+Monchique,2023,8,33878
+Alcoutim,2023,8,4900
+Albufeira,2023,9,1158362
+Loulé,2023,9,455091
+Portimão,2023,9,383543
+Lagos,2023,9,320777
+Faro,2023,9,203496
+Tavira,2023,9,184436
+Lagoa,2023,9,176101
+Vila Real de Santo António,2023,9,175280
+Silves,2023,9,110799
+Olhão,2023,9,73586
+Castro Marim,2023,9,42988
+Vila do Bispo,2023,9,36719
+Aljezur,2023,9,28351
+Monchique,2023,9,20168
+São Brás de Alportel,2023,9,9945
+Alcoutim,2023,9,3379
+Albufeira,2023,10,741605
+Loulé,2023,10,292594
+Portimão,2023,10,242046
+Lagos,2023,10,193632
+Faro,2023,10,146223
+Tavira,2023,10,130942
+Lagoa,2023,10,115398
+Vila Real de Santo António,2023,10,116726
+Silves,2023,10,77355
+Olhão,2023,10,50766
+Castro Marim,2023,10,27168
+Vila do Bispo,2023,10,25828
+Aljezur,2023,10,18697
+Monchique,2023,10,13334
+São Brás de Alportel,2023,10,6119
+Alcoutim,2023,10,2137
+Albufeira,2023,11,331894
+Loulé,2023,11,140796
+Portimão,2023,11,113196
+Lagos,2023,11,90002
+Faro,2023,11,62085
+Tavira,2023,11,59782
+Lagoa,2023,11,54880
+Vila Real de Santo António,2023,11,53310
+Silves,2023,11,36218
+Olhão,2023,11,22669
+Castro Marim,2023,11,12010
+Vila do Bispo,2023,11,11957
+Aljezur,2023,11,8317
+Monchique,2023,11,5929
+Alcoutim,2023,11,966
+Albufeira,2023,12,273338
+Loulé,2023,12,105699
+Portimão,2023,12,91973
+Lagos,2023,12,71077
+Faro,2023,12,51124
+Tavira,2023,12,45654
+Lagoa,2023,12,43504
+Vila Real de Santo António,2023,12,40753
+Silves,2023,12,27614
+Olhão,2023,12,17628
+Castro Marim,2023,12,9848
+Vila do Bispo,2023,12,9242
+Aljezur,2023,12,6470
+Monchique,2023,12,4585
+São Brás de Alportel,2023,12,2286
+Alcoutim,2023,12,748
+Albufeira,2024,1,273252
+Loulé,2024,1,110874
+Portimão,2024,1,92209
+Lagos,2024,1,76093
+Faro,2024,1,52672
+Tavira,2024,1,45542
+Lagoa,2024,1,43589
+Vila Real de Santo António,2024,1,42325
+Silves,2024,1,27956
+Olhão,2024,1,18169
+Castro Marim,2024,1,9522
+Vila do Bispo,2024,1,9346
+Aljezur,2024,1,6808
+Monchique,2024,1,5125
+São Brás de Alportel,2024,1,2310
+Alcoutim,2024,1,776
+Albufeira,2024,2,339142
+Loulé,2024,2,135744
+Portimão,2024,2,111928
+Lagos,2024,2,90873
+Faro,2024,2,65326
+Tavira,2024,2,53969
+Lagoa,2024,2,55365
+Vila Real de Santo António,2024,2,48072
+Silves,2024,2,34728
+Olhão,2024,2,22202
+Castro Marim,2024,2,12355
+Vila do Bispo,2024,2,10890
+Aljezur,2024,2,8456
+Monchique,2024,2,6111
+São Brás de Alportel,2024,2,2718
+Alcoutim,2024,2,954
+Albufeira,2024,3,476624
+Loulé,2024,3,179394
+Portimão,2024,3,154626
+Lagos,2024,3,130204
+Faro,2024,3,86890
+Lagoa,2024,3,79360
+Vila Real de Santo António,2024,3,71226
+Silves,2024,3,46648
+Olhão,2024,3,30974
+Castro Marim,2024,3,17672
+Vila do Bispo,2024,3,16409
+Aljezur,2024,3,11283
+Monchique,2024,3,8587
+São Brás de Alportel,2024,3,4062
+Alcoutim,2024,3,1352
+Albufeira,2024,4,678148
+Loulé,2024,4,274363
+Portimão,2024,4,228857
+Lagos,2024,4,185176
+Faro,2024,4,135629
+Tavira,2024,4,120152
+Lagoa,2024,4,107940
+Vila Real de Santo António,2024,4,101897
+Silves,2024,4,70830
+Olhão,2024,4,45457
+Castro Marim,2024,4,24573
+Vila do Bispo,2024,4,22434
+Aljezur,2024,4,17550
+Monchique,2024,4,12892
+São Brás de Alportel,2024,4,5728
+Alcoutim,2024,4,1946
+Albufeira,2024,5,860800
+Loulé,2024,5,360362
+Portimão,2024,5,307567
+Lagos,2024,5,246837
+Faro,2024,5,156883
+Tavira,2024,5,152259
+Lagoa,2024,5,135002
+Vila Real de Santo António,2024,5,129459
+Silves,2024,5,87818
+Olhão,2024,5,61591
+Castro Marim,2024,5,31336
+Vila do Bispo,2024,5,30344
+Aljezur,2024,5,21574
+Monchique,2024,5,16645
+São Brás de Alportel,2024,5,7227
+Alcoutim,2024,5,2500
+Albufeira,2024,6,1084196
+Loulé,2024,6,447816
+Portimão,2024,6,366508
+Lagos,2024,6,300092
+Faro,2024,6,201122
+Tavira,2024,6,192298
+Lagoa,2024,6,186590
+Vila Real de Santo António,2024,6,172043
+Silves,2024,6,108868
+Olhão,2024,6,78473
+Castro Marim,2024,6,39909
+Vila do Bispo,2024,6,38298
+Aljezur,2024,6,27272
+Monchique,2024,6,19693
+São Brás de Alportel,2024,6,9280
+Alcoutim,2024,6,3218
+Albufeira,2024,7,1581975
+Loulé,2024,7,598736
+Portimão,2024,7,513040
+Lagos,2024,7,390686
+Faro,2024,7,275075
+Tavira,2024,7,265077
+Lagoa,2024,7,233285
+Vila Real de Santo António,2024,7,227609
+Silves,2024,7,147129
+Olhão,2024,7,102028
+Castro Marim,2024,7,52571
+Vila do Bispo,2024,7,48220
+Aljezur,2024,7,37611
+Monchique,2024,7,26036
+São Brás de Alportel,2024,7,13241
+Alcoutim,2024,7,4454
+Albufeira,2024,8,1864867
+Loulé,2024,8,762763
+Portimão,2024,8,597543
+Lagos,2024,8,501294
+Faro,2024,8,355130
+Tavira,2024,8,301940
+Lagoa,2024,8,306939
+Vila Real de Santo António,2024,8,270113
+Silves,2024,8,179936
+Olhão,2024,8,129641
+Castro Marim,2024,8,67752
+Vila do Bispo,2024,8,64351
+Aljezur,2024,8,46490
+Monchique,2024,8,32755
+São Brás de Alportel,2024,8,16388
+Alcoutim,2024,8,5565
+Albufeira,2024,9,1154083
+Loulé,2024,9,498322
+Portimão,2024,9,409547
+Lagos,2024,9,327436
+Faro,2024,9,212102
+Tavira,2024,9,194767
+Lagoa,2024,9,201064
+Vila Real de Santo António,2024,9,174531
+Silves,2024,9,123452
+Olhão,2024,9,79546
+Castro Marim,2024,9,41922
+Vila do Bispo,2024,9,41399
+Aljezur,2024,9,28264
+Monchique,2024,9,21997
+São Brás de Alportel,2024,9,9700
+Alcoutim,2024,9,3279
+Albufeira,2024,10,800510
+Loulé,2024,10,309074
+Portimão,2024,10,252275
+Lagos,2024,10,207698
+Faro,2024,10,143009
+Tavira,2024,10,125476
+Lagoa,2024,10,126623
+Vila Real de Santo António,2024,10,118440
+Silves,2024,10,76009
+Olhão,2024,10,49865
+Castro Marim,2024,10,27751
+Vila do Bispo,2024,10,25270
+Aljezur,2024,10,18667
+Monchique,2024,10,14496
+São Brás de Alportel,2024,10,6429
+Alcoutim,2024,10,2279
+Albufeira,2024,11,349600
+Loulé,2024,11,144870
+Portimão,2024,11,124806
+Lagos,2024,11,96171
+Faro,2024,11,69721
+Tavira,2024,11,57360
+Lagoa,2024,11,59229
+Vila Real de Santo António,2024,11,50991
+Silves,2024,11,35347
+Olhão,2024,11,23663
+Castro Marim,2024,11,13185
+Vila do Bispo,2024,11,11801
+Aljezur,2024,11,8846
+Monchique,2024,11,6413
+São Brás de Alportel,2024,11,3089
+Alcoutim,2024,11,968
+Albufeira,2024,12,279318
+Loulé,2024,12,109292
+Portimão,2024,12,97398
+Lagos,2024,12,77614
+Faro,2024,12,51242
+Tavira,2024,12,44573
+Lagoa,2024,12,46838
+Vila Real de Santo António,2024,12,39438
+Silves,2024,12,26580
+Castro Marim,2024,12,10156
+Vila do Bispo,2024,12,9280
+Aljezur,2024,12,6566
+Monchique,2024,12,4772
+São Brás de Alportel,2024,12,2214
+Alcoutim,2024,12,767

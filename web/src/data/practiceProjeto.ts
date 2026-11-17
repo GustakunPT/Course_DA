@@ -4,27 +4,11 @@ import type { PythonChallengeSpec } from './types';
 // dados/bicicletas_viagens_sujas.csv. As verificações com correr_com(...) trocam o ficheiro
 // por uma tabela pequena inventada: só passa quem calcula a partir dos dados.
 
-const ESTACOES_CANONICAS = `# Forma normalizada (sem acentos, minúsculas, "estacao ...") -> nome oficial
-estacoes_canonicas = {
-    "estacao central": "Estação Central",
-    "estacao jardim botanico": "Estação Jardim Botânico",
-    "estacao ribeira": "Estação Ribeira",
-    "estacao universidade": "Estação Universidade",
-    "estacao sao bento": "Estação São Bento",
-    "estacao do mercado": "Estação do Mercado",
-    "estacao praca nova": "Estação Praça Nova",
-    "estacao farol": "Estação Farol",
-    "estacao parque verde": "Estação Parque Verde",
-    "estacao hospital": "Estação Hospital",
-    "estacao avenida da liberdade": "Estação Avenida da Liberdade",
-    "estacao cais do sodre": "Estação Cais do Sodré",
-}`;
-
 const LOTE_RELATORIO =
   'pd.DataFrame({"viagem_id": ["V1", "V1", "V2", "V3"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:05", "14/03/2025 09:00", "14-03-2025 9h05"], "fim": ["2025-03-14 08:20", "2025-03-14 08:20", "14/03/2025 09:00", "14-03-2025 9h15"], "estacao_partida": ["Estação Central", "Estação Central", "EST. RIBEIRA", "Estação Farol"], "estacao_chegada": ["Estação Farol", "Estação Farol", "Estação Farol", "estacao farol"], "duracao_min": [15, 15, 0, 10], "tipo_cliente": ["Anual", "Anual", None, "anual"], "valor_eur": ["0.00", "0.00", None, "1,50"]})';
 
 const LOTE_ANALISE =
-  'pd.DataFrame({"viagem_id": ["V1", "V2", "V3", "V3", "V4"], "inicio": ["2025-03-14 08:05", "14/03/2025 08:40", "14-03-2025 17h05", "14-03-2025 17h05", "2025-03-14 17:30"], "fim": ["2025-03-14 08:20", "14/03/2025 09:00", "14-03-2025 17h30", "14-03-2025 17h30", "2025-03-14 17:30"], "estacao_partida": [" estacao farol ", "Estação Farol", "Estação Central", "Estação Central", "EST. CENTRAL"], "estacao_chegada": ["Estação Central", "Estação Central", "Estação Farol", "Estação Farol", "Estação Farol"], "duracao_min": [15, 20, 25, 25, 0], "tipo_cliente": ["Anual", "Ocasional", "Anual", "Anual", "Anual"], "valor_eur": ["0.00", "2.00", "0.00", "0.00", "0.00"]})';
+  'pd.DataFrame({"viagem_id": ["V1", "V2", "V3", "V3", "V4", "V5"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:40", "2025-03-14 17:05", "2025-03-14 17:05", "2025-03-14 17:30", "14/03/2025 17:45"], "fim": ["2025-03-14 08:20", "2025-03-14 09:00", "2025-03-14 17:30", "2025-03-14 17:30", "2025-03-14 17:30", "14/03/2025 18:00"], "estacao_partida": ["Estação Farol", "Estação Farol", "Estação Central", "Estação Central", "Estação Central", "Estação Central"], "estacao_chegada": ["Estação Central", "Estação Central", "Estação Farol", "Estação Farol", "Estação Farol", "Estação Farol"], "duracao_min": [15, 20, 25, 25, 0, 15], "tipo_cliente": ["Anual", "Ocasional", "Anual", "Anual", "Anual", "Anual"], "valor_eur": ["0.00", "2.00", "0.00", "0.00", "0.00", "0.00"]})';
 
 export const projetoPractice: Record<string, PythonChallengeSpec[]> = {
   'pf-01-limpeza-bicicletas': [
@@ -87,63 +71,52 @@ print(relatorio)`,
       ],
     },
     {
-      title: 'Primeira análise dos dados limpos',
-      description: 'Com os dados limpos, responde a duas perguntas da rede de bicicletas: a que hora do dia (0 a 23) começam mais viagens e de que estação partem mais viagens. Primeiro limpa dados/bicicletas_viagens_sujas.csv com as mesmas regras do desafio principal e guarda o resultado em limpo (podes colar aqui a tua limpeza). Depois guarda em hora_de_ponta a hora com mais inícios (.dt.hour, .value_counts() e .idxmax()), em viagens_hora_de_ponta quantas viagens começaram nessa hora e em estacao_mais_usada o nome oficial da estação de partida com mais viagens. Antes de dar a resposta, olha para a contagem por hora inteira: há um pico de manhã e outro ao fim da tarde, de quem vai e volta do trabalho.',
+      title: 'Amostra de hora de ponta (sem spoilers da limpeza)',
+      description: 'Sem precisar da limpeza completa das estações e dos 3 formatos de data, responde já sobre a amostra já bem formatada (15 998 linhas): fica só com as linhas únicas por viagem_id, com inicio já no formato ISO ("%Y-%m-%d %H:%M", usando errors="coerce" e .notna()), estacao_partida dentro de estacoes_oficiais e duracao_min entre 1 e 1440. Depois guarda em hora_de_ponta a hora com mais partidas (.dt.hour), em viagens_hora_de_ponta quantas viagens começaram nessa hora e em estacao_mais_usada a estação de partida com mais viagens.',
       starterCode: `import pandas as pd
 
-${ESTACOES_CANONICAS}
+estacoes_oficiais = [
+    "Estação Central", "Estação Jardim Botânico", "Estação Ribeira", "Estação Universidade",
+    "Estação São Bento", "Estação do Mercado", "Estação Praça Nova", "Estação Farol",
+    "Estação Parque Verde", "Estação Hospital", "Estação Avenida da Liberdade", "Estação Cais do Sodré",
+]
 
 viagens = pd.read_csv("dados/bicicletas_viagens_sujas.csv")
 
-# 1) A limpeza do desafio principal, que cria limpo
-limpo = None
-
-# 2) A primeira análise
 hora_de_ponta = None
 viagens_hora_de_ponta = None
 estacao_mais_usada = None
 print(hora_de_ponta, viagens_hora_de_ponta, estacao_mais_usada)`,
       solutionCode: `import pandas as pd
 
-${ESTACOES_CANONICAS}
+estacoes_oficiais = [
+    "Estação Central", "Estação Jardim Botânico", "Estação Ribeira", "Estação Universidade",
+    "Estação São Bento", "Estação do Mercado", "Estação Praça Nova", "Estação Farol",
+    "Estação Parque Verde", "Estação Hospital", "Estação Avenida da Liberdade", "Estação Cais do Sodré",
+]
 
 viagens = pd.read_csv("dados/bicicletas_viagens_sujas.csv")
 
-# 1) A limpeza do desafio principal, que cria limpo
-def normalizar_estacao(serie):
-    s = serie.str.normalize("NFD").str.encode("ascii", "ignore").str.decode("ascii")
-    s = s.str.lower().str.strip().str.replace("est. ", "estacao ", regex=False)
-    return s.map(estacoes_canonicas)
-
-def converter_datas(serie):
-    iso = pd.to_datetime(serie, format="%Y-%m-%d %H:%M", errors="coerce")
-    barras = pd.to_datetime(serie, format="%d/%m/%Y %H:%M", errors="coerce")
-    com_h = pd.to_datetime(serie, format="%d-%m-%Y %Hh%M", errors="coerce")
-    return iso.fillna(barras).fillna(com_h)
-
 df = viagens.drop_duplicates(subset="viagem_id").copy()
-df["estacao_partida"] = normalizar_estacao(df["estacao_partida"])
-df["estacao_chegada"] = normalizar_estacao(df["estacao_chegada"])
-df["inicio"] = converter_datas(df["inicio"])
-df["fim"] = converter_datas(df["fim"])
-df["valor_eur"] = df["valor_eur"].str.replace(",", ".").astype(float)
-df["tipo_cliente"] = df["tipo_cliente"].str.strip().str.capitalize().fillna("Desconhecido")
-df = df[(df["duracao_min"] > 0) & (df["duracao_min"] <= 1440)]
-limpo = df[df["fim"] >= df["inicio"]]
+df["inicio_dt"] = pd.to_datetime(df["inicio"], format="%Y-%m-%d %H:%M", errors="coerce")
+amostra = df[
+    df["inicio_dt"].notna()
+    & df["estacao_partida"].isin(estacoes_oficiais)
+    & (df["duracao_min"] > 0)
+    & (df["duracao_min"] <= 1440)
+]
 
-# 2) A primeira análise
-por_hora = limpo["inicio"].dt.hour.value_counts()
+por_hora = amostra["inicio_dt"].dt.hour.value_counts()
 hora_de_ponta = int(por_hora.idxmax())
 viagens_hora_de_ponta = int(por_hora.max())
-estacao_mais_usada = limpo["estacao_partida"].value_counts().idxmax()
+estacao_mais_usada = str(amostra["estacao_partida"].value_counts().idxmax())
 print("Hora de ponta:", hora_de_ponta, "com", viagens_hora_de_ponta, "viagens")
-print("Estação mais usada:", estacao_mais_usada)
-por_hora.sort_index()`,
+print("Estação mais usada:", estacao_mais_usada)`,
       checks: [
-        { label: 'hora_de_ponta: 8, ou seja, das 8h00 às 8h59', expr: 'int(hora_de_ponta) == 8', actualExpr: 'hora_de_ponta', hint: 'limpo["inicio"].dt.hour.value_counts().idxmax(): a hora com mais inícios de viagem.' },
-        { label: 'viagens_hora_de_ponta: 2 303 viagens (a seguir vêm as 17h, com 1 776)', expr: 'int(viagens_hora_de_ponta) == 2303', actualExpr: 'viagens_hora_de_ponta', hint: 'limpo["inicio"].dt.hour.value_counts().max(). Se te dá outro número, a limpeza ainda deixa passar duplicados ou viagens impossíveis.' },
-        { label: 'estacao_mais_usada: "Estação Central" (4 467 partidas)', expr: 'estacao_mais_usada == "Estação Central"', actualExpr: 'estacao_mais_usada', hint: 'limpo["estacao_partida"].value_counts().idxmax(), depois de trocar as variantes pelo nome oficial.' },
-        { label: 'A análise funciona com outro lote', expr: `(lambda r: int(r["hora_de_ponta"]) == 8 and int(r["viagens_hora_de_ponta"]) == 2 and r["estacao_mais_usada"] == "Estação Farol")(correr_com(viagens=${LOTE_ANALISE}))`, actualExpr: `(lambda r: (r.get("hora_de_ponta"), r.get("viagens_hora_de_ponta"), r.get("estacao_mais_usada")))(correr_com(viagens=${LOTE_ANALISE}))`, hint: 'Num lote com 2 viagens às 8h a partir do Farol, uma às 17h repetida e outra às 17h impossível, a hora de ponta é 8 (2 viagens) e a estação é a Estação Farol.' },
+        { label: 'hora_de_ponta: 8, ou seja, das 8h00 às 8h59', expr: 'int(hora_de_ponta) == 8', actualExpr: 'hora_de_ponta', hint: 'amostra["inicio_dt"].dt.hour.value_counts().idxmax().' },
+        { label: 'viagens_hora_de_ponta: 1 912 viagens na amostra ISO', expr: 'int(viagens_hora_de_ponta) == 1912', actualExpr: 'viagens_hora_de_ponta', hint: 'Confirma que tiraste duplicados por viagem_id, filtraste datas ISO, estações oficiais e duracao_min entre 1 e 1440.' },
+        { label: 'estacao_mais_usada: "Estação Central" (3 634 partidas na amostra)', expr: 'estacao_mais_usada == "Estação Central"', actualExpr: 'estacao_mais_usada', hint: 'amostra["estacao_partida"].value_counts().idxmax().' },
+        { label: 'A análise funciona com outro lote', expr: `(lambda r: int(r["hora_de_ponta"]) == 8 and int(r["viagens_hora_de_ponta"]) == 2 and r["estacao_mais_usada"] == "Estação Farol")(correr_com(viagens=${LOTE_ANALISE}))`, actualExpr: `(lambda r: (r.get("hora_de_ponta"), r.get("viagens_hora_de_ponta"), r.get("estacao_mais_usada")))(correr_com(viagens=${LOTE_ANALISE}))`, hint: 'Usa o mesmo filtro sobre viagens sem escrever os resultados à mão.' },
       ],
     },
   ],

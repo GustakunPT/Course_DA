@@ -87,6 +87,8 @@ export interface Lesson {
   quiz: QuizSpec;
   /** Perguntas extra de revisão; só a primeira (quiz) conta para o progresso. */
   moreQuiz?: QuizSpec[];
+  /** Tempo estimado em minutos para concluir a etapa (leitura + prática + quiz). */
+  estimatedMinutes?: number;
 }
 
 export interface Track {

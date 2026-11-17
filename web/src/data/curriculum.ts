@@ -53,7 +53,10 @@ const careerProComTreinos: Track = {
 
 const projetoFinalComTreinos: Track = {
   ...projetoFinalTrack,
-  lessons: projetoFinalTrack.lessons.map((l) => comTreinosExtra(l, projetoPractice[l.id])),
+  lessons: projetoFinalTrack.lessons.map((l, i) => ({
+    ...comTreinosExtra(l, projetoPractice[l.id]),
+    code: String(i + 1).padStart(2, '0'),
+  })),
 };
 
 /** Escolhe e ordena etapas de uma trilha base e renumera os códigos (01, 02, ...). */
@@ -74,10 +77,21 @@ const visualBiTrack = montarTrilha(
   {
     id: 'bi',
     shortTitle: '5. Visualização & BI',
-    fullTitle: 'Visualização, Excel/DAX e Power BI para Analistas',
-    summary: 'Curva ABC, relatório executivo e gráficos honestos com matplotlib, Star Schema, DAX e prática guiada de Excel e Power BI com os dados da Mercearia.',
+    fullTitle: 'Visualização, Excel/Power Query e Power BI para Analistas',
+    summary: 'Curva ABC, relatório executivo e gráficos honestos com matplotlib, Star Schema, DAX, Inteligência de Tempo e 4 oficinas práticas de Excel, Power Query e Power BI com conferência numérica.',
   },
-  ['bi-03-curva-abc', 'bi-06-storytelling', 'bi-07-graficos-matplotlib', 'bi-04-star-schema', 'bi-05-excel-dax', 'bi-10-pratica-excel-powerbi', 'bi-18-inteligencia-tempo'],
+  [
+    'bi-03-curva-abc',
+    'bi-06-storytelling',
+    'bi-07-graficos-matplotlib',
+    'bi-04-star-schema',
+    'bi-05-excel-dax',
+    'bi-10-pratica-excel-powerbi',
+    'bi-20-excel-powerquery-limpeza',
+    'bi-21-excel-dinamicas-procx',
+    'bi-22-powerbi-dax-relatorio',
+    'bi-18-inteligencia-tempo',
+  ],
 );
 
 const estatisticaTrack = montarTrilha(

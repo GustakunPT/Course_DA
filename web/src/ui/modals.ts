@@ -1,4 +1,12 @@
 import { allTracks, totalLessonsCount } from '../data/curriculum';
+import {
+  formatHoursApproxPt,
+  formatMinutesPt,
+  getCourseMinutes,
+  getLessonMinutes,
+  getTrackMinutes,
+  STUDY_PLAN_WEEKS,
+} from '../data/studyPlan';
 import type { AppState } from './appState';
 import { escapeHtml } from './html';
 import { THEME_OPTIONS } from './theme';
@@ -65,16 +73,34 @@ export function renderProgressModal(state: AppState): string {
     );
   }, 0);
 
+  const courseMinutes = getCourseMinutes(allTracks);
+  const totalRealSeconds = Object.values(state.lessonTimes).reduce((s, v) => s + v, 0);
+  const totalRealMinutes = Math.round(totalRealSeconds / 60);
+  const remainingMinutes = allTracks.reduce(
+    (sum, tr) => sum + tr.lessons.filter((l) => !state.completedLessons[l.id]).reduce((s, l) => s + getLessonMinutes(l), 0),
+    0,
+  );
+  const cursoConcluido = doneCount === totalLessonsCount;
+
   return `
     <div class="modal-backdrop" data-action="close-progress-backdrop" role="dialog" aria-modal="true" aria-labelledby="progress-modal-title">
       <div class="progress-modal">
         <div class="workbench-toolbar">
           <div>
-            <h2 id="progress-modal-title">Progresso, Código de Retoma & Portfólio</h2>
-            <p class="measured">O teu progresso, rascunhos de código e quizzes ficam guardados automaticamente neste navegador.</p>
+            <h2 id="progress-modal-title">Mapa do Percurso, Plano de 10 Semanas &amp; Portfólio</h2>
+            <p class="measured">Tempo real registado: ${escapeHtml(formatMinutesPt(totalRealMinutes))} · Carga projetada total (c/ margem): ${escapeHtml(formatHoursApproxPt(courseMinutes))} (falta ${escapeHtml(formatHoursApproxPt(remainingMinutes))}).</p>
           </div>
           <button type="button" class="btn" data-action="close-progress-modal" aria-label="Fechar janela">Fechar</button>
         </div>
+
+        ${
+          cursoConcluido
+            ? `<div class="completion-banner is-course-complete">
+                <strong>Curso completo (${doneCount}/${totalLessonsCount} etapas)!</strong>
+                <p>Tens o portefólio pronto para exportar, o projeto no GitHub e a preparação para candidaturas. Descarrega o ficheiro <code>.md</code> abaixo para juntar ao teu repositório ou CV.</p>
+              </div>`
+            : ''
+        }
 
         <div class="progress-summary-grid">
           <div class="progress-stat-card">
@@ -104,9 +130,10 @@ export function renderProgressModal(state: AppState): string {
             .map((tr) => {
               const trDone = tr.lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
               const pct = Math.round((trDone / tr.lessons.length) * 100);
+              const trTempo = formatHoursApproxPt(getTrackMinutes(tr));
               return `
                 <div class="progress-track-row">
-                  <span>${escapeHtml(tr.shortTitle)}</span>
+                  <span>${escapeHtml(tr.shortTitle)} <small class="measured">(${escapeHtml(trTempo)})</small></span>
                   <span class="measured">${trDone}/${tr.lessons.length}</span>
                   <div class="progress-bar-bg" aria-hidden="true">
                     <div class="progress-bar-fill" style="width: ${pct}%;"></div>
@@ -116,6 +143,37 @@ export function renderProgressModal(state: AppState): string {
             })
             .join('')}
         </div>
+
+        <details class="study-plan-panel">
+          <summary><strong>Plano de estudo sugerido: 10 semanas a ~5–6 h/semana</strong></summary>
+          <div class="table-scroll" style="margin-top:8px;">
+            <table class="data-table study-plan-table">
+              <thead>
+                <tr>
+                  <th scope="col">Ritmo</th>
+                  <th scope="col">Trilhas</th>
+                  <th scope="col">Objetivo</th>
+                  <th scope="col">Feito</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${STUDY_PLAN_WEEKS.map((bloco) => {
+                  const lessons = allTracks.filter((t) => bloco.trackIds.includes(t.id)).flatMap((t) => t.lessons);
+                  const blocoDone = lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
+                  const blocoMins = lessons.reduce((s, l) => s + getLessonMinutes(l), 0);
+                  return `
+                    <tr>
+                      <td><strong>${escapeHtml(bloco.weeks)}</strong><br><small class="measured">${escapeHtml(formatHoursApproxPt(blocoMins))}</small></td>
+                      <td>${escapeHtml(bloco.focus)}</td>
+                      <td>${escapeHtml(bloco.goal)}</td>
+                      <td>${blocoDone}/${lessons.length}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </details>
 
         <div class="hints-panel">
           <strong>Sincronização na Cloud (sem login)</strong>
@@ -168,8 +226,9 @@ export function renderProgressModal(state: AppState): string {
         </div>
 
         <div class="modal-actions-row">
-          <div class="action-pair">
-            <button type="button" class="btn btn-primary" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
+          <div class="action-pair" style="flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" data-action="open-gantt-view">Ver Cronograma Gantt</button>
+            <button type="button" class="btn" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
             <button type="button" class="btn" data-action="export-progress-json">Backup (.json)</button>
             <button type="button" class="btn" data-action="trigger-import-json">Restaurar (.json)</button>
             <input type="file" id="import-progress-file" accept=".json,application/json" aria-label="Selecionar ficheiro JSON de cópia de segurança do progresso" style="display:none" />

@@ -1,5 +1,6 @@
 import type { Track } from './types';
 import { linkGithubValido } from '../ui/projectPanel';
+import { clearSavedLessonTimes, sanitizeLessonTimes, saveLessonTimes, type LessonTimeMap } from './timeTracker';
 
 export type LessonCompletionStatus = 'autonomous' | 'helped';
 
@@ -14,7 +15,7 @@ export type UserProgressMap = Record<string, LessonProgressRecord>;
 export interface LastVisitedLocation {
   trackId: string;
   lessonId: string;
-  view: 'academia' | 'explorador' | 'referencia';
+  view: 'academia' | 'explorador' | 'referencia' | 'cronograma';
   timestamp: string;
 }
 
@@ -26,6 +27,8 @@ export interface ExportableProgress {
   quizzes: Record<string, number>;
   /** Treinos resolvidos ("etapa:n"); opcional para aceitar backups antigos. */
   practice?: string[];
+  /** Tempo real registado por etapa em segundos (opcional). */
+  timeSpent?: LessonTimeMap;
 }
 
 const STORAGE_V1_KEY = 'mercearia_academia_done_v1';
@@ -183,6 +186,7 @@ export function clearAllUserProgress(): void {
     localStorage.removeItem(STORAGE_LAST_LOC_KEY);
     localStorage.removeItem(STORAGE_SYNC_CODE_KEY);
     localStorage.removeItem(STORAGE_PRACTICE_KEY);
+    clearSavedLessonTimes();
   } catch {
     // Ignorar
   }
@@ -193,6 +197,7 @@ export function exportProgressJson(
   drafts: Record<string, string>,
   quizzes: Record<string, number>,
   practice: string[] = [],
+  timeSpent: LessonTimeMap = {},
 ): string {
   const data: ExportableProgress = {
     version: 2,
@@ -201,6 +206,7 @@ export function exportProgressJson(
     drafts,
     quizzes,
     practice,
+    timeSpent,
   };
   return JSON.stringify(data, null, 2);
 }
@@ -210,6 +216,7 @@ export function importProgressJson(jsonStr: string): {
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
   practice: string[];
+  timeSpent: LessonTimeMap;
 } {
   const parsed = JSON.parse(jsonStr);
   if (!parsed || typeof parsed !== 'object') {
@@ -228,8 +235,10 @@ export function importProgressJson(jsonStr: string): {
   saveQuizzes(quizzes);
   const practice = sanitizePractice(parsed.practice);
   savePractice(practice);
+  const timeSpent = sanitizeLessonTimes(parsed.timeSpent);
+  saveLessonTimes(timeSpent);
 
-  return { progress, drafts, quizzes, practice };
+  return { progress, drafts, quizzes, practice, timeSpent };
 }
 
 export function generatePortfolioMarkdown(
@@ -355,7 +364,7 @@ export interface CompactProgressPayload {
   d: Record<string, string>;
   /** Treinos resolvidos (opcional). */
   t?: string[];
-  l?: { t: string; l: string; v: 'academia' | 'explorador' | 'referencia' };
+  l?: { t: string; l: string; v: 'academia' | 'explorador' | 'referencia' | 'cronograma' };
 }
 
 export async function encodeProgressCode(

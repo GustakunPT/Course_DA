@@ -1,5 +1,14 @@
 import './styles/app.css';
 import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
+import {
+  formatHoursApproxPt,
+  formatMinutesPt,
+  getLessonBaseMinutes,
+  getLessonBufferMinutes,
+  getLessonMinutes,
+  getTrackMinutes,
+} from './data/studyPlan';
+import { formatTimerClock, loadSavedLessonTimes, saveLessonTimes } from './data/timeTracker';
 import type { EngineKind, GitChallengeSpec, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
 import { runSqlQuery } from './engines/sqlEngine';
@@ -7,6 +16,7 @@ import { runPythonCode } from './engines/pythonEngine';
 import { createInitialGitState, runGitSimulator } from './engines/gitEngine';
 import { renderExplorerHtml } from './ui/explorerView';
 import { renderCheatsheetHtml } from './ui/cheatsheetView';
+import { renderGanttHtml, type GanttFilterStatus } from './ui/ganttView';
 import { formatCodePrettier, highlightCode, renderLineNumbers } from './ui/codeEditor';
 import {
   clearAllUserProgress,
@@ -39,7 +49,7 @@ import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
 import { renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
-import { chaveLista, ESTADO_PROJETO, etapaProjetoCompleta, mensagemLink, renderPainelProjeto } from './ui/projectPanel';
+import { chaveLista, ESTADO_PROJETO, etapaProjetoCompleta, linkGithubValido, mensagemLink, renderPainelProjeto } from './ui/projectPanel';
 import {
   type AbaEscrita,
   deveUsarEcraDeEscrita,
@@ -91,6 +101,11 @@ const state: AppState = {
   mobileEditor: null,
   fontSize: loadSavedFontSize(),
   showFontMenu: false,
+  ganttPaceMinutes: 360,
+  ganttFilterStatus: 'all',
+  ganttCollapsedTracks: new Set(),
+  lessonTimes: loadSavedLessonTimes(),
+  timerPaused: false,
 };
 
 applyTheme(state.theme);
@@ -257,7 +272,7 @@ function syncStateFromUrl(): void {
   if (!raw) {
     const last = loadLastLocation();
     if (last) {
-      if (last.view === 'academia' || last.view === 'explorador' || last.view === 'referencia') {
+      if (last.view === 'academia' || last.view === 'explorador' || last.view === 'referencia' || last.view === 'cronograma') {
         state.view = last.view;
       }
       const loc = locateLesson(last.trackId, last.lessonId);
@@ -270,7 +285,7 @@ function syncStateFromUrl(): void {
   }
   const params = new URLSearchParams(raw);
   const v = params.get('vista');
-  if (v === 'academia' || v === 'explorador' || v === 'referencia') {
+  if (v === 'academia' || v === 'explorador' || v === 'referencia' || v === 'cronograma') {
     state.view = v;
   }
   const loc = locateLesson(params.get('trilha'), params.get('licao'));
@@ -592,6 +607,63 @@ function renderEcraDeEscritaAtual(): string {
   });
 }
 
+function renderCompletionBanner(track: Track, lesson: Lesson): string {
+  const doneCount = Object.keys(state.completedLessons).length;
+  const trackDone = track.lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
+  const isTrackFinished = trackDone === track.lessons.length;
+  const trackIdx = allTracks.findIndex((t) => t.id === track.id);
+  const nextTrack = trackIdx >= 0 && trackIdx < allTracks.length - 1 ? allTracks[trackIdx + 1] : null;
+  const isFinalLesson = trackIdx === allTracks.length - 1 && lesson.id === track.lessons[track.lessons.length - 1]?.id;
+  const isCourseFinished = doneCount === totalLessonsCount || (isFinalLesson && Boolean(state.completedLessons[lesson.id]));
+
+  if (isCourseFinished) {
+    const githubLink = allTracks
+      .flatMap((t) => t.lessons)
+      .filter((l) => l.projectSpec?.pedirLinkGithub)
+      .map((l) => (state.editorDrafts[`${l.id}:challenge`] ?? '').trim())
+      .find((url) => linkGithubValido(url));
+    return `
+      <section class="completion-banner is-course-complete" aria-label="Conclusão do curso">
+        <span class="status-chip is-ok">Percurso concluído · ${doneCount} / ${totalLessonsCount} etapas</span>
+        <h2>Chegaste ao fim! O teu portefólio está pronto.</h2>
+        <p>Fechaste Python, SQL, Pandas, Git, Visualização/BI, Estatística, o desafio de recrutamento simulado, o projeto próprio e a preparação para candidaturas.</p>
+        ${
+          githubLink
+            ? `<p><strong>Projeto publicado no GitHub:</strong> <a href="${escapeHtml(githubLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(githubLink)}</a></p>`
+            : ''
+        }
+        <ol class="prose-list">
+          <li>Descarrega o teu portefólio em Markdown (<code>.md</code>) e junta o resumo ao teu CV em PDF.</li>
+          <li>Confirma que o repositório do projeto próprio está fixado nos <strong>Destaques</strong> do LinkedIn.</li>
+          <li>Usa o guião do pitch de 2 minutos e candidata-te esta semana às primeiras 5 vagas de Analista de Dados Júnior.</li>
+        </ol>
+        <div class="action-pair" style="flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" data-action="export-portfolio-md">Descarregar Portfólio (.md)</button>
+          <button type="button" class="btn" data-action="export-progress-json">Backup do Progresso (.json)</button>
+          <button type="button" class="btn" data-action="open-progress-modal">Ver mapa e plano de 10 semanas</button>
+        </div>
+      </section>
+    `;
+  }
+
+  if (isTrackFinished && nextTrack) {
+    return `
+      <section class="completion-banner" aria-label="Conclusão da trilha">
+        <span class="status-chip is-ok">Trilha concluída · ${trackDone}/${track.lessons.length} etapas</span>
+        <h3>Terminaste ${escapeHtml(track.shortTitle)}!</h3>
+        <p>Todas as etapas desta trilha estão concluídas. Podes seguir diretamente para a próxima trilha (${escapeHtml(formatHoursApproxPt(getTrackMinutes(nextTrack)))} estimadas).</p>
+        <div class="action-pair">
+          <button type="button" class="btn btn-primary" data-select-track="${escapeHtml(nextTrack.id)}">
+            Avançar para ${escapeHtml(nextTrack.shortTitle)} →
+          </button>
+        </div>
+      </section>
+    `;
+  }
+
+  return '';
+}
+
 function renderAcademyWorkspace(): string {
   const track = currentTrack();
   const lesson = currentLesson();
@@ -664,7 +736,7 @@ function renderAcademyWorkspace(): string {
       <!-- Left Sidebar -->
       <nav class="seam-panel sidebar-panel ${state.sidebarOpenMobile ? 'is-open' : ''}" aria-label="Índice de etapas">
         <div class="sidebar-section">
-          <div class="sidebar-heading">${escapeHtml(track.fullTitle)}</div>
+          <div class="sidebar-heading">${escapeHtml(track.fullTitle)} <span class="sidebar-time-hint">(${escapeHtml(formatHoursApproxPt(getTrackMinutes(track)))})</span></div>
           <ul class="lesson-nav-list">
             ${track.lessons
               .map((item) => {
@@ -724,7 +796,20 @@ function renderAcademyWorkspace(): string {
       <article class="seam-panel lesson-article">
         <header class="lesson-header">
           <div class="workbench-toolbar">
-            <span class="status-chip is-person">Etapa ${escapeHtml(lesson.code)} de ${track.lessons.length}</span>
+            <div class="action-pair" style="flex-wrap:wrap;gap:6px;">
+              <span class="status-chip is-person">Etapa ${escapeHtml(lesson.code)} de ${track.lessons.length}</span>
+              <span class="status-chip" title="Tempo previsto base (${getLessonBaseMinutes(lesson)} min) + margem de ~20% (${getLessonBufferMinutes(lesson)} min)">⏱ ~${escapeHtml(formatMinutesPt(getLessonBaseMinutes(lesson)))} (+${getLessonBufferMinutes(lesson)} min margem)</span>
+              <button
+                type="button"
+                class="status-chip lesson-timer-pill ${state.timerPaused ? 'is-paused' : 'is-running'}"
+                data-action="toggle-lesson-timer"
+                title="Tempo real nesta etapa vs previsto (${getLessonMinutes(lesson)} min c/ margem). Pausa automaticamente se mudares de separador ou após 3 min de inatividade. Clica para pausar/retomar."
+              >
+                <span aria-hidden="true">${state.timerPaused ? '▶' : '⏸'}</span>
+                <span id="lesson-timer-clock">${escapeHtml(formatTimerClock(state.lessonTimes[lesson.id] ?? 0))}</span>
+                <span class="measured">/ ${escapeHtml(formatMinutesPt(getLessonMinutes(lesson)))}</span>
+              </button>
+            </div>
             ${
               state.completedLessons[lesson.id]
                 ? lesson.engine === 'projeto'
@@ -865,6 +950,8 @@ function renderAcademyWorkspace(): string {
             Próxima etapa
           </button>
         </nav>
+
+        ${renderCompletionBanner(track, lesson)}
 
         <div class="mobile-switch-wrap">
           <button type="button" class="btn btn-primary mobile-switch-btn" data-action="switch-to-workbench">
@@ -1020,6 +1107,14 @@ function renderApp(): void {
         categoria: state.explorerCategoria,
       });
     }
+  } else if (state.view === 'cronograma') {
+    mainContent = renderGanttHtml(allTracks, state.completedLessons, {
+      paceMinutesPerWeek: state.ganttPaceMinutes,
+      filterStatus: state.ganttFilterStatus,
+      collapsedTracks: state.ganttCollapsedTracks,
+      currentLessonId: state.lessonId,
+      lessonTimes: state.lessonTimes,
+    });
   } else {
     mainContent = renderCheatsheetHtml(state.refQuery, state.refCategory);
   }
@@ -1058,6 +1153,14 @@ function renderApp(): void {
               data-select-view="explorador"
             >
               Explorador CSV
+            </button>
+            <button
+              type="button"
+              class="nav-tab ${state.view === 'cronograma' ? 'is-active' : ''}"
+              ${state.view === 'cronograma' ? 'aria-current="page"' : ''}
+              data-select-view="cronograma"
+            >
+              Cronograma
             </button>
             <button
               type="button"
@@ -1379,6 +1482,54 @@ function attachDomListeners(): void {
   document.querySelectorAll<HTMLElement>('[data-select-view]').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.view = btn.dataset.selectView as ViewMode;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-gantt-pace]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mins = Number(btn.dataset.ganttPace);
+      if (Number.isFinite(mins) && mins > 0) {
+        state.ganttPaceMinutes = mins;
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-gantt-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.ganttFilter as GanttFilterStatus;
+      if (f === 'all' || f === 'todo' || f === 'done') {
+        state.ganttFilterStatus = f;
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-gantt-toggle-track]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tid = btn.dataset.ganttToggleTrack;
+      if (!tid) return;
+      if (state.ganttCollapsedTracks.has(tid)) state.ganttCollapsedTracks.delete(tid);
+      else state.ganttCollapsedTracks.add(tid);
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-gantt-jump-lesson]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tid = btn.dataset.ganttJumpTrack;
+      const lid = btn.dataset.ganttJumpLesson;
+      const loc = locateLesson(tid ?? null, lid ?? null);
+      if (!loc) return;
+      state.trackId = loc.trackId;
+      state.lessonId = loc.lessonId;
+      state.view = 'academia';
+      state.wbTab = 'challenge';
+      state.practiceIdx = 0;
+      state.output = { kind: 'empty' };
+      state.confirmSolutionLessonId = null;
+      state.hintLevel = 0;
       renderApp();
     });
   });
@@ -1923,7 +2074,14 @@ function attachDomListeners(): void {
         state.progressModalFeedback = { ok: true, text: 'Portefólio (.md) descarregado com sucesso.' };
         renderApp();
       } else if (act === 'export-progress-json') {
-        const json = exportProgressJson(state.completedLessons, state.editorDrafts, state.quizSelection, [...state.practiceDone]);
+        saveLessonTimes(state.lessonTimes);
+        const json = exportProgressJson(
+          state.completedLessons,
+          state.editorDrafts,
+          state.quizSelection,
+          [...state.practiceDone],
+          state.lessonTimes,
+        );
         downloadTextFile('mercearia_progresso_backup.json', json, 'application/json;charset=utf-8');
         state.progressModalFeedback = { ok: true, text: 'Backup (.json) descarregado com sucesso.' };
         renderApp();
@@ -1941,6 +2099,7 @@ function attachDomListeners(): void {
         state.editorDrafts = {};
         state.quizSelection = {};
         state.practiceDone = new Set();
+        state.lessonTimes = {};
         state.helpedInSession.clear();
         state.generatedProgressCode = '';
         state.confirmClearProgress = false;
@@ -1958,6 +2117,21 @@ function attachDomListeners(): void {
         state.datasetError = null;
         renderApp();
         void bootstrapData();
+      } else if (act === 'open-gantt-view') {
+        saveLessonTimes(state.lessonTimes);
+        state.showProgressModal = false;
+        state.view = 'cronograma';
+        renderApp();
+      } else if (act === 'toggle-lesson-timer') {
+        state.timerPaused = !state.timerPaused;
+        saveLessonTimes(state.lessonTimes);
+        renderApp();
+      } else if (act === 'gantt-expand-all') {
+        state.ganttCollapsedTracks.clear();
+        renderApp();
+      } else if (act === 'gantt-collapse-all') {
+        state.ganttCollapsedTracks = new Set(allTracks.map((t) => t.id));
+        renderApp();
       }
     });
   });
@@ -1982,6 +2156,7 @@ function attachDomListeners(): void {
           state.editorDrafts = imported.drafts;
           state.quizSelection = imported.quizzes;
           state.practiceDone = new Set(imported.practice);
+          state.lessonTimes = imported.timeSpent;
           state.progressModalFeedback = {
             ok: true,
             text: `Backup importado! (${Object.keys(imported.progress).length} etapas concluídas).`,
@@ -2229,3 +2404,43 @@ syncStateFromUrl();
 renderApp();
 void bootstrapData();
 void bootstrapCloudSync();
+
+// Tracker discreto de tempo útil por etapa: só avança na vista Academia com o separador visível e atividade recente.
+let lastStudyActivityAt = Date.now();
+let timerTicksSinceSave = 0;
+const touchStudyActivity = () => {
+  lastStudyActivityAt = Date.now();
+};
+window.addEventListener('pointerdown', touchStudyActivity, { passive: true });
+window.addEventListener('keydown', touchStudyActivity, { passive: true });
+window.addEventListener('scroll', touchStudyActivity, { passive: true });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    saveLessonTimes(state.lessonTimes);
+  } else {
+    touchStudyActivity();
+  }
+});
+window.addEventListener('beforeunload', () => saveLessonTimes(state.lessonTimes));
+
+window.setInterval(() => {
+  if (
+    state.view !== 'academia' ||
+    state.timerPaused ||
+    document.visibilityState !== 'visible' ||
+    state.showProgressModal ||
+    state.showThemeModal ||
+    Date.now() - lastStudyActivityAt > 180_000
+  ) {
+    return;
+  }
+  const nextSecs = (state.lessonTimes[state.lessonId] ?? 0) + 1;
+  state.lessonTimes[state.lessonId] = nextSecs;
+  const clockEl = document.getElementById('lesson-timer-clock');
+  if (clockEl) clockEl.textContent = formatTimerClock(nextSecs);
+  timerTicksSinceSave++;
+  if (timerTicksSinceSave >= 10) {
+    timerTicksSinceSave = 0;
+    saveLessonTimes(state.lessonTimes);
+  }
+}, 1000);
