@@ -23,14 +23,14 @@ export function etapaProjetoCompleta(lesson: Lesson, feitos: Set<string>, link: 
 
 /** Mensagem por baixo do campo do link; a app atualiza-a sem redesenhar o campo (não perde o foco). */
 export function mensagemLink(link: string): { texto: string; classe: '' | 'ok' | 'erro' } {
-  if (linkGithubValido(link)) return { texto: 'Link válido', classe: 'ok' };
+  if (linkGithubValido(link)) return { texto: 'Formato do link certo', classe: 'ok' };
   return {
     texto: 'O link deve ser https://github.com/utilizador/repositório',
     classe: link.trim() !== '' ? 'erro' : '',
   };
 }
 
-export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: string): string {
+export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: string, concluida: boolean): string {
   const spec = lesson.projectSpec;
   if (!spec) return '';
 
@@ -60,7 +60,7 @@ export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: s
 
   return `<section class="projeto-painel">
   <p class="projeto-aviso">Esta etapa faz-se no teu computador. A app não vê os teus ficheiros: as marcas são um compromisso teu.</p>
-  <p class="projeto-estado">${escapeHtml(ESTADO_PROJETO)}</p>
+  <p class="projeto-estado">${escapeHtml(concluida ? ESTADO_PROJETO : 'Por fazer: marca cada ponto quando o tiveres feito.')}</p>
   <h3>O que deves entregar</h3>
   <ul class="projeto-entregaveis">${entregaveis}</ul>
   <h3>Lista de verificação</h3>

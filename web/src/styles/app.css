@@ -1041,11 +1041,17 @@ pre,
   height: 36px;
   padding: 0 var(--space-sm);
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: max(16px, var(--text-sm)); /* 16px evita o zoom ao focar no iPhone */
   background: var(--color-paper-3);
   color: var(--color-ink);
   border: var(--rule-hair) solid var(--color-rule-2);
   border-radius: var(--radius-chip);
+}
+
+@media (pointer: coarse) {
+  .projeto-link input {
+    height: 44px;
+  }
 }
 
 .projeto-link-msg {
@@ -1054,7 +1060,7 @@ pre,
 }
 
 .projeto-link-msg.ok {
-  color: var(--color-ok);
+  color: var(--color-ink-2); /* só o formato; neutro para não parecer validação */
 }
 
 .projeto-link-msg.erro {

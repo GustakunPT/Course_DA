@@ -894,7 +894,7 @@ function renderAcademyWorkspace(): string {
 
         ${
           lesson.engine === 'projeto'
-            ? renderPainelProjeto(lesson, state.practiceDone, linkDoProjeto(lesson))
+            ? renderPainelProjeto(lesson, state.practiceDone, linkDoProjeto(lesson), Boolean(state.completedLessons[lesson.id]))
             : `
         <div class="workbench-toolbar">
           <div class="mode-tabs" role="tablist" aria-label="Modo do editor">
@@ -1465,6 +1465,8 @@ function attachDomListeners(): void {
         msg.className = `projeto-link-msg ${classe}`;
       }
       if (concluirEtapaProjeto(lesson)) {
+        // A conclusão grava já; o rascunho do link também, para não o perder se o separador fechar.
+        saveDrafts(state.editorDrafts, true);
         // Redesenha uma vez (chip, índice, progresso) e devolve o foco e o cursor ao campo.
         const { selectionStart, selectionEnd } = linkInput;
         renderApp();

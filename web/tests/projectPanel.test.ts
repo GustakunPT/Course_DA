@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Lesson } from '../src/data/types';
-import { chaveLista, etapaProjetoCompleta, linkGithubValido, renderPainelProjeto } from '../src/ui/projectPanel';
+import {
+  chaveLista,
+  ESTADO_PROJETO,
+  etapaProjetoCompleta,
+  linkGithubValido,
+  mensagemLink,
+  renderPainelProjeto,
+} from '../src/ui/projectPanel';
 
 const etapa = {
   id: 'pf-05-publicar',
@@ -43,6 +50,7 @@ describe('projectPanel', () => {
       { ...etapa, projectSpec: { ...etapa.projectSpec!, lista: ['<b>x</b>', 'y'] } } as Lesson,
       new Set([chaveLista(etapa.id, 1)]),
       '',
+      false,
     );
     expect(html.match(/data-lista-item="\d+"/g)).toHaveLength(2);
     expect(html).toMatch(/data-lista-item="1"[^>]*checked/);
@@ -50,5 +58,21 @@ describe('projectPanel', () => {
     expect(html).toContain('&lt;b&gt;x&lt;/b&gt;');
     expect(html).toContain('data-link-github');
     expect(html).toContain('as marcas são um compromisso teu');
+  });
+
+  it('o estado "não corrigido" só aparece quando a etapa está concluída', () => {
+    const feitos = new Set<string>();
+    const porFazer = renderPainelProjeto(etapa, feitos, '', false);
+    expect(porFazer).not.toContain(ESTADO_PROJETO);
+    expect(porFazer).toContain('Por fazer: marca cada ponto quando o tiveres feito.');
+    const feita = renderPainelProjeto(etapa, feitos, '', true);
+    expect(feita).toContain(ESTADO_PROJETO);
+    expect(feita).not.toContain('Por fazer:');
+  });
+
+  it('a mensagem do link válido só fala do formato, sem parecer validação', () => {
+    expect(mensagemLink('https://github.com/ana/p')).toEqual({ texto: 'Formato do link certo', classe: 'ok' });
+    expect(mensagemLink('https://github.com/ana/p').texto).not.toMatch(/válido/i);
+    expect(mensagemLink('xx').classe).toBe('erro');
   });
 });
