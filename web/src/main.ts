@@ -1,5 +1,16 @@
 import './styles/app.css';
-import { allTracks, cheatsheets, totalLessonsCount } from './data/curriculum';
+import {
+  TOTAL_LESSONS_COUNT,
+  TRACK_INDEX,
+  type LessonIndexEntry,
+  type TrackIndexEntry,
+} from './data/trackIndex';
+import {
+  ensureTrackLoaded,
+  getCachedTrack,
+  loadAllTracksAsync,
+  loadCheatsheetsAsync,
+} from './data/trackLoaders';
 import {
   formatHoursApproxPt,
   formatMinutesPt,
@@ -52,6 +63,14 @@ import {
   saveSyncCode,
 } from './data/progress';
 import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
+import {
+  focusInitialDialogElement,
+  getActiveModalKind,
+  handleDialogTabTrap,
+  restoreFocusFromSelectors,
+  selectorForControl,
+  type ModalKind,
+} from './ui/modalFocus';
 import { buildAnswerSheetCode, isAnswerSheetMode, renderAnswerSheetPanel } from './ui/answerSheetPanel';
 import { downloadTextFile, escapeHtml } from './ui/html';
 import { quizDisplayOrder } from './ui/quizOrder';
@@ -76,8 +95,8 @@ const savedDiagnostic = loadSavedDiagnostic();
 
 const state: AppState = {
   view: 'academia',
-  trackId: allTracks[0].id,
-  lessonId: allTracks[0].lessons[0].id,
+  trackId: TRACK_INDEX[0].id,
+  lessonId: TRACK_INDEX[0].lessons[0].id,
   wbTab: 'challenge',
   practiceIdx: 0,
   practiceDone: new Set(loadSavedPractice()),
@@ -183,8 +202,23 @@ function renderQuizzes(lesson: Lesson): string {
         </div>`;
 }
 
+function currentTrackMeta(): TrackIndexEntry {
+  return TRACK_INDEX.find((t) => t.id === state.trackId) ?? TRACK_INDEX[0];
+}
+
+function currentLessonMeta(): LessonIndexEntry {
+  const tr = currentTrackMeta();
+  return tr.lessons.find((l) => l.id === state.lessonId) ?? tr.lessons[0];
+}
+
+function currentTrackOrNull(): Track | null {
+  return getCachedTrack(currentTrackMeta().id) ?? null;
+}
+
 function currentTrack(): Track {
-  return allTracks.find((t) => t.id === state.trackId) ?? allTracks[0];
+  const tr = currentTrackOrNull();
+  if (!tr) throw new Error(`Trilha "${state.trackId}" ainda a carregar.`);
+  return tr;
 }
 
 function currentLesson(): Lesson {
@@ -256,7 +290,7 @@ function getEditorValue(): string {
 
 function activeEngine(): EngineKind {
   if (state.wbTab === 'sqlfree') return 'sql';
-  return currentLesson().engine;
+  return currentLessonMeta().engine;
 }
 
 /**
@@ -264,9 +298,9 @@ function activeEngine(): EngineKind {
  * foi dividida), segue a etapa; se não existir, abre a primeira etapa da trilha pedida.
  */
 function locateLesson(trackId: string | null | undefined, lessonId: string | null | undefined): { trackId: string; lessonId: string } | null {
-  const pedida = allTracks.find((t) => t.id === trackId);
+  const pedida = TRACK_INDEX.find((t) => t.id === trackId);
   if (lessonId) {
-    const dona = pedida?.lessons.some((l) => l.id === lessonId) ? pedida : allTracks.find((t) => t.lessons.some((l) => l.id === lessonId));
+    const dona = pedida?.lessons.some((l) => l.id === lessonId) ? pedida : TRACK_INDEX.find((t) => t.lessons.some((l) => l.id === lessonId));
     if (dona) return { trackId: dona.id, lessonId };
   }
   return pedida ? { trackId: pedida.id, lessonId: pedida.lessons[0].id } : null;
@@ -605,13 +639,13 @@ const aparelho = vigiarAparelho(() => {
 
 /** O aparelho é de toque e estreito (independentemente da preferência do aluno). */
 function aparelhoPedeEcraDeEscrita(): boolean {
-  if (currentLesson().engine === 'projeto') return false;
+  if (currentLessonMeta().engine === 'projeto') return false;
   return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: false });
 }
 
 /** As etapas de projeto não têm editor, logo nunca usam o ecrã de escrita. */
 function usaEcraDeEscrita(): boolean {
-  if (currentLesson().engine === 'projeto') return false;
+  if (currentLessonMeta().engine === 'projeto') return false;
   return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: loadPreferirEditorNormal() });
 }
 
@@ -632,7 +666,7 @@ function focarEditor(): void {
 }
 
 function abrirEcraDeEscrita(aba: AbaEscrita): void {
-  if (currentLesson().engine === 'projeto') return;
+  if (currentLessonMeta().engine === 'projeto') return;
   if (state.mobileEditor === null) {
     scrollAntesDoEcra = window.scrollY;
     etapaDoEcra = etapaAtual();
@@ -686,24 +720,23 @@ function renderEcraDeEscritaAtual(): string {
   });
 }
 
-function renderCompletionBanner(track: Track, lesson: Lesson): string {
+const loadingTrackIds = new Set<string>();
+
+function renderCompletionBanner(track: TrackIndexEntry, lesson: Lesson): string {
   const doneCount = Object.keys(state.completedLessons).length;
   const trackDone = track.lessons.filter((l) => Boolean(state.completedLessons[l.id])).length;
   const isTrackFinished = trackDone === track.lessons.length;
-  const trackIdx = allTracks.findIndex((t) => t.id === track.id);
-  const nextTrack = trackIdx >= 0 && trackIdx < allTracks.length - 1 ? allTracks[trackIdx + 1] : null;
-  const isFinalLesson = trackIdx === allTracks.length - 1 && lesson.id === track.lessons[track.lessons.length - 1]?.id;
-  const isCourseFinished = doneCount === totalLessonsCount || (isFinalLesson && Boolean(state.completedLessons[lesson.id]));
+  const trackIdx = TRACK_INDEX.findIndex((t) => t.id === track.id);
+  const nextTrack = trackIdx >= 0 && trackIdx < TRACK_INDEX.length - 1 ? TRACK_INDEX[trackIdx + 1] : null;
+  const isFinalLesson = trackIdx === TRACK_INDEX.length - 1 && lesson.id === track.lessons[track.lessons.length - 1]?.id;
+  const isCourseFinished = doneCount === TOTAL_LESSONS_COUNT || (isFinalLesson && Boolean(state.completedLessons[lesson.id]));
 
   if (isCourseFinished) {
-    const githubLink = allTracks
-      .flatMap((t) => t.lessons)
-      .filter((l) => l.projectSpec?.pedirLinkGithub)
-      .map((l) => (state.editorDrafts[`${l.id}:challenge`] ?? '').trim())
-      .find((url) => linkGithubValido(url));
+    const rawGithubUrl = (state.editorDrafts['pf-05-publicar:challenge'] ?? '').trim();
+    const githubLink = linkGithubValido(rawGithubUrl) ? rawGithubUrl : '';
     return `
       <section class="completion-banner is-course-complete" aria-label="Conclusão do curso">
-        <span class="status-chip is-ok">Percurso concluído · ${doneCount} / ${totalLessonsCount} etapas</span>
+        <span class="status-chip is-ok">Percurso concluído · ${doneCount} / ${TOTAL_LESSONS_COUNT} etapas</span>
         <h2>Chegaste ao fim! O teu portefólio está pronto.</h2>
         <p>Fechaste Python, SQL, Pandas, Git, Visualização/BI, Estatística, o desafio de recrutamento simulado, o projeto próprio e a preparação para candidaturas.</p>
         ${
@@ -743,18 +776,7 @@ function renderCompletionBanner(track: Track, lesson: Lesson): string {
   return '';
 }
 
-function renderAcademyWorkspace(): string {
-  const track = currentTrack();
-  const lesson = currentLesson();
-  const lessonIdx = track.lessons.findIndex((l) => l.id === lesson.id);
-  const prevLesson = lessonIdx > 0 ? track.lessons[lessonIdx - 1] : null;
-  const nextLesson = lessonIdx < track.lessons.length - 1 ? track.lessons[lessonIdx + 1] : null;
-
-  const engine = activeEngine();
-  const editorVal = getEditorValue();
-  const answerSheet = isAnswerSheetMode(lesson.id, state.wbTab, state.practiceIdx);
-
-
+function renderAcademyShell(trackMeta: TrackIndexEntry, lessonMeta: LessonIndexEntry, centerAndRightHtml: string): string {
   const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
   const workbenchRatio = 100 - lessonRatio;
 
@@ -762,7 +784,7 @@ function renderAcademyWorkspace(): string {
     <div class="layout-bar" role="region" aria-label="Controlo de painéis e redimensionamento">
       <div class="layout-controls">
         <button type="button" class="btn mobile-index-toggle" data-action="toggle-mobile-sidebar">
-          ${state.sidebarOpenMobile ? 'Ocultar índice' : `Índice (etapa ${escapeHtml(lesson.code)})`}
+          ${state.sidebarOpenMobile ? 'Ocultar índice' : `Índice (etapa ${escapeHtml(lessonMeta.code)})`}
         </button>
         <button type="button" class="btn" data-action="toggle-desktop-sidebar">
           ${sidebarCollapsed ? 'Mostrar índice' : 'Recolher índice'}
@@ -816,11 +838,11 @@ function renderAcademyWorkspace(): string {
       <!-- Left Sidebar -->
       <nav class="seam-panel sidebar-panel ${state.sidebarOpenMobile ? 'is-open' : ''}" aria-label="Índice de etapas">
         <div class="sidebar-section">
-          <div class="sidebar-heading">${escapeHtml(track.fullTitle)} <span class="sidebar-time-hint">(${escapeHtml(formatHoursApproxPt(getTrackMinutes(track)))})</span></div>
+          <div class="sidebar-heading">${escapeHtml(trackMeta.fullTitle)} <span class="sidebar-time-hint">(${escapeHtml(formatHoursApproxPt(getTrackMinutes(trackMeta)))})</span></div>
           <ul class="lesson-nav-list">
-            ${track.lessons
+            ${trackMeta.lessons
               .map((item) => {
-                const isCur = item.id === lesson.id;
+                const isCur = item.id === lessonMeta.id;
                 const rec = state.completedLessons[item.id];
                 const isDone = Boolean(rec);
                 const isHelped = rec?.status === 'helped';
@@ -872,6 +894,61 @@ function renderAcademyWorkspace(): string {
         title="Arrasta para redimensionar o índice lateral (duplo clique para repor)"
       ></div>
 
+      ${centerAndRightHtml}
+    </div>
+  `;
+}
+
+function renderAcademyWorkspace(): string {
+  const trackMeta = currentTrackMeta();
+  const lessonMeta = currentLessonMeta();
+  const track = getCachedTrack(trackMeta.id);
+
+  if (!track) {
+    if (!loadingTrackIds.has(trackMeta.id)) {
+      loadingTrackIds.add(trackMeta.id);
+      void ensureTrackLoaded(trackMeta.id)
+        .finally(() => {
+          loadingTrackIds.delete(trackMeta.id);
+        })
+        .then(() => {
+          if (state.view === 'academia' && currentTrackMeta().id === trackMeta.id) renderApp();
+        });
+    }
+    return renderAcademyShell(
+      trackMeta,
+      lessonMeta,
+      `
+      <article class="seam-panel lesson-article skeleton-stack" role="status">
+        <span class="status-chip">A carregar ${escapeHtml(trackMeta.shortTitle)}…</span>
+        <h1>${escapeHtml(lessonMeta.title)}</h1>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+      </article>
+      <div id="splitter-main" class="pane-splitter-v" role="separator" tabindex="0" aria-orientation="vertical"></div>
+      <section class="seam-panel seam-panel-deep workbench-panel skeleton-stack" aria-label="Bancada a carregar">
+        <span class="status-chip">A preparar bancada…</span>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+      </section>
+      `,
+    );
+  }
+
+  const lesson = track.lessons.find((l) => l.id === lessonMeta.id) ?? track.lessons[0];
+  const lessonIdx = track.lessons.findIndex((l) => l.id === lesson.id);
+  const prevLesson = lessonIdx > 0 ? track.lessons[lessonIdx - 1] : null;
+  const nextLesson = lessonIdx < track.lessons.length - 1 ? track.lessons[lessonIdx + 1] : null;
+
+  const engine = activeEngine();
+  const editorVal = getEditorValue();
+  const answerSheet = isAnswerSheetMode(lesson.id, state.wbTab, state.practiceIdx);
+
+  return renderAcademyShell(
+    trackMeta,
+    lessonMeta,
+    `
       <!-- Center Lesson Column -->
       <article class="seam-panel lesson-article">
         <header class="lesson-header">
@@ -1045,7 +1122,7 @@ function renderAcademyWorkspace(): string {
           </button>
         </nav>
 
-        ${renderCompletionBanner(track, lesson)}
+        ${renderCompletionBanner(trackMeta, lesson)}
 
         <div class="mobile-switch-wrap">
           <button type="button" class="btn btn-primary mobile-switch-btn" data-action="switch-to-workbench">
@@ -1129,7 +1206,7 @@ function renderAcademyWorkspace(): string {
               ${answerSheet ? 'Verificar respostas' : state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar agora'}
             </button>
             ${
-              state.output.kind === 'loading' && activeEngine() === 'python'
+              state.output.kind === 'loading' && (activeEngine() === 'python' || activeEngine() === 'sql')
                 ? '<button type="button" class="btn btn-danger-outline" data-action="stop-code">Parar execução</button>'
                 : ''
             }
@@ -1167,13 +1244,33 @@ function renderAcademyWorkspace(): string {
         `
         }
       </section>
-    </div>
-  `;
+    `,
+  );
 }
+
+let prevOpenModal: ModalKind = 'none';
+let modalTriggerSelector: string | null = null;
+const MODAL_FALLBACK_TRIGGERS: Record<Exclude<ModalKind, 'none'>, string[]> = {
+  guide: ['[data-action="open-guide-modal"]'],
+  progress: ['[data-action="open-progress-modal"]'],
+  theme: ['[data-action="open-theme-modal"]'],
+  diagnostic: ['[data-action="open-diagnostic-modal"]', '[data-action="open-progress-modal"]'],
+};
 
 function renderApp(): void {
   const root = document.getElementById('app');
   if (!root) return;
+
+  const nextModal = getActiveModalKind(state);
+  let insideModalControlSelector: string | null = null;
+  if (prevOpenModal === 'none' && nextModal !== 'none') {
+    modalTriggerSelector = selectorForControl(document.activeElement);
+  } else if (prevOpenModal !== 'none' && nextModal === prevOpenModal) {
+    const active = document.activeElement;
+    if (active && active.closest('.modal-backdrop')) {
+      insideModalControlSelector = selectorForControl(active);
+    }
+  }
 
   writeStateToUrl();
 
@@ -1182,7 +1279,7 @@ function renderApp(): void {
     state.mobileEditor = null;
     if (history.state?.ecraEscrita) history.replaceState(null, '');
   }
-  const ecraAberto = state.view === 'academia' && state.mobileEditor !== null;
+  const ecraAberto = state.view === 'academia' && state.mobileEditor !== null && Boolean(currentTrackOrNull());
   desligarAlturaVisivel();
   desligarAlturaVisivel = () => {};
 
@@ -1238,7 +1335,7 @@ function renderApp(): void {
       }
       mainContent = renderViewLoadingSkeleton('A carregar Cronograma…');
     } else {
-      mainContent = ganttViewMod.renderGanttHtml(allTracks, state.completedLessons, {
+      mainContent = ganttViewMod.renderGanttHtml(TRACK_INDEX, state.completedLessons, {
         paceMinutesPerWeek: state.ganttPaceMinutes,
         filterStatus: state.ganttFilterStatus,
         collapsedTracks: state.ganttCollapsedTracks,
@@ -1274,7 +1371,7 @@ function renderApp(): void {
           </div>
 
           <nav class="track-strip" aria-label="Trilhas e ferramentas">
-            ${allTracks
+            ${TRACK_INDEX
               .map((tr) => {
                 const isActive = state.view === 'academia' && state.trackId === tr.id;
                 return `
@@ -1331,8 +1428,8 @@ function renderApp(): void {
               data-action="open-progress-modal"
               title="Ver progresso por trilha, código de retoma e exportar portefólio"
             >
-              <span class="progress-full">${Object.keys(state.completedLessons).length} / ${totalLessonsCount} etapas · Progresso</span>
-              <span class="progress-compact">🏆 ${Object.keys(state.completedLessons).length}/${totalLessonsCount}</span>
+              <span class="progress-full">${Object.keys(state.completedLessons).length} / ${TOTAL_LESSONS_COUNT} etapas · Progresso</span>
+              <span class="progress-compact">🏆 ${Object.keys(state.completedLessons).length}/${TOTAL_LESSONS_COUNT}</span>
             </button>
             <div class="font-menu-wrap">
               <button
@@ -1376,11 +1473,25 @@ function renderApp(): void {
   if (ecra) desligarAlturaVisivel = ligarAlturaVisivel(ecra);
 
   attachDomListeners();
+
+  if (nextModal !== 'none' && nextModal !== prevOpenModal) {
+    const dialog = root.querySelector<HTMLElement>('.modal-backdrop[role="dialog"]');
+    if (dialog) focusInitialDialogElement(dialog);
+  } else if (nextModal !== 'none' && insideModalControlSelector) {
+    const dialog = root.querySelector<HTMLElement>('.modal-backdrop[role="dialog"]');
+    dialog?.querySelector<HTMLElement>(insideModalControlSelector)?.focus();
+  } else if (prevOpenModal !== 'none' && nextModal === 'none') {
+    restoreFocusFromSelectors([modalTriggerSelector, ...MODAL_FALLBACK_TRIGGERS[prevOpenModal]]);
+    modalTriggerSelector = null;
+  }
+  prevOpenModal = nextModal;
 }
 
 let activeRunToken = 0;
+let sqlEngineMod: typeof import('./engines/sqlEngine') | null = null;
 
 async function executeWorkbench(): Promise<void> {
+  if (!currentTrackOrNull()) return;
   const lesson = currentLesson();
   // As etapas de projeto fazem-se no computador do aluno: não há nada para correr aqui.
   if (lesson.engine === 'projeto') return;
@@ -1392,8 +1503,15 @@ async function executeWorkbench(): Promise<void> {
   renderApp();
 
   if (engine === 'sql') {
-    const { runSqlQuery } = await import('./engines/sqlEngine');
-    const res = await runSqlQuery(code);
+    if (!sqlEngineMod) {
+      sqlEngineMod = await import('./engines/sqlEngine');
+    }
+    const res = await sqlEngineMod.runSqlQuery(code, (statusMsg) => {
+      if (runToken !== activeRunToken) return;
+      state.output = { kind: 'loading', statusMessage: statusMsg };
+      const statusEl = document.querySelector('.output-panel .measured');
+      if (statusEl) statusEl.textContent = statusMsg;
+    });
     if (runToken !== activeRunToken) return;
     if (res.error) {
       state.output = { kind: 'error', errorText: res.error, elapsedMs: res.elapsedMs };
@@ -1647,7 +1765,7 @@ function attachDomListeners(): void {
   document.querySelectorAll<HTMLElement>('[data-select-track]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const tid = btn.dataset.selectTrack!;
-      const tr = allTracks.find((t) => t.id === tid);
+      const tr = TRACK_INDEX.find((t) => t.id === tid);
       if (!tr) return;
       state.view = 'academia';
       state.trackId = tr.id;
@@ -1846,24 +1964,31 @@ function attachDomListeners(): void {
 
   document.querySelectorAll<HTMLElement>('[data-try-ref]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const entry = cheatsheets[Number(btn.dataset.tryRef)];
-      if (!entry || !entry.tryEngine || !entry.trySnippet) return;
-      const targetTrack =
-        entry.tryEngine === 'sql'
-          ? allTracks.find((t) => t.id === 'sql')!
-          : entry.tryEngine === 'git'
-            ? allTracks.find((t) => t.id === 'git')!
-            : allTracks.find((t) => t.id === (entry.category === 'Pandas' ? 'pandas' : 'python'))!;
-      state.view = 'academia';
-      state.trackId = targetTrack.id;
-      state.lessonId = targetTrack.lessons[0].id;
-      state.wbTab = 'example';
-      state.mobileTab = 'workbench';
-      state.editorDrafts[draftKey(targetTrack.lessons[0], 'example')] = entry.trySnippet;
-      saveDrafts(state.editorDrafts, true);
-      state.output = { kind: 'empty' };
-      renderApp();
-      void executeWorkbench();
+      const refIdx = Number(btn.dataset.tryRef);
+      void (async () => {
+        const cheatsheets = await loadCheatsheetsAsync();
+        const entry = cheatsheets[refIdx];
+        if (!entry || !entry.tryEngine || !entry.trySnippet) return;
+        const targetTrackId =
+          entry.tryEngine === 'sql'
+            ? 'sql'
+            : entry.tryEngine === 'git'
+              ? 'git'
+              : entry.category === 'Pandas'
+                ? 'pandas'
+                : 'python';
+        const targetTrack = await ensureTrackLoaded(targetTrackId);
+        state.view = 'academia';
+        state.trackId = targetTrack.id;
+        state.lessonId = targetTrack.lessons[0].id;
+        state.wbTab = 'example';
+        state.mobileTab = 'workbench';
+        state.editorDrafts[draftKey(targetTrack.lessons[0], 'example')] = entry.trySnippet;
+        saveDrafts(state.editorDrafts, true);
+        state.output = { kind: 'empty' };
+        renderApp();
+        void executeWorkbench();
+      })();
     });
   });
 
@@ -1919,8 +2044,8 @@ function attachDomListeners(): void {
       if (act === 'go-home') {
         ev.preventDefault();
         state.view = 'academia';
-        state.trackId = allTracks[0].id;
-        state.lessonId = allTracks[0].lessons[0].id;
+        state.trackId = TRACK_INDEX[0].id;
+        state.lessonId = TRACK_INDEX[0].lessons[0].id;
         state.wbTab = 'challenge';
         renderApp();
       } else if (act === 'toggle-font-menu') {
@@ -1989,7 +2114,8 @@ function attachDomListeners(): void {
       } else if (act === 'run-code') {
         void executeWorkbench();
       } else if (act === 'stop-code') {
-        if (!stopPythonExecution()) {
+        const stopped = stopPythonExecution() || Boolean(sqlEngineMod?.stopSqlExecution());
+        if (!stopped) {
           activeRunToken++;
           state.output = { kind: 'error', errorText: 'Execução interrompida pelo utilizador.' };
           renderApp();
@@ -2255,10 +2381,22 @@ function attachDomListeners(): void {
           renderApp();
         })();
       } else if (act === 'export-portfolio-md') {
-        const md = generatePortfolioMarkdown(state.completedLessons, state.editorDrafts, allTracks);
-        downloadTextFile('portfolio_mercearia_do_bairro.md', md, 'text/markdown;charset=utf-8');
-        state.progressModalFeedback = { ok: true, text: 'Portefólio (.md) descarregado com sucesso.' };
+        state.progressModalFeedback = { ok: true, text: 'A preparar portefólio completo…' };
         renderApp();
+        void (async () => {
+          try {
+            const tracks = await loadAllTracksAsync();
+            const md = generatePortfolioMarkdown(state.completedLessons, state.editorDrafts, tracks);
+            downloadTextFile('portfolio_mercearia_do_bairro.md', md, 'text/markdown;charset=utf-8');
+            state.progressModalFeedback = { ok: true, text: 'Portefólio (.md) descarregado com sucesso.' };
+          } catch (err) {
+            state.progressModalFeedback = {
+              ok: false,
+              text: err instanceof Error ? err.message : 'Erro ao exportar portefólio.',
+            };
+          }
+          renderApp();
+        })();
       } else if (act === 'export-progress-json') {
         saveLessonTimes(state.lessonTimes);
         const json = exportProgressJson(
@@ -2334,7 +2472,7 @@ function attachDomListeners(): void {
         state.ganttCollapsedTracks.clear();
         renderApp();
       } else if (act === 'gantt-collapse-all') {
-        state.ganttCollapsedTracks = new Set(allTracks.map((t) => t.id));
+        state.ganttCollapsedTracks = new Set(TRACK_INDEX.map((t) => t.id));
         renderApp();
       } else if (act === 'open-diagnostic-modal') {
         state.showProgressModal = false;
@@ -2358,7 +2496,7 @@ function attachDomListeners(): void {
         state.ganttPaceMinutes = saved.hoursPerWeek * 60;
         state.showDiagnosticModal = false;
         if (act === 'apply-diagnostic-and-go') {
-          const plan = evaluateDiagnosticPlan(saved, getCourseMinutes(allTracks));
+          const plan = evaluateDiagnosticPlan(saved, getCourseMinutes(TRACK_INDEX));
           const loc = locateLesson(plan.startTrackId, plan.startLessonId);
           if (loc) {
             state.trackId = loc.trackId;
@@ -2592,6 +2730,11 @@ window.addEventListener('keydown', (ev) => {
   }
   const anyModalOpen =
     state.showProgressModal || state.showThemeModal || state.showDiagnosticModal || state.showGuideModal;
+  if (ev.key === 'Tab' && anyModalOpen) {
+    const dialog = document.querySelector<HTMLElement>('.modal-backdrop[role="dialog"]');
+    if (dialog) handleDialogTabTrap(dialog, ev);
+    return;
+  }
   if (ev.key === 'Escape' && state.mobileEditor !== null && !anyModalOpen) {
     fecharEcraDeEscrita();
     return;

@@ -26,6 +26,14 @@ export const PYODIDE_INDEX_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/
 export const PYODIDE_SCRIPT_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
 export const PYODIDE_MJS_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.mjs';
 export const PYODIDE_SCRIPT_SRI = 'sha384-i3R37b3tF+HWudsUf1VSEOY2YxwSNMqY8DQa9Z0O3xh+NkJ9o+yjcGyIi5huj+nB';
+/** Hashes SHA-384 oficiais dos artefactos Pyodide v0.26.4 (verificados nos testes contra node_modules/pyodide). */
+export const PYODIDE_CORE_SRI: Record<string, string> = {
+  'pyodide.mjs': 'sha384-UiKiawyJJUwQkJq6d192fVAdFQWHEF0d5giIIehJbb9IRKdfMT6CKXZBoHX1KaR8',
+  'pyodide.asm.js': 'sha384-yZKhBBiP0ZceJh1RKKbMUfptsNLc0SyfFA4nZmJysRCsIJg0eYjy5Bonr0NN9U3X',
+  'pyodide.asm.wasm': 'sha384-UPLqVXovAmYvDGP3QsAICvyhkugIB8nhuGo3wgsxZD7DlcFDUSpYlRUfpwfq87uX',
+  'python_stdlib.zip': 'sha384-PawoekFvzx+5AUUlZ8VtwwUSpml23vie0wrGq/euGJEkRjl0FXWCXytybeVgbK5c',
+  'pyodide-lock.json': 'sha384-N3VHChchW0Cig+dw+pboPe9oVagcHuwzNGe4VFUqwaMPrEe/ewVorZ58G5lGQxHc',
+};
 
 export const MAX_PYTHON_CODE_CHARS = 30_000;
 export const PYTHON_EXECUTION_TIMEOUT_MS = 12_000;

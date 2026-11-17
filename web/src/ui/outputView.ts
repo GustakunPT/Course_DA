@@ -31,7 +31,7 @@ export function renderOutputRegion(out: OutputViewModel, engine: EngineKind): st
           <div class="output-header-actions">
             <span class="measured">${escapeHtml(out.statusMessage ?? 'A executar…')}</span>
             ${
-              engine === 'python'
+              engine === 'python' || engine === 'sql'
                 ? '<button type="button" class="btn btn-danger-outline" data-action="stop-code">Parar execução</button>'
                 : ''
             }

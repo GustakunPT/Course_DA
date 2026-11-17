@@ -24,6 +24,8 @@ vi.stubGlobal('fetch', async (url: string) => {
 });
 
 const { allTracks, totalLessonsCount, cheatsheets } = await import('../src/data/curriculum');
+const { TRACK_INDEX, TOTAL_LESSONS_COUNT } = await import('../src/data/trackIndex');
+const { getCourseMinutes, getLessonMinutes, getTrackMinutes } = await import('../src/data/studyPlan');
 const { runSqlQuery } = await import('../src/engines/sqlEngine');
 const { createInitialGitState, runGitSimulator } = await import('../src/engines/gitEngine');
 
@@ -33,6 +35,43 @@ describe('estrutura do currículo', () => {
   it('tem 8 trilhas e 80 etapas', () => {
     expect(allTracks).toHaveLength(8);
     expect(totalLessonsCount).toBe(80);
+    expect(TOTAL_LESSONS_COUNT).toBe(totalLessonsCount);
+    expect(getCourseMinutes(TRACK_INDEX)).toBe(getCourseMinutes(allTracks));
+    expect(
+      TRACK_INDEX.map((t) => ({
+        id: t.id,
+        shortTitle: t.shortTitle,
+        fullTitle: t.fullTitle,
+        summary: t.summary,
+        engineLabel: t.engineLabel,
+        mins: getTrackMinutes(t),
+        lessons: t.lessons.map((l) => ({
+          id: l.id,
+          code: l.code,
+          title: l.title,
+          engine: l.engine,
+          mins: getLessonMinutes(l),
+          correctIndex: l.quiz.correctIndex,
+        })),
+      })),
+    ).toEqual(
+      allTracks.map((t) => ({
+        id: t.id,
+        shortTitle: t.shortTitle,
+        fullTitle: t.fullTitle,
+        summary: t.summary,
+        engineLabel: t.engineLabel,
+        mins: getTrackMinutes(t),
+        lessons: t.lessons.map((l) => ({
+          id: l.id,
+          code: l.code,
+          title: l.title,
+          engine: l.engine,
+          mins: getLessonMinutes(l),
+          correctIndex: l.quiz.correctIndex,
+        })),
+      })),
+    );
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {

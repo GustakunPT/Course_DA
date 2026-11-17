@@ -1,4 +1,14 @@
-import type { Lesson, Track } from './types';
+import type { EngineKind } from './types';
+
+export interface LessonTimingInfo {
+  id: string;
+  engine: EngineKind;
+  estimatedMinutes?: number;
+}
+
+export interface TrackTimingInfo {
+  lessons: LessonTimingInfo[];
+}
 
 const EXPLICIT_MINUTES: Record<string, number> = {
   'py-00-pensamento': 15,
@@ -25,7 +35,7 @@ const EXPLICIT_MINUTES: Record<string, number> = {
 };
 
 /** Tempo base estimado (em minutos) sem margem, para leitura, prática e quiz. */
-export function getLessonBaseMinutes(lesson: Lesson): number {
+export function getLessonBaseMinutes(lesson: LessonTimingInfo): number {
   if (lesson.estimatedMinutes && lesson.estimatedMinutes > 0) return lesson.estimatedMinutes;
   if (EXPLICIT_MINUTES[lesson.id]) return EXPLICIT_MINUTES[lesson.id];
   if (lesson.engine === 'projeto') return 60;
@@ -38,18 +48,18 @@ export function getLessonBaseMinutes(lesson: Lesson): number {
 }
 
 /** Margem (buffer) de ~20% por etapa, arredondada a múltiplos de 5 minutos (mínimo 5 min). */
-export function getLessonBufferMinutes(lesson: Lesson): number {
+export function getLessonBufferMinutes(lesson: LessonTimingInfo): number {
   const base = getLessonBaseMinutes(lesson);
   return Math.max(5, Math.round((base * 0.2) / 5) * 5);
 }
 
 /** Tempo total projetado por etapa (base + margem). */
-export function getLessonMinutes(lesson: Lesson): number {
+export function getLessonMinutes(lesson: LessonTimingInfo): number {
   return getLessonBaseMinutes(lesson) + getLessonBufferMinutes(lesson);
 }
 
 /** Margem extra de consolidação e revisão no fim de cada tema antes do marco. */
-export function getTrackBufferMinutes(track: Track): number {
+export function getTrackBufferMinutes(track: TrackTimingInfo): number {
   return track.lessons.length <= 6 ? 15 : 30;
 }
 
@@ -60,7 +70,7 @@ export interface TrackMinutesBreakdown {
   totalMinutes: number;
 }
 
-export function getTrackMinutesBreakdown(track: Track): TrackMinutesBreakdown {
+export function getTrackMinutesBreakdown(track: TrackTimingInfo): TrackMinutesBreakdown {
   const baseMinutes = track.lessons.reduce((sum, l) => sum + getLessonBaseMinutes(l), 0);
   const lessonBufferMinutes = track.lessons.reduce((sum, l) => sum + getLessonBufferMinutes(l), 0);
   const themeBufferMinutes = getTrackBufferMinutes(track);
@@ -72,11 +82,11 @@ export function getTrackMinutesBreakdown(track: Track): TrackMinutesBreakdown {
   };
 }
 
-export function getTrackMinutes(track: Track): number {
+export function getTrackMinutes(track: TrackTimingInfo): number {
   return getTrackMinutesBreakdown(track).totalMinutes;
 }
 
-export function getCourseMinutes(tracks: Track[]): number {
+export function getCourseMinutes(tracks: TrackTimingInfo[]): number {
   return tracks.reduce((sum, t) => sum + getTrackMinutes(t), 0);
 }
 

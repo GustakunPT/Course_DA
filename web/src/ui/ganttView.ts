@@ -11,16 +11,28 @@ import {
   getLessonBaseMinutes,
   getLessonBufferMinutes,
   getTrackBufferMinutes,
+  type LessonTimingInfo,
 } from '../data/studyPlan';
 import { compareActualVsProjected, type LessonTimeMap, type PaceComparison } from '../data/timeTracker';
-import type { Lesson, Track } from '../data/types';
 import { escapeHtml } from './html';
+
+export interface GanttLessonRef extends LessonTimingInfo {
+  code: string;
+  title: string;
+}
+
+export interface GanttTrackRef {
+  id: string;
+  shortTitle: string;
+  fullTitle: string;
+  lessons: GanttLessonRef[];
+}
 
 export type GanttLessonStatus = 'autonomous' | 'helped' | 'projeto' | 'todo';
 export type GanttFilterStatus = 'all' | 'todo' | 'done';
 
 export interface GanttLessonNode {
-  lesson: Lesson;
+  lesson: GanttLessonRef;
   trackId: string;
   baseMinutes: number;
   bufferMinutes: number;
@@ -41,7 +53,7 @@ export interface GanttLessonNode {
 }
 
 export interface GanttTrackGroup {
-  track: Track;
+  track: GanttTrackRef;
   color: string;
   softColor: string;
   startMin: number;
@@ -120,7 +132,7 @@ function paletteForTrack(trackId: string, idx: number): { color: string; soft: s
   return fallbacks[idx % fallbacks.length];
 }
 
-function resolveLessonStatus(lesson: Lesson, progress: UserProgressMap): GanttLessonStatus {
+function resolveLessonStatus(lesson: GanttLessonRef, progress: UserProgressMap): GanttLessonStatus {
   const rec = progress[lesson.id];
   if (!rec) return 'todo';
   if (lesson.engine === 'projeto') return 'projeto';
@@ -128,7 +140,7 @@ function resolveLessonStatus(lesson: Lesson, progress: UserProgressMap): GanttLe
 }
 
 export function buildGanttModel(
-  tracks: Track[],
+  tracks: GanttTrackRef[],
   progress: UserProgressMap,
   paceMinutesPerWeek = 360,
   lessonTimes: LessonTimeMap = {},
@@ -334,7 +346,7 @@ export interface GanttRenderOptions {
 }
 
 export function renderGanttHtml(
-  tracks: Track[],
+  tracks: GanttTrackRef[],
   progress: UserProgressMap,
   opts: GanttRenderOptions,
 ): string {

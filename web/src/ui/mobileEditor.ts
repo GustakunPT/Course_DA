@@ -91,6 +91,7 @@ export function renderEcraDeEscrita(o: {
       ${painel('resultado', o.resultadoHtml)}
       <div class="ecra-barra">
         ${simbolos}
+        ${o.aCorrer ? '<button type="button" class="btn btn-danger-outline" data-action="stop-code">Parar</button>' : ''}
         <button type="button" class="btn btn-primary" data-action="executar-ecra-escrita"${o.aCorrer ? ' disabled' : ''}>${escapeHtml(o.rotuloExecutar)}</button>
       </div>
     </div>`;

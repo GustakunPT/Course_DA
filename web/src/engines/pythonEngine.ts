@@ -10,10 +10,12 @@ import {
   type PythonCheckSpec,
   type PythonExecutionResult,
 } from './pythonRunnerCore';
-import type { PythonWorkerRequest, PythonWorkerResponse } from './pythonWorker';
+import type { PythonWorkerRequest } from './pythonWorker';
+import { createSandboxWorkerClient, type SandboxWorkerLike } from './sandboxWorkerClient';
 
 export {
   ALLOWED_PYTHON_MODULES,
+  PYODIDE_CORE_SRI,
   PYTHON_EXECUTION_TIMEOUT_MS,
   validatePythonCodeScope,
   type PythonAssertionCheck,
@@ -27,40 +29,32 @@ declare global {
   }
 }
 
-export interface PythonWorkerLike {
-  onmessage: ((ev: { data: PythonWorkerResponse }) => void) | null;
-  onerror: ((ev: { message?: string }) => void) | null;
-  postMessage(msg: PythonWorkerRequest): void;
-  terminate(): void;
-}
+export type PythonWorkerLike = SandboxWorkerLike<PythonWorkerRequest, PythonExecutionResult>;
 
 type PyodideLoader = () => Promise<any>;
-type WorkerFactory = () => PythonWorkerLike;
 
 let pyodidePromise: Promise<any> | null = null;
 const loadedPackages = new Set<string>();
 const loadedFiles = new Set<string>();
 let customPyodideLoader: PyodideLoader | null = null;
-let customWorkerFactory: WorkerFactory | null = null;
-let executionTimeoutMs = PYTHON_EXECUTION_TIMEOUT_MS;
-
-interface PendingRun {
-  id: number;
-  startTime: number;
-  onStatus?: (msg: string) => void;
-  resolve: (res: PythonExecutionResult) => void;
-  timerId: ReturnType<typeof setTimeout> | null;
-}
-
-let activeWorker: PythonWorkerLike | null = null;
-let activePending: PendingRun | null = null;
-let nextRunId = 1;
 
 // No browser o Pyodide principal é usado só se Web Workers não existirem; nos testes é trocado pelo npm "pyodide".
 let pyodideLoader: PyodideLoader = async () => {
   await loadPyodideScript();
   return window.loadPyodide!({ indexURL: PYODIDE_INDEX_URL });
 };
+
+const pythonWorkerClient = createSandboxWorkerClient<PythonWorkerRequest, PythonExecutionResult>({
+  createWorker: () =>
+    new Worker(new URL('./pythonWorker.ts', import.meta.url), { type: 'module' }) as unknown as PythonWorkerLike,
+  defaultTimeoutMs: PYTHON_EXECUTION_TIMEOUT_MS,
+  preparingMessage: 'A preparar Python no Web Worker…',
+  stopErrorMessage: 'Execução interrompida pelo utilizador.',
+  formatTimeoutError: (secs) =>
+    `Execução interrompida: o código demorou mais de ${secs} segundos (verifica se existe um ciclo infinito como while True).`,
+  defaultWorkerError: 'Falha no Web Worker de Python.',
+  makeErrorResult: (error, elapsedMs) => ({ stdout: '', elapsedMs, error }),
+});
 
 /** Só para testes: usa outro carregador do Pyodide e recomeça do zero. */
 export function setPyodideLoaderForTests(loader: PyodideLoader): void {
@@ -72,10 +66,11 @@ export function setPyodideLoaderForTests(loader: PyodideLoader): void {
 }
 
 /** Só para testes: substitui a criação do Web Worker e/ou o timeout de execução. */
-export function setPythonWorkerForTests(factory: WorkerFactory | null, timeoutMs = PYTHON_EXECUTION_TIMEOUT_MS): void {
-  stopPythonExecution();
-  customWorkerFactory = factory;
-  executionTimeoutMs = timeoutMs;
+export function setPythonWorkerForTests(
+  factory: (() => PythonWorkerLike) | null,
+  timeoutMs = PYTHON_EXECUTION_TIMEOUT_MS,
+): void {
+  pythonWorkerClient.setTestWorkerFactory(factory, timeoutMs);
 }
 
 function loadPyodideScript(): Promise<void> {
@@ -117,99 +112,9 @@ export async function getPyodideEngine(onStatus?: (msg: string) => void): Promis
   return pyodidePromise;
 }
 
-function elapsedSince(startTime: number): number {
-  return Math.round((performance.now() - startTime) * 10) / 10;
-}
-
-function finishPendingWithError(error: string, terminateWorker: boolean): void {
-  const pending = activePending;
-  activePending = null;
-  if (pending?.timerId) clearTimeout(pending.timerId);
-  if (terminateWorker && activeWorker) {
-    activeWorker.terminate();
-    activeWorker = null;
-  }
-  pending?.resolve({
-    stdout: '',
-    elapsedMs: elapsedSince(pending.startTime),
-    error,
-  });
-}
-
-function ensureWorker(): PythonWorkerLike {
-  if (!activeWorker) {
-    activeWorker = customWorkerFactory
-      ? customWorkerFactory()
-      : (new Worker(new URL('./pythonWorker.ts', import.meta.url), { type: 'module' }) as unknown as PythonWorkerLike);
-
-    activeWorker.onmessage = (ev: { data: PythonWorkerResponse }) => {
-      const msg = ev.data;
-      if (!activePending || !msg || msg.id !== activePending.id) return;
-
-      if (msg.type === 'status') {
-        activePending.onStatus?.(msg.message);
-      } else if (msg.type === 'executing') {
-        if (activePending.timerId) clearTimeout(activePending.timerId);
-        const runId = activePending.id;
-        activePending.timerId = setTimeout(() => {
-          if (activePending?.id !== runId) return;
-          const secs = Math.max(1, Math.round(executionTimeoutMs / 1000));
-          finishPendingWithError(
-            `Execução interrompida: o código demorou mais de ${secs} segundos (verifica se existe um ciclo infinito como while True).`,
-            true,
-          );
-        }, executionTimeoutMs);
-      } else if (msg.type === 'result') {
-        const pending = activePending;
-        activePending = null;
-        if (pending.timerId) clearTimeout(pending.timerId);
-        pending.resolve(msg.result);
-      } else if (msg.type === 'error') {
-        finishPendingWithError(msg.error, true);
-      }
-    };
-
-    activeWorker.onerror = (ev: { message?: string }) => {
-      finishPendingWithError(ev.message || 'Falha no Web Worker de Python.', true);
-    };
-  }
-  return activeWorker;
-}
-
 /** Termina imediatamente o Web Worker Python em execução (por ex. ciclo infinito). */
 export function stopPythonExecution(): boolean {
-  if (!activePending) return false;
-  finishPendingWithError('Execução interrompida pelo utilizador.', true);
-  return true;
-}
-
-function shouldUseWorker(): boolean {
-  if (customWorkerFactory) return true;
-  if (customPyodideLoader) return false;
-  return typeof Worker !== 'undefined';
-}
-
-function runPythonInWorker(
-  code: string,
-  checks: PythonCheckSpec[] | undefined,
-  onStatus: ((msg: string) => void) | undefined,
-  ficheirosExtra: string[],
-  startTime: number,
-): Promise<PythonExecutionResult> {
-  if (activePending) {
-    stopPythonExecution();
-  }
-  return new Promise((resolve) => {
-    const id = nextRunId++;
-    activePending = { id, startTime, onStatus, resolve, timerId: null };
-    try {
-      const worker = ensureWorker();
-      onStatus?.('A preparar Python no Web Worker…');
-      worker.postMessage({ type: 'run', id, code, checks, ficheirosExtra });
-    } catch (err) {
-      finishPendingWithError(err instanceof Error ? err.message : String(err), true);
-    }
-  });
+  return pythonWorkerClient.stop();
 }
 
 export async function runPythonCode(
@@ -223,13 +128,13 @@ export async function runPythonCode(
   if (quickError) {
     return {
       stdout: '',
-      elapsedMs: elapsedSince(start),
+      elapsedMs: Math.round((performance.now() - start) * 10) / 10,
       error: quickError,
     };
   }
 
-  if (shouldUseWorker()) {
-    return runPythonInWorker(code, checks, onStatus, ficheirosExtra, start);
+  if (pythonWorkerClient.hasTestWorkerFactory() || (!customPyodideLoader && typeof Worker !== 'undefined')) {
+    return pythonWorkerClient.run({ type: 'run', code, checks, ficheirosExtra }, onStatus);
   }
 
   try {
@@ -249,7 +154,7 @@ export async function runPythonCode(
     loadedFiles.clear();
     return {
       stdout: '',
-      elapsedMs: elapsedSince(start),
+      elapsedMs: Math.round((performance.now() - start) * 10) / 10,
       error: err instanceof Error ? err.message : String(err),
     };
   }

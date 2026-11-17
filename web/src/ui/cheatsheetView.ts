@@ -1,4 +1,4 @@
-import { cheatsheets } from '../data/curriculum';
+import { cheatsheets } from '../data/cheatsheetsData';
 import { escapeHtml } from './html';
 
 

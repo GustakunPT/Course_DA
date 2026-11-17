@@ -26,9 +26,12 @@ describe('renderOutputRegion', () => {
     expect(html).toContain('&lt;i&gt;falhou&lt;/i&gt;');
   });
 
-  it('mostra o botão Parar execução durante o carregamento Python', () => {
-    const html = renderOutputRegion({ kind: 'loading', statusMessage: 'A executar…' }, 'python');
-    expect(html).toContain('data-action="stop-code"');
-    expect(html).toContain('Parar execução');
+  it('mostra o botão Parar execução durante o carregamento Python e SQL', () => {
+    const htmlPy = renderOutputRegion({ kind: 'loading', statusMessage: 'A executar…' }, 'python');
+    expect(htmlPy).toContain('data-action="stop-code"');
+    expect(htmlPy).toContain('Parar execução');
+
+    const htmlSql = renderOutputRegion({ kind: 'loading', statusMessage: 'A executar consulta…' }, 'sql');
+    expect(htmlSql).toContain('data-action="stop-code"');
   });
 });

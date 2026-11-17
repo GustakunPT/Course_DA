@@ -1,13 +1,14 @@
 import {
   BASE_CSV_FILES,
+  PYODIDE_CORE_SRI,
   PYODIDE_INDEX_URL,
-  PYODIDE_MJS_URL,
   executeInPyodideInstance,
   validatePythonCodeScope,
   writeCsvPairToPyodide,
   type PythonCheckSpec,
   type PythonExecutionResult,
 } from './pythonRunnerCore';
+import type { SandboxWorkerResponse } from './sandboxWorkerClient';
 
 export type PythonWorkerRequest = {
   type: 'run';
@@ -17,15 +18,38 @@ export type PythonWorkerRequest = {
   ficheirosExtra?: string[];
 };
 
-export type PythonWorkerResponse =
-  | { type: 'status'; id: number; message: string }
-  | { type: 'executing'; id: number }
-  | { type: 'result'; id: number; result: PythonExecutionResult }
-  | { type: 'error'; id: number; error: string; elapsedMs: number };
+export type PythonWorkerResponse = SandboxWorkerResponse<PythonExecutionResult>;
+
+const LOCAL_BOOTSTRAP_FILES = new Set(['pyodide.mjs', 'pyodide.asm.js']);
 
 let pyodidePromise: Promise<any> | null = null;
 const loadedPackages = new Set<string>();
 const loadedFiles = new Set<string>();
+let fetchPatchedForSri = false;
+
+/** Garante integridade SRI nos artefactos Pyodide v0.26.4 e redireciona pacotes .whl/.zip para a CDN mantendo o integrity da Pyodide. */
+function installPyodideFetchIntegrity(): void {
+  if (fetchPatchedForSri) return;
+  fetchPatchedForSri = true;
+  const origFetch = globalThis.fetch.bind(globalThis);
+  const localPrefix = `${globalThis.location.origin}/pyodide/`;
+
+  globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    if (rawUrl.startsWith(localPrefix)) {
+      const fileName = rawUrl.slice(localPrefix.length).split('?')[0];
+      if (!LOCAL_BOOTSTRAP_FILES.has(fileName)) {
+        const sri = PYODIDE_CORE_SRI[fileName];
+        return origFetch(`${PYODIDE_INDEX_URL}${fileName}`, {
+          ...init,
+          ...(sri ? { integrity: sri } : {}),
+          mode: 'cors',
+        });
+      }
+    }
+    return origFetch(input, init);
+  };
+}
 
 async function loadBaseCsvs(): Promise<Record<string, string>> {
   const rawCsvs: Record<string, string> = {};
@@ -45,11 +69,15 @@ async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<any> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
       onStatus('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');
+      installPyodideFetchIntegrity();
+      // O runtime JS (pyodide.mjs e pyodide.asm.js) é servido localmente de 'self' (npm pinado 0.26.4);
+      // wasm, stdlib e lockfile vêm da CDN com verificação criptográfica SRI (SHA-384).
+      const localBase = `${globalThis.location.origin}/pyodide/`;
       const [mod, rawCsvs] = await Promise.all([
-        import(/* @vite-ignore */ PYODIDE_MJS_URL),
+        import(/* @vite-ignore */ `${localBase}pyodide.mjs`),
         loadBaseCsvs(),
       ]);
-      const pyodide = await mod.loadPyodide({ indexURL: PYODIDE_INDEX_URL });
+      const pyodide = await mod.loadPyodide({ indexURL: localBase });
       pyodide.FS.mkdirTree('/home/pyodide/dados');
       pyodide.FS.mkdirTree('/home/dados');
       for (const [name, content] of Object.entries(rawCsvs)) {

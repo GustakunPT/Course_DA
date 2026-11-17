@@ -39,4 +39,15 @@ if (existsSync(wasmSrc)) {
   copyFileSync(wasmSrc, wasmDst);
 }
 
-console.log('Synced CSV datasets and sql-wasm.wasm to public/');
+const pyodideSrcDir = resolve(webRoot, 'node_modules', 'pyodide');
+const publicPyodide = resolve(publicRoot, 'pyodide');
+mkdirSync(publicPyodide, { recursive: true });
+for (const pyFile of ['pyodide.mjs', 'pyodide.asm.js']) {
+  const src = resolve(pyodideSrcDir, pyFile);
+  const dst = resolve(publicPyodide, pyFile);
+  if (existsSync(src)) {
+    copyFileSync(src, dst);
+  }
+}
+
+console.log('Synced CSV datasets, sql-wasm.wasm and Pyodide bootstrap scripts to public/');

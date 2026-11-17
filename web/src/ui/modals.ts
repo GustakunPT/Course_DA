@@ -1,4 +1,4 @@
-import { allTracks, totalLessonsCount } from '../data/curriculum';
+import { TOTAL_LESSONS_COUNT as totalLessonsCount, TRACK_INDEX as allTracks } from '../data/trackIndex';
 import {
   BACKGROUND_OPTIONS,
   evaluateDiagnosticPlan,

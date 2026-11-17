@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
@@ -24,9 +25,16 @@ vi.stubGlobal('fetch', async (url: string | URL | Request, init?: RequestInit) =
   return fetchReal(url, init);
 });
 
-const { runPythonCode, setPyodideLoaderForTests, setPythonWorkerForTests, stopPythonExecution, validatePythonCodeScope } =
-  await import('../src/engines/pythonEngine');
-const { runSqlQuery, validateSqlReadOnly } = await import('../src/engines/sqlEngine');
+const {
+  PYODIDE_CORE_SRI,
+  runPythonCode,
+  setPyodideLoaderForTests,
+  setPythonWorkerForTests,
+  stopPythonExecution,
+  validatePythonCodeScope,
+} = await import('../src/engines/pythonEngine');
+const { runSqlQuery, setSqlWorkerForTests, stopSqlExecution, validateSqlReadOnly } =
+  await import('../src/engines/sqlEngine');
 const { createInitialGitState, runGitSimulator } = await import('../src/engines/gitEngine');
 const { renderGuideModal } = await import('../src/ui/modals');
 
@@ -173,6 +181,72 @@ describe('Web Worker Python (cancelamento e timeout)', () => {
       expect(res.error).toContain('ciclo infinito');
     } finally {
       setPythonWorkerForTests(null);
+    }
+  });
+
+  it('valida integridade SRI SHA-384 dos artefactos Pyodide v0.26.4 locais/CDN', () => {
+    for (const [fileName, expectedSri] of Object.entries(PYODIDE_CORE_SRI)) {
+      const bytes = readFileSync(new URL(`../node_modules/pyodide/${fileName}`, import.meta.url));
+      const actualSri = `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
+      expect(actualSri, fileName).toBe(expectedSri);
+    }
+  });
+});
+
+describe('Web Worker SQLite (cancelamento e timeout)', () => {
+  it('stopSqlExecution termina o Worker ativo e devolve erro limpo', async () => {
+    let terminated = false;
+    setSqlWorkerForTests(
+      () => ({
+        onmessage: null,
+        onerror: null,
+        postMessage() {},
+        terminate() {
+          terminated = true;
+        },
+      }),
+      5_000,
+    );
+    try {
+      const promise = runSqlQuery('SELECT * FROM vendas a, vendas b;');
+      expect(stopSqlExecution()).toBe(true);
+      const res = await promise;
+      expect(terminated).toBe(true);
+      expect(res.error).toContain('interrompida pelo utilizador');
+    } finally {
+      setSqlWorkerForTests(null);
+    }
+  });
+
+  it('o timeout corta consultas SQL pesadas após entrar em execução', async () => {
+    let terminated = false;
+    setSqlWorkerForTests(
+      () => {
+        const w = {
+          onmessage: null as ((ev: { data: any }) => void) | null,
+          onerror: null,
+          postMessage(req: { id: number }) {
+            setTimeout(() => {
+              w.onmessage?.({ data: { type: 'status', id: req.id, message: 'A executar consulta SQL…' } });
+            }, 15);
+            setTimeout(() => {
+              w.onmessage?.({ data: { type: 'executing', id: req.id } });
+            }, 25);
+          },
+          terminate() {
+            terminated = true;
+          },
+        };
+        return w;
+      },
+      40,
+    );
+    try {
+      const res = await runSqlQuery('SELECT COUNT(*) FROM vendas a, vendas b;');
+      expect(terminated).toBe(true);
+      expect(res.error).toContain('Consulta SQL interrompida');
+    } finally {
+      setSqlWorkerForTests(null);
     }
   });
 });

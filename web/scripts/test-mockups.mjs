@@ -5,19 +5,15 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(__dirname, '..');
 
-const mockupsHtmlPath = path.join(webRoot, 'mockups.html');
-const publicMockupsHtmlPath = path.join(webRoot, 'public', 'mockups.html');
-const svgDir = path.join(webRoot, 'public', 'mockups');
+const mockupsDir = path.resolve(webRoot, '..', 'docs', 'mockups');
+const mockupsHtmlPath = path.join(mockupsDir, 'mockups.html');
+const svgDir = mockupsDir;
 
-console.log('Testing Mockups in:', webRoot);
+console.log('Testing Mockups in:', mockupsDir);
 
-// 1. Check HTML files exist
+// 1. Check HTML file exists
 if (!fs.existsSync(mockupsHtmlPath)) {
-  console.error('FAIL: mockups.html missing');
-  process.exit(1);
-}
-if (!fs.existsSync(publicMockupsHtmlPath)) {
-  console.error('FAIL: public/mockups.html missing');
+  console.error('FAIL: docs/mockups/mockups.html missing');
   process.exit(1);
 }
 
