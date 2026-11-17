@@ -193,6 +193,13 @@ pre,
   color: var(--color-bad);
 }
 
+/* Etapa de projeto concluída: autoavaliada, nunca com o verde de "corrigida". */
+.status-chip.is-projeto {
+  background: transparent;
+  color: var(--color-ink-2);
+  border-color: var(--color-ink-2);
+}
+
 /* Controls (8 states, 36px height with 44px touch target on coarse pointers) */
 .btn {
   height: 36px;
@@ -540,6 +547,13 @@ pre,
   color: var(--color-cool);
 }
 
+.lesson-nav-btn.is-projeto .lesson-step-id {
+  color: var(--color-ink-2);
+  border: var(--rule-hair) solid var(--color-ink-2);
+  border-radius: var(--radius-chip);
+  padding: 0 var(--space-2xs);
+}
+
 .nav-tab .track-tag {
   font-family: var(--font-outlier);
   font-size: var(--text-xs);
@@ -605,8 +619,13 @@ pre,
 
 .progress-summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   gap: var(--space-xs);
+}
+
+.progress-stat-card.is-projeto {
+  background: transparent;
+  border-color: var(--color-ink-2);
 }
 
 .progress-stat-card {
@@ -922,6 +941,124 @@ pre,
   font-size: var(--text-sm);
   color: var(--color-ink-2);
   white-space: pre-line;
+}
+
+/* Painel das etapas de projeto (no lugar do editor) */
+.projeto-painel {
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.projeto-painel h3 {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+  margin-top: var(--space-xs);
+}
+
+.projeto-aviso {
+  background: var(--color-paper-2);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-pill);
+  border-left: 3px solid var(--color-ink-2);
+}
+
+.projeto-estado {
+  justify-self: start;
+  padding: var(--space-2xs) var(--space-xs);
+  border: var(--rule-hair) solid var(--color-ink-2);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-xs);
+}
+
+.projeto-entregaveis {
+  padding-left: var(--space-lg);
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-lista {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-lista label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  min-height: 32px;
+  padding: var(--space-2xs) 0;
+  cursor: pointer;
+}
+
+.projeto-lista input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-ink-2);
+}
+
+.projeto-grelha {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  table-layout: fixed;
+}
+
+.projeto-grelha th,
+.projeto-grelha td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  overflow-wrap: anywhere;
+}
+
+.projeto-grelha thead th {
+  color: var(--color-muted);
+  font-weight: 500;
+  border-bottom-color: var(--color-rule-2);
+}
+
+.projeto-grelha tbody th {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.projeto-link {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-link input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-chip);
+}
+
+.projeto-link-msg {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.projeto-link-msg.ok {
+  color: var(--color-ok);
+}
+
+.projeto-link-msg.erro {
+  color: var(--color-bad);
 }
 
 .code-editor-shell {

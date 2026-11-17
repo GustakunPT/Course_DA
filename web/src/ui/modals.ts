@@ -48,7 +48,13 @@ export function renderThemeModal(state: AppState): string {
 export function renderProgressModal(state: AppState): string {
   const entries = Object.values(state.completedLessons);
   const doneCount = entries.length;
-  const autonomousCount = entries.filter((e) => e.status === 'autonomous').length;
+  // As etapas de projeto são autoavaliadas: contam no seu próprio cartão, não em "Resolvidas s/ ajuda".
+  const etapasProjeto = allTracks.flatMap((tr) => tr.lessons.filter((l) => l.engine === 'projeto'));
+  const idsProjeto = new Set(etapasProjeto.map((l) => l.id));
+  const projetoFeitas = etapasProjeto.filter((l) => state.completedLessons[l.id]).length;
+  const autonomousCount = Object.entries(state.completedLessons).filter(
+    ([id, e]) => e.status === 'autonomous' && !idsProjeto.has(id),
+  ).length;
   const quizCorrectCount = allTracks.reduce((acc, tr) => {
     return (
       acc +
@@ -83,6 +89,14 @@ export function renderProgressModal(state: AppState): string {
             <div class="progress-stat-val">${quizCorrectCount} / ${totalLessonsCount}</div>
             <div class="progress-stat-lbl">Quizzes certos</div>
           </div>
+          ${
+            etapasProjeto.length
+              ? `<div class="progress-stat-card is-projeto">
+            <div class="progress-stat-val">${projetoFeitas} / ${etapasProjeto.length}</div>
+            <div class="progress-stat-lbl">Projeto final (autoavaliado)</div>
+          </div>`
+              : ''
+          }
         </div>
 
         <div class="progress-track-list">

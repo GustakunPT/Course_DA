@@ -21,6 +21,15 @@ export function etapaProjetoCompleta(lesson: Lesson, feitos: Set<string>, link: 
   return spec.pedirLinkGithub ? linkGithubValido(link ?? '') : true;
 }
 
+/** Mensagem por baixo do campo do link; a app atualiza-a sem redesenhar o campo (não perde o foco). */
+export function mensagemLink(link: string): { texto: string; classe: '' | 'ok' | 'erro' } {
+  if (linkGithubValido(link)) return { texto: 'Link válido', classe: 'ok' };
+  return {
+    texto: 'O link deve ser https://github.com/utilizador/repositório',
+    classe: link.trim() !== '' ? 'erro' : '',
+  };
+}
+
 export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: string): string {
   const spec = lesson.projectSpec;
   if (!spec) return '';
@@ -41,13 +50,11 @@ export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: s
 
   let linkHtml = '';
   if (spec.pedirLinkGithub) {
-    const preenchido = link.trim() !== '';
-    const valido = linkGithubValido(link);
-    const msg = valido ? 'Link válido' : 'O link deve ser https://github.com/utilizador/repositório';
+    const { texto, classe } = mensagemLink(link);
     linkHtml = `<div class="projeto-link">
   <label for="projeto-link-github">Link do teu repositório no GitHub</label>
-  <input type="url" id="projeto-link-github" data-link-github value="${escapeHtml(link)}" placeholder="https://github.com/utilizador/repositório" autocomplete="off">
-  <p class="projeto-link-msg ${valido ? 'ok' : preenchido ? 'erro' : ''}" data-link-msg>${msg}</p>
+  <input type="text" inputmode="url" id="projeto-link-github" data-link-github value="${escapeHtml(link)}" placeholder="https://github.com/utilizador/repositório" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <p class="projeto-link-msg ${classe}" data-link-msg aria-live="polite">${texto}</p>
 </div>`;
   }
 

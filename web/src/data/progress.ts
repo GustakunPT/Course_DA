@@ -1,4 +1,5 @@
 import type { Track } from './types';
+import { linkGithubValido } from '../ui/projectPanel';
 
 export type LessonCompletionStatus = 'autonomous' | 'helped';
 
@@ -249,9 +250,12 @@ export function generatePortfolioMarkdown(
   let autonomousCount = 0;
   let helpedCount = 0;
 
+  // As etapas de projeto são autoavaliadas: ficam fora das contagens e do código (secção 3).
   for (const tr of tracks) {
+    const corrigidas = tr.lessons.filter((le) => le.engine !== 'projeto');
+    if (corrigidas.length === 0) continue;
     let trSolved = 0;
-    for (const le of tr.lessons) {
+    for (const le of corrigidas) {
       if (progress[le.id]) {
         trSolved++;
         totalSolved++;
@@ -259,7 +263,7 @@ export function generatePortfolioMarkdown(
         else helpedCount++;
       }
     }
-    lines.push(`- **${tr.fullTitle}:** ${trSolved} de ${tr.lessons.length} etapas concluídas.`);
+    lines.push(`- **${tr.fullTitle}:** ${trSolved} de ${corrigidas.length} etapas concluídas.`);
   }
 
   lines.push('');
@@ -275,7 +279,7 @@ export function generatePortfolioMarkdown(
     lines.push('');
     for (const le of tr.lessons) {
       const prog = progress[le.id];
-      if (!prog) continue;
+      if (!prog || le.engine === 'projeto') continue;
 
       const codeKey = `${le.id}:challenge`;
       const userCode =
@@ -285,7 +289,7 @@ export function generatePortfolioMarkdown(
         le.gitChallenge?.solutionCommands ??
         le.exampleCode;
 
-      const lang = le.engine === 'sql' ? 'sql' : le.engine === 'git' ? 'bash' : le.engine === 'projeto' ? 'text' : 'python';
+      const lang = le.engine === 'sql' ? 'sql' : le.engine === 'git' ? 'bash' : 'python';
       const statusTag = prog.status === 'autonomous' ? 'Resolvido com sucesso' : 'Resolvido com referência';
 
       lines.push(`#### Etapa ${le.code} · ${le.title} (${statusTag})`);
@@ -296,6 +300,30 @@ export function generatePortfolioMarkdown(
       lines.push('```');
       lines.push('');
     }
+  }
+
+  const projetoConcluidas = tracks.flatMap((tr) =>
+    tr.lessons.filter((le) => le.engine === 'projeto' && progress[le.id]),
+  );
+  if (projetoConcluidas.length > 0) {
+    lines.push('---');
+    lines.push('');
+    lines.push('## 3. Projeto final (autoavaliado)');
+    lines.push('');
+    lines.push('*Etapas marcadas pelo aluno; a app não corrigiu este trabalho.*');
+    lines.push('');
+    for (const le of projetoConcluidas) {
+      lines.push(`- Etapa ${le.code} · ${le.title}`);
+    }
+    const link = projetoConcluidas
+      .filter((le) => le.projectSpec?.pedirLinkGithub)
+      .map((le) => (drafts[`${le.id}:challenge`] ?? '').trim())
+      .find((url) => linkGithubValido(url));
+    if (link) {
+      lines.push('');
+      lines.push(`**Repositório:** ${link}`);
+    }
+    lines.push('');
   }
 
   return lines.join('\n');

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ProjectSpec, Track } from '../src/data/types';
 
 const memoria = new Map<string, string>();
 vi.stubGlobal('localStorage', {
@@ -69,6 +70,105 @@ describe('códigos de progresso MB1', () => {
 
   it('recusa códigos sem prefixo válido', async () => {
     await expect(progress.decodeProgressCode('abc')).rejects.toThrow();
+  });
+});
+
+describe('etapas de projeto', () => {
+  const etapaBase = {
+    lede: 'Lede.',
+    analogyTitle: '',
+    analogyBody: '',
+    concepts: [],
+    referenceTitle: '',
+    referenceRows: [],
+    quiz: { question: '', options: [], correctIndex: 0, explanation: '' },
+  };
+  const spec = (pedirLinkGithub?: boolean): ProjectSpec => ({
+    entregaveis: ['Um ficheiro'],
+    lista: ['Fiz isto'],
+    grelha: [{ criterio: 'C', bom: 'B', aMelhorar: 'M' }],
+    ...(pedirLinkGithub ? { pedirLinkGithub } : {}),
+  });
+  const tracksMinimas: Track[] = [
+    {
+      id: 'projeto-final',
+      shortTitle: 'Projeto',
+      fullTitle: '8. Projeto final',
+      summary: '',
+      engineLabel: '',
+      lessons: [
+        {
+          ...etapaBase,
+          id: 'pf-01-limpeza',
+          code: '01',
+          title: 'Limpeza a sério',
+          engine: 'python',
+          exampleCode: 'print("exemplo")',
+        },
+        {
+          ...etapaBase,
+          id: 'pf-02-pergunta-dados',
+          code: '02',
+          title: 'Escolher a pergunta e os dados',
+          engine: 'projeto',
+          exampleCode: 'pasta/\n  dados/',
+          projectSpec: spec(),
+        },
+        {
+          ...etapaBase,
+          id: 'pf-05-publicar',
+          code: '05',
+          title: 'Publicar',
+          engine: 'projeto',
+          exampleCode: '# README',
+          projectSpec: spec(true),
+        },
+      ],
+    },
+  ];
+  const progressoComAsTres = {
+    'pf-01-limpeza': { status: 'autonomous' as const, completedAt: 'x' },
+    'pf-02-pergunta-dados': { status: 'autonomous' as const, completedAt: 'x' },
+    'pf-05-publicar': { status: 'autonomous' as const, completedAt: 'x' },
+  };
+
+  it('o portefólio não conta as etapas de projeto como validadas nem lhes põe código', () => {
+    const md = progress.generatePortfolioMarkdown(
+      progressoComAsTres,
+      { 'pf-05-publicar:challenge': 'https://github.com/ana/p' },
+      tracksMinimas,
+    );
+    expect(md).toContain('1 desafios resolvidos');
+    expect(md).toContain('1 de 1 etapas concluídas');
+    expect(md).toContain('## 3. Projeto final (autoavaliado)');
+    expect(md).toContain('Etapas marcadas pelo aluno; a app não corrigiu este trabalho.');
+    expect(md).toContain('- Etapa 02 · Escolher a pergunta e os dados');
+    expect(md).toContain('- Etapa 05 · Publicar');
+    expect(md).toContain('**Repositório:** https://github.com/ana/p');
+    const seccao2 = md.split('## 2.')[1].split('## 3.')[0];
+    expect(seccao2).not.toContain('pf-0');
+    expect(seccao2).not.toContain('Publicar');
+    expect(seccao2).not.toContain('# README');
+  });
+
+  it('sem etapas de projeto concluídas não há secção 3, e um link inválido não aparece', () => {
+    const soPython = { 'pf-01-limpeza': progressoComAsTres['pf-01-limpeza'] };
+    expect(progress.generatePortfolioMarkdown(soPython, {}, tracksMinimas)).not.toContain('## 3.');
+    const md = progress.generatePortfolioMarkdown(
+      progressoComAsTres,
+      { 'pf-05-publicar:challenge': 'https://gitlab.com/ana/p' },
+      tracksMinimas,
+    );
+    expect(md).toContain('## 3. Projeto final (autoavaliado)');
+    expect(md).not.toContain('**Repositório:**');
+  });
+
+  it('as marcas da lista sobrevivem ao JSON e ao código MB1', async () => {
+    const practice = ['pf-02-pergunta-dados#lista:0'];
+    const json = progress.exportProgressJson({}, {}, {}, practice);
+    expect(progress.importProgressJson(json).practice).toEqual(practice);
+    const code = await progress.encodeProgressCode({}, {}, {}, null, practice);
+    expect((await progress.decodeProgressCode(code)).practice).toEqual(practice);
   });
 });
 

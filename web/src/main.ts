@@ -39,6 +39,7 @@ import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
 import { renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
+import { chaveLista, ESTADO_PROJETO, etapaProjetoCompleta, mensagemLink, renderPainelProjeto } from './ui/projectPanel';
 import {
   type AbaEscrita,
   deveUsarEcraDeEscrita,
@@ -184,6 +185,18 @@ function draftKey(lesson: Lesson, tab: WorkbenchTab): string {
   return `${lesson.id}:${tab}`;
 }
 
+/**
+ * Rascunho onde fica o link do GitHub de uma etapa de projeto. É o draftKey(lesson, 'challenge')
+ * sem treino (as etapas de projeto não têm treinos), a mesma chave que o portefólio lê.
+ */
+function chaveLinkProjeto(lesson: Lesson): string {
+  return `${lesson.id}:challenge`;
+}
+
+function linkDoProjeto(lesson: Lesson): string {
+  return state.editorDrafts[chaveLinkProjeto(lesson)] ?? '';
+}
+
 function defaultEditorCode(lesson: Lesson, tab: WorkbenchTab): string {
   if (tab === 'sqlfree') {
     return `SELECT produto, SUM(quantidade) AS unidades, ROUND(SUM(quantidade * preco), 2) AS faturacao_eur\nFROM vendas\nGROUP BY produto\nORDER BY faturacao_eur DESC\nLIMIT 5;`;
@@ -314,6 +327,17 @@ function markLessonCompleted(lesson: Lesson): void {
   };
   saveProgress(state.completedLessons);
   scheduleCloudSync();
+}
+
+/**
+ * Conclui uma etapa de projeto quando a lista está toda marcada (e há link válido, se pedido).
+ * Desmarcar depois não desfaz a conclusão. Devolve true só quando a etapa acabou de ficar concluída.
+ */
+function concluirEtapaProjeto(lesson: Lesson): boolean {
+  if (state.completedLessons[lesson.id]) return false;
+  if (!etapaProjetoCompleta(lesson, state.practiceDone, linkDoProjeto(lesson))) return false;
+  markLessonCompleted(lesson);
+  return true;
 }
 
 let cloudSyncTimer: number | undefined;
@@ -487,10 +511,13 @@ const aparelho = vigiarAparelho(() => {
 
 /** O aparelho é de toque e estreito (independentemente da preferência do aluno). */
 function aparelhoPedeEcraDeEscrita(): boolean {
+  if (currentLesson().engine === 'projeto') return false;
   return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: false });
 }
 
+/** As etapas de projeto não têm editor, logo nunca usam o ecrã de escrita. */
 function usaEcraDeEscrita(): boolean {
+  if (currentLesson().engine === 'projeto') return false;
   return deveUsarEcraDeEscrita({ toque: aparelho.toque(), estreito: aparelho.estreito(), preferirNormal: loadPreferirEditorNormal() });
 }
 
@@ -511,6 +538,7 @@ function focarEditor(): void {
 }
 
 function abrirEcraDeEscrita(aba: AbaEscrita): void {
+  if (currentLesson().engine === 'projeto') return;
   if (state.mobileEditor === null) {
     scrollAntesDoEcra = window.scrollY;
     etapaDoEcra = etapaAtual();
@@ -644,18 +672,22 @@ function renderAcademyWorkspace(): string {
                 const rec = state.completedLessons[item.id];
                 const isDone = Boolean(rec);
                 const isHelped = rec?.status === 'helped';
-                const statusClass = isDone ? (isHelped ? 'is-helped' : 'is-done') : '';
+                // Etapa de projeto concluída: autoavaliada, nunca aparece como corrigida.
+                const isProjeto = isDone && item.engine === 'projeto';
+                const statusClass = isProjeto ? 'is-projeto' : isDone ? (isHelped ? 'is-helped' : 'is-done') : '';
+                const rotulo = isProjeto ? `${item.title} (${ESTADO_PROJETO})` : item.title;
                 return `
                   <li>
                     <button
                       type="button"
                       class="lesson-nav-btn ${isCur ? 'is-current' : ''} ${statusClass}"
                       data-select-lesson="${escapeHtml(item.id)}"
-                      title="${escapeHtml(item.title)}"
+                      title="${escapeHtml(rotulo)}"
+                      ${isProjeto ? `aria-label="${escapeHtml(rotulo)}"` : ''}
                       ${isCur ? 'aria-current="step"' : ''}
                     >
                       <span class="lesson-nav-title">${escapeHtml(item.title)}</span>
-                      <span class="lesson-step-id">${isDone ? (isHelped ? 'REF' : 'OK') : escapeHtml(item.code)}</span>
+                      <span class="lesson-step-id">${isProjeto ? '✓' : isDone ? (isHelped ? 'REF' : 'OK') : escapeHtml(item.code)}</span>
                     </button>
                   </li>
                 `;
@@ -695,7 +727,9 @@ function renderAcademyWorkspace(): string {
             <span class="status-chip is-person">Etapa ${escapeHtml(lesson.code)} de ${track.lessons.length}</span>
             ${
               state.completedLessons[lesson.id]
-                ? state.completedLessons[lesson.id].status === 'helped'
+                ? lesson.engine === 'projeto'
+                  ? `<span class="status-chip is-projeto">${escapeHtml(ESTADO_PROJETO)}</span>`
+                  : state.completedLessons[lesson.id].status === 'helped'
                   ? `<span class="status-chip is-helped">Concluída c/ apoio</span>`
                   : `<span class="status-chip is-ok">Concluída</span>`
                 : `<span class="status-chip">${escapeHtml(track.engineLabel)}</span>`
@@ -816,7 +850,7 @@ function renderAcademyWorkspace(): string {
         <section class="prose-section">
           <div class="workbench-toolbar">
             <h2>Exemplo demonstrativo</h2>
-            <button type="button" class="btn" data-action="load-example-tab">Experimentar no editor</button>
+            ${lesson.engine === 'projeto' ? '' : '<button type="button" class="btn" data-action="load-example-tab">Experimentar no editor</button>'}
           </div>
           <pre class="code-sample"><code>${highlightCode(lesson.exampleCode, lesson.engine)}</code></pre>
         </section>
@@ -858,6 +892,10 @@ function renderAcademyWorkspace(): string {
           </button>
         </div>
 
+        ${
+          lesson.engine === 'projeto'
+            ? renderPainelProjeto(lesson, state.practiceDone, linkDoProjeto(lesson))
+            : `
         <div class="workbench-toolbar">
           <div class="mode-tabs" role="tablist" aria-label="Modo do editor">
             <button type="button" role="tab" class="mode-btn" aria-selected="${state.wbTab === 'challenge'}" data-wb-tab="challenge">
@@ -928,6 +966,8 @@ function renderAcademyWorkspace(): string {
         ${state.mobileEditor === null ? renderPistas(lesson) : ''}
 
         ${state.mobileEditor === null ? renderOutputRegion(state.output, engine) : ''}
+        `
+        }
       </section>
     </div>
   `;
@@ -1083,6 +1123,8 @@ function renderApp(): void {
 
 async function executeWorkbench(): Promise<void> {
   const lesson = currentLesson();
+  // As etapas de projeto fazem-se no computador do aluno: não há nada para correr aqui.
+  if (lesson.engine === 'projeto') return;
   const engine = activeEngine();
   const code = getEditorValue();
 
@@ -1390,6 +1432,50 @@ function attachDomListeners(): void {
       renderApp();
     });
   });
+
+  // Etapas de projeto: as marcas da lista vão para practiceDone (chaves "etapa#lista:n").
+  document.querySelectorAll<HTMLInputElement>('input[data-lista-item]').forEach((inp) => {
+    inp.addEventListener('change', () => {
+      const lesson = currentLesson();
+      const n = Number(inp.dataset.listaItem);
+      const chave = chaveLista(lesson.id, n);
+      if (inp.checked) state.practiceDone.add(chave);
+      else state.practiceDone.delete(chave);
+      savePracticeDone(); // grava e agenda a sincronização com a nuvem
+      // A caixa já mostra o estado certo; só se redesenha quando a etapa acaba de ficar concluída.
+      if (concluirEtapaProjeto(lesson)) {
+        renderApp();
+        document.querySelector<HTMLInputElement>(`input[data-lista-item="${n}"]`)?.focus();
+      }
+    });
+  });
+
+  const linkInput = document.querySelector<HTMLInputElement>('input[data-link-github]');
+  if (linkInput) {
+    linkInput.addEventListener('input', () => {
+      const lesson = currentLesson();
+      state.editorDrafts[chaveLinkProjeto(lesson)] = linkInput.value;
+      saveDrafts(state.editorDrafts);
+      scheduleCloudSync();
+      // Atualiza só a mensagem: o campo não é redesenhado e não perde o foco.
+      const msg = document.querySelector<HTMLElement>('[data-link-msg]');
+      if (msg) {
+        const { texto, classe } = mensagemLink(linkInput.value);
+        msg.textContent = texto;
+        msg.className = `projeto-link-msg ${classe}`;
+      }
+      if (concluirEtapaProjeto(lesson)) {
+        // Redesenha uma vez (chip, índice, progresso) e devolve o foco e o cursor ao campo.
+        const { selectionStart, selectionEnd } = linkInput;
+        renderApp();
+        const novo = document.querySelector<HTMLInputElement>('input[data-link-github]');
+        if (novo) {
+          novo.focus();
+          novo.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
+    });
+  }
 
   document.querySelectorAll<HTMLElement>('[data-try-ref]').forEach((btn) => {
     btn.addEventListener('click', () => {
