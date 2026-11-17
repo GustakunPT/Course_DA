@@ -24,6 +24,41 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+function sanitizeTimeMap(raw: unknown): Record<string, number> {
+  if (!isPlainObject(raw)) return {};
+  const out: Record<string, number> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(raw)) {
+    if (count >= 500) break;
+    if (k.length <= 80 && typeof v === 'number' && Number.isFinite(v) && v > 0) {
+      out[k] = Math.min(360_000, Math.floor(v));
+      count++;
+    }
+  }
+  return out;
+}
+
+function sanitizeDiag(raw: unknown): {
+  background: 'zero' | 'negocio' | 'tech';
+  hoursPerWeek: number;
+  targetMonths: number;
+  updatedAt: string;
+} | null {
+  if (!isPlainObject(raw)) return null;
+  const bg = raw.background;
+  if (bg !== 'zero' && bg !== 'negocio' && bg !== 'tech') return null;
+  const hrs = Number(raw.hoursPerWeek);
+  const months = Number(raw.targetMonths);
+  if (!Number.isFinite(hrs) || hrs < 2 || hrs > 40) return null;
+  if (!Number.isFinite(months) || months < 1 || months > 36) return null;
+  return {
+    background: bg,
+    hoursPerWeek: Math.round(hrs),
+    targetMonths: Math.round(months),
+    updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt.slice(0, 40) : new Date().toISOString(),
+  };
+}
+
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -98,6 +133,8 @@ export async function POST(request: Request): Promise<Response> {
     const practice = Array.isArray(body.practice)
       ? body.practice.filter((x: unknown) => typeof x === 'string' && x.length <= 80).slice(0, 500)
       : [];
+    const lessonTimes = sanitizeTimeMap(body.lessonTimes);
+    const diagnostic = sanitizeDiag(body.diagnostic);
 
     const updatedAt = new Date().toISOString();
     const payload = {
@@ -108,6 +145,8 @@ export async function POST(request: Request): Promise<Response> {
       drafts,
       quizzes,
       practice,
+      lessonTimes,
+      diagnostic,
       lastLocation,
     };
 

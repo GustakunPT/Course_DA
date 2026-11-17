@@ -61,6 +61,7 @@ export interface AppState {
   lessonTimes: LessonTimeMap;
   timerPaused: boolean;
   showDiagnosticModal: boolean;
+  showGuideModal: boolean;
   diagnostic: DiagnosticProfile | null;
   diagnosticDraft: DiagnosticProfile;
 }

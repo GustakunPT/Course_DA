@@ -42,7 +42,15 @@ function isIgnored(file: string, patterns: string[]): boolean {
   });
 }
 
+const MAX_GIT_CHARS = 4_000;
+
 export function runGitSimulator(state: GitRepoState, scriptText: string): { output: string; nextState: GitRepoState } {
+  if (scriptText.length > MAX_GIT_CHARS) {
+    return {
+      output: `Erro: o script Git excede o limite de ${MAX_GIT_CHARS} caracteres do simulador.`,
+      nextState: state,
+    };
+  }
   const s: GitRepoState = JSON.parse(JSON.stringify(state));
   const lines = scriptText
     .split('\n')

@@ -15,16 +15,14 @@ import {
   loadSavedDiagnostic,
   saveDiagnostic,
   type BackgroundLevel,
+  type DiagnosticProfile,
 } from './data/diagnostic';
 import { getCourseMinutes } from './data/studyPlan';
 import type { EngineKind, GitChallengeSpec, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
-import { runSqlQuery } from './engines/sqlEngine';
-import { runPythonCode } from './engines/pythonEngine';
+import { runPythonCode, stopPythonExecution } from './engines/pythonEngine';
 import { createInitialGitState, runGitSimulator } from './engines/gitEngine';
-import { renderExplorerHtml } from './ui/explorerView';
-import { renderCheatsheetHtml } from './ui/cheatsheetView';
-import { renderGanttHtml, type GanttFilterStatus } from './ui/ganttView';
+import type { GanttFilterStatus } from './ui/ganttView';
 import { formatCodePrettier, highlightCode, renderLineNumbers } from './ui/codeEditor';
 import {
   clearAllUserProgress,
@@ -40,9 +38,11 @@ import {
   loadSavedProgress,
   loadSavedQuizzes,
   loadSyncCode,
+  mergeLessonTimes,
   mergeProgressRecords,
   pullCloudSync,
   pushCloudSync,
+  type CloudSyncPayload,
   loadSavedPractice,
   savePractice,
   saveDrafts,
@@ -52,10 +52,11 @@ import {
   saveSyncCode,
 } from './data/progress';
 import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
+import { buildAnswerSheetCode, isAnswerSheetMode, renderAnswerSheetPanel } from './ui/answerSheetPanel';
 import { downloadTextFile, escapeHtml } from './ui/html';
 import { quizDisplayOrder } from './ui/quizOrder';
 import { DEFAULT_LAYOUT, loadSavedLayout, saveLayoutPrefs } from './ui/layout';
-import { renderDiagnosticModal, renderProgressModal, renderThemeModal } from './ui/modals';
+import { renderDiagnosticModal, renderGuideModal, renderProgressModal, renderThemeModal } from './ui/modals';
 import { renderOutputRegion } from './ui/outputView';
 import { chaveLista, ESTADO_PROJETO, etapaProjetoCompleta, linkGithubValido, mensagemLink, renderPainelProjeto } from './ui/projectPanel';
 import {
@@ -117,6 +118,7 @@ const state: AppState = {
   lessonTimes: loadSavedLessonTimes(),
   timerPaused: false,
   showDiagnosticModal: false,
+  showGuideModal: false,
   diagnostic: savedDiagnostic,
   diagnosticDraft: savedDiagnostic ?? {
     background: 'zero',
@@ -373,26 +375,85 @@ function concluirEtapaProjeto(lesson: Lesson): boolean {
   return true;
 }
 
+function buildCloudSyncPayload(code?: string | null) {
+  return {
+    ...(code !== undefined ? { code } : {}),
+    progress: state.completedLessons,
+    drafts: state.editorDrafts,
+    quizzes: state.quizSelection,
+    practice: [...state.practiceDone],
+    lessonTimes: state.lessonTimes,
+    diagnostic: state.diagnostic,
+    lastLocation: {
+      trackId: state.trackId,
+      lessonId: state.lessonId,
+      view: state.view,
+      timestamp: new Date().toISOString(),
+    },
+  };
+}
+
+function mergeDiagnosticProfiles(
+  local: DiagnosticProfile | null,
+  remote: DiagnosticProfile | null,
+): DiagnosticProfile | null {
+  if (!remote) return local;
+  if (!local) return remote;
+  return Date.parse(remote.updatedAt) >= Date.parse(local.updatedAt) ? remote : local;
+}
+
+function applyRemoteCloudSync(remote: CloudSyncPayload): void {
+  state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
+  state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
+  state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
+  state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
+  state.lessonTimes = mergeLessonTimes(state.lessonTimes, remote.lessonTimes);
+  const mergedDiag = mergeDiagnosticProfiles(state.diagnostic, remote.diagnostic);
+  if (mergedDiag) {
+    state.diagnostic = mergedDiag;
+    state.diagnosticDraft = mergedDiag;
+    state.ganttPaceMinutes = mergedDiag.hoursPerWeek * 60;
+    saveDiagnostic(mergedDiag);
+  }
+  savePractice(state.practiceDone);
+  saveProgress(state.completedLessons);
+  saveDrafts(state.editorDrafts, true);
+  saveQuizzes(state.quizSelection);
+  saveLessonTimes(state.lessonTimes);
+  saveSyncCode(remote.code);
+  state.syncCode = remote.code;
+  state.syncStatus = 'synced';
+  state.syncLastUpdatedAt = remote.updatedAt;
+}
+
 let cloudSyncTimer: number | undefined;
+function renderViewLoadingSkeleton(title: string): string {
+  return `
+    <section class="seam-panels">
+      <div class="seam-panel skeleton-stack" role="status">
+        <h1>${escapeHtml(title)}</h1>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+      </div>
+    </section>
+  `;
+}
+
+let explorerViewMod: typeof import('./ui/explorerView') | null = null;
+let ganttViewMod: typeof import('./ui/ganttView') | null = null;
+let cheatsheetViewMod: typeof import('./ui/cheatsheetView') | null = null;
+let explorerLoadStarted = false;
+let ganttLoadStarted = false;
+let cheatsheetLoadStarted = false;
+
 function scheduleCloudSync(): void {
   if (!state.syncCode) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
   state.syncStatus = 'syncing';
   cloudSyncTimer = window.setTimeout(() => {
     if (!state.syncCode) return;
-    void pushCloudSync({
-      code: state.syncCode,
-      progress: state.completedLessons,
-      drafts: state.editorDrafts,
-      quizzes: state.quizSelection,
-      practice: [...state.practiceDone],
-      lastLocation: {
-        trackId: state.trackId,
-        lessonId: state.lessonId,
-        view: state.view,
-        timestamp: new Date().toISOString(),
-      },
-    })
+    void pushCloudSync(buildCloudSyncPayload(state.syncCode))
       .then((res) => {
         state.syncStatus = 'synced';
         state.syncLastUpdatedAt = res.updatedAt;
@@ -691,6 +752,7 @@ function renderAcademyWorkspace(): string {
 
   const engine = activeEngine();
   const editorVal = getEditorValue();
+  const answerSheet = isAnswerSheetMode(lesson.id, state.wbTab, state.practiceIdx);
 
 
   const { sidebarWidth, lessonRatio, editorHeight, sidebarCollapsed } = state.layout;
@@ -846,9 +908,12 @@ function renderAcademyWorkspace(): string {
           lesson.id === 'py-00-pensamento' && !state.diagnostic
             ? `<div class="gantt-diag-strip">
                 <div class="gantt-diag-info">
-                  <strong>Novo na academia?</strong> <span class="measured">Define a tua bagagem, horas por semana e prazo alvo em 30 segundos para personalizar o Cronograma Gantt.</span>
+                  <strong>Novo na academia?</strong> <span class="measured">Vê como navegar pelas 3 janelas ou faz o diagnóstico de 30 s para ajustar o Cronograma Gantt ao teu ritmo.</span>
                 </div>
-                <button type="button" class="btn btn-primary" data-action="open-diagnostic-modal">🎯 Fazer diagnóstico</button>
+                <div class="action-pair" style="flex-wrap:wrap;">
+                  <button type="button" class="btn" data-action="open-guide-modal">? Como navegar</button>
+                  <button type="button" class="btn btn-primary" data-action="open-diagnostic-modal">🎯 Fazer diagnóstico</button>
+                </div>
               </div>`
             : ''
         }
@@ -1024,22 +1089,29 @@ function renderAcademyWorkspace(): string {
               Consola SQL
             </button>
           </div>
-          <span class="status-chip desktop-shortcut-chip">Ctrl + Enter para correr</span>
+          <span class="status-chip desktop-shortcut-chip">
+            ${answerSheet ? 'Preenche os valores e clica Verificar' : 'Ctrl + Enter para correr'}
+          </span>
         </div>
 
         ${renderEnunciado(lesson)}
 
         ${
-          usaEcraDeEscrita()
-            ? state.mobileEditor === null
-              ? renderPreviaCodigo(highlightCode(editorVal, engine))
-              : ''
-            : `${renderSimbolosBar(engine)}
+          answerSheet
+            ? renderAnswerSheetPanel(lesson.id, editorVal)
+            : usaEcraDeEscrita()
+              ? state.mobileEditor === null
+                ? renderPreviaCodigo(highlightCode(editorVal, engine))
+                : ''
+              : `${renderSimbolosBar(engine)}
         ${renderEditorShell(editorVal, engine)}
         ${aparelhoPedeEcraDeEscrita() ? '<button type="button" class="link-btn" data-action="usar-ecra-escrita">Usar o ecrã de escrita</button>' : ''}`
         }
 
-        <!-- Resizable Horizontal Splitter: Editor <-> Output -->
+        ${
+          answerSheet
+            ? ''
+            : `<!-- Resizable Horizontal Splitter: Editor <-> Output -->
         <div
           id="splitter-editor"
           class="pane-splitter-h"
@@ -1048,17 +1120,27 @@ function renderAcademyWorkspace(): string {
           aria-orientation="horizontal"
           aria-label="Redimensionar altura do editor de código"
           title="Arrasta para aumentar ou diminuir a altura do editor (duplo clique para repor)"
-        ></div>
+        ></div>`
+        }
 
         <div class="workbench-actions">
           <div class="action-pair">
             <button type="button" class="btn btn-primary" data-action="run-code" ${state.output.kind === 'loading' ? 'disabled' : ''}>
-              ${state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar agora'}
+              ${answerSheet ? 'Verificar respostas' : state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar agora'}
             </button>
-            <button type="button" class="btn" data-action="format-code" title="Formatar código com Prettier (Shift + Alt + F)">
+            ${
+              state.output.kind === 'loading' && activeEngine() === 'python'
+                ? '<button type="button" class="btn btn-danger-outline" data-action="stop-code">Parar execução</button>'
+                : ''
+            }
+            ${
+              answerSheet
+                ? ''
+                : `<button type="button" class="btn" data-action="format-code" title="Formatar código com Prettier (Shift + Alt + F)">
               Formatar Prettier
-            </button>
-            <button type="button" class="btn" data-action="reset-code">Repor código</button>
+            </button>`
+            }
+            <button type="button" class="btn" data-action="reset-code">${answerSheet ? 'Limpar respostas' : 'Repor código'}</button>
           </div>
           ${
             state.wbTab === 'challenge'
@@ -1072,7 +1154,7 @@ function renderAcademyWorkspace(): string {
                     state.confirmSolutionLessonId === lesson.id
                       ? `<button type="button" class="btn" data-action="apply-solution">Confirmar solução</button>
                          <button type="button" class="btn" data-action="cancel-solution">Cancelar</button>`
-                      : `<button type="button" class="btn" data-action="ask-solution">Mostrar solução de referência</button>`
+                      : `<button type="button" class="btn" data-action="ask-solution">${answerSheet ? 'Mostrar respostas de referência' : 'Mostrar solução de referência'}</button>`
                   }
                 </div>`
               : ''
@@ -1129,24 +1211,55 @@ function renderApp(): void {
           </div>
         </section>
       `;
+    } else if (!explorerViewMod) {
+      if (!explorerLoadStarted) {
+        explorerLoadStarted = true;
+        void import('./ui/explorerView').then((mod) => {
+          explorerViewMod = mod;
+          if (state.view === 'explorador') renderApp();
+        });
+      }
+      mainContent = renderViewLoadingSkeleton('A carregar Explorador de Dados…');
     } else {
-      mainContent = renderExplorerHtml(state.dataset, {
+      mainContent = explorerViewMod.renderExplorerHtml(state.dataset, {
         serie: state.explorerSerie,
         cidade: state.explorerCidade,
         categoria: state.explorerCategoria,
       });
     }
   } else if (state.view === 'cronograma') {
-    mainContent = renderGanttHtml(allTracks, state.completedLessons, {
-      paceMinutesPerWeek: state.ganttPaceMinutes,
-      filterStatus: state.ganttFilterStatus,
-      collapsedTracks: state.ganttCollapsedTracks,
-      currentLessonId: state.lessonId,
-      lessonTimes: state.lessonTimes,
-      diagnostic: state.diagnostic,
-    });
+    if (!ganttViewMod) {
+      if (!ganttLoadStarted) {
+        ganttLoadStarted = true;
+        void import('./ui/ganttView').then((mod) => {
+          ganttViewMod = mod;
+          if (state.view === 'cronograma') renderApp();
+        });
+      }
+      mainContent = renderViewLoadingSkeleton('A carregar Cronograma…');
+    } else {
+      mainContent = ganttViewMod.renderGanttHtml(allTracks, state.completedLessons, {
+        paceMinutesPerWeek: state.ganttPaceMinutes,
+        filterStatus: state.ganttFilterStatus,
+        collapsedTracks: state.ganttCollapsedTracks,
+        currentLessonId: state.lessonId,
+        lessonTimes: state.lessonTimes,
+        diagnostic: state.diagnostic,
+      });
+    }
   } else {
-    mainContent = renderCheatsheetHtml(state.refQuery, state.refCategory);
+    if (!cheatsheetViewMod) {
+      if (!cheatsheetLoadStarted) {
+        cheatsheetLoadStarted = true;
+        void import('./ui/cheatsheetView').then((mod) => {
+          cheatsheetViewMod = mod;
+          if (state.view === 'referencia') renderApp();
+        });
+      }
+      mainContent = renderViewLoadingSkeleton('A carregar Referência Rápida…');
+    } else {
+      mainContent = cheatsheetViewMod.renderCheatsheetHtml(state.refQuery, state.refCategory);
+    }
   }
 
   root.innerHTML = `
@@ -1205,6 +1318,15 @@ function renderApp(): void {
           <div class="nav-actions">
             <button
               type="button"
+              class="btn nav-guide-btn"
+              data-action="open-guide-modal"
+              title="Como navegar pelas janelas (etapas, teoria e bancada de código)"
+            >
+              <span class="progress-full">? Guia</span>
+              <span class="progress-compact">?</span>
+            </button>
+            <button
+              type="button"
               class="btn nav-progress-btn"
               data-action="open-progress-modal"
               title="Ver progresso por trilha, código de retoma e exportar portefólio"
@@ -1244,6 +1366,7 @@ function renderApp(): void {
       ${state.showProgressModal ? renderProgressModal(state) : ''}
       ${state.showThemeModal ? renderThemeModal(state) : ''}
       ${state.showDiagnosticModal ? renderDiagnosticModal(state) : ''}
+      ${state.showGuideModal ? renderGuideModal() : ''}
       ${ecraAberto ? renderEcraDeEscritaAtual() : ''}
     </div>
   `;
@@ -1255,10 +1378,13 @@ function renderApp(): void {
   attachDomListeners();
 }
 
+let activeRunToken = 0;
+
 async function executeWorkbench(): Promise<void> {
   const lesson = currentLesson();
   // As etapas de projeto fazem-se no computador do aluno: não há nada para correr aqui.
   if (lesson.engine === 'projeto') return;
+  const runToken = ++activeRunToken;
   const engine = activeEngine();
   const code = getEditorValue();
 
@@ -1266,7 +1392,9 @@ async function executeWorkbench(): Promise<void> {
   renderApp();
 
   if (engine === 'sql') {
+    const { runSqlQuery } = await import('./engines/sqlEngine');
     const res = await runSqlQuery(code);
+    if (runToken !== activeRunToken) return;
     if (res.error) {
       state.output = { kind: 'error', errorText: res.error, elapsedMs: res.elapsedMs };
       renderApp();
@@ -1359,10 +1487,13 @@ async function executeWorkbench(): Promise<void> {
   const pyChallenge = state.wbTab === 'challenge' ? activePythonChallenge(lesson) : undefined;
   const pyChecks = pyChallenge?.checks;
   const pyRes = await runPythonCode(code, pyChecks, (statusMsg) => {
+    if (runToken !== activeRunToken) return;
     state.output = { kind: 'loading', statusMessage: statusMsg };
     const statusEl = document.querySelector('.output-panel .measured');
     if (statusEl) statusEl.textContent = statusMsg;
   }, currentLesson().ficheirosDados ?? []);
+
+  if (runToken !== activeRunToken) return;
 
   if (pyRes.error) {
     state.output = {
@@ -1403,6 +1534,28 @@ async function executeWorkbench(): Promise<void> {
 }
 
 function attachDomListeners(): void {
+  const answerInputs = Array.from(document.querySelectorAll<HTMLInputElement>('.answer-field-input[data-answer-var]'));
+  if (answerInputs.length > 0) {
+    const syncAnswerInputs = (): void => {
+      const vals: Record<string, string> = {};
+      for (const inp of answerInputs) {
+        if (inp.dataset.answerVar) vals[inp.dataset.answerVar] = inp.value;
+      }
+      state.editorDrafts[draftKey(currentLesson(), state.wbTab)] = buildAnswerSheetCode(currentLesson().id, vals);
+      saveDrafts(state.editorDrafts);
+      scheduleCloudSync();
+    };
+    for (const inp of answerInputs) {
+      inp.addEventListener('input', syncAnswerInputs);
+      inp.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          void executeWorkbench();
+        }
+      });
+    }
+  }
+
   const editor = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
   const highlightPre = document.getElementById('workbench-highlight') as HTMLElement | null;
   const gutterEl = document.getElementById('workbench-gutter') as HTMLElement | null;
@@ -1835,6 +1988,12 @@ function attachDomListeners(): void {
         void executeWorkbench();
       } else if (act === 'run-code') {
         void executeWorkbench();
+      } else if (act === 'stop-code') {
+        if (!stopPythonExecution()) {
+          activeRunToken++;
+          state.output = { kind: 'error', errorText: 'Execução interrompida pelo utilizador.' };
+          renderApp();
+        }
       } else if (act === 'abrir-ecra-escrita') {
         abrirEcraDeEscrita('codigo');
       } else if (act === 'fechar-ecra-escrita') {
@@ -1941,18 +2100,7 @@ function attachDomListeners(): void {
         renderApp();
         void (async () => {
           try {
-            const res = await pushCloudSync({
-              progress: state.completedLessons,
-              drafts: state.editorDrafts,
-              quizzes: state.quizSelection,
-              practice: [...state.practiceDone],
-              lastLocation: {
-                trackId: state.trackId,
-                lessonId: state.lessonId,
-                view: state.view,
-                timestamp: new Date().toISOString(),
-              },
-            });
+            const res = await pushCloudSync(buildCloudSyncPayload());
             state.syncCode = res.code;
             state.syncStatus = 'synced';
             state.syncLastUpdatedAt = res.updatedAt;
@@ -2009,19 +2157,7 @@ function attachDomListeners(): void {
         renderApp();
         void (async () => {
           try {
-            const res = await pushCloudSync({
-              code: state.syncCode,
-              progress: state.completedLessons,
-              drafts: state.editorDrafts,
-              quizzes: state.quizSelection,
-              practice: [...state.practiceDone],
-              lastLocation: {
-                trackId: state.trackId,
-                lessonId: state.lessonId,
-                view: state.view,
-                timestamp: new Date().toISOString(),
-              },
-            });
+            const res = await pushCloudSync(buildCloudSyncPayload(state.syncCode));
             state.syncStatus = 'synced';
             state.syncLastUpdatedAt = res.updatedAt;
             state.progressModalFeedback = {
@@ -2064,18 +2200,7 @@ function attachDomListeners(): void {
           void (async () => {
             try {
               const remote = await pullCloudSync(cloudCode);
-              state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
-              state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
-              state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
-              state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
-              savePractice(state.practiceDone);
-              saveProgress(state.completedLessons);
-              saveDrafts(state.editorDrafts, true);
-              saveQuizzes(state.quizSelection);
-              saveSyncCode(remote.code);
-              state.syncCode = remote.code;
-              state.syncStatus = 'synced';
-              state.syncLastUpdatedAt = remote.updatedAt;
+              applyRemoteCloudSync(remote);
               if (remote.lastLocation) {
                 const loc = locateLesson(remote.lastLocation!.trackId, remote.lastLocation!.lessonId);
                 if (loc) {
@@ -2142,6 +2267,7 @@ function attachDomListeners(): void {
           state.quizSelection,
           [...state.practiceDone],
           state.lessonTimes,
+          state.diagnostic,
         );
         downloadTextFile('mercearia_progresso_backup.json', json, 'application/json;charset=utf-8');
         state.progressModalFeedback = { ok: true, text: 'Backup (.json) descarregado com sucesso.' };
@@ -2183,11 +2309,26 @@ function attachDomListeners(): void {
       } else if (act === 'open-gantt-view') {
         saveLessonTimes(state.lessonTimes);
         state.showProgressModal = false;
+        state.showGuideModal = false;
         state.view = 'cronograma';
         renderApp();
+      } else if (act === 'open-guide-modal') {
+        state.showProgressModal = false;
+        state.showDiagnosticModal = false;
+        state.showGuideModal = true;
+        renderApp();
+      } else if (act === 'close-guide-modal') {
+        state.showGuideModal = false;
+        renderApp();
+      } else if (act === 'close-guide-backdrop') {
+        if (ev.target === el) {
+          state.showGuideModal = false;
+          renderApp();
+        }
       } else if (act === 'toggle-lesson-timer') {
         state.timerPaused = !state.timerPaused;
         saveLessonTimes(state.lessonTimes);
+        scheduleCloudSync();
         renderApp();
       } else if (act === 'gantt-expand-all') {
         state.ganttCollapsedTracks.clear();
@@ -2197,6 +2338,7 @@ function attachDomListeners(): void {
         renderApp();
       } else if (act === 'open-diagnostic-modal') {
         state.showProgressModal = false;
+        state.showGuideModal = false;
         state.diagnosticDraft = state.diagnostic ?? state.diagnosticDraft;
         state.showDiagnosticModal = true;
         renderApp();
@@ -2212,6 +2354,7 @@ function attachDomListeners(): void {
         const saved = { ...state.diagnosticDraft, updatedAt: new Date().toISOString() };
         state.diagnostic = saved;
         saveDiagnostic(saved);
+        scheduleCloudSync();
         state.ganttPaceMinutes = saved.hoursPerWeek * 60;
         state.showDiagnosticModal = false;
         if (act === 'apply-diagnostic-and-go') {
@@ -2252,6 +2395,13 @@ function attachDomListeners(): void {
           state.quizSelection = imported.quizzes;
           state.practiceDone = new Set(imported.practice);
           state.lessonTimes = imported.timeSpent;
+          if (imported.diagnostic) {
+            state.diagnostic = imported.diagnostic;
+            state.diagnosticDraft = imported.diagnostic;
+            state.ganttPaceMinutes = imported.diagnostic.hoursPerWeek * 60;
+            saveDiagnostic(imported.diagnostic);
+          }
+          saveLessonTimes(state.lessonTimes);
           state.progressModalFeedback = {
             ok: true,
             text: `Backup importado! (${Object.keys(imported.progress).length} etapas concluídas).`,
@@ -2440,13 +2590,17 @@ window.addEventListener('keydown', (ev) => {
     document.querySelector<HTMLElement>('.nav-font-btn')?.focus();
     return;
   }
-  if (ev.key === 'Escape' && state.mobileEditor !== null && !state.showProgressModal && !state.showThemeModal) {
+  const anyModalOpen =
+    state.showProgressModal || state.showThemeModal || state.showDiagnosticModal || state.showGuideModal;
+  if (ev.key === 'Escape' && state.mobileEditor !== null && !anyModalOpen) {
     fecharEcraDeEscrita();
     return;
   }
-  if (ev.key === 'Escape' && (state.showProgressModal || state.showThemeModal)) {
+  if (ev.key === 'Escape' && anyModalOpen) {
     state.showProgressModal = false;
     state.showThemeModal = false;
+    state.showDiagnosticModal = false;
+    state.showGuideModal = false;
     renderApp();
   }
 });
@@ -2460,18 +2614,7 @@ async function bootstrapCloudSync(): Promise<void> {
 
   try {
     const remote = await pullCloudSync(targetCode);
-    state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
-    state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
-    state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
-    state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
-    savePractice(state.practiceDone);
-    saveProgress(state.completedLessons);
-    saveDrafts(state.editorDrafts, true);
-    saveQuizzes(state.quizSelection);
-    saveSyncCode(remote.code);
-    state.syncCode = remote.code;
-    state.syncStatus = 'synced';
-    state.syncLastUpdatedAt = remote.updatedAt;
+    applyRemoteCloudSync(remote);
 
     if (normalizedUrlCode && remote.lastLocation) {
       const loc = locateLesson(remote.lastLocation!.trackId, remote.lastLocation!.lessonId);
@@ -2526,6 +2669,7 @@ window.setInterval(() => {
     state.showProgressModal ||
     state.showThemeModal ||
     state.showDiagnosticModal ||
+    state.showGuideModal ||
     Date.now() - lastStudyActivityAt > 180_000
   ) {
     return;

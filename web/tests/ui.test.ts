@@ -25,4 +25,10 @@ describe('renderOutputRegion', () => {
     const html = renderOutputRegion({ kind: 'error', errorText: '<i>falhou</i>' }, 'python');
     expect(html).toContain('&lt;i&gt;falhou&lt;/i&gt;');
   });
+
+  it('mostra o botão Parar execução durante o carregamento Python', () => {
+    const html = renderOutputRegion({ kind: 'loading', statusMessage: 'A executar…' }, 'python');
+    expect(html).toContain('data-action="stop-code"');
+    expect(html).toContain('Parar execução');
+  });
 });

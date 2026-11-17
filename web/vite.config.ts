@@ -20,6 +20,44 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     target: 'es2022',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const normalized = id.replace(/\\/g, '/');
+          if (normalized.includes('/node_modules/sql.js/')) {
+            return 'vendor-sql';
+          }
+          if (
+            normalized.includes('/src/data/trackGitAndBi') ||
+            normalized.includes('/src/data/practiceBiPro') ||
+            normalized.includes('/src/data/practiceStats') ||
+            normalized.includes('/src/data/practiceGit') ||
+            normalized.includes('/src/data/moreQuiz')
+          ) {
+            return 'curriculum-bi-stats';
+          }
+          if (
+            normalized.includes('/src/data/trackCareerPro') ||
+            normalized.includes('/src/data/trackProjetoFinal') ||
+            normalized.includes('/src/data/practiceProjeto')
+          ) {
+            return 'curriculum-career';
+          }
+          if (
+            normalized.includes('/src/data/trackPython') ||
+            normalized.includes('/src/data/trackSql') ||
+            normalized.includes('/src/data/trackPandas') ||
+            normalized.includes('/src/data/practicePython') ||
+            normalized.includes('/src/data/practiceSql') ||
+            normalized.includes('/src/data/practicePandas') ||
+            normalized.includes('/src/data/pythonExplained')
+          ) {
+            return 'curriculum-core';
+          }
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     port: 4173,

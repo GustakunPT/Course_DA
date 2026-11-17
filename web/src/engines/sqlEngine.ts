@@ -1,4 +1,4 @@
-import initSqlJs, { type Database } from 'sql.js';
+import type { Database } from 'sql.js';
 import { loadMerceariaDataset } from './csvEngine';
 
 export interface SqlExecutionResult {
@@ -13,10 +13,11 @@ let dbPromise: Promise<Database> | null = null;
 export async function getSqlDatabase(forceReset = false): Promise<Database> {
   if (!dbPromise || forceReset) {
     dbPromise = (async () => {
-      const [SQL, dataset] = await Promise.all([
-        initSqlJs({ locateFile: () => '/sql-wasm.wasm' }),
+      const [sqlJsMod, dataset] = await Promise.all([
+        import('sql.js'),
         loadMerceariaDataset(),
       ]);
+      const SQL = await sqlJsMod.default({ locateFile: () => '/sql-wasm.wasm' });
 
       const db = new SQL.Database();
       db.run(`
@@ -108,8 +109,48 @@ export async function getSqlDatabase(forceReset = false): Promise<Database> {
   return dbPromise;
 }
 
+const MAX_SQL_CHARS = 15_000;
+const BLOCKED_SQL_KEYWORDS = /\b(DROP|DELETE|UPDATE|INSERT|ALTER|ATTACH|DETACH|PRAGMA|CREATE|VACUUM|REINDEX)\b|\bREPLACE\s+INTO\b/i;
+
+/** Garante que o editor SQL executa apenas consultas de leitura (SELECT, WITH, EXPLAIN). */
+export function validateSqlReadOnly(query: string): string | null {
+  if (query.length > MAX_SQL_CHARS) {
+    return `A consulta excede o limite de ${MAX_SQL_CHARS} caracteres da bancada.`;
+  }
+  const stripped = query
+    .replace(/--[^\n]*/g, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/'(?:''|[^'])*'/g, "''")
+    .replace(/"(?:""|[^"])*"/g, '""')
+    .trim();
+
+  if (!stripped) return null;
+  if (BLOCKED_SQL_KEYWORDS.test(stripped)) {
+    return 'A bancada SQL permite apenas consultas de leitura (SELECT, WITH, EXPLAIN). Alterações de esquema ou dados estão bloqueadas.';
+  }
+  const stmts = stripped
+    .split(';')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  for (const stmt of stmts) {
+    if (!/^(SELECT|WITH|EXPLAIN\s+(?:QUERY\s+PLAN\s+)?(?:SELECT|WITH))\b/i.test(stmt)) {
+      return 'Cada instrução na bancada SQL deve começar por SELECT, WITH ou EXPLAIN.';
+    }
+  }
+  return null;
+}
+
 export async function runSqlQuery(query: string): Promise<SqlExecutionResult> {
   const start = performance.now();
+  const guardError = validateSqlReadOnly(query);
+  if (guardError) {
+    return {
+      columns: [],
+      rows: [],
+      elapsedMs: Math.round((performance.now() - start) * 10) / 10,
+      error: guardError,
+    };
+  }
   try {
     const db = await getSqlDatabase();
     const res = db.exec(query);

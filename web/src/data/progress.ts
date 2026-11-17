@@ -1,5 +1,6 @@
 import type { Track } from './types';
 import { linkGithubValido } from '../ui/projectPanel';
+import { sanitizeDiagnostic, saveDiagnostic, type DiagnosticProfile } from './diagnostic';
 import { clearSavedLessonTimes, sanitizeLessonTimes, saveLessonTimes, type LessonTimeMap } from './timeTracker';
 
 export type LessonCompletionStatus = 'autonomous' | 'helped';
@@ -29,6 +30,8 @@ export interface ExportableProgress {
   practice?: string[];
   /** Tempo real registado por etapa em segundos (opcional). */
   timeSpent?: LessonTimeMap;
+  /** Diagnóstico inicial guardado pelo aluno (opcional). */
+  diagnostic?: DiagnosticProfile | null;
 }
 
 const STORAGE_V1_KEY = 'mercearia_academia_done_v1';
@@ -198,6 +201,7 @@ export function exportProgressJson(
   quizzes: Record<string, number>,
   practice: string[] = [],
   timeSpent: LessonTimeMap = {},
+  diagnostic: DiagnosticProfile | null = null,
 ): string {
   const data: ExportableProgress = {
     version: 2,
@@ -207,6 +211,7 @@ export function exportProgressJson(
     quizzes,
     practice,
     timeSpent,
+    ...(diagnostic ? { diagnostic } : {}),
   };
   return JSON.stringify(data, null, 2);
 }
@@ -217,6 +222,7 @@ export function importProgressJson(jsonStr: string): {
   quizzes: Record<string, number>;
   practice: string[];
   timeSpent: LessonTimeMap;
+  diagnostic: DiagnosticProfile | null;
 } {
   const parsed = JSON.parse(jsonStr);
   if (!parsed || typeof parsed !== 'object') {
@@ -237,8 +243,10 @@ export function importProgressJson(jsonStr: string): {
   savePractice(practice);
   const timeSpent = sanitizeLessonTimes(parsed.timeSpent);
   saveLessonTimes(timeSpent);
+  const diagnostic = sanitizeDiagnostic(parsed.diagnostic);
+  if (diagnostic) saveDiagnostic(diagnostic);
 
-  return { progress, drafts, quizzes, practice, timeSpent };
+  return { progress, drafts, quizzes, practice, timeSpent, diagnostic };
 }
 
 export function generatePortfolioMarkdown(
@@ -536,6 +544,16 @@ export function mergeProgressRecords(
   return merged;
 }
 
+export function mergeLessonTimes(local: LessonTimeMap, remote: LessonTimeMap): LessonTimeMap {
+  const cleanLocal = sanitizeLessonTimes(local);
+  const cleanRemote = sanitizeLessonTimes(remote);
+  const merged: LessonTimeMap = { ...cleanLocal };
+  for (const [id, secs] of Object.entries(cleanRemote)) {
+    merged[id] = Math.max(merged[id] ?? 0, secs);
+  }
+  return merged;
+}
+
 export interface CloudSyncPayload {
   code: string;
   updatedAt: string;
@@ -543,6 +561,8 @@ export interface CloudSyncPayload {
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
   practice: string[];
+  lessonTimes: LessonTimeMap;
+  diagnostic: DiagnosticProfile | null;
   lastLocation: LastVisitedLocation | null;
 }
 
@@ -552,6 +572,8 @@ export async function pushCloudSync(payload: {
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
   practice?: string[];
+  lessonTimes?: LessonTimeMap;
+  diagnostic?: DiagnosticProfile | null;
   lastLocation: LastVisitedLocation | null;
 }): Promise<{ code: string; updatedAt: string }> {
   const res = await fetch('/api/sync', {
@@ -563,6 +585,8 @@ export async function pushCloudSync(payload: {
       drafts: payload.drafts,
       quizzes: payload.quizzes,
       practice: payload.practice ?? [],
+      lessonTimes: sanitizeLessonTimes(payload.lessonTimes ?? {}),
+      diagnostic: payload.diagnostic ?? null,
       lastLocation: payload.lastLocation,
     }),
   });
@@ -594,6 +618,8 @@ export async function pullCloudSync(code: string): Promise<CloudSyncPayload> {
     drafts: data.drafts && typeof data.drafts === 'object' ? data.drafts : {},
     quizzes: data.quizzes && typeof data.quizzes === 'object' ? data.quizzes : {},
     practice: sanitizePractice(data.practice),
+    lessonTimes: sanitizeLessonTimes(data.lessonTimes),
+    diagnostic: sanitizeDiagnostic(data.diagnostic),
     lastLocation: data.lastLocation ?? null,
   };
 }

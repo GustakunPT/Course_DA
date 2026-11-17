@@ -66,6 +66,29 @@ describe('POST /api/sync', () => {
     expect(saved.practice).toEqual(['py-04-condicoes:1']);
   });
 
+  it('guarda e devolve lessonTimes e diagnostic sanitizados', async () => {
+    const { code } = await (
+      await post({
+        lessonTimes: { 'py-01-sintaxe': 420.9, invalido: -5, texto: 'nope' },
+        diagnostic: { background: 'negocio', hoursPerWeek: 8.4, targetMonths: 6, updatedAt: '2026-11-17T10:00:00Z' },
+      })
+    ).json();
+    const res = await GET(new Request(`https://x/api/sync?code=${code}`));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.lessonTimes).toEqual({ 'py-01-sintaxe': 420 });
+    expect(body.diagnostic).toEqual({
+      background: 'negocio',
+      hoursPerWeek: 8,
+      targetMonths: 6,
+      updatedAt: '2026-11-17T10:00:00Z',
+    });
+
+    const bad = await (await post({ diagnostic: { background: 'invalido', hoursPerWeek: 8, targetMonths: 6 } })).json();
+    const badBody = await (await GET(new Request(`https://x/api/sync?code=${bad.code}`))).json();
+    expect(badBody.diagnostic).toBeNull();
+  });
+
   it('não expõe erros internos', async () => {
     const blob = await import('@vercel/blob');
     vi.mocked(blob.put).mockRejectedValueOnce(new Error('token secreto inválido'));

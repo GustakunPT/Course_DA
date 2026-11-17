@@ -28,7 +28,14 @@ export function renderOutputRegion(out: OutputViewModel, engine: EngineKind): st
       <div class="output-panel" role="status" aria-live="polite">
         <div class="output-header">
           <span class="status-chip">${escapeHtml(engineName)}</span>
-          <span class="measured">${escapeHtml(out.statusMessage ?? 'A executar…')}</span>
+          <div class="output-header-actions">
+            <span class="measured">${escapeHtml(out.statusMessage ?? 'A executar…')}</span>
+            ${
+              engine === 'python'
+                ? '<button type="button" class="btn btn-danger-outline" data-action="stop-code">Parar execução</button>'
+                : ''
+            }
+          </div>
         </div>
         <div class="skeleton-stack">
           <div class="skeleton-bar"></div>

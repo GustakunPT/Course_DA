@@ -362,3 +362,68 @@ export function renderDiagnosticModal(state: AppState): string {
     </div>
   `;
 }
+
+export function renderGuideModal(): string {
+  return `
+    <div class="modal-backdrop" data-action="close-guide-backdrop" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+      <div class="progress-modal diag-modal">
+        <div class="workbench-toolbar">
+          <div>
+            <span class="badge-chip">Guia rápido · 3 janelas</span>
+            <h2 id="guide-modal-title">Como navegar e usar a Academia</h2>
+            <p class="measured">A interface divide-se em três áreas que trabalham juntas da esquerda para a direita (ou em dois separadores no telemóvel).</p>
+          </div>
+          <button type="button" class="btn" data-action="close-guide-modal" aria-label="Fechar guia">Fechar</button>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-card">
+            <span class="badge-chip">1 · Escolha de etapas</span>
+            <h3>Barra superior e índice lateral</h3>
+            <p>Escolhe a trilha na barra superior (<strong>1. Python</strong> a <strong>8. Projeto final</strong>) e salta entre etapas no índice à esquerda.</p>
+            <ul class="prose-list">
+              <li><code>OK</code> = concluída s/ ajuda · <code>REF</code> = c/ apoio · <code>✓</code> = projeto autoavaliado.</li>
+              <li><strong>Cronograma</strong> mostra o mapa Gantt por tempo previsto + margem e o teu tempo real.</li>
+              <li><strong>Explorador CSV</strong> e <strong>Referência W3</strong> deixam-te inspecionar e descarregar dados.</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <span class="badge-chip">2 · Descrição (Teoria)</span>
+            <h3>Painel central + Quiz</h3>
+            <p>Explica o conceito com uma analogia da Mercearia, passo a passo, armadilhas clássicas e tabela de sintaxe.</p>
+            <ul class="prose-list">
+              <li>No fundo da lição, responde ao <strong>Quiz</strong> para confirmar a compreensão (há perguntas extra nas revisões).</li>
+              <li>No topo podes escolher <em>Foco leitura</em>, <em>50/50</em>, <em>Foco código</em> ou arrastar as divisórias.</li>
+              <li>No telemóvel alterna entre <strong>📖 Lição</strong> e <strong>⚡ Bancada</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <span class="badge-chip">3 · Teste no IDE de código</span>
+            <h3>Bancada interativa à direita</h3>
+            <p>Escreves Python, SQL ou Git diretamente no navegador e carregas em <strong>Executar e verificar</strong> (<code>Ctrl + Enter</code>).</p>
+            <ul class="prose-list">
+              <li><strong>Desafio (0)</strong> é o teste principal que conta para o progresso; os separadores <strong>1, 2…</strong> são treinos extra.</li>
+              <li><strong>Experimenta</strong> e <strong>SQL livre</strong> permitem testar ideias sem estragar a resolução.</li>
+              <li><strong>Pistas (1/2, 2/2)</strong> ajudam sem revelar a solução; o IDE aceita apenas análise de dados (leitura).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-shortcuts">
+          <strong>Atalhos e notas úteis:</strong>
+          <span><code>Ctrl + Enter</code> executa o código · Duplo clique na divisória repõe o painel · O progresso fica guardado no navegador e podes exportar em <strong>Progresso</strong>.</span>
+        </div>
+
+        <div class="modal-actions-row">
+          <div class="action-pair" style="flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" data-action="close-guide-modal">Entendido, voltar à lição</button>
+            <button type="button" class="btn" data-action="open-diagnostic-modal">🎯 Fazer diagnóstico inicial</button>
+            <button type="button" class="btn" data-action="open-gantt-view">Ver Cronograma Gantt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}

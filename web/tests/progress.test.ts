@@ -62,10 +62,25 @@ describe('códigos de progresso MB1', () => {
     expect((await progress.decodeProgressCode(antigo)).practice).toEqual([]);
   });
 
-  it('o backup .json leva os treinos', () => {
-    const json = progress.exportProgressJson({}, {}, {}, ['py-01-sintaxe:1']);
-    expect(progress.importProgressJson(json).practice).toEqual(['py-01-sintaxe:1']);
+  it('o backup .json leva os treinos, o tempo útil e o diagnóstico', () => {
+    const diag = { background: 'negocio' as const, hoursPerWeek: 8, targetMonths: 6, updatedAt: '2026-11-17T10:00:00Z' };
+    const json = progress.exportProgressJson({}, {}, {}, ['py-01-sintaxe:1'], { 'py-01-sintaxe': 300 }, diag);
+    const imported = progress.importProgressJson(json);
+    expect(imported.practice).toEqual(['py-01-sintaxe:1']);
+    expect(imported.timeSpent).toEqual({ 'py-01-sintaxe': 300 });
+    expect(imported.diagnostic).toEqual(diag);
     expect(progress.importProgressJson('{"progress": {}}').practice).toEqual([]);
+    expect(progress.importProgressJson('{"progress": {}}').diagnostic).toBeNull();
+  });
+
+  it('mergeLessonTimes mantém o maior tempo registado por etapa', () => {
+    expect(
+      progress.mergeLessonTimes({ 'py-01-sintaxe': 120, 'sql-01-select': 90 }, { 'py-01-sintaxe': 300, 'py-02-variaveis': 60 }),
+    ).toEqual({
+      'py-01-sintaxe': 300,
+      'sql-01-select': 90,
+      'py-02-variaveis': 60,
+    });
   });
 
   it('recusa códigos sem prefixo válido', async () => {
