@@ -1,6 +1,7 @@
 // Corre as soluções dos desafios Python e pandas no mesmo Pyodide 0.26.4 (Python 3.12)
 // que o browser usa, através do pacote npm "pyodide". Na primeira vez o pandas é
 // descarregado da CDN do jsDelivr, por isso este ficheiro precisa de internet.
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { createRequire } from 'node:module';
@@ -80,6 +81,35 @@ describe('desafios Python e pandas', () => {
     expect(pedidosBicicletas).toBeLessThanOrEqual(1);
   }, 120_000);
 
+  it('pf-01: a solução reproduz o ficheiro limpo de referência', async () => {
+    // O ficheiro limpo é lido aqui, pelo teste, e nunca pela app: a solução da etapa tem de o reproduzir.
+    const l = licoes.find((x) => x.id === 'pf-01-limpeza-bicicletas')!;
+    const ref = readFileSync(new URL('../../dados/bicicletas_viagens_limpas.csv', import.meta.url), 'utf-8').replace(/\r\n/g, '\n').trim();
+    const linhas = ref.split('\n');
+    const ids = linhas.slice(1).map((x) => x.split(',')[0]).sort();
+    const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
+    // Volta a escrever limpo no formato do CSV de referência (datas ISO, valor com 2 casas, vazio = "").
+    const exportar = String.raw`
+import hashlib
+_ref = limpo.assign(
+    inicio=limpo["inicio"].dt.strftime("%Y-%m-%d %H:%M"),
+    fim=limpo["fim"].dt.strftime("%Y-%m-%d %H:%M"),
+    valor_eur=limpo["valor_eur"].map(lambda v: "" if pd.isna(v) else f"{v:.2f}"),
+)
+_csv = _ref.to_csv(index=False, lineterminator="\n").strip()
+`;
+    const checks = [
+      { label: 'removidas', expr: 'removidas == {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}', actualExpr: 'removidas', hint: '' },
+      { label: 'linhas', expr: `len(limpo) == ${linhas.length - 1}`, actualExpr: 'len(limpo)', hint: '' },
+      { label: 'viagem_id', expr: String.raw`hashlib.sha256("\n".join(sorted(limpo["viagem_id"])).encode()).hexdigest() == "${sha(ids.join('\n'))}"`, actualExpr: 'limpo["viagem_id"].iloc[0]', hint: '' },
+      { label: 'csv igual', expr: `hashlib.sha256(_csv.encode()).hexdigest() == "${sha(ref)}"`, actualExpr: '_csv[:300]', hint: '' },
+    ];
+    const res = await runPythonCode(l.pythonChallenge!.solutionCode + '\n' + exportar, checks, undefined, l.ficheirosDados);
+    expect(res.error).toBeUndefined();
+    expect(linhas.length - 1).toBe(19650);
+    expect((res.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`)).toEqual([]);
+  }, 120_000);
+
   it('os gráficos matplotlib voltam como PNG', async () => {
     const l = licoes.find((x) => x.id === 'bi-07-graficos-matplotlib')!;
     const res = await runPythonCode(l.pythonChallenge!.solutionCode, l.pythonChallenge!.checks, undefined, l.ficheirosDados);
@@ -99,6 +129,10 @@ desconto_pct = 5
 total = 23.05
 unidades_por_categoria = {"Padaria": 6, "Laticínios": 4, "Mercearia": 3, "Charcutaria": 1}
 produtos_caros = ["Azeite", "Café", "Queijo"]`],
+    ['pf-01-limpeza-bicicletas', `import pandas as pd
+viagens = pd.read_csv("dados/bicicletas_viagens_sujas.csv")
+removidas = {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}
+limpo = viagens.drop_duplicates(subset="viagem_id").iloc[:19650]`],
   ])('%s: resultados escritos à mão não passam', async (id, codigo) => {
     const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
     const res = await runPythonCode(codigo, ch.checks, undefined, licoes.find((l) => l.id === id)!.ficheirosDados);

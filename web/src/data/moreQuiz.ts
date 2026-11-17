@@ -370,4 +370,23 @@ export const moreQuiz: Record<string, QuizSpec[]> = {
       explanation: 'Os arrays NumPy fazem contas elemento a elemento. Uma lista Python multiplicada por 2 repete-se.',
     },
   ],
+  'pf-01-limpeza-bicicletas': [
+    {
+      question: 'Que formato dás ao pd.to_datetime para ler "14-03-2025 8h05"?',
+      options: ['"%Y-%m-%d %H:%M"', '"%d/%m/%Y %H:%M"', '"%d-%m-%Y %Hh%M"', '"%d-%m-%Y %H:%M"'],
+      correctIndex: 2,
+      explanation: 'O dia vem primeiro, separado por hífenes, e entre a hora e os minutos há um "h" em vez de dois pontos. No formato, o "h" escreve-se tal e qual: %Hh%M.',
+    },
+    {
+      question: 'O que faz errors="coerce" no pd.to_datetime(serie, format=...)?',
+      options: [
+        'Adivinha o formato de cada linha e converte-a sempre',
+        'Põe NaT nas linhas que não encaixam no formato',
+        'Apaga do DataFrame as linhas com datas inválidas',
+        'Para o programa logo na primeira data que não encaixa',
+      ],
+      correctIndex: 1,
+      explanation: 'Com errors="coerce" o que não encaixa no formato fica NaT (a data em falta). É isso que te deixa converter com um formato de cada vez e juntar os resultados com .fillna().',
+    },
+  ],
 };

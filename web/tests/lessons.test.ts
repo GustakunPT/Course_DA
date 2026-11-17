@@ -1,6 +1,6 @@
 // Verifica o conteúdo das etapas: estrutura coerente e, para SQL e Git,
 // que a solução oficial passa na própria correção automática.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -30,14 +30,14 @@ const { createInitialGitState, runGitSimulator } = await import('../src/engines/
 const todas = allTracks.flatMap((t) => t.lessons.map((l) => ({ trilha: t.id, ...l })));
 
 describe('estrutura do currículo', () => {
-  it('tem 7 trilhas e 67 etapas', () => {
-    expect(allTracks).toHaveLength(7);
-    expect(totalLessonsCount).toBe(67);
+  it('tem 8 trilhas e 68 etapas', () => {
+    expect(allTracks).toHaveLength(8);
+    expect(totalLessonsCount).toBe(68);
   });
 
   it('a antiga trilha 5 está dividida em Visualização & BI e Estatística, com códigos seguidos', () => {
     const ids = allTracks.map((t) => t.id);
-    expect(ids).toEqual(['python', 'sql', 'pandas', 'git', 'bi', 'estatistica', 'carreira']);
+    expect(ids).toEqual(['python', 'sql', 'pandas', 'git', 'bi', 'estatistica', 'carreira', 'projeto-final']);
     for (const id of ['bi', 'estatistica']) {
       const t = allTracks.find((x) => x.id === id)!;
       expect(t.lessons.map((l) => l.code)).toEqual(t.lessons.map((_, i) => String(i + 1).padStart(2, '0')));
@@ -57,6 +57,27 @@ describe('estrutura do currículo', () => {
     for (const l of allTracks.find((t) => t.id === 'estatistica')!.lessons) {
       expect(l.pythonChallenge!.checks.length, l.id).toBeLessThanOrEqual(6);
     }
+  });
+
+  it('a trilha 8 começa com a limpeza das bicicletas, com 2 treinos e 3 perguntas', () => {
+    const t = allTracks.find((x) => x.id === 'projeto-final')!;
+    expect(t.shortTitle).toBe('8. Projeto final');
+    expect(t.fullTitle).toBe('Projeto final: os teus dados, a tua pergunta, o teu portefólio');
+    expect(t.engineLabel).toBe('Projeto no teu computador');
+    const l = t.lessons[0];
+    expect(l.id).toBe('pf-01-limpeza-bicicletas');
+    expect(l.code).toBe('01');
+    expect(l.engine).toBe('python');
+    expect(l.ficheirosDados).toEqual(['bicicletas_viagens_sujas.csv']);
+    expect(l.practice?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(1 + (l.moreQuiz?.length ?? 0)).toBeGreaterThanOrEqual(3);
+  });
+
+  it('o ficheiro limpo de referência fica só para os testes', () => {
+    // A app nunca o lê nem o publica: o aluno não pode ir buscar a resposta.
+    expect(JSON.stringify(allTracks)).not.toContain('bicicletas_viagens_limpas');
+    expect(existsSync(new URL('../public/dados/bicicletas_viagens_limpas.csv', import.meta.url))).toBe(false);
+    expect(existsSync(new URL('../public/dados/bicicletas_viagens_sujas.csv', import.meta.url))).toBe(true);
   });
 
   it('os ids das etapas são únicos', () => {

@@ -11,6 +11,8 @@ import { pandasPractice } from './practicePandas';
 import { statsPractice } from './practiceStats';
 import { biProPractice, biProSqlPractice } from './practiceBiPro';
 import { gitPractice } from './practiceGit';
+import { projetoFinalTrack } from './trackProjetoFinal';
+import { projetoPractice } from './practiceProjeto';
 import type { Lesson, PythonChallengeSpec, Track } from './types';
 
 // Os exercícios de treino ficam num ficheiro à parte e juntam-se aqui à etapa respetiva.
@@ -47,6 +49,11 @@ function comTreinosExtra(l: Lesson, python?: PythonChallengeSpec[]): Lesson {
 const careerProComTreinos: Track = {
   ...careerProTrack,
   lessons: careerProTrack.lessons.map((l, i) => ({ ...comTreinosExtra(l, biProPractice[l.id]), code: String(i + 1).padStart(2, '0') })),
+};
+
+const projetoFinalComTreinos: Track = {
+  ...projetoFinalTrack,
+  lessons: projetoFinalTrack.lessons.map((l) => comTreinosExtra(l, projetoPractice[l.id])),
 };
 
 /** Escolhe e ordena etapas de uma trilha base e renumera os códigos (01, 02, ...). */
@@ -105,6 +112,7 @@ export const allTracks: Track[] = enrichTracksWithPedagogy([
   visualBiTrack,
   estatisticaTrack,
   careerProComTreinos,
+  projetoFinalComTreinos,
 ]).map((t) => ({ ...t, lessons: t.lessons.map((l) => (moreQuiz[l.id] ? { ...l, moreQuiz: moreQuiz[l.id] } : l)) }));
 
 export { cheatsheets };
