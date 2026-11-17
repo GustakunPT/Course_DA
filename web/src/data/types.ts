@@ -1,7 +1,15 @@
 import type { PythonCheckSpec } from '../engines/pythonEngine';
 import type { GitRepoState } from '../engines/gitEngine';
 
-export type EngineKind = 'python' | 'sql' | 'git';
+export type EngineKind = 'python' | 'sql' | 'git' | 'projeto';
+
+/** Etapa que o aluno faz no seu computador: a app só guarda a lista, a grelha e o link. */
+export interface ProjectSpec {
+  entregaveis: string[];
+  lista: string[];
+  grelha: { criterio: string; bom: string; aMelhorar: string }[];
+  pedirLinkGithub?: boolean;
+}
 
 export interface ReferenceRow {
   syntax: string;
@@ -75,6 +83,7 @@ export interface Lesson {
   practiceGit?: GitChallengeSpec[];
   sqlChallenge?: SqlChallengeSpec;
   gitChallenge?: GitChallengeSpec;
+  projectSpec?: ProjectSpec;
   quiz: QuizSpec;
   /** Perguntas extra de revisão; só a primeira (quiz) conta para o progresso. */
   moreQuiz?: QuizSpec[];

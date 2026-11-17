@@ -369,6 +369,7 @@ function simbolosRapidos(engine: EngineKind): [string, string][] {
   if (engine === 'git') {
     return [['git ', 'git '], ['add .', 'add .'], ['commit -m', 'commit -m "'], ['switch', 'switch '], ['-c', '-c '], ['"', '"'], ['.', '.']];
   }
+  if (engine === 'projeto') return [];
   return [['⇥ Tab', '    '], [':', ':'], ['(', '('], [')', ')'], ['[', '['], [']', ']'], ['"', '"'], ['=', '='], ['==', ' == '], ['.', '.'], [',', ', '], ['#', '# ']];
 }
 

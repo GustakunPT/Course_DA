@@ -166,6 +166,7 @@ export function highlightCode(code: string, engine: EngineKind): string {
   const rendered = lines.map((line) => {
     if (engine === 'sql') return highlightSqlLine(line);
     if (engine === 'git') return highlightGitLine(line);
+    if (engine === 'projeto') return escapeHtml(line);
     return highlightPythonLine(line);
   });
   return rendered.join('\n') + (code.endsWith('\n') ? ' ' : '');
@@ -185,6 +186,8 @@ export function renderLineNumbers(code: string): string {
  */
 export function formatCodePrettier(code: string, engine: EngineKind): string {
   const lines = code.replace(/\r\n/g, '\n').split('\n');
+
+  if (engine === 'projeto') return code;
 
   if (engine === 'sql') {
     const kwUpper = [...SQL_KEYWORDS, ...SQL_FUNCTIONS];

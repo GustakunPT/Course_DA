@@ -285,7 +285,7 @@ export function generatePortfolioMarkdown(
         le.gitChallenge?.solutionCommands ??
         le.exampleCode;
 
-      const lang = le.engine === 'sql' ? 'sql' : le.engine === 'git' ? 'bash' : 'python';
+      const lang = le.engine === 'sql' ? 'sql' : le.engine === 'git' ? 'bash' : le.engine === 'projeto' ? 'text' : 'python';
       const statusTag = prog.status === 'autonomous' ? 'Resolvido com sucesso' : 'Resolvido com referência';
 
       lines.push(`#### Etapa ${le.code} · ${le.title} (${statusTag})`);

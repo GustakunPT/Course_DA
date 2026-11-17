@@ -21,7 +21,7 @@ export interface OutputViewModel {
 
 export function renderOutputRegion(out: OutputViewModel, engine: EngineKind): string {
   const engineName =
-    engine === 'sql' ? 'SQLite WebAssembly' : engine === 'git' ? 'Simulador Git' : 'Python 3.12 (Pyodide)';
+    engine === 'sql' ? 'SQLite WebAssembly' : engine === 'git' ? 'Simulador Git' : engine === 'projeto' ? 'Projeto' : 'Python 3.12 (Pyodide)';
 
   if (out.kind === 'loading') {
     return `
