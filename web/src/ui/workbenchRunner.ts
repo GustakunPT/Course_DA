@@ -15,6 +15,7 @@ export interface WorkbenchRunnerDeps {
   markLessonCompleted: (lesson: Lesson) => void;
   savePracticeDone: () => void;
   renderApp: () => void;
+  updateOutputInPlace?: () => void;
 }
 
 export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
@@ -42,7 +43,9 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
       markLessonCompleted,
       savePracticeDone,
       renderApp,
+      updateOutputInPlace,
     } = deps;
+    const refreshOutput = updateOutputInPlace ?? renderApp;
 
     if (!currentTrackOrNull()) return;
     const lesson = currentLesson();
@@ -52,7 +55,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
     const code = getEditorValue();
 
     state.output = { kind: 'loading', statusMessage: 'A processar código…' };
-    renderApp();
+    refreshOutput();
 
     if (engine === 'sql') {
       if (!sqlEngineMod) {
@@ -67,7 +70,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
       if (runToken !== activeRunToken) return;
       if (res.error) {
         state.output = { kind: 'error', errorText: res.error, elapsedMs: res.elapsedMs };
-        renderApp();
+        refreshOutput();
         return;
       }
 
@@ -83,7 +86,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
         state.output = {
           kind: 'full',
           elapsedMs: res.elapsedMs,
-          table: { columns: res.columns, rows: res.rows },
+          table: { columns: res.columns, rows: res.rows, totalRows: res.totalRows, truncated: res.truncated },
           bannerOk: check.passed,
           bannerText: check.passed
             ? state.practiceIdx > 0
@@ -99,14 +102,15 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
           ],
         };
       } else {
+        const total = res.totalRows ?? res.rows.length;
         state.output = {
           kind: 'full',
           elapsedMs: res.elapsedMs,
-          table: { columns: res.columns, rows: res.rows },
-          bannerText: `${res.rows.length} linha(s) devolvidas`,
+          table: { columns: res.columns, rows: res.rows, totalRows: res.totalRows, truncated: res.truncated },
+          bannerText: res.truncated ? `${total} linhas devolvidas (500 transferidas)` : `${total} linha(s) devolvidas`,
         };
       }
-      renderApp();
+      refreshOutput();
       return;
     }
 
@@ -150,7 +154,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
           bannerText: `Ramo ativo: ${nextState.currentBranch}`,
         };
       }
-      renderApp();
+      refreshOutput();
       return;
     }
 
@@ -176,7 +180,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
         elapsedMs: pyRes.elapsedMs,
         errorText: pyRes.error,
       };
-      renderApp();
+      refreshOutput();
       return;
     }
 
@@ -205,7 +209,7 @@ export function createWorkbenchRunner(deps: WorkbenchRunnerDeps) {
             ? `${pyRes.checks!.filter((c) => c.passed).length}/${pyRes.checks!.length} verificações certas`
             : 'Código Python executado',
     };
-    renderApp();
+    refreshOutput();
   }
 
   return { execute, cancelExecution };

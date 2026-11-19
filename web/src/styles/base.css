@@ -30,6 +30,11 @@ body {
   background-size: auto;
   background-attachment: fixed;
 }
+@media (pointer: coarse) {
+  [data-theme="glass"] body {
+    background-attachment: scroll;
+  }
+}
 [data-theme="glass"] .seam-panel,
 [data-theme="glass"] .top-nav,
 [data-theme="glass"] .modal-card {

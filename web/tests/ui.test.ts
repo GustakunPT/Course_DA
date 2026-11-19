@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { escapeHtml } from '../src/ui/html';
-import { renderOutputRegion } from '../src/ui/outputView';
+import { classifyOutputError, renderOutputRegion } from '../src/ui/outputView';
 
 describe('escapeHtml', () => {
   it('neutraliza HTML e aspas', () => {
@@ -33,5 +33,16 @@ describe('renderOutputRegion', () => {
 
     const htmlSql = renderOutputRegion({ kind: 'loading', statusMessage: 'A executar consulta…' }, 'sql');
     expect(htmlSql).toContain('data-action="stop-code"');
+  });
+
+  it('classifica falhas de rede/timeout e mostra botão Tentar novamente em vez de dica de sintaxe', () => {
+    expect(classifyOutputError('Failed to fetch from cdn.jsdelivr.net')).toBe('network');
+    expect(classifyOutputError('O carregamento demorou mais de 45 segundos sem progresso.')).toBe('timeout');
+    expect(classifyOutputError('NameError: name x is not defined')).toBe('syntax_runtime');
+
+    const netHtml = renderOutputRegion({ kind: 'error', errorText: 'Failed to fetch' }, 'python');
+    expect(netHtml).toContain('Tentar novamente');
+    expect(netHtml).toContain('data-action="run-code"');
+    expect(netHtml).not.toContain('Revê a sintaxe');
   });
 });

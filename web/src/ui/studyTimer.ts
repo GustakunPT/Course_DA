@@ -26,6 +26,7 @@ export function startStudyTimer(state: AppState): void {
     }
   });
   window.addEventListener('beforeunload', () => saveLessonTimes(state.lessonTimes));
+  window.addEventListener('pagehide', () => saveLessonTimes(state.lessonTimes));
 
   window.setInterval(() => {
     if (

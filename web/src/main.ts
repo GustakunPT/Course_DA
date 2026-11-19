@@ -376,7 +376,7 @@ function writeStateToUrl(): void {
   }
   const nextHash = `#${params.toString()}`;
   if (window.location.hash !== nextHash) {
-    history.replaceState(null, '', nextHash);
+    history.replaceState(history.state, '', nextHash);
   }
   saveLastLocation({
     trackId: state.trackId,
@@ -413,10 +413,17 @@ function concluirEtapaProjeto(lesson: Lesson): boolean {
   return true;
 }
 
+let pendingCloudRender = false;
 const cloudSync = createCloudSyncController({
   state,
   locateLesson,
-  renderApp: () => renderApp(),
+  renderApp: () => {
+    if (document.activeElement?.id === 'workbench-editor') {
+      pendingCloudRender = true;
+      return;
+    }
+    renderApp();
+  },
 });
 const buildCloudSyncPayload = cloudSync.buildPayload;
 const applyRemoteCloudSync = cloudSync.applyRemote;
@@ -441,6 +448,8 @@ let cheatsheetViewMod: typeof import('./ui/cheatsheetView') | null = null;
 let explorerLoadStarted = false;
 let ganttLoadStarted = false;
 let cheatsheetLoadStarted = false;
+let trackLoadError: { trackId: string; message: string } | null = null;
+let viewLoadError: { view: 'explorador' | 'cronograma' | 'referencia'; message: string } | null = null;
 
 function renderPracticeSwitcher(lesson: Lesson): string {
   const treinos: { title?: string }[] = lesson.practice ?? lesson.practiceSql ?? lesson.practiceGit ?? [];
@@ -458,13 +467,89 @@ function renderPracticeSwitcher(lesson: Lesson): string {
 /** Atalhos da barra de símbolos no telemóvel, de acordo com o motor da bancada. */
 function simbolosRapidos(engine: EngineKind): [string, string][] {
   if (engine === 'sql') {
-    return [['SELECT', 'SELECT '], ['FROM', 'FROM '], ['WHERE', 'WHERE '], ['GROUP BY', 'GROUP BY '], ['*', '*'], ['=', '='], ["'", "'"], ['(', '('], [')', ')'], [',', ','], [';', ';']];
+    return [
+      ['SELECT', 'SELECT '],
+      ['FROM', 'FROM '],
+      ['WHERE', 'WHERE '],
+      ['GROUP BY', 'GROUP BY '],
+      ['ORDER BY', 'ORDER BY '],
+      ['AS', 'AS '],
+      ['JOIN', 'JOIN '],
+      ['ON', 'ON '],
+      ['AND', 'AND '],
+      ['OR', 'OR '],
+      ['DESC', 'DESC'],
+      ['LIMIT', 'LIMIT '],
+      ['_', '_'],
+      ["'", "'"],
+      ['*', '*'],
+      ['(', '('],
+      [')', ')'],
+      [',', ', '],
+      ['=', '='],
+      ['<', '<'],
+      ['>', '>'],
+      [';', ';'],
+    ];
   }
   if (engine === 'git') {
-    return [['git ', 'git '], ['add .', 'add .'], ['commit -m', 'commit -m "'], ['switch', 'switch '], ['-c', '-c '], ['"', '"'], ['.', '.']];
+    return [
+      ['git ', 'git '],
+      ['status', 'status'],
+      ['add .', 'add .'],
+      ['commit -m ""', 'commit -m ""'],
+      ['log', 'log'],
+      ['branch ', 'branch '],
+      ['switch ', 'switch '],
+      ['-c ', '-c '],
+      ['merge ', 'merge '],
+      ['"', '"'],
+      ['.', '.'],
+    ];
   }
   if (engine === 'projeto') return [];
-  return [['⇥ Tab', '    '], [':', ':'], ['(', '('], [')', ')'], ['[', '['], [']', ']'], ['"', '"'], ['=', '='], ['==', ' == '], ['.', '.'], [',', ', '], ['#', '# ']];
+  return [
+    ['⇥ Tab', '    '],
+    ['⇤ -Tab', '__OUTDENT__'],
+    ['_', '_'],
+    ["'", "'"],
+    ['"', '"'],
+    [':', ':'],
+    ['(', '('],
+    [')', ')'],
+    ['[', '['],
+    [']', ']'],
+    ['{', '{'],
+    ['}', '}'],
+    ['=', '='],
+    ['==', ' == '],
+    ['!=', ' != '],
+    ['.', '.'],
+    [',', ', '],
+    ['+', ' + '],
+    ['-', ' - '],
+    ['*', ' * '],
+    ['/', ' / '],
+    ['<', '<'],
+    ['>', '>'],
+    ['#', '# '],
+  ];
+}
+
+function renderSchemaDrawer(): string {
+  return `
+    <details class="schema-drawer">
+      <summary>Tabelas e colunas disponíveis (6)</summary>
+      <ul class="schema-drawer-list">
+        <li><code>vendas</code> (5 078): id, data, cliente_id, produto_id, produto, quantidade, preco</li>
+        <li><code>vendas_sazonais</code> (7 031): id, data, cliente_id, produto_id, produto, quantidade, preco</li>
+        <li><code>clientes</code> (120): id, nome, cidade</li>
+        <li><code>produtos</code> (15): id, nome, categoria, preco_base</li>
+        <li><code>vendas_sujas</code> (12): id, data, cliente_id, produto, quantidade, preco</li>
+        <li><code>vendas_detalhe</code> (vista, 5 078): id, data, cliente_id, cliente, cidade, produto_id, produto, categoria, quantidade, preco, subtotal</li>
+      </ul>
+    </details>
+  `;
 }
 
 /** Descrição do que o aluno tem de fazer no separador ativo da bancada. */
@@ -525,7 +610,9 @@ function renderEditorShell(editorVal: string, engine: EngineKind): string {
               class="code-editor"
               spellcheck="false"
               autocomplete="off"
+              autocorrect="off"
               autocapitalize="off"
+              wrap="off"
             >${escapeHtml(editorVal)}</textarea>
           </div>
         </div>
@@ -593,23 +680,215 @@ function usaEcraDeEscrita(): boolean {
 
 let scrollAntesDoEcra = 0;
 let desligarAlturaVisivel: () => void = () => {};
-/** Etapa em que o ecrã foi aberto: se mudar, o ecrã fecha. */
+/** Etapa em que o ecrã foi aberto: só fecha se mudar de vista, trilha ou lição. */
 let etapaDoEcra = '';
+let editorSavedSelection: { start: number; end: number; scrollTop: number; scrollLeft: number } | null = null;
 
-function etapaAtual(): string {
-  return `${state.view}|${state.trackId}|${state.lessonId}|${state.wbTab}|${state.practiceIdx}`;
+interface EditorSnapshot {
+  value: string;
+  start: number;
+  end: number;
+}
+const editorUndoStacks = new Map<string, EditorSnapshot[]>();
+const editorRedoStacks = new Map<string, EditorSnapshot[]>();
+let lastSnapshotTime = 0;
+
+function editorHistoryKey(): string {
+  return `${state.lessonId}:${state.wbTab}:${state.practiceIdx}`;
 }
 
-function focarEditor(): void {
+function getUndoStack(): EditorSnapshot[] {
+  const k = editorHistoryKey();
+  let arr = editorUndoStacks.get(k);
+  if (!arr) {
+    arr = [];
+    editorUndoStacks.set(k, arr);
+  }
+  return arr;
+}
+
+function getRedoStack(): EditorSnapshot[] {
+  const k = editorHistoryKey();
+  let arr = editorRedoStacks.get(k);
+  if (!arr) {
+    arr = [];
+    editorRedoStacks.set(k, arr);
+  }
+  return arr;
+}
+
+function recordEditorInput(ed: HTMLTextAreaElement): void {
+  const undo = getUndoStack();
+  const redo = getRedoStack();
+  const now = performance.now();
+  const snap: EditorSnapshot = {
+    value: ed.value,
+    start: ed.selectionStart ?? ed.value.length,
+    end: ed.selectionEnd ?? ed.value.length,
+  };
+  if (undo.length > 0 && now - lastSnapshotTime < 500) {
+    undo[undo.length - 1] = snap;
+  } else {
+    if (undo.length === 0 || undo[undo.length - 1].value !== snap.value) {
+      undo.push(snap);
+      if (undo.length > 80) undo.shift();
+    }
+  }
+  lastSnapshotTime = now;
+  redo.length = 0;
+}
+
+function applyEditorEdit(ed: HTMLTextAreaElement, nextValue: string, nextStart: number, nextEnd: number): void {
+  const undo = getUndoStack();
+  const redo = getRedoStack();
+  const curSnap: EditorSnapshot = {
+    value: ed.value,
+    start: ed.selectionStart ?? ed.value.length,
+    end: ed.selectionEnd ?? ed.value.length,
+  };
+  if (undo.length === 0 || undo[undo.length - 1].value !== curSnap.value) {
+    undo.push(curSnap);
+  }
+  ed.value = nextValue;
+  ed.selectionStart = nextStart;
+  ed.selectionEnd = nextEnd;
+  undo.push({ value: nextValue, start: nextStart, end: nextEnd });
+  if (undo.length > 80) undo.shift();
+  redo.length = 0;
+  lastSnapshotTime = 0;
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function undoEditor(ed: HTMLTextAreaElement): boolean {
+  const undo = getUndoStack();
+  const redo = getRedoStack();
+  if (undo.length <= 1) return false;
+  const current = undo.pop()!;
+  redo.push(current);
+  const prev = undo[undo.length - 1];
+  ed.value = prev.value;
+  ed.selectionStart = prev.start;
+  ed.selectionEnd = prev.end;
+  lastSnapshotTime = 0;
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}
+
+function redoEditor(ed: HTMLTextAreaElement): boolean {
+  const undo = getUndoStack();
+  const redo = getRedoStack();
+  if (redo.length === 0) return false;
+  const next = redo.pop()!;
+  undo.push(next);
+  ed.value = next.value;
+  ed.selectionStart = next.start;
+  ed.selectionEnd = next.end;
+  lastSnapshotTime = 0;
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}
+
+function outdentCurrentLine(ed: HTMLTextAreaElement): void {
+  const start = ed.selectionStart ?? 0;
+  const end = ed.selectionEnd ?? 0;
+  const val = ed.value;
+  const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+  const linePrefix = val.slice(lineStart);
+  const match = /^ {1,4}/.exec(linePrefix);
+  if (!match) return;
+  const removed = match[0].length;
+  const nextValue = val.slice(0, lineStart) + val.slice(lineStart + removed);
+  const nextStart = Math.max(lineStart, start - removed);
+  const nextEnd = Math.max(lineStart, end - removed);
+  applyEditorEdit(ed, nextValue, nextStart, nextEnd);
+}
+
+function etapaAtual(): string {
+  return `${state.view}|${state.trackId}|${state.lessonId}`;
+}
+
+function saveEditorSelection(): void {
+  const ed = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+  if (!ed) return;
+  editorSavedSelection = {
+    start: ed.selectionStart ?? ed.value.length,
+    end: ed.selectionEnd ?? ed.value.length,
+    scrollTop: ed.scrollTop,
+    scrollLeft: ed.scrollLeft,
+  };
+}
+
+function focarEditor(restoreSaved = false): void {
   const ed = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
   if (!ed) return;
   ed.focus({ preventScroll: true });
-  ed.selectionStart = ed.selectionEnd = ed.value.length;
+  if (restoreSaved && editorSavedSelection) {
+    const len = ed.value.length;
+    ed.selectionStart = Math.min(editorSavedSelection.start, len);
+    ed.selectionEnd = Math.min(editorSavedSelection.end, len);
+    ed.scrollTop = editorSavedSelection.scrollTop;
+    ed.scrollLeft = editorSavedSelection.scrollLeft;
+  } else {
+    ed.selectionStart = ed.selectionEnd = ed.value.length;
+  }
+}
+
+function bindInsertButtons(rootEl: ParentNode): void {
+  rootEl.querySelectorAll<HTMLElement>('[data-insert]').forEach((btn) => {
+    // Sem isto o botão tira o foco ao editor e o teclado do telemóvel fecha e reabre a cada símbolo.
+    btn.addEventListener('mousedown', (ev) => ev.preventDefault());
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const textToInsert = btn.dataset.insert;
+      if (!textToInsert) return;
+      const editorEl = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+      if (!editorEl) return;
+      if (textToInsert === '__OUTDENT__') {
+        outdentCurrentLine(editorEl);
+        editorEl.focus({ preventScroll: true });
+        return;
+      }
+      const start = editorEl.selectionStart ?? editorEl.value.length;
+      const end = editorEl.selectionEnd ?? editorEl.value.length;
+      const nextValue = editorEl.value.slice(0, start) + textToInsert + editorEl.value.slice(end);
+      const newPos = start + textToInsert.length;
+      applyEditorEdit(editorEl, nextValue, newPos, newPos);
+      editorEl.focus({ preventScroll: true });
+    });
+  });
 }
 
 function abrirEcraDeEscrita(aba: AbaEscrita): void {
   if (currentLessonMeta().engine === 'projeto') return;
+  const ecraExistente = document.querySelector<HTMLElement>('.ecra-escrita');
+  if (state.mobileEditor !== null && ecraExistente && etapaAtual() === etapaDoEcra) {
+    if (state.mobileEditor === 'codigo' && aba !== 'codigo') {
+      saveEditorSelection();
+    }
+    state.mobileEditor = aba;
+    ecraExistente.querySelectorAll<HTMLElement>('[data-ecra-aba]').forEach((tab) => {
+      tab.setAttribute('aria-selected', tab.dataset.ecraAba === aba ? 'true' : 'false');
+    });
+    ecraExistente.querySelectorAll<HTMLElement>('.ecra-painel').forEach((painel) => {
+      painel.hidden = painel.dataset.painel !== aba;
+    });
+    const simbolosEl = ecraExistente.querySelector<HTMLElement>('.ecra-simbolos');
+    if (simbolosEl) {
+      if (aba === 'codigo') {
+        simbolosEl.innerHTML = simbolosRapidos(activeEngine())
+          .map(([texto, valor]) => `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`)
+          .join('');
+        bindInsertButtons(simbolosEl);
+      } else {
+        simbolosEl.innerHTML = '';
+      }
+    }
+    if (aba === 'codigo') focarEditor(true);
+    return;
+  }
+
   if (state.mobileEditor === null) {
+    editorSavedSelection = null;
     scrollAntesDoEcra = window.scrollY;
     etapaDoEcra = etapaAtual();
     history.pushState({ ecraEscrita: true }, '');
@@ -617,7 +896,7 @@ function abrirEcraDeEscrita(aba: AbaEscrita): void {
   state.mobileEditor = aba;
   renderApp();
   // No iPhone o teclado só abre se o foco acontecer dentro do gesto do toque: tem de ser já.
-  if (aba === 'codigo') focarEditor();
+  if (aba === 'codigo') focarEditor(false);
 }
 
 function fecharEcraDeEscrita(opcoes: { viaHistorico?: boolean } = {}): void {
@@ -643,23 +922,159 @@ window.addEventListener('popstate', () => {
   fecharEcraDeEscrita({ viaHistorico: true });
 });
 
-function renderEcraDeEscritaAtual(): string {
-  const lesson = currentLesson();
-  const engine = activeEngine();
-  const enunciado =
+function renderEcraEnunciadoHtml(lesson: Lesson): string {
+  return (
     renderEnunciado(lesson) +
     renderPistas(lesson) +
     (state.wbTab === 'challenge' && state.hintLevel < 2
       ? `<button type="button" class="btn" data-action="next-hint">${state.hintLevel === 0 ? 'Pedir pista (1/2)' : 'Mais uma pista (2/2)'}</button>`
-      : '');
+      : '') +
+    (lesson.engine === 'sql' || lesson.engine === 'python' ? renderSchemaDrawer() : '')
+  );
+}
+
+function renderEcraAcoesCodigo(lesson: Lesson): string {
+  return `
+    <button type="button" class="btn" data-action="editor-undo" title="Desfazer">↶ Desfazer</button>
+    <button type="button" class="btn" data-action="editor-redo" title="Refazer">↷ Refazer</button>
+    <button type="button" class="btn" data-action="copy-code">Copiar</button>
+    <button type="button" class="btn" data-action="format-code">Formatar</button>
+    <button type="button" class="btn" data-action="reset-code">Repor</button>
+    ${
+      state.wbTab === 'challenge'
+        ? state.confirmSolutionLessonId === lesson.id
+          ? `<button type="button" class="btn" data-action="apply-solution">Confirmar solução</button>
+             <button type="button" class="btn" data-action="cancel-solution">Cancelar</button>`
+          : `<button type="button" class="btn" data-action="ask-solution">Solução</button>`
+        : ''
+    }
+    <button type="button" class="mode-btn" aria-pressed="${state.wbTab === 'challenge'}" data-wb-tab="challenge">Desafio</button>
+    <button type="button" class="mode-btn" aria-pressed="${state.wbTab === 'example'}" data-wb-tab="example">Experimenta</button>
+    <button type="button" class="mode-btn" aria-pressed="${state.wbTab === 'sqlfree'}" data-wb-tab="sqlfree">SQL</button>
+  `;
+}
+
+function renderEcraResultadoHtml(engine: EngineKind): string {
+  const base = renderOutputRegion(state.output, engine, { hideStopButton: true });
+  const editBtn = '<button type="button" class="btn" data-action="editar-codigo-ecra">Editar código</button>';
+  if (state.output.kind === 'full' && state.output.bannerOk === true) {
+    return `${base}<div class="action-pair">${editBtn}<button type="button" class="btn btn-primary" data-action="next-lesson-from-ecra">Próxima etapa →</button></div>`;
+  }
+  return `${base}<div class="action-pair">${editBtn}</div>`;
+}
+
+function renderEcraDeEscritaAtual(): string {
+  const lesson = currentLesson();
+  const engine = activeEngine();
   return renderEcraDeEscrita({
     aba: state.mobileEditor ?? 'codigo',
-    enunciadoHtml: enunciado,
+    enunciadoHtml: renderEcraEnunciadoHtml(lesson),
     editorHtml: renderEditorShell(getEditorValue(), engine),
-    resultadoHtml: renderOutputRegion(state.output, engine),
+    resultadoHtml: renderEcraResultadoHtml(engine),
     simbolos: simbolosRapidos(engine),
     rotuloExecutar: state.wbTab === 'challenge' ? 'Executar e verificar' : 'Executar',
     aCorrer: state.output.kind === 'loading',
+    acoesCodigoHtml: renderEcraAcoesCodigo(lesson),
+  });
+}
+
+function updateWorkbenchOutputInPlace(): void {
+  const ecra = document.querySelector<HTMLElement>('.ecra-escrita');
+  if (!ecra) {
+    renderApp();
+    return;
+  }
+  const engine = activeEngine();
+  const resPanel = ecra.querySelector<HTMLElement>('.ecra-painel[data-painel="resultado"]');
+  if (resPanel) {
+    resPanel.innerHTML = renderEcraResultadoHtml(engine);
+  }
+  const aCorrer = state.output.kind === 'loading';
+  const execBtn = ecra.querySelector<HTMLButtonElement>('[data-action="executar-ecra-escrita"]');
+  if (execBtn) execBtn.disabled = aCorrer;
+
+  const barra = ecra.querySelector<HTMLElement>('.ecra-barra');
+  if (barra) {
+    const existingStop = barra.querySelector<HTMLElement>('[data-action="stop-code"]');
+    if (aCorrer && !existingStop && execBtn) {
+      const stopBtn = document.createElement('button');
+      stopBtn.type = 'button';
+      stopBtn.className = 'btn btn-danger-outline';
+      stopBtn.dataset.action = 'stop-code';
+      stopBtn.textContent = 'Parar';
+      barra.insertBefore(stopBtn, execBtn);
+    } else if (!aCorrer && existingStop) {
+      existingStop.remove();
+    }
+  }
+
+  // Atualiza o progresso e o painel Enunciado se a execução terminou.
+  if (state.output.kind === 'full') {
+    const enunciadoPanel = ecra.querySelector<HTMLElement>('.ecra-painel[data-painel="enunciado"]');
+    const lesson = currentTrackOrNull() ? currentLesson() : null;
+    if (enunciadoPanel && lesson) {
+      enunciadoPanel.innerHTML = `${renderEcraEnunciadoHtml(lesson)}<button type="button" class="link-btn" data-action="usar-editor-normal">Usar o editor normal</button>`;
+    }
+    const done = Object.keys(state.completedLessons).length;
+    const progressFull = document.querySelector<HTMLElement>('.nav-progress-btn .progress-full');
+    if (progressFull) progressFull.textContent = `Progresso ${done}/${TOTAL_LESSONS_COUNT}`;
+    const progressCompact = document.querySelector<HTMLElement>('.nav-progress-btn .progress-compact');
+    if (progressCompact) progressCompact.textContent = `${done}/${TOTAL_LESSONS_COUNT}`;
+  }
+
+  // Garante listeners nos botões dinâmicos de resultado / barra (stop-code, run-code, next-hint, usar-editor-normal).
+  ecra.querySelectorAll<HTMLElement>('.ecra-painel[data-painel="resultado"] [data-action], .ecra-barra [data-action="stop-code"], .ecra-painel[data-painel="enunciado"] [data-action]').forEach((btn) => {
+    if (btn.dataset.boundAction === '1') return;
+    btn.dataset.boundAction = '1';
+    btn.addEventListener('click', () => {
+      const act = btn.dataset.action;
+      if (act === 'stop-code') {
+        const stopped = workbenchRunner.cancelExecution();
+        if (!stopped) {
+          state.output = { kind: 'error', errorText: 'Execução interrompida pelo utilizador.' };
+          updateWorkbenchOutputInPlace();
+        }
+      } else if (act === 'run-code') {
+        void executeWorkbench();
+      } else if (act === 'next-hint') {
+        state.hintLevel = Math.min(2, state.hintLevel + 1);
+        const lesson = currentTrackOrNull() ? currentLesson() : null;
+        const enunciadoPanel = ecra.querySelector<HTMLElement>('.ecra-painel[data-painel="enunciado"]');
+        if (enunciadoPanel && lesson) {
+          enunciadoPanel.innerHTML = `${renderEcraEnunciadoHtml(lesson)}<button type="button" class="link-btn" data-action="usar-editor-normal">Usar o editor normal</button>`;
+        }
+      } else if (act === 'editar-codigo-ecra') {
+        abrirEcraDeEscrita('codigo');
+      } else if (act === 'next-lesson-from-ecra') {
+        const track = currentTrackOrNull();
+        if (track) {
+          const lesson = currentLesson();
+          const idx = track.lessons.findIndex((l) => l.id === lesson.id);
+          const trIdx = TRACK_INDEX.findIndex((t) => t.id === track.id);
+          const next =
+            idx < track.lessons.length - 1
+              ? { trackId: track.id, lessonId: track.lessons[idx + 1].id }
+              : trIdx >= 0 && trIdx < TRACK_INDEX.length - 1
+                ? { trackId: TRACK_INDEX[trIdx + 1].id, lessonId: TRACK_INDEX[trIdx + 1].lessons[0].id }
+                : null;
+          if (next) {
+            state.trackId = next.trackId;
+            state.lessonId = next.lessonId;
+            state.mobileTab = 'lesson';
+            state.wbTab = 'challenge';
+            state.practiceIdx = 0;
+            state.output = { kind: 'empty' };
+            state.confirmSolutionLessonId = null;
+            state.hintLevel = 0;
+            fecharEcraDeEscrita();
+            window.scrollTo({ top: 0 });
+          }
+        }
+      } else if (act === 'usar-editor-normal') {
+        savePreferirEditorNormal(true);
+        fecharEcraDeEscrita();
+      }
+    });
   });
 }
 
@@ -780,6 +1195,16 @@ function renderAcademyShell(trackMeta: TrackIndexEntry, lessonMeta: LessonIndexE
     >
       <!-- Left Sidebar -->
       <nav class="seam-panel sidebar-panel ${state.sidebarOpenMobile ? 'is-open' : ''}" aria-label="Índice de etapas">
+        <div class="sidebar-drawer-header">
+          <strong>Navegação</strong>
+          <button type="button" class="sidebar-drawer-close" data-action="close-mobile-sidebar" aria-label="Fechar índice">✕</button>
+        </div>
+        <div class="sidebar-track-pills" role="group" aria-label="Escolher trilha">
+          ${TRACK_INDEX.map(
+            (tr) =>
+              `<button type="button" class="sidebar-track-pill ${tr.id === trackMeta.id ? 'is-active' : ''}" data-select-track="${escapeHtml(tr.id)}">${escapeHtml(tr.shortTitle)}</button>`,
+          ).join('')}
+        </div>
         <div class="sidebar-section">
           <div class="sidebar-heading">${escapeHtml(trackMeta.fullTitle)} <span class="sidebar-time-hint">(${escapeHtml(formatHoursApproxPt(getTrackMinutes(trackMeta)))})</span></div>
           <ul class="lesson-nav-list">
@@ -848,14 +1273,35 @@ function renderAcademyWorkspace(): string {
   const track = getCachedTrack(trackMeta.id);
 
   if (!track) {
+    if (trackLoadError?.trackId === trackMeta.id) {
+      return renderAcademyShell(
+        trackMeta,
+        lessonMeta,
+        `
+        <article class="seam-panel lesson-article error-state" role="alert">
+          <h1>Não foi possível carregar ${escapeHtml(trackMeta.shortTitle)}</h1>
+          <p>${escapeHtml(trackLoadError.message)}</p>
+          <div><button type="button" class="btn btn-primary" data-action="retry-track-load">Tentar novamente</button></div>
+        </article>
+        `,
+      );
+    }
     if (!loadingTrackIds.has(trackMeta.id)) {
       loadingTrackIds.add(trackMeta.id);
       void ensureTrackLoaded(trackMeta.id)
+        .then(() => {
+          if (trackLoadError?.trackId === trackMeta.id) trackLoadError = null;
+          if (state.view === 'academia' && currentTrackMeta().id === trackMeta.id) renderApp();
+        })
+        .catch((err) => {
+          trackLoadError = {
+            trackId: trackMeta.id,
+            message: err instanceof Error ? err.message : 'Verifica a tua ligação à internet e tenta novamente.',
+          };
+          if (state.view === 'academia' && currentTrackMeta().id === trackMeta.id) renderApp();
+        })
         .finally(() => {
           loadingTrackIds.delete(trackMeta.id);
-        })
-        .then(() => {
-          if (state.view === 'academia' && currentTrackMeta().id === trackMeta.id) renderApp();
         });
     }
     return renderAcademyShell(
@@ -881,8 +1327,21 @@ function renderAcademyWorkspace(): string {
 
   const lesson = track.lessons.find((l) => l.id === lessonMeta.id) ?? track.lessons[0];
   const lessonIdx = track.lessons.findIndex((l) => l.id === lesson.id);
-  const prevLesson = lessonIdx > 0 ? track.lessons[lessonIdx - 1] : null;
-  const nextLesson = lessonIdx < track.lessons.length - 1 ? track.lessons[lessonIdx + 1] : null;
+  const trackIdx = TRACK_INDEX.findIndex((t) => t.id === track.id);
+  const prevTrack = trackIdx > 0 ? TRACK_INDEX[trackIdx - 1] : null;
+  const nextTrack = trackIdx >= 0 && trackIdx < TRACK_INDEX.length - 1 ? TRACK_INDEX[trackIdx + 1] : null;
+  const prevLesson =
+    lessonIdx > 0
+      ? track.lessons[lessonIdx - 1]
+      : prevTrack
+        ? prevTrack.lessons[prevTrack.lessons.length - 1]
+        : null;
+  const nextLesson =
+    lessonIdx < track.lessons.length - 1
+      ? track.lessons[lessonIdx + 1]
+      : nextTrack
+        ? nextTrack.lessons[0]
+        : null;
 
   const engine = activeEngine();
   const editorVal = getEditorValue();
@@ -1187,6 +1646,8 @@ function renderAcademyWorkspace(): string {
           }
         </div>
 
+        ${state.mobileEditor === null && (engine === 'sql' || engine === 'python') ? renderSchemaDrawer() : ''}
+
         ${state.mobileEditor === null ? renderPistas(lesson) : ''}
 
         ${state.mobileEditor === null ? renderOutputRegion(state.output, engine) : ''}
@@ -1247,6 +1708,7 @@ function renderApp(): void {
         </section>
       `;
     } else if (!state.dataset) {
+      void bootstrapData();
       mainContent = `
         <section class="seam-panels">
           <div class="seam-panel skeleton-stack" role="status">
@@ -1258,14 +1720,36 @@ function renderApp(): void {
         </section>
       `;
     } else if (!explorerViewMod) {
-      if (!explorerLoadStarted) {
-        explorerLoadStarted = true;
-        void import('./ui/explorerView').then((mod) => {
-          explorerViewMod = mod;
-          if (state.view === 'explorador') renderApp();
-        });
+      if (viewLoadError?.view === 'explorador') {
+        mainContent = `
+          <section class="seam-panels">
+            <div class="seam-panel error-state" role="alert">
+              <h1>Não foi possível carregar o Explorador</h1>
+              <p>${escapeHtml(viewLoadError.message)}</p>
+              <div><button type="button" class="btn btn-primary" data-action="retry-view-load">Tentar novamente</button></div>
+            </div>
+          </section>
+        `;
+      } else {
+        if (!explorerLoadStarted) {
+          explorerLoadStarted = true;
+          void import('./ui/explorerView')
+            .then((mod) => {
+              explorerViewMod = mod;
+              if (viewLoadError?.view === 'explorador') viewLoadError = null;
+              if (state.view === 'explorador') renderApp();
+            })
+            .catch((err) => {
+              explorerLoadStarted = false;
+              viewLoadError = {
+                view: 'explorador',
+                message: err instanceof Error ? err.message : 'Verifica a ligação à internet e tenta novamente.',
+              };
+              if (state.view === 'explorador') renderApp();
+            });
+        }
+        mainContent = renderViewLoadingSkeleton('A carregar Explorador de Dados…');
       }
-      mainContent = renderViewLoadingSkeleton('A carregar Explorador de Dados…');
     } else {
       mainContent = explorerViewMod.renderExplorerHtml(state.dataset, {
         serie: state.explorerSerie,
@@ -1275,14 +1759,36 @@ function renderApp(): void {
     }
   } else if (state.view === 'cronograma') {
     if (!ganttViewMod) {
-      if (!ganttLoadStarted) {
-        ganttLoadStarted = true;
-        void import('./ui/ganttView').then((mod) => {
-          ganttViewMod = mod;
-          if (state.view === 'cronograma') renderApp();
-        });
+      if (viewLoadError?.view === 'cronograma') {
+        mainContent = `
+          <section class="seam-panels">
+            <div class="seam-panel error-state" role="alert">
+              <h1>Não foi possível carregar o Cronograma</h1>
+              <p>${escapeHtml(viewLoadError.message)}</p>
+              <div><button type="button" class="btn btn-primary" data-action="retry-view-load">Tentar novamente</button></div>
+            </div>
+          </section>
+        `;
+      } else {
+        if (!ganttLoadStarted) {
+          ganttLoadStarted = true;
+          void import('./ui/ganttView')
+            .then((mod) => {
+              ganttViewMod = mod;
+              if (viewLoadError?.view === 'cronograma') viewLoadError = null;
+              if (state.view === 'cronograma') renderApp();
+            })
+            .catch((err) => {
+              ganttLoadStarted = false;
+              viewLoadError = {
+                view: 'cronograma',
+                message: err instanceof Error ? err.message : 'Verifica a ligação à internet e tenta novamente.',
+              };
+              if (state.view === 'cronograma') renderApp();
+            });
+        }
+        mainContent = renderViewLoadingSkeleton('A carregar Cronograma…');
       }
-      mainContent = renderViewLoadingSkeleton('A carregar Cronograma…');
     } else {
       mainContent = ganttViewMod.renderGanttHtml(TRACK_INDEX, state.completedLessons, {
         paceMinutesPerWeek: state.ganttPaceMinutes,
@@ -1296,14 +1802,36 @@ function renderApp(): void {
     }
   } else {
     if (!cheatsheetViewMod) {
-      if (!cheatsheetLoadStarted) {
-        cheatsheetLoadStarted = true;
-        void import('./ui/cheatsheetView').then((mod) => {
-          cheatsheetViewMod = mod;
-          if (state.view === 'referencia') renderApp();
-        });
+      if (viewLoadError?.view === 'referencia') {
+        mainContent = `
+          <section class="seam-panels">
+            <div class="seam-panel error-state" role="alert">
+              <h1>Não foi possível carregar a Referência Rápida</h1>
+              <p>${escapeHtml(viewLoadError.message)}</p>
+              <div><button type="button" class="btn btn-primary" data-action="retry-view-load">Tentar novamente</button></div>
+            </div>
+          </section>
+        `;
+      } else {
+        if (!cheatsheetLoadStarted) {
+          cheatsheetLoadStarted = true;
+          void import('./ui/cheatsheetView')
+            .then((mod) => {
+              cheatsheetViewMod = mod;
+              if (viewLoadError?.view === 'referencia') viewLoadError = null;
+              if (state.view === 'referencia') renderApp();
+            })
+            .catch((err) => {
+              cheatsheetLoadStarted = false;
+              viewLoadError = {
+                view: 'referencia',
+                message: err instanceof Error ? err.message : 'Verifica a ligação à internet e tenta novamente.',
+              };
+              if (state.view === 'referencia') renderApp();
+            });
+        }
+        mainContent = renderViewLoadingSkeleton('A carregar Referência Rápida…');
       }
-      mainContent = renderViewLoadingSkeleton('A carregar Referência Rápida…');
     } else {
       mainContent = cheatsheetViewMod.renderCheatsheetHtml(state.refQuery, state.refCategory);
     }
@@ -1423,6 +1951,10 @@ function renderApp(): void {
   const ecra = root.querySelector<HTMLElement>('.ecra-escrita');
   if (ecra) desligarAlturaVisivel = ligarAlturaVisivel(ecra);
 
+  if (state.sidebarOpenMobile) {
+    root.querySelector<HTMLElement>('.sidebar-panel .lesson-nav-btn.is-current')?.scrollIntoView({ block: 'nearest' });
+  }
+
   attachDomListeners();
 
   if (nextModal !== 'none' && nextModal !== prevOpenModal) {
@@ -1450,6 +1982,7 @@ const workbenchRunner = createWorkbenchRunner({
   markLessonCompleted,
   savePracticeDone,
   renderApp,
+  updateOutputInPlace: updateWorkbenchOutputInPlace,
 });
 
 const executeWorkbench = workbenchRunner.execute;
@@ -1494,62 +2027,87 @@ function attachDomListeners(): void {
     }
     if (gutterEl) {
       gutterEl.innerHTML = renderLineNumbers(val);
+      gutterEl.scrollTop = editor.scrollTop;
     }
   };
 
   if (editor) {
     let tabTrapActive = true;
-    editor.addEventListener('input', syncEditorOverlay);
+    if (getUndoStack().length === 0) {
+      getUndoStack().push({
+        value: editor.value,
+        start: editor.selectionStart ?? editor.value.length,
+        end: editor.selectionEnd ?? editor.value.length,
+      });
+    }
+    editor.addEventListener('input', () => {
+      recordEditorInput(editor);
+      syncEditorOverlay();
+    });
     editor.addEventListener('blur', () => {
       tabTrapActive = true;
+      if (pendingCloudRender) {
+        pendingCloudRender = false;
+        renderApp();
+      }
     });
     editor.addEventListener('scroll', () => {
       if (highlightPre) {
         highlightPre.scrollTop = editor.scrollTop;
         highlightPre.scrollLeft = editor.scrollLeft;
       }
+      if (gutterEl) {
+        gutterEl.scrollTop = editor.scrollTop;
+      }
     });
     editor.addEventListener('keydown', (ev) => {
       if (ev.key === 'Escape') {
-        tabTrapActive = false;
+        if (tabTrapActive) {
+          tabTrapActive = false;
+          ev.stopPropagation();
+        }
         return;
       }
-      if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
+      if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && ev.key.toLowerCase() === 'z') {
+        if (undoEditor(editor)) ev.preventDefault();
+      } else if ((ev.ctrlKey || ev.metaKey) && ((ev.shiftKey && ev.key.toLowerCase() === 'z') || ev.key.toLowerCase() === 'y')) {
+        if (redoEditor(editor)) ev.preventDefault();
+      } else if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
         ev.preventDefault();
         void executeWorkbench();
       } else if (ev.shiftKey && ev.altKey && (ev.key === 'F' || ev.key === 'f')) {
         ev.preventDefault();
-        editor.value = formatCodePrettier(editor.value, activeEngine());
-        syncEditorOverlay();
+        const formatted = formatCodePrettier(editor.value, activeEngine());
+        applyEditorEdit(editor, formatted, formatted.length, formatted.length);
+      } else if (ev.key === 'Enter' && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
+        const start = editor.selectionStart ?? editor.value.length;
+        const end = editor.selectionEnd ?? editor.value.length;
+        const val = editor.value;
+        const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        const lineUpToCursor = val.slice(lineStart, start);
+        const indentMatch = /^[ \t]*/.exec(lineUpToCursor);
+        let nextIndent = indentMatch ? indentMatch[0] : '';
+        if (activeEngine() === 'python' && lineUpToCursor.trimEnd().endsWith(':')) {
+          nextIndent += '    ';
+        }
+        if (nextIndent.length > 0) {
+          ev.preventDefault();
+          const insert = '\n' + nextIndent;
+          applyEditorEdit(editor, val.slice(0, start) + insert + val.slice(end), start + insert.length, start + insert.length);
+        }
       } else if (ev.key === 'Tab' && !ev.shiftKey && tabTrapActive) {
         ev.preventDefault();
         const start = editor.selectionStart;
         const end = editor.selectionEnd;
-        editor.value = editor.value.slice(0, start) + '    ' + editor.value.slice(end);
-        editor.selectionStart = editor.selectionEnd = start + 4;
-        syncEditorOverlay();
+        applyEditorEdit(editor, editor.value.slice(0, start) + '    ' + editor.value.slice(end), start + 4, start + 4);
+      } else if (ev.key === 'Tab' && ev.shiftKey && tabTrapActive) {
+        ev.preventDefault();
+        outdentCurrentLine(editor);
       }
     });
   }
 
-  document.querySelectorAll<HTMLElement>('[data-insert]').forEach((btn) => {
-    // Sem isto o botão tira o foco ao editor e o teclado do telemóvel fecha e reabre a cada símbolo.
-    btn.addEventListener('mousedown', (ev) => ev.preventDefault());
-    btn.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const textToInsert = btn.dataset.insert;
-      if (!textToInsert) return;
-      const editorEl = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
-      if (!editorEl) return;
-      const start = editorEl.selectionStart ?? editorEl.value.length;
-      const end = editorEl.selectionEnd ?? editorEl.value.length;
-      editorEl.value = editorEl.value.slice(0, start) + textToInsert + editorEl.value.slice(end);
-      const newPos = start + textToInsert.length;
-      editorEl.selectionStart = editorEl.selectionEnd = newPos;
-      editorEl.focus();
-      syncEditorOverlay();
-    });
-  });
+  bindInsertButtons(document);
 
   document.querySelectorAll<HTMLElement>('[data-ecra-aba]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -1562,6 +2120,7 @@ function attachDomListeners(): void {
     btn.addEventListener('click', () => {
       state.mobileTab = btn.dataset.mobileTab === 'workbench' ? 'workbench' : 'lesson';
       renderApp();
+      window.scrollTo({ top: 0 });
     });
   });
 
@@ -1575,12 +2134,15 @@ function attachDomListeners(): void {
       if (!tr.lessons.some((l) => l.id === state.lessonId)) {
         state.lessonId = tr.lessons[0].id;
       }
+      state.mobileTab = 'lesson';
+      state.sidebarOpenMobile = false;
       state.wbTab = 'challenge';
       state.practiceIdx = 0;
       state.output = { kind: 'empty' };
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
       renderApp();
+      window.scrollTo({ top: 0 });
     });
   });
 
@@ -1630,12 +2192,14 @@ function attachDomListeners(): void {
       state.trackId = loc.trackId;
       state.lessonId = loc.lessonId;
       state.view = 'academia';
+      state.mobileTab = 'lesson';
       state.wbTab = 'challenge';
       state.practiceIdx = 0;
       state.output = { kind: 'empty' };
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
       renderApp();
+      window.scrollTo({ top: 0 });
     });
   });
 
@@ -1673,7 +2237,14 @@ function attachDomListeners(): void {
     btn.addEventListener('click', () => {
       const lid = btn.dataset.selectLesson;
       if (!lid) return;
-      state.lessonId = lid;
+      const loc = locateLesson(null, lid);
+      if (loc) {
+        state.trackId = loc.trackId;
+        state.lessonId = loc.lessonId;
+      } else {
+        state.lessonId = lid;
+      }
+      state.mobileTab = 'lesson';
       state.wbTab = 'challenge';
       state.practiceIdx = 0;
       state.output = { kind: 'empty' };
@@ -1681,6 +2252,7 @@ function attachDomListeners(): void {
       state.confirmSolutionLessonId = null;
       state.hintLevel = 0;
       renderApp();
+      window.scrollTo({ top: 0 });
     });
   });
 
@@ -1790,6 +2362,7 @@ function attachDomListeners(): void {
         saveDrafts(state.editorDrafts, true);
         state.output = { kind: 'empty' };
         renderApp();
+        window.scrollTo({ top: 0 });
         void executeWorkbench();
       })();
     });
@@ -1904,15 +2477,18 @@ function attachDomListeners(): void {
       } else if (act === 'switch-to-workbench') {
         state.mobileTab = 'workbench';
         renderApp();
+        window.scrollTo({ top: 0 });
       } else if (act === 'switch-to-lesson') {
         state.mobileTab = 'lesson';
         renderApp();
+        window.scrollTo({ top: 0 });
       } else if (act === 'load-example-tab') {
         state.wbTab = 'example';
         state.mobileTab = 'workbench';
         state.editorDrafts[draftKey(currentLesson(), 'example')] = currentLesson().exampleCode;
         saveDrafts(state.editorDrafts, true);
         renderApp();
+        window.scrollTo({ top: 0 });
         void executeWorkbench();
       } else if (act === 'run-code') {
         void executeWorkbench();
@@ -1920,23 +2496,99 @@ function attachDomListeners(): void {
         const stopped = workbenchRunner.cancelExecution();
         if (!stopped) {
           state.output = { kind: 'error', errorText: 'Execução interrompida pelo utilizador.' };
-          renderApp();
+          updateWorkbenchOutputInPlace();
         }
-      } else if (act === 'abrir-ecra-escrita') {
+      } else if (act === 'abrir-ecra-escrita' || act === 'editar-codigo-ecra') {
         abrirEcraDeEscrita('codigo');
       } else if (act === 'fechar-ecra-escrita') {
         fecharEcraDeEscrita();
+      } else if (act === 'editar-codigo-ecra') {
+        abrirEcraDeEscrita('codigo');
+      } else if (act === 'next-lesson-from-ecra') {
+        const track = currentTrackOrNull();
+        if (track) {
+          const lesson = currentLesson();
+          const idx = track.lessons.findIndex((l) => l.id === lesson.id);
+          const trIdx = TRACK_INDEX.findIndex((t) => t.id === track.id);
+          const next =
+            idx < track.lessons.length - 1
+              ? { trackId: track.id, lessonId: track.lessons[idx + 1].id }
+              : trIdx >= 0 && trIdx < TRACK_INDEX.length - 1
+                ? { trackId: TRACK_INDEX[trIdx + 1].id, lessonId: TRACK_INDEX[trIdx + 1].lessons[0].id }
+                : null;
+          if (next) {
+            state.trackId = next.trackId;
+            state.lessonId = next.lessonId;
+            state.mobileTab = 'lesson';
+            state.wbTab = 'challenge';
+            state.practiceIdx = 0;
+            state.output = { kind: 'empty' };
+            state.confirmSolutionLessonId = null;
+            state.hintLevel = 0;
+            fecharEcraDeEscrita();
+            window.scrollTo({ top: 0 });
+          }
+        }
       } else if (act === 'usar-editor-normal') {
         savePreferirEditorNormal(true);
         fecharEcraDeEscrita();
-        renderApp();
       } else if (act === 'usar-ecra-escrita') {
         savePreferirEditorNormal(false);
         renderApp();
       } else if (act === 'executar-ecra-escrita') {
         (document.activeElement as HTMLElement | null)?.blur();
-        state.mobileEditor = 'resultado';
+        abrirEcraDeEscrita('resultado');
         void executeWorkbench();
+      } else if (act === 'editor-undo') {
+        const ed = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+        if (ed) {
+          undoEditor(ed);
+          ed.focus({ preventScroll: true });
+        }
+      } else if (act === 'editor-redo') {
+        const ed = document.getElementById('workbench-editor') as HTMLTextAreaElement | null;
+        if (ed) {
+          redoEditor(ed);
+          ed.focus({ preventScroll: true });
+        }
+      } else if (act === 'copy-code') {
+        const cur = getEditorValue();
+        void navigator.clipboard?.writeText(cur).catch(() => {});
+      } else if (act === 'next-lesson-from-ecra') {
+        const track = currentTrackOrNull();
+        if (track) {
+          const lesson = currentLesson();
+          const idx = track.lessons.findIndex((l) => l.id === lesson.id);
+          const trIdx = TRACK_INDEX.findIndex((t) => t.id === track.id);
+          const next =
+            idx < track.lessons.length - 1
+              ? { trackId: track.id, lessonId: track.lessons[idx + 1].id }
+              : trIdx >= 0 && trIdx < TRACK_INDEX.length - 1
+                ? { trackId: TRACK_INDEX[trIdx + 1].id, lessonId: TRACK_INDEX[trIdx + 1].lessons[0].id }
+                : null;
+          if (next) {
+            state.trackId = next.trackId;
+            state.lessonId = next.lessonId;
+            state.mobileTab = 'lesson';
+            state.wbTab = 'challenge';
+            state.practiceIdx = 0;
+            state.output = { kind: 'empty' };
+            state.confirmSolutionLessonId = null;
+            state.hintLevel = 0;
+            fecharEcraDeEscrita();
+            window.scrollTo({ top: 0 });
+          }
+        }
+      } else if (act === 'close-mobile-sidebar') {
+        state.sidebarOpenMobile = false;
+        renderApp();
+        document.querySelector<HTMLElement>('.mobile-index-toggle')?.focus({ preventScroll: true });
+      } else if (act === 'retry-track-load') {
+        trackLoadError = null;
+        renderApp();
+      } else if (act === 'retry-view-load') {
+        viewLoadError = null;
+        renderApp();
       } else if (act === 'format-code') {
         const cur = getEditorValue();
         state.editorDrafts[draftKey(currentLesson(), state.wbTab)] = formatCodePrettier(cur, activeEngine());
@@ -2417,11 +3069,13 @@ function attachDomListeners(): void {
         state.trackId = loc.trackId;
         state.lessonId = loc.lessonId;
         state.view = 'academia';
+        state.mobileTab = 'lesson';
         state.wbTab = 'challenge';
         state.practiceIdx = 0;
         state.output = { kind: 'empty' };
         state.showProgressModal = false;
         renderApp();
+        window.scrollTo({ top: 0 });
       }
     });
   });
@@ -2510,6 +3164,12 @@ window.addEventListener('keydown', (ev) => {
     fecharEcraDeEscrita();
     return;
   }
+  if (ev.key === 'Escape' && state.sidebarOpenMobile && !anyModalOpen) {
+    state.sidebarOpenMobile = false;
+    renderApp();
+    document.querySelector<HTMLElement>('.mobile-index-toggle')?.focus({ preventScroll: true });
+    return;
+  }
   if (ev.key === 'Escape' && anyModalOpen) {
     state.showProgressModal = false;
     state.showThemeModal = false;
@@ -2521,7 +3181,18 @@ window.addEventListener('keydown', (ev) => {
 
 syncStateFromUrl();
 renderApp();
-void bootstrapData();
 void cloudSync.bootstrap();
 cloudSync.attachCrossTabStorageSync();
 startStudyTimer(state);
+
+window.addEventListener('pagehide', () => saveDrafts(state.editorDrafts, true));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveDrafts(state.editorDrafts, true);
+});
+
+const isProdBuild = Boolean((import.meta as unknown as { env?: { PROD?: boolean } }).env?.PROD);
+if (isProdBuild && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

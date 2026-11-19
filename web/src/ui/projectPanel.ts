@@ -66,10 +66,12 @@ export function renderPainelProjeto(lesson: Lesson, feitos: Set<string>, link: s
   <h3>Lista de verificação</h3>
   <ul class="projeto-lista">${lista}</ul>
   <h3>Grelha de autoavaliação</h3>
-  <table class="projeto-grelha">
-    <thead><tr><th scope="col">Critério</th><th scope="col">Bom</th><th scope="col">A melhorar</th></tr></thead>
-    <tbody>${grelha}</tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="projeto-grelha">
+      <thead><tr><th scope="col">Critério</th><th scope="col">Bom</th><th scope="col">A melhorar</th></tr></thead>
+      <tbody>${grelha}</tbody>
+    </table>
+  </div>
   ${linkHtml}
 </section>`;
 }

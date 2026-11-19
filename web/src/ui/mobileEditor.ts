@@ -39,7 +39,7 @@ export function vigiarAparelho(aoMudar: () => void): { toque: () => boolean; est
     return { toque: () => false, estreito: () => false };
   }
   const toque = window.matchMedia('(pointer: coarse)');
-  const estreito = window.matchMedia('(max-width: 48rem)');
+  const estreito = window.matchMedia('(max-width: 768px), (max-height: 520px)');
   toque.addEventListener('change', aoMudar);
   estreito.addEventListener('change', aoMudar);
   return { toque: () => toque.matches, estreito: () => estreito.matches };
@@ -64,6 +64,7 @@ export function renderEcraDeEscrita(o: {
   simbolos: [string, string][];
   rotuloExecutar: string;
   aCorrer: boolean;
+  acoesCodigoHtml?: string;
 }): string {
   const separadores = ABAS.map(
     ([id, nome]) =>
@@ -87,7 +88,10 @@ export function renderEcraDeEscrita(o: {
         'enunciado',
         `${o.enunciadoHtml}<button type="button" class="link-btn" data-action="usar-editor-normal">Usar o editor normal</button>`,
       )}
-      ${painel('codigo', o.editorHtml)}
+      ${painel(
+        'codigo',
+        `${o.acoesCodigoHtml ? `<div class="ecra-acoes-barra" role="toolbar" aria-label="Ações do editor">${o.acoesCodigoHtml}</div>` : ''}${o.editorHtml}`,
+      )}
       ${painel('resultado', o.resultadoHtml)}
       <div class="ecra-barra">
         ${simbolos}
@@ -116,6 +120,8 @@ export function ligarAlturaVisivel(el: HTMLElement): () => void {
   const aplicar = () => {
     el.style.setProperty('--vv-altura', `${vv.height}px`);
     el.style.setProperty('--vv-topo', `${vv.offsetTop}px`);
+    el.style.setProperty('--vv-esq', `${vv.offsetLeft}px`);
+    el.style.setProperty('--vv-largura', `${vv.width}px`);
   };
   aplicar();
   vv.addEventListener('resize', aplicar);

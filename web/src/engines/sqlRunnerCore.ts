@@ -4,12 +4,15 @@ import type { MerceariaDataset } from './csvEngine';
 export interface SqlExecutionResult {
   columns: string[];
   rows: (string | number | null)[][];
+  totalRows?: number;
+  truncated?: boolean;
   elapsedMs: number;
   error?: string;
 }
 
 export const MAX_SQL_CHARS = 15_000;
 export const SQL_EXECUTION_TIMEOUT_MS = 10_000;
+export const SQL_MAX_TRANSFER_ROWS = 500;
 const BLOCKED_SQL_KEYWORDS =
   /\b(DROP|DELETE|UPDATE|INSERT|ALTER|ATTACH|DETACH|PRAGMA|CREATE|VACUUM|REINDEX)\b|\bREPLACE\s+INTO\b/i;
 
@@ -136,9 +139,14 @@ export function executeSqlOnDatabase(db: Database, query: string, startTime: num
     return { columns: [], rows: [], elapsedMs };
   }
   const last = res[res.length - 1];
+  const allRows = last.values as (string | number | null)[][];
+  const totalRows = allRows.length;
+  const truncated = totalRows > SQL_MAX_TRANSFER_ROWS;
   return {
     columns: last.columns,
-    rows: last.values as (string | number | null)[][],
+    rows: truncated ? allRows.slice(0, SQL_MAX_TRANSFER_ROWS) : allRows,
+    totalRows,
+    truncated,
     elapsedMs,
   };
 }

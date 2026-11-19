@@ -14,9 +14,11 @@ export interface SandboxWorkerLike<TRequest extends { id: number }, TResult> {
 export interface SandboxWorkerClientOptions<TRequest extends { id: number }, TResult> {
   createWorker: () => SandboxWorkerLike<TRequest, TResult>;
   defaultTimeoutMs: number;
+  stallTimeoutMs?: number;
   preparingMessage: string;
   stopErrorMessage: string;
   formatTimeoutError: (seconds: number) => string;
+  formatStallError?: (seconds: number) => string;
   defaultWorkerError: string;
   makeErrorResult: (error: string, elapsedMs: number) => TResult;
 }
@@ -34,6 +36,7 @@ interface PendingExecution<TResult> {
   onStatus?: (msg: string) => void;
   resolve: (res: TResult) => void;
   timerId: ReturnType<typeof setTimeout> | null;
+  stallTimerId: ReturnType<typeof setTimeout> | null;
 }
 
 function elapsedSince(startTime: number): number {
@@ -47,12 +50,27 @@ export function createSandboxWorkerClient<TRequest extends { id: number }, TResu
   let activePending: PendingExecution<TResult> | null = null;
   let customFactory: (() => SandboxWorkerLike<TRequest, TResult>) | null = null;
   let timeoutMs = opts.defaultTimeoutMs;
+  const stallTimeoutMs = opts.stallTimeoutMs ?? 45_000;
   let nextId = 1;
+
+  function armStallTimer(pending: PendingExecution<TResult>): void {
+    if (pending.stallTimerId) clearTimeout(pending.stallTimerId);
+    const runId = pending.id;
+    pending.stallTimerId = setTimeout(() => {
+      if (activePending?.id !== runId) return;
+      const secs = Math.max(1, Math.round(stallTimeoutMs / 1000));
+      const msg =
+        opts.formatStallError?.(secs) ??
+        `O carregamento demorou mais de ${secs} segundos sem progresso. Verifica a ligação à internet e tenta novamente.`;
+      finishWithError(msg, true);
+    }, stallTimeoutMs);
+  }
 
   function finishWithError(error: string, terminateWorker: boolean): void {
     const pending = activePending;
     activePending = null;
     if (pending?.timerId) clearTimeout(pending.timerId);
+    if (pending?.stallTimerId) clearTimeout(pending.stallTimerId);
     if (terminateWorker && activeWorker) {
       activeWorker.terminate();
       activeWorker = null;
@@ -71,8 +89,13 @@ export function createSandboxWorkerClient<TRequest extends { id: number }, TResu
         if (!activePending || !msg || msg.id !== activePending.id) return;
 
         if (msg.type === 'status') {
+          armStallTimer(activePending);
           activePending.onStatus?.(msg.message);
         } else if (msg.type === 'executing') {
+          if (activePending.stallTimerId) {
+            clearTimeout(activePending.stallTimerId);
+            activePending.stallTimerId = null;
+          }
           if (activePending.timerId) clearTimeout(activePending.timerId);
           const runId = activePending.id;
           activePending.timerId = setTimeout(() => {
@@ -84,6 +107,7 @@ export function createSandboxWorkerClient<TRequest extends { id: number }, TResu
           const pending = activePending;
           activePending = null;
           if (pending.timerId) clearTimeout(pending.timerId);
+          if (pending.stallTimerId) clearTimeout(pending.stallTimerId);
           pending.resolve(msg.result);
         } else if (msg.type === 'error') {
           finishWithError(msg.error, true);
@@ -108,7 +132,8 @@ export function createSandboxWorkerClient<TRequest extends { id: number }, TResu
     const startTime = performance.now();
     return new Promise((resolve) => {
       const id = nextId++;
-      activePending = { id, startTime, onStatus, resolve, timerId: null };
+      activePending = { id, startTime, onStatus, resolve, timerId: null, stallTimerId: null };
+      armStallTimer(activePending);
       try {
         const worker = ensureWorker();
         onStatus?.(opts.preparingMessage);

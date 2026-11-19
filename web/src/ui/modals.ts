@@ -251,18 +251,18 @@ export function renderProgressModal(state: AppState): string {
           ${
             state.generatedProgressCode
               ? `<div class="action-pair" style="margin-top:6px;">
-                  <input type="text" readonly class="code-input-inline" id="generated-code-field" value="${escapeHtml(state.generatedProgressCode)}" aria-label="Código de progresso gerado" style="flex:1;min-width:180px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);" />
+                  <input type="text" readonly class="code-input-inline" id="generated-code-field" value="${escapeHtml(state.generatedProgressCode)}" aria-label="Código de progresso gerado" />
                 </div>`
               : ''
           }
-          <div class="action-pair" style="margin-top:8px;">
+          <div class="action-pair progress-code-row">
             <input
               type="text"
+              class="code-input-inline"
               id="progress-code-input"
               placeholder="Cola MB-XXXX-XXXX-XXXX, link ?sync=… ou MB1-…"
               value="${escapeHtml(state.progressCodeInput)}"
               aria-label="Colar código de sincronização ou progresso"
-              style="flex:1;min-width:200px;padding:6px 10px;font-family:var(--font-mono);font-size:var(--text-xs);background:var(--color-paper-3);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-chip);"
             />
             <button type="button" class="btn" data-action="apply-progress-code">Continuar com código</button>
           </div>

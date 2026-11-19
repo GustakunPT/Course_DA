@@ -4,6 +4,8 @@ import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
 import { loadPyodide } from 'pyodide';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { createSandboxWorkerClient } from '../src/engines/sandboxWorkerClient';
+import { executeSqlOnDatabase, SQL_MAX_TRANSFER_ROWS } from '../src/engines/sqlRunnerCore';
 
 const require = createRequire(import.meta.url);
 
@@ -248,5 +250,44 @@ describe('Web Worker SQLite (cancelamento e timeout)', () => {
     } finally {
       setSqlWorkerForTests(null);
     }
+  });
+
+  it('executeSqlOnDatabase limita a transferência a SQL_MAX_TRANSFER_ROWS (500) e sinaliza totalRows/truncated', () => {
+    const fakeDb = {
+      exec: () => [
+        {
+          columns: ['id'],
+          values: Array.from({ length: SQL_MAX_TRANSFER_ROWS + 25 }, (_, i) => [i + 1]),
+        },
+      ],
+    } as any;
+    const res = executeSqlOnDatabase(fakeDb, 'SELECT id FROM vendas', performance.now());
+    expect(res.rows).toHaveLength(SQL_MAX_TRANSFER_ROWS);
+    expect(res.totalRows).toBe(SQL_MAX_TRANSFER_ROWS + 25);
+    expect(res.truncated).toBe(true);
+  });
+
+  it('createSandboxWorkerClient dispara stallTimeoutMs se o carregamento estagnar antes de executing', async () => {
+    let terminated = false;
+    const client = createSandboxWorkerClient<{ id: number }, { error?: string }>({
+      createWorker: () => ({
+        onmessage: null,
+        onerror: null,
+        postMessage() {},
+        terminate() {
+          terminated = true;
+        },
+      }),
+      defaultTimeoutMs: 5_000,
+      stallTimeoutMs: 30,
+      preparingMessage: 'A preparar…',
+      stopErrorMessage: 'Parado',
+      formatTimeoutError: (s) => `Timeout ${s}s`,
+      defaultWorkerError: 'Erro',
+      makeErrorResult: (error) => ({ error }),
+    });
+    const res = await client.run({});
+    expect(terminated).toBe(true);
+    expect(res.error).toContain('sem progresso');
   });
 });

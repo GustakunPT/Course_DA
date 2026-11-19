@@ -263,7 +263,23 @@ _res_bancada
 
 export function writeCsvPairToPyodide(pyodide: any, name: string, content: string): void {
   pyodide.FS.writeFile(`/home/pyodide/dados/${name}`, content, { encoding: 'utf8' });
-  pyodide.FS.writeFile(`/home/dados/${name}`, content, { encoding: 'utf8' });
+  let isSymlink = false;
+  try {
+    const stat = pyodide.FS.lstat('/home/dados');
+    isSymlink = Boolean(pyodide.FS.isSymlink(stat.mode));
+  } catch {
+    isSymlink = false;
+  }
+  if (!isSymlink) {
+    pyodide.FS.writeFile(`/home/dados/${name}`, content, { encoding: 'utf8' });
+  }
+}
+
+function stripPythonCommentsAndStrings(code: string): string {
+  return code
+    .replace(/'''[\s\S]*?'''|"""[\s\S]*?"""/g, ' ')
+    .replace(/'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"/g, ' ')
+    .replace(/#[^\n]*/g, ' ');
 }
 
 export async function executeInPyodideInstance(opts: {
@@ -295,13 +311,15 @@ export async function executeInPyodideInstance(opts: {
     loadedFiles.add(nome);
   }
 
+  const cleanedCode = stripPythonCommentsAndStrings(code);
   for (const pkg of ALLOWED_PYODIDE_PACKAGES) {
     const needed =
-      new RegExp(`\\b${pkg}\\b`).test(code) ||
+      new RegExp(`\\b${pkg}\\b`).test(cleanedCode) ||
       (pkg === 'pandas' && (checks ?? []).some((c) => /\bpd\b/.test(c.expr))) ||
       (pkg === 'numpy' && (checks ?? []).some((c) => /\bnp\b/.test(c.expr)));
     if (needed && !loadedPackages.has(pkg)) {
-      onStatus?.(`A carregar biblioteca ${pkg} no navegador…`);
+      const pesoAviso = pkg === 'pandas' ? ' (~37 MB)' : pkg === 'matplotlib' ? ' (~24 MB)' : '';
+      onStatus?.(`A carregar biblioteca ${pkg}${pesoAviso} no navegador…`);
       await pyodide.loadPackage(pkg);
       loadedPackages.add(pkg);
     }

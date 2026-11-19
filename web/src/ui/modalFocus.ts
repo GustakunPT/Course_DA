@@ -47,15 +47,15 @@ export function focusInitialDialogElement(dialog: HTMLElement): void {
   if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
   const closeBtn = dialog.querySelector<HTMLElement>('button[data-action^="close-"]:not([disabled])');
   if (closeBtn) {
-    closeBtn.focus();
+    closeBtn.focus({ preventScroll: true });
     return;
   }
   const focusables = getFocusableElements(dialog);
   if (focusables.length > 0) {
-    focusables[0].focus();
+    focusables[0].focus({ preventScroll: true });
     return;
   }
-  dialog.focus();
+  dialog.focus({ preventScroll: true });
 }
 
 /** Prende a navegação Tab / Shift+Tab dentro da modal aberta (WCAG 2.1 AA). */
@@ -99,7 +99,7 @@ export function restoreFocusFromSelectors(selectors: (string | null | undefined)
     if (!sel) continue;
     const target = doc.querySelector<HTMLElement>(sel);
     if (target && !target.hasAttribute('disabled')) {
-      target.focus();
+      target.focus({ preventScroll: true });
       return;
     }
   }

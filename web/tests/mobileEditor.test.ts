@@ -6,6 +6,7 @@ import {
   renderEcraDeEscrita,
   renderPreviaCodigo,
   savePreferirEditorNormal,
+  vigiarAparelho,
 } from '../src/ui/mobileEditor';
 
 describe('deveUsarEcraDeEscrita', () => {
@@ -112,5 +113,20 @@ describe('estilos do ecrã de escrita', () => {
     const regra = /\.ecra-escrita \.code-editor,[^{]*\.ecra-escrita \.code-highlight-layer[^{]*\{([^}]*)\}/.exec(css);
     expect(regra, 'falta a regra para .ecra-escrita .code-editor e .code-highlight-layer').not.toBeNull();
     expect(regra![1]).toMatch(/font-size:\s*max\(16px/);
+  });
+
+  it('vigiarAparelho mantém estreito=true em telemóvel em paisagem (max-height: 520px)', () => {
+    vi.stubGlobal('window', {
+      matchMedia: (query: string) => ({
+        matches: query.includes('pointer: coarse') || query.includes('max-height: 520px'),
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }),
+    });
+    const ap = vigiarAparelho(() => {});
+    expect(ap.toque()).toBe(true);
+    expect(ap.estreito()).toBe(true);
+    expect(deveUsarEcraDeEscrita({ toque: ap.toque(), estreito: ap.estreito(), preferirNormal: false })).toBe(true);
+    vi.unstubAllGlobals();
   });
 });
