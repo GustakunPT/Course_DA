@@ -532,16 +532,6 @@ export function renderGanttHtml(
             <h1>Progresso por Tema e por Etapa</h1>
             <p class="measured">Cada barra mostra o tempo previsto + margem de ~20% por etapa e margem de revisão por tema, e vai enchendo conforme o teu avanço e tempo real registado. Clica em qualquer etapa para a abrir.</p>
           </div>
-          <div class="gantt-legend-box" aria-label="Legenda do cronograma">
-            <div class="gantt-legend-group">${legendTracks}</div>
-            <div class="gantt-legend-states">
-              <span class="gantt-legend-item"><span class="gantt-state-pill is-autonomous"></span>Concluída (100%)</span>
-              <span class="gantt-legend-item"><span class="gantt-state-pill is-helped"></span>C/ apoio</span>
-              <span class="gantt-legend-item"><span class="gantt-state-pill is-todo"></span>Por fazer / em curso</span>
-              <span class="gantt-legend-item"><span class="gantt-state-pill is-buffer"></span>Zona de margem</span>
-              <span class="gantt-legend-item"><span class="gantt-milestone is-complete" style="position:static;">◆</span>Marco do tema</span>
-            </div>
-          </div>
         </div>
 
         <div class="progress-summary-grid">
@@ -563,7 +553,20 @@ export function renderGanttHtml(
           </div>
         </div>
 
-        <div class="gantt-toolbar">
+        <details class="schema-drawer gantt-controls-drawer">
+          <summary>Ritmo semanal, filtros, legenda e diagnóstico</summary>
+          <div class="gantt-legend-box" aria-label="Legenda do cronograma" style="margin-top:var(--space-xs);">
+            <div class="gantt-legend-group">${legendTracks}</div>
+            <div class="gantt-legend-states">
+              <span class="gantt-legend-item"><span class="gantt-state-pill is-autonomous"></span>Concluída (100%)</span>
+              <span class="gantt-legend-item"><span class="gantt-state-pill is-helped"></span>C/ apoio</span>
+              <span class="gantt-legend-item"><span class="gantt-state-pill is-todo"></span>Por fazer / em curso</span>
+              <span class="gantt-legend-item"><span class="gantt-state-pill is-buffer"></span>Zona de margem</span>
+              <span class="gantt-legend-item"><span class="gantt-milestone is-complete" style="position:static;">◆</span>Marco do tema</span>
+            </div>
+          </div>
+
+          <div class="gantt-toolbar" style="margin-top:var(--space-xs);">
           <div class="gantt-control-group" role="group" aria-label="Ritmo de estudo semanal">
             <span class="gantt-control-label">Ritmo:</span>
             ${GANTT_PACE_OPTIONS.map(
@@ -706,6 +709,7 @@ export function renderGanttHtml(
 
           return `<div class="study-insights-grid">${reviewHtml}${timeHtml}</div>`;
         })()}
+        </details>
       </section>
 
       <section class="seam-panel gantt-board-panel">

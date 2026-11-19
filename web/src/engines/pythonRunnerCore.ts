@@ -36,7 +36,7 @@ export const PYODIDE_CORE_SRI: Record<string, string> = {
 };
 
 export const MAX_PYTHON_CODE_CHARS = 30_000;
-export const PYTHON_EXECUTION_TIMEOUT_MS = 12_000;
+export const PYTHON_EXECUTION_TIMEOUT_MS = 18_000;
 export const ALLOWED_PYODIDE_PACKAGES = ['pandas', 'numpy', 'matplotlib', 'sqlite3'] as const;
 export const BASE_CSV_FILES = [
   'produtos.csv',
@@ -240,7 +240,7 @@ def _executar_na_bancada(_codigo_fonte, _checks_str):
         _plt = sys.modules["matplotlib.pyplot"]
         for _num in _plt.get_fignums()[:4]:
             _png = io.BytesIO()
-            _plt.figure(_num).savefig(_png, format="png", dpi=90, bbox_inches="tight")
+            _plt.figure(_num).savefig(_png, format="png", dpi=80, bbox_inches="tight")
             _images.append(base64.b64encode(_png.getvalue()).decode("ascii"))
         _plt.close("all")
 

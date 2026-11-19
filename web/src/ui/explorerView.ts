@@ -131,12 +131,10 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
     </section>
 
     <section class="seam-panels">
-      <div class="seam-panel">
-        <div class="workbench-toolbar">
-          <div>
-            <h2>Transferência direta de artefactos Power BI e Excel (Fase 4)</h2>
-            <p class="helper-slot">Inclui o modelo semântico Star Schema com relacionamentos 1:* e 8 medidas DAX (Faturação Total, Ticket Médio, Clientes Ativos, LTV, Quota % e Acumulado YTD).</p>
-          </div>
+      <details class="seam-panel schema-drawer explorer-downloads-drawer">
+        <summary>Transferência direta Power BI (.pbip) e Excel (.xlsx) — 4 artefactos</summary>
+        <div class="workbench-toolbar" style="margin-top:var(--space-xs);">
+          <p class="helper-slot">Inclui o modelo semântico Star Schema com relacionamentos 1:* e 8 medidas DAX (Faturação Total, Ticket Médio, Clientes Ativos, LTV, Quota % e Acumulado YTD).</p>
           <div class="filter-bar">
             <a href="/relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip" download class="btn btn-primary">
               Descarregar Power BI (.pbip + DAX)
@@ -152,7 +150,7 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
             </a>
           </div>
         </div>
-      </div>
+      </details>
     </section>
 
     <section class="seam-panels kpi-grid" aria-label="Indicadores principais">
