@@ -258,6 +258,18 @@ describe('base SQL da bancada', () => {
     const total = await runSqlQuery('SELECT ROUND(SUM(subtotal), 2) FROM vendas_detalhe');
     expect(total.rows[0][0]).toBe(26902.89);
   });
+
+  const sqlDemos = todas.filter((l) => l.engine === 'sql' && l.errorDemo);
+  it('as etapas avançadas de SQL e BI têm explicação longa e erro típico validado', () => {
+    expect(sqlDemos.length).toBeGreaterThanOrEqual(9);
+    for (const l of sqlDemos) expect(l.explained!.join(' ').length, l.id).toBeGreaterThan(600);
+  });
+
+  it.each(sqlDemos.map((l) => [l.id, l.errorDemo!] as const))('%s: o erro típico SQL dá a mensagem anunciada', async (_id, demo) => {
+    const res = await runSqlQuery(demo.code);
+    expect(res.error).toBeDefined();
+    expect(res.error).toContain(demo.message);
+  });
 });
 
 describe('fichas da Referência', () => {

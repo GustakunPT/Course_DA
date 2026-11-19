@@ -85,11 +85,16 @@ export function assembleSqlTrack(
   sqlTrack: Track,
   sqlPractice: Record<string, SqlChallengeSpec[]>,
   moreQuiz: Record<string, QuizSpec[]>,
+  sqlExplained: Record<string, Partial<Lesson>> = {},
 ): Track {
   return applyMoreQuiz(
     {
       ...sqlTrack,
-      lessons: sqlTrack.lessons.map((l) => (sqlPractice[l.id] ? { ...l, practiceSql: sqlPractice[l.id] } : l)),
+      lessons: sqlTrack.lessons.map((l) => ({
+        ...l,
+        ...sqlExplained[l.id],
+        ...(sqlPractice[l.id] ? { practiceSql: sqlPractice[l.id] } : {}),
+      })),
     },
     moreQuiz,
   );
@@ -99,11 +104,16 @@ export function assemblePandasTrack(
   pandasTrack: Track,
   pandasPractice: Record<string, PythonChallengeSpec[]>,
   moreQuiz: Record<string, QuizSpec[]>,
+  pandasExplained: Record<string, Partial<Lesson>> = {},
 ): Track {
   return applyMoreQuiz(
     {
       ...pandasTrack,
-      lessons: pandasTrack.lessons.map((l) => (pandasPractice[l.id] ? { ...l, practice: pandasPractice[l.id] } : l)),
+      lessons: pandasTrack.lessons.map((l) => ({
+        ...l,
+        ...pandasExplained[l.id],
+        ...(pandasPractice[l.id] ? { practice: pandasPractice[l.id] } : {}),
+      })),
     },
     moreQuiz,
   );
@@ -129,22 +139,27 @@ export function assembleVisualBiTrack(
   biProPractice: Record<string, PythonChallengeSpec[]>,
   biProSqlPractice: Record<string, SqlChallengeSpec[]>,
   moreQuiz: Record<string, QuizSpec[]>,
+  statsBiExplained: Record<string, Partial<Lesson>> = {},
 ): Track {
+  const base = montarTrilha(
+    statsBiTrack,
+    {
+      id: 'bi',
+      shortTitle: '5. Visualização & BI',
+      fullTitle: 'Visualização, Excel/Power Query e Power BI para Analistas',
+      summary:
+        'Curva ABC, relatório executivo e gráficos honestos com matplotlib, Star Schema, DAX, Inteligência de Tempo e 4 oficinas práticas de Excel, Power Query e Power BI com conferência numérica.',
+    },
+    VISUAL_BI_ORDER,
+    statsPractice,
+    biProPractice,
+    biProSqlPractice,
+  );
   return applyMoreQuiz(
-    montarTrilha(
-      statsBiTrack,
-      {
-        id: 'bi',
-        shortTitle: '5. Visualização & BI',
-        fullTitle: 'Visualização, Excel/Power Query e Power BI para Analistas',
-        summary:
-          'Curva ABC, relatório executivo e gráficos honestos com matplotlib, Star Schema, DAX, Inteligência de Tempo e 4 oficinas práticas de Excel, Power Query e Power BI com conferência numérica.',
-      },
-      VISUAL_BI_ORDER,
-      statsPractice,
-      biProPractice,
-      biProSqlPractice,
-    ),
+    {
+      ...base,
+      lessons: base.lessons.map((l) => ({ ...l, ...statsBiExplained[l.id] })),
+    },
     moreQuiz,
   );
 }
@@ -155,22 +170,27 @@ export function assembleEstatisticaTrack(
   biProPractice: Record<string, PythonChallengeSpec[]>,
   biProSqlPractice: Record<string, SqlChallengeSpec[]>,
   moreQuiz: Record<string, QuizSpec[]>,
+  statsBiExplained: Record<string, Partial<Lesson>> = {},
 ): Track {
+  const base = montarTrilha(
+    statsBiTrack,
+    {
+      id: 'estatistica',
+      shortTitle: '6. Estatística',
+      fullTitle: 'Estatística para Analistas: do descritivo às perguntas de entrevista',
+      summary:
+        'Média e mediana, quartis, probabilidade e Bayes, correlação e intervalos de confiança, simulação e bootstrap, testes A/B, qui-quadrado e ANOVA, regressão simples e múltipla, e perguntas rápidas de entrevista.',
+    },
+    ESTATISTICA_ORDER,
+    statsPractice,
+    biProPractice,
+    biProSqlPractice,
+  );
   return applyMoreQuiz(
-    montarTrilha(
-      statsBiTrack,
-      {
-        id: 'estatistica',
-        shortTitle: '6. Estatística',
-        fullTitle: 'Estatística para Analistas: do descritivo às perguntas de entrevista',
-        summary:
-          'Média e mediana, quartis, probabilidade e Bayes, correlação e intervalos de confiança, simulação e bootstrap, testes A/B, qui-quadrado e ANOVA, regressão simples e múltipla, e perguntas rápidas de entrevista.',
-      },
-      ESTATISTICA_ORDER,
-      statsPractice,
-      biProPractice,
-      biProSqlPractice,
-    ),
+    {
+      ...base,
+      lessons: base.lessons.map((l) => ({ ...l, ...statsBiExplained[l.id] })),
+    },
     moreQuiz,
   );
 }

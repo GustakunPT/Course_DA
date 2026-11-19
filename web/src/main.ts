@@ -1036,8 +1036,14 @@ function renderAcademyWorkspace(): string {
             ? `
           <section class="prose-section error-demo" aria-label="Exemplo de erro">
             <h2>O que acontece se…</h2>
-            <pre class="code-sample"><code>${highlightCode(lesson.errorDemo.code, 'python')}</code></pre>
-            <p class="error-demo-label">O Python responde:</p>
+            <pre class="code-sample"><code>${highlightCode(lesson.errorDemo.code, lesson.engine)}</code></pre>
+            <p class="error-demo-label">${
+              lesson.engine === 'sql'
+                ? 'O SQLite responde:'
+                : lesson.engine === 'git'
+                  ? 'O Git responde:'
+                  : 'O Python responde:'
+            }</p>
             <pre class="error-demo-msg">${escapeHtml(lesson.errorDemo.message)}</pre>
             <p>${escapeHtml(lesson.errorDemo.fix)}</p>
           </section>

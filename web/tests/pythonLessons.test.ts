@@ -151,9 +151,9 @@ limpo = viagens.drop_duplicates(subset="viagem_id").iloc[:19650]`],
     120_000,
   );
 
-  const demos = allTracks.flatMap((t) => t.lessons).filter((l) => l.errorDemo);
-  it('as etapas 02 a 10 da trilha Python têm explicação longa e um erro típico', () => {
-    expect(demos.map((l) => l.id)).toHaveLength(9);
+  const demos = allTracks.flatMap((t) => t.lessons).filter((l) => l.engine === 'python' && l.errorDemo);
+  it('as etapas Python, Pandas, BI e Estatística com errorDemo têm explicação longa e cobertura ampla', () => {
+    expect(demos.length).toBeGreaterThanOrEqual(28);
     for (const l of demos) expect(l.explained!.join(' ').length, l.id).toBeGreaterThan(600);
   });
 

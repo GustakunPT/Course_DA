@@ -38,20 +38,22 @@ async function fetchAndAssembleTrack(trackId: string): Promise<Track> {
       return assemblePythonTrack(pythonTrack, pythonExplained, pythonPractice, moreQuiz);
     }
     case 'sql': {
-      const [{ sqlTrack }, { sqlPractice }, { moreQuiz }] = await Promise.all([
+      const [{ sqlTrack }, { sqlPractice }, { moreQuiz }, { sqlExplained }] = await Promise.all([
         import('./trackSql'),
         import('./practiceSql'),
         import('./moreQuiz'),
+        import('./sqlExplained'),
       ]);
-      return assembleSqlTrack(sqlTrack, sqlPractice, moreQuiz);
+      return assembleSqlTrack(sqlTrack, sqlPractice, moreQuiz, sqlExplained);
     }
     case 'pandas': {
-      const [{ pandasTrack }, { pandasPractice }, { moreQuiz }] = await Promise.all([
+      const [{ pandasTrack }, { pandasPractice }, { moreQuiz }, { pandasExplained }] = await Promise.all([
         import('./trackPandas'),
         import('./practicePandas'),
         import('./moreQuiz'),
+        import('./pandasExplained'),
       ]);
-      return assemblePandasTrack(pandasTrack, pandasPractice, moreQuiz);
+      return assemblePandasTrack(pandasTrack, pandasPractice, moreQuiz, pandasExplained);
     }
     case 'git': {
       const [{ gitTrack }, { gitPractice }, { moreQuiz }] = await Promise.all([
@@ -62,22 +64,24 @@ async function fetchAndAssembleTrack(trackId: string): Promise<Track> {
       return assembleGitTrack(gitTrack, gitPractice, moreQuiz);
     }
     case 'bi': {
-      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }] = await Promise.all([
+      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }, { statsBiExplained }] = await Promise.all([
         import('./trackGitAndBi'),
         import('./practiceStats'),
         import('./practiceBiPro'),
         import('./moreQuiz'),
+        import('./statsBiExplained'),
       ]);
-      return assembleVisualBiTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz);
+      return assembleVisualBiTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained);
     }
     case 'estatistica': {
-      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }] = await Promise.all([
+      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }, { statsBiExplained }] = await Promise.all([
         import('./trackGitAndBi'),
         import('./practiceStats'),
         import('./practiceBiPro'),
         import('./moreQuiz'),
+        import('./statsBiExplained'),
       ]);
-      return assembleEstatisticaTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz);
+      return assembleEstatisticaTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained);
     }
     case 'carreira': {
       const [{ careerProTrack }, { biProPractice, biProSqlPractice }, { moreQuiz }] = await Promise.all([

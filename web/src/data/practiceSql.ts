@@ -283,6 +283,33 @@ export const sqlPractice: Record<string, SqlChallengeSpec[]> = {
         );
       },
     },
+    {
+      title: 'Deduplicar: última compra de cada cliente',
+      description: 'Padrão clássico de trabalho real: usa ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY data DESC, id DESC) AS rn numa CTE sobre vendas e filtra WHERE rn = 1 para devolver exatamente 1 linha por cliente (cliente_id, data, produto), ordenada por cliente_id.',
+      starterSql: 'SELECT cliente_id, data, produto\nFROM vendas\nORDER BY cliente_id;',
+      solutionSql: 'WITH ordenadas AS (\n  SELECT\n    cliente_id,\n    data,\n    produto,\n    ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY data DESC, id DESC) AS rn\n  FROM vendas\n)\nSELECT cliente_id, data, produto\nFROM ordenadas\nWHERE rn = 1\nORDER BY cliente_id;',
+      hint: 'Numa CTE calcula ROW_NUMBER() OVER (PARTITION BY cliente_id ORDER BY data DESC, id DESC) AS rn e fora dela filtra WHERE rn = 1.',
+      validate: (cols, rows) => {
+        const c1 = rows[0];
+        const c120 = rows[rows.length - 1];
+        const certo =
+          cols.length === 3 &&
+          rows.length === 120 &&
+          num(c1?.[0]) === 1 &&
+          c1?.[1] === '2025-12-17' &&
+          c1?.[2] === 'Massa' &&
+          num(c120?.[0]) === 120 &&
+          c120?.[1] === '2025-12-14' &&
+          c120?.[2] === 'Sumo';
+        return ok(
+          certo,
+          'Deduplicação limpa: ficaste com exatamente 1 linha por cliente (120 linhas), sempre com o registo mais recente.',
+          rows.length > 120
+            ? `Devolveste ${rows.length} linhas: falta filtrar WHERE rn = 1 depois de ROW_NUMBER().`
+            : 'Esperava 120 linhas (cliente_id, data, produto), com cliente 1 em 2025-12-17 (Massa) e cliente 120 em 2025-12-14 (Sumo).',
+        );
+      },
+    },
   ],
   'sql-09-subqueries-exists-union': [
     {

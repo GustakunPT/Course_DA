@@ -1,5 +1,8 @@
 import { moreQuiz } from './moreQuiz';
 import { pythonExplained } from './pythonExplained';
+import { sqlExplained } from './sqlExplained';
+import { pandasExplained } from './pandasExplained';
+import { statsBiExplained } from './statsBiExplained';
 import { pythonTrack } from './trackPython';
 import { sqlTrack } from './trackSql';
 import { pandasTrack } from './trackPandas';
@@ -29,11 +32,11 @@ import type { Track } from './types';
 
 export const allTracks: Track[] = [
   assemblePythonTrack(pythonTrack, pythonExplained, pythonPractice, moreQuiz),
-  assembleSqlTrack(sqlTrack, sqlPractice, moreQuiz),
-  assemblePandasTrack(pandasTrack, pandasPractice, moreQuiz),
+  assembleSqlTrack(sqlTrack, sqlPractice, moreQuiz, sqlExplained),
+  assemblePandasTrack(pandasTrack, pandasPractice, moreQuiz, pandasExplained),
   assembleGitTrack(gitTrack, gitPractice, moreQuiz),
-  assembleVisualBiTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz),
-  assembleEstatisticaTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz),
+  assembleVisualBiTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained),
+  assembleEstatisticaTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained),
   assembleCareerProTrack(careerProTrack, biProPractice, biProSqlPractice, moreQuiz),
   assembleProjetoFinalTrack(projetoFinalTrack, projetoPractice, moreQuiz),
 ];
