@@ -55,11 +55,39 @@ describe('códigos de progresso MB1', () => {
     expect(out.quizzes).toEqual({ 'py-01': 3 });
   });
 
-  it('leva os treinos resolvidos e aceita códigos antigos sem treinos', async () => {
-    const code = await progress.encodeProgressCode({}, {}, {}, null, ['sql-10-medias-moveis-rfm:2']);
-    expect((await progress.decodeProgressCode(code)).practice).toEqual(['sql-10-medias-moveis-rfm:2']);
+  it('leva os treinos resolvidos, tempo útil, diagnóstico e revisões em MB1 e aceita códigos antigos', async () => {
+    const diag = { background: 'tech' as const, hoursPerWeek: 10, targetMonths: 6, updatedAt: '2026-11-19T10:00:00Z' };
+    const prog = {
+      'py-01-sintaxe': {
+        status: 'autonomous' as const,
+        quizPassed: true,
+        completedAt: '2026-11-10T10:00:00Z',
+        reviewCount: 2,
+        lastReviewedAt: '2026-11-18T10:00:00Z',
+      },
+    };
+    const code = await progress.encodeProgressCode(
+      prog,
+      {},
+      {},
+      null,
+      ['sql-10-medias-moveis-rfm:2'],
+      { 'py-01-sintaxe': 420 },
+      diag,
+    );
+    const decoded = await progress.decodeProgressCode(code);
+    expect(decoded.practice).toEqual(['sql-10-medias-moveis-rfm:2']);
+    expect(decoded.timeSpent).toEqual({ 'py-01-sintaxe': 420 });
+    expect(decoded.diagnostic?.background).toBe('tech');
+    expect(decoded.diagnostic?.hoursPerWeek).toBe(10);
+    expect(decoded.progress['py-01-sintaxe'].reviewCount).toBe(2);
+    expect(decoded.progress['py-01-sintaxe'].lastReviewedAt).toBe('2026-11-18T10:00:00Z');
+
     const antigo = await progress.encodeProgressCode({}, {}, {}, null);
-    expect((await progress.decodeProgressCode(antigo)).practice).toEqual([]);
+    const decAntigo = await progress.decodeProgressCode(antigo);
+    expect(decAntigo.practice).toEqual([]);
+    expect(decAntigo.timeSpent).toEqual({});
+    expect(decAntigo.diagnostic).toBeNull();
   });
 
   it('o backup .json leva os treinos, o tempo útil e o diagnóstico', () => {

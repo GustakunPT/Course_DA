@@ -1,0 +1,113 @@
+import { spawn } from 'node:child_process';
+import { setTimeout as delay } from 'node:timers/promises';
+
+const PORT = Number(process.env.SMOKE_PORT ?? 4178);
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+
+async function waitForServer(url, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return;
+    } catch {
+      // Ainda a arrancar
+    }
+    await delay(250);
+  }
+  throw new Error(`Servidor preview não respondeu em ${url} dentro de ${timeoutMs}ms.`);
+}
+
+async function run() {
+  let chromium;
+  try {
+    ({ chromium } = await import('playwright'));
+  } catch {
+    throw new Error('Playwright não está instalado. Instala com: npm install --no-save playwright && npx playwright install chromium');
+  }
+
+  const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  const server = spawn(npxCmd, ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
+    stdio: 'pipe',
+    shell: process.platform === 'win32',
+  });
+
+  const consoleErrors = [];
+  const pageErrors = [];
+
+  try {
+    await waitForServer(BASE_URL);
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') consoleErrors.push(msg.text());
+      });
+      page.on('pageerror', (err) => pageErrors.push(err.message));
+
+      await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+
+      // 1) Skip-link + landmark principal
+      const skipHref = await page.locator('a.skip-link').getAttribute('href');
+      if (skipHref !== '#conteudo-principal') throw new Error(`Skip-link inválido: ${skipHref}`);
+      const mainCount = await page.locator('main#conteudo-principal').count();
+      if (mainCount !== 1) throw new Error('Landmark main#conteudo-principal em falta.');
+
+      // 2) Modal Guia: foco inicial + trap Tab + Escape restaura foco
+      await page.locator('[data-action="open-guide-modal"]').first().click();
+      await page.locator('.modal-backdrop[role="dialog"]').waitFor({ state: 'visible' });
+      for (let i = 0; i < 6; i++) {
+        await page.keyboard.press('Tab');
+      }
+      const focusInside = await page.evaluate(() => Boolean(document.activeElement?.closest('.modal-backdrop[role="dialog"]')));
+      if (!focusInside) throw new Error('Foco escapou da modal ? Guia ao premir Tab.');
+      await page.keyboard.press('Escape');
+      await page.locator('.modal-backdrop[role="dialog"]').waitFor({ state: 'detached' });
+      const restoredAction = await page.evaluate(() => document.activeElement?.dataset?.action ?? '');
+      if (restoredAction !== 'open-guide-modal') {
+        throw new Error(`Foco não voltou ao botão ? Guia após Escape (ativo: "${restoredAction}").`);
+      }
+
+      // 3) Diagnóstico + Nivelamento prático de 4 perguntas
+      await page.locator('[data-action="open-diagnostic-modal"]').first().click();
+      await page.locator('[data-action="toggle-placement-quiz"]').click();
+      await page.locator('[data-placement-q="negocio"][data-placement-opt="1"]').click();
+      await page.locator('[data-placement-q="sql"][data-placement-opt="1"]').click();
+      await page.locator('[data-placement-q="python"][data-placement-opt="1"]').click();
+      await page.locator('[data-placement-q="estatistica"][data-placement-opt="1"]').click();
+      const applyVisible = await page.locator('[data-action="apply-placement-result"]').isVisible();
+      if (!applyVisible) throw new Error('Botão de aplicar nivelamento prático não apareceu após 4 respostas.');
+      await page.keyboard.press('Escape');
+
+      // 4) Trilha SQL + execução no Worker SQLite
+      await page.locator('[data-select-track="sql"]').click();
+      await page.locator('h1', { hasText: 'SELECT' }).waitFor({ state: 'visible' });
+      await page.locator('[data-wb-tab="sqlfree"]').click();
+      await page.locator('[data-action="run-code"]').click();
+      await page.locator('.output-panel table.data-table tbody tr').first().waitFor({ state: 'visible', timeout: 15_000 });
+
+      // 5) Cronograma Gantt + verificação ARIA (zero aria-selected em botões fora de role="tab")
+      await page.locator('[data-select-view="cronograma"]').click();
+      await page.locator('.gantt-board').waitFor({ state: 'visible' });
+      const badAria = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('button[aria-selected]:not([role="tab"])')).length,
+      );
+      if (badAria > 0) throw new Error(`Encontrados ${badAria} botões com aria-selected sem role="tab".`);
+
+      if (consoleErrors.length || pageErrors.length) {
+        throw new Error(`Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`);
+      }
+
+      console.log('✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).');
+    } finally {
+      await browser.close();
+    }
+  } finally {
+    server.kill('SIGTERM');
+  }
+}
+
+run().catch((err) => {
+  console.error('✗ E2E smoke test FAILED:', err);
+  process.exit(1);
+});

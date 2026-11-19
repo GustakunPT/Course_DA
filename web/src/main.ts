@@ -26,13 +26,13 @@ import {
   loadSavedDiagnostic,
   saveDiagnostic,
   type BackgroundLevel,
-  type DiagnosticProfile,
 } from './data/diagnostic';
+import { evaluatePlacementAnswers } from './data/placementQuiz';
+import { markLessonReviewedRecord } from './data/spacedReview';
 import { getCourseMinutes } from './data/studyPlan';
 import type { EngineKind, GitChallengeSpec, Lesson, PythonChallengeSpec, SqlChallengeSpec, Track } from './data/types';
 import { loadMerceariaDataset } from './engines/csvEngine';
-import { runPythonCode, stopPythonExecution } from './engines/pythonEngine';
-import { createInitialGitState, runGitSimulator } from './engines/gitEngine';
+import { createInitialGitState } from './engines/gitEngine';
 import type { GanttFilterStatus } from './ui/ganttView';
 import { formatCodePrettier, highlightCode, renderLineNumbers } from './ui/codeEditor';
 import {
@@ -49,11 +49,8 @@ import {
   loadSavedProgress,
   loadSavedQuizzes,
   loadSyncCode,
-  mergeLessonTimes,
-  mergeProgressRecords,
   pullCloudSync,
   pushCloudSync,
-  type CloudSyncPayload,
   loadSavedPractice,
   savePractice,
   saveDrafts,
@@ -63,14 +60,19 @@ import {
   saveSyncCode,
 } from './data/progress';
 import type { AppState, ViewMode, WorkbenchTab } from './ui/appState';
+import { createCloudSyncController } from './ui/cloudSyncController';
 import {
   focusInitialDialogElement,
   getActiveModalKind,
   handleDialogTabTrap,
+  handleTablistArrowKeys,
   restoreFocusFromSelectors,
   selectorForControl,
   type ModalKind,
 } from './ui/modalFocus';
+import { attachSplitterListeners } from './ui/splitters';
+import { startStudyTimer } from './ui/studyTimer';
+import { createWorkbenchRunner } from './ui/workbenchRunner';
 import { buildAnswerSheetCode, isAnswerSheetMode, renderAnswerSheetPanel } from './ui/answerSheetPanel';
 import { downloadTextFile, escapeHtml } from './ui/html';
 import { quizDisplayOrder } from './ui/quizOrder';
@@ -145,6 +147,8 @@ const state: AppState = {
     targetMonths: 6,
     updatedAt: '',
   },
+  showPlacementQuiz: false,
+  placementAnswers: {},
 };
 
 applyTheme(state.theme);
@@ -409,58 +413,15 @@ function concluirEtapaProjeto(lesson: Lesson): boolean {
   return true;
 }
 
-function buildCloudSyncPayload(code?: string | null) {
-  return {
-    ...(code !== undefined ? { code } : {}),
-    progress: state.completedLessons,
-    drafts: state.editorDrafts,
-    quizzes: state.quizSelection,
-    practice: [...state.practiceDone],
-    lessonTimes: state.lessonTimes,
-    diagnostic: state.diagnostic,
-    lastLocation: {
-      trackId: state.trackId,
-      lessonId: state.lessonId,
-      view: state.view,
-      timestamp: new Date().toISOString(),
-    },
-  };
-}
+const cloudSync = createCloudSyncController({
+  state,
+  locateLesson,
+  renderApp: () => renderApp(),
+});
+const buildCloudSyncPayload = cloudSync.buildPayload;
+const applyRemoteCloudSync = cloudSync.applyRemote;
+const scheduleCloudSync = cloudSync.scheduleSync;
 
-function mergeDiagnosticProfiles(
-  local: DiagnosticProfile | null,
-  remote: DiagnosticProfile | null,
-): DiagnosticProfile | null {
-  if (!remote) return local;
-  if (!local) return remote;
-  return Date.parse(remote.updatedAt) >= Date.parse(local.updatedAt) ? remote : local;
-}
-
-function applyRemoteCloudSync(remote: CloudSyncPayload): void {
-  state.completedLessons = mergeProgressRecords(state.completedLessons, remote.progress);
-  state.editorDrafts = { ...remote.drafts, ...state.editorDrafts };
-  state.quizSelection = { ...remote.quizzes, ...state.quizSelection };
-  state.practiceDone = new Set([...state.practiceDone, ...remote.practice]);
-  state.lessonTimes = mergeLessonTimes(state.lessonTimes, remote.lessonTimes);
-  const mergedDiag = mergeDiagnosticProfiles(state.diagnostic, remote.diagnostic);
-  if (mergedDiag) {
-    state.diagnostic = mergedDiag;
-    state.diagnosticDraft = mergedDiag;
-    state.ganttPaceMinutes = mergedDiag.hoursPerWeek * 60;
-    saveDiagnostic(mergedDiag);
-  }
-  savePractice(state.practiceDone);
-  saveProgress(state.completedLessons);
-  saveDrafts(state.editorDrafts, true);
-  saveQuizzes(state.quizSelection);
-  saveLessonTimes(state.lessonTimes);
-  saveSyncCode(remote.code);
-  state.syncCode = remote.code;
-  state.syncStatus = 'synced';
-  state.syncLastUpdatedAt = remote.updatedAt;
-}
-
-let cloudSyncTimer: number | undefined;
 function renderViewLoadingSkeleton(title: string): string {
   return `
     <section class="seam-panels">
@@ -480,25 +441,6 @@ let cheatsheetViewMod: typeof import('./ui/cheatsheetView') | null = null;
 let explorerLoadStarted = false;
 let ganttLoadStarted = false;
 let cheatsheetLoadStarted = false;
-
-function scheduleCloudSync(): void {
-  if (!state.syncCode) return;
-  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
-  state.syncStatus = 'syncing';
-  cloudSyncTimer = window.setTimeout(() => {
-    if (!state.syncCode) return;
-    void pushCloudSync(buildCloudSyncPayload(state.syncCode))
-      .then((res) => {
-        state.syncStatus = 'synced';
-        state.syncLastUpdatedAt = res.updatedAt;
-        if (state.showProgressModal) renderApp();
-      })
-      .catch(() => {
-        state.syncStatus = 'error';
-        if (state.showProgressModal) renderApp();
-      });
-  }, 1200);
-}
 
 function renderPracticeSwitcher(lesson: Lesson): string {
   const treinos: { title?: string }[] = lesson.practice ?? lesson.practiceSql ?? lesson.practiceGit ?? [];
@@ -690,6 +632,7 @@ function fecharEcraDeEscrita(opcoes: { viaHistorico?: boolean } = {}): void {
   state.mobileEditor = null;
   renderApp();
   if (mesmaEtapa) window.scrollTo(0, scrollAntesDoEcra);
+  restoreFocusFromSelectors(['[data-action="abrir-ecra-escrita"]', '#workbench-editor']);
 }
 
 window.addEventListener('popstate', () => {
@@ -789,13 +732,13 @@ function renderAcademyShell(trackMeta: TrackIndexEntry, lessonMeta: LessonIndexE
         <button type="button" class="btn" data-action="toggle-desktop-sidebar">
           ${sidebarCollapsed ? 'Mostrar índice' : 'Recolher índice'}
         </button>
-        <button type="button" class="mode-btn" aria-selected="${lessonRatio >= 58}" data-layout-preset="reading">
+        <button type="button" class="mode-btn" aria-pressed="${lessonRatio >= 58}" data-layout-preset="reading">
           Foco leitura
         </button>
-        <button type="button" class="mode-btn" aria-selected="${lessonRatio > 42 && lessonRatio < 58}" data-layout-preset="balanced">
+        <button type="button" class="mode-btn" aria-pressed="${lessonRatio > 42 && lessonRatio < 58}" data-layout-preset="balanced">
           Divisão 50 / 50
         </button>
-        <button type="button" class="mode-btn" aria-selected="${lessonRatio <= 42}" data-layout-preset="coding">
+        <button type="button" class="mode-btn" aria-pressed="${lessonRatio <= 42}" data-layout-preset="coding">
           Foco código
         </button>
       </div>
@@ -1348,6 +1291,7 @@ function renderApp(): void {
         currentLessonId: state.lessonId,
         lessonTimes: state.lessonTimes,
         diagnostic: state.diagnostic,
+        quizSelection: state.quizSelection,
       });
     }
   } else {
@@ -1367,6 +1311,7 @@ function renderApp(): void {
 
   root.innerHTML = `
     <div class="app-root">
+      <a href="#conteudo-principal" class="skip-link">Saltar para o conteúdo principal</a>
       <header class="top-nav">
         <div class="top-nav-inner">
           <div class="brand-group">
@@ -1463,7 +1408,7 @@ function renderApp(): void {
         </div>
       </header>
 
-      <main class="workspace-wrap">
+      <main id="conteudo-principal" class="workspace-wrap" tabindex="-1">
         ${mainContent}
       </main>
       ${state.showProgressModal ? renderProgressModal(state) : ''}
@@ -1493,169 +1438,21 @@ function renderApp(): void {
   prevOpenModal = nextModal;
 }
 
-let activeRunToken = 0;
-let sqlEngineMod: typeof import('./engines/sqlEngine') | null = null;
+const workbenchRunner = createWorkbenchRunner({
+  state,
+  currentTrackOrNull,
+  currentLesson,
+  activeEngine,
+  getEditorValue,
+  activePythonChallenge,
+  activeSqlChallenge,
+  activeGitChallenge,
+  markLessonCompleted,
+  savePracticeDone,
+  renderApp,
+});
 
-async function executeWorkbench(): Promise<void> {
-  if (!currentTrackOrNull()) return;
-  const lesson = currentLesson();
-  // As etapas de projeto fazem-se no computador do aluno: não há nada para correr aqui.
-  if (lesson.engine === 'projeto') return;
-  const runToken = ++activeRunToken;
-  const engine = activeEngine();
-  const code = getEditorValue();
-
-  state.output = { kind: 'loading', statusMessage: 'A processar código…' };
-  renderApp();
-
-  if (engine === 'sql') {
-    if (!sqlEngineMod) {
-      sqlEngineMod = await import('./engines/sqlEngine');
-    }
-    const res = await sqlEngineMod.runSqlQuery(code, (statusMsg) => {
-      if (runToken !== activeRunToken) return;
-      state.output = { kind: 'loading', statusMessage: statusMsg };
-      const statusEl = document.querySelector('.output-panel .measured');
-      if (statusEl) statusEl.textContent = statusMsg;
-    });
-    if (runToken !== activeRunToken) return;
-    if (res.error) {
-      state.output = { kind: 'error', errorText: res.error, elapsedMs: res.elapsedMs };
-      renderApp();
-      return;
-    }
-
-    const sqlChallenge = state.wbTab === 'challenge' ? activeSqlChallenge(lesson) : undefined;
-    if (sqlChallenge) {
-      const check = sqlChallenge.validate(res.columns, res.rows);
-      if (check.passed && state.practiceIdx > 0) {
-        state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
-        savePracticeDone();
-      } else if (check.passed) {
-        markLessonCompleted(lesson);
-      }
-      state.output = {
-        kind: 'full',
-        elapsedMs: res.elapsedMs,
-        table: { columns: res.columns, rows: res.rows },
-        bannerOk: check.passed,
-        bannerText: check.passed
-          ? state.practiceIdx > 0
-            ? 'Treino resolvido!'
-            : 'Desafio SQL validado'
-          : 'Query executada: revê o requisito',
-        checks: [
-          {
-            label: check.message,
-            passed: check.passed,
-            hint: check.passed ? undefined : sqlChallenge.hint,
-          },
-        ],
-      };
-    } else {
-      state.output = {
-        kind: 'full',
-        elapsedMs: res.elapsedMs,
-        table: { columns: res.columns, rows: res.rows },
-        bannerText: `${res.rows.length} linha(s) devolvidas`,
-      };
-    }
-    renderApp();
-    return;
-  }
-
-  if (engine === 'git') {
-    const freshBase = state.wbTab === 'challenge' ? createInitialGitState() : state.gitState;
-    const { output, nextState } = runGitSimulator(freshBase, code);
-    state.gitState = nextState;
-
-    const gitChallenge = state.wbTab === 'challenge' ? activeGitChallenge(lesson) : undefined;
-    if (gitChallenge) {
-      const check = gitChallenge.validate(nextState, output);
-      if (check.passed && state.practiceIdx > 0) {
-        state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
-        savePracticeDone();
-      } else if (check.passed) {
-        markLessonCompleted(lesson);
-      }
-      state.output = {
-        kind: 'full',
-        elapsedMs: 1.2,
-        stdout: output || 'Nenhum comando executado.',
-        bannerOk: check.passed,
-        bannerText: check.passed
-          ? state.practiceIdx > 0
-            ? 'Treino resolvido!'
-            : 'Desafio Git concluído'
-          : 'Comandos executados: falta um passo',
-        checks: [
-          {
-            label: check.message,
-            passed: check.passed,
-            hint: check.passed ? undefined : gitChallenge.hint,
-          },
-        ],
-      };
-    } else {
-      state.output = {
-        kind: 'full',
-        elapsedMs: 1.0,
-        stdout: output || 'Nenhum comando executado.',
-        bannerText: `Ramo ativo: ${nextState.currentBranch}`,
-      };
-    }
-    renderApp();
-    return;
-  }
-
-  const pyChallenge = state.wbTab === 'challenge' ? activePythonChallenge(lesson) : undefined;
-  const pyChecks = pyChallenge?.checks;
-  const pyRes = await runPythonCode(code, pyChecks, (statusMsg) => {
-    if (runToken !== activeRunToken) return;
-    state.output = { kind: 'loading', statusMessage: statusMsg };
-    const statusEl = document.querySelector('.output-panel .measured');
-    if (statusEl) statusEl.textContent = statusMsg;
-  }, currentLesson().ficheirosDados ?? []);
-
-  if (runToken !== activeRunToken) return;
-
-  if (pyRes.error) {
-    state.output = {
-      kind: 'error',
-      elapsedMs: pyRes.elapsedMs,
-      errorText: pyRes.error,
-    };
-    renderApp();
-    return;
-  }
-
-  const allPassed = pyRes.checks ? pyRes.checks.every((c) => c.passed) : undefined;
-  if (allPassed && state.practiceIdx > 0) {
-    state.practiceDone.add(`${lesson.id}:${state.practiceIdx}`);
-    savePracticeDone();
-  } else if (allPassed) {
-    markLessonCompleted(lesson);
-  }
-
-  state.output = {
-    kind: 'full',
-    elapsedMs: pyRes.elapsedMs,
-    stdout: pyRes.stdout,
-    table: pyRes.table,
-    images: pyRes.images,
-    checks: pyRes.checks,
-    bannerOk: allPassed,
-    bannerText:
-      allPassed === true
-        ? state.practiceIdx > 0
-          ? 'Treino resolvido!'
-          : 'Todos os testes passaram!'
-        : allPassed === false
-          ? `${pyRes.checks!.filter((c) => c.passed).length}/${pyRes.checks!.length} verificações certas`
-          : 'Código Python executado',
-  };
-  renderApp();
-}
+const executeWorkbench = workbenchRunner.execute;
 
 function attachDomListeners(): void {
   const answerInputs = Array.from(document.querySelectorAll<HTMLInputElement>('.answer-field-input[data-answer-var]'));
@@ -2120,9 +1917,8 @@ function attachDomListeners(): void {
       } else if (act === 'run-code') {
         void executeWorkbench();
       } else if (act === 'stop-code') {
-        const stopped = stopPythonExecution() || Boolean(sqlEngineMod?.stopSqlExecution());
+        const stopped = workbenchRunner.cancelExecution();
         if (!stopped) {
-          activeRunToken++;
           state.output = { kind: 'error', errorText: 'Execução interrompida pelo utilizador.' };
           renderApp();
         }
@@ -2204,6 +2000,8 @@ function attachDomListeners(): void {
                 timestamp: new Date().toISOString(),
               },
               [...state.practiceDone],
+              state.lessonTimes,
+              state.diagnostic,
             );
             state.generatedProgressCode = code;
             if (navigator.clipboard?.writeText) {
@@ -2365,6 +2163,14 @@ function attachDomListeners(): void {
             state.editorDrafts = restored.drafts;
             state.quizSelection = restored.quizzes;
             state.practiceDone = new Set(restored.practice);
+            if (Object.keys(restored.timeSpent).length) {
+              state.lessonTimes = restored.timeSpent;
+            }
+            if (restored.diagnostic) {
+              state.diagnostic = restored.diagnostic;
+              state.diagnosticDraft = restored.diagnostic;
+              state.ganttPaceMinutes = restored.diagnostic.hoursPerWeek * 60;
+            }
             if (restored.lastLocation) {
               const loc = locateLesson(restored.lastLocation!.trackId, restored.lastLocation!.lessonId);
               if (loc) {
@@ -2494,6 +2300,32 @@ function attachDomListeners(): void {
           state.showDiagnosticModal = false;
           renderApp();
         }
+      } else if (act === 'toggle-placement-quiz') {
+        state.showPlacementQuiz = !state.showPlacementQuiz;
+        renderApp();
+      } else if (act === 'apply-placement-result') {
+        const res = evaluatePlacementAnswers(state.placementAnswers);
+        const saved = {
+          ...state.diagnosticDraft,
+          background: res.suggestedBackground,
+          updatedAt: new Date().toISOString(),
+        };
+        state.diagnosticDraft = saved;
+        state.diagnostic = saved;
+        saveDiagnostic(saved);
+        scheduleCloudSync();
+        state.ganttPaceMinutes = saved.hoursPerWeek * 60;
+        state.showDiagnosticModal = false;
+        const loc = locateLesson(res.suggestedTrackId, res.suggestedLessonId);
+        if (loc) {
+          state.trackId = loc.trackId;
+          state.lessonId = loc.lessonId;
+        }
+        state.view = 'academia';
+        state.wbTab = 'challenge';
+        state.practiceIdx = 0;
+        state.output = { kind: 'empty' };
+        renderApp();
       } else if (act === 'apply-diagnostic-only' || act === 'apply-diagnostic-and-go') {
         const saved = { ...state.diagnosticDraft, updatedAt: new Date().toISOString() };
         state.diagnostic = saved;
@@ -2560,6 +2392,57 @@ function attachDomListeners(): void {
       })();
     });
   }
+  document.querySelectorAll<HTMLElement>('[data-placement-q][data-placement-opt]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const qId = btn.dataset.placementQ;
+      const opt = Number(btn.dataset.placementOpt);
+      if (qId && Number.isInteger(opt)) {
+        state.placementAnswers[qId] = opt;
+        const res = evaluatePlacementAnswers(state.placementAnswers);
+        if (res.complete) {
+          state.diagnosticDraft = { ...state.diagnosticDraft, background: res.suggestedBackground };
+        }
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-review-go-track][data-review-go-lesson]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const trId = btn.dataset.reviewGoTrack;
+      const leId = btn.dataset.reviewGoLesson;
+      const loc = locateLesson(trId, leId);
+      if (loc) {
+        saveLessonTimes(state.lessonTimes);
+        state.trackId = loc.trackId;
+        state.lessonId = loc.lessonId;
+        state.view = 'academia';
+        state.wbTab = 'challenge';
+        state.practiceIdx = 0;
+        state.output = { kind: 'empty' };
+        state.showProgressModal = false;
+        renderApp();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-review-done]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const leId = btn.dataset.reviewDone;
+      if (!leId || !state.completedLessons[leId]) return;
+      state.completedLessons[leId] = markLessonReviewedRecord(state.completedLessons[leId]);
+      saveProgress(state.completedLessons);
+      scheduleCloudSync();
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((tablist) => {
+    tablist.addEventListener('keydown', (ev) => {
+      handleTablistArrowKeys(tablist, ev);
+    });
+  });
+
   document.querySelectorAll<HTMLElement>('[data-layout-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const preset = btn.dataset.layoutPreset;
@@ -2575,132 +2458,7 @@ function attachDomListeners(): void {
     });
   });
 
-  const gridEl = document.getElementById('academy-grid');
-  const sidebarSplitter = document.getElementById('splitter-sidebar');
-  const mainSplitter = document.getElementById('splitter-main');
-  const editorSplitter = document.getElementById('splitter-editor');
-
-  const applyCssVarsLive = (): void => {
-    if (!gridEl) return;
-    gridEl.style.setProperty('--sidebar-w', `${state.layout.sidebarWidth}px`);
-    gridEl.style.setProperty('--lesson-fr', `${state.layout.lessonRatio}fr`);
-    gridEl.style.setProperty('--workbench-fr', `${100 - state.layout.lessonRatio}fr`);
-    gridEl.style.setProperty('--editor-h', `${state.layout.editorHeight}px`);
-  };
-
-  if (sidebarSplitter && gridEl) {
-    sidebarSplitter.addEventListener('pointerdown', (ev) => {
-      ev.preventDefault();
-      sidebarSplitter.setPointerCapture(ev.pointerId);
-      sidebarSplitter.classList.add('is-dragging');
-      const rect = gridEl.getBoundingClientRect();
-      const onMove = (moveEv: PointerEvent): void => {
-        const nextW = Math.round(Math.min(420, Math.max(180, moveEv.clientX - rect.left)));
-        state.layout.sidebarWidth = nextW;
-        applyCssVarsLive();
-      };
-      const onUp = (): void => {
-        sidebarSplitter.classList.remove('is-dragging');
-        sidebarSplitter.removeEventListener('pointermove', onMove);
-        sidebarSplitter.removeEventListener('pointerup', onUp);
-        saveLayoutPrefs(state.layout);
-      };
-      sidebarSplitter.addEventListener('pointermove', onMove);
-      sidebarSplitter.addEventListener('pointerup', onUp);
-    });
-    sidebarSplitter.addEventListener('dblclick', () => {
-      state.layout.sidebarWidth = DEFAULT_LAYOUT.sidebarWidth;
-      applyCssVarsLive();
-      saveLayoutPrefs(state.layout);
-    });
-    sidebarSplitter.addEventListener('keydown', (ev) => {
-      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
-        ev.preventDefault();
-        const delta = ev.key === 'ArrowRight' ? 16 : -16;
-        state.layout.sidebarWidth = Math.min(420, Math.max(180, state.layout.sidebarWidth + delta));
-        applyCssVarsLive();
-        saveLayoutPrefs(state.layout);
-      }
-    });
-  }
-
-  if (mainSplitter && gridEl) {
-    mainSplitter.addEventListener('pointerdown', (ev) => {
-      ev.preventDefault();
-      mainSplitter.setPointerCapture(ev.pointerId);
-      mainSplitter.classList.add('is-dragging');
-      const onMove = (moveEv: PointerEvent): void => {
-        const rect = gridEl.getBoundingClientRect();
-        const sideOffset = state.layout.sidebarCollapsed ? 0 : state.layout.sidebarWidth + 8;
-        const availW = Math.max(400, rect.width - sideOffset);
-        const relX = moveEv.clientX - (rect.left + sideOffset);
-        const ratio = Math.round(Math.min(70, Math.max(30, (relX / availW) * 100)));
-        state.layout.lessonRatio = ratio;
-        applyCssVarsLive();
-      };
-      const onUp = (): void => {
-        mainSplitter.classList.remove('is-dragging');
-        mainSplitter.removeEventListener('pointermove', onMove);
-        mainSplitter.removeEventListener('pointerup', onUp);
-        saveLayoutPrefs(state.layout);
-        renderApp();
-      };
-      mainSplitter.addEventListener('pointermove', onMove);
-      mainSplitter.addEventListener('pointerup', onUp);
-    });
-    mainSplitter.addEventListener('dblclick', () => {
-      state.layout.lessonRatio = DEFAULT_LAYOUT.lessonRatio;
-      saveLayoutPrefs(state.layout);
-      renderApp();
-    });
-    mainSplitter.addEventListener('keydown', (ev) => {
-      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
-        ev.preventDefault();
-        const delta = ev.key === 'ArrowRight' ? 4 : -4;
-        state.layout.lessonRatio = Math.min(70, Math.max(30, state.layout.lessonRatio + delta));
-        applyCssVarsLive();
-        saveLayoutPrefs(state.layout);
-      }
-    });
-  }
-
-  if (editorSplitter && gridEl) {
-    const editorShell = document.getElementById('editor-shell');
-    editorSplitter.addEventListener('pointerdown', (ev) => {
-      ev.preventDefault();
-      editorSplitter.setPointerCapture(ev.pointerId);
-      editorSplitter.classList.add('is-dragging');
-      const startY = ev.clientY;
-      const startH = editorShell?.getBoundingClientRect().height ?? state.layout.editorHeight;
-      const onMove = (moveEv: PointerEvent): void => {
-        const nextH = Math.round(Math.min(640, Math.max(140, startH + (moveEv.clientY - startY))));
-        state.layout.editorHeight = nextH;
-        applyCssVarsLive();
-      };
-      const onUp = (): void => {
-        editorSplitter.classList.remove('is-dragging');
-        editorSplitter.removeEventListener('pointermove', onMove);
-        editorSplitter.removeEventListener('pointerup', onUp);
-        saveLayoutPrefs(state.layout);
-      };
-      editorSplitter.addEventListener('pointermove', onMove);
-      editorSplitter.addEventListener('pointerup', onUp);
-    });
-    editorSplitter.addEventListener('dblclick', () => {
-      state.layout.editorHeight = DEFAULT_LAYOUT.editorHeight;
-      applyCssVarsLive();
-      saveLayoutPrefs(state.layout);
-    });
-    editorSplitter.addEventListener('keydown', (ev) => {
-      if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
-        ev.preventDefault();
-        const delta = ev.key === 'ArrowDown' ? 24 : -24;
-        state.layout.editorHeight = Math.min(640, Math.max(140, state.layout.editorHeight + delta));
-        applyCssVarsLive();
-        saveLayoutPrefs(state.layout);
-      }
-    });
-  }
+  attachSplitterListeners(state, renderApp);
 }
 
 async function bootstrapData(): Promise<void> {
@@ -2741,6 +2499,13 @@ window.addEventListener('keydown', (ev) => {
     if (dialog) handleDialogTabTrap(dialog, ev);
     return;
   }
+  if (ev.key === 'Tab' && state.mobileEditor !== null && !anyModalOpen) {
+    const mobileDialog = document.querySelector<HTMLElement>('.ecra-escrita[role="dialog"]');
+    if (mobileDialog && ev.target !== document.getElementById('workbench-editor')) {
+      handleDialogTabTrap(mobileDialog, ev);
+    }
+    return;
+  }
   if (ev.key === 'Escape' && state.mobileEditor !== null && !anyModalOpen) {
     fecharEcraDeEscrita();
     return;
@@ -2754,82 +2519,9 @@ window.addEventListener('keydown', (ev) => {
   }
 });
 
-async function bootstrapCloudSync(): Promise<void> {
-  const params = new URLSearchParams(window.location.search);
-  const urlCode = params.get('sync');
-  const normalizedUrlCode = urlCode ? extractSyncCode(urlCode) : null;
-  const targetCode = normalizedUrlCode ?? state.syncCode;
-  if (!targetCode) return;
-
-  try {
-    const remote = await pullCloudSync(targetCode);
-    applyRemoteCloudSync(remote);
-
-    if (normalizedUrlCode && remote.lastLocation) {
-      const loc = locateLesson(remote.lastLocation!.trackId, remote.lastLocation!.lessonId);
-      if (loc) {
-        state.trackId = loc.trackId;
-        state.lessonId = loc.lessonId;
-      }
-      state.view = remote.lastLocation.view;
-      saveLastLocation(remote.lastLocation);
-    }
-
-    if (urlCode) {
-      params.delete('sync');
-      const cleanSearch = params.toString();
-      const nextUrl = `${window.location.pathname}${cleanSearch ? `?${cleanSearch}` : ''}${window.location.hash}`;
-      history.replaceState(null, '', nextUrl);
-    }
-    renderApp();
-  } catch {
-    state.syncStatus = 'error';
-  }
-}
-
 syncStateFromUrl();
 renderApp();
 void bootstrapData();
-void bootstrapCloudSync();
-
-// Tracker discreto de tempo útil por etapa: só avança na vista Academia com o separador visível e atividade recente.
-let lastStudyActivityAt = Date.now();
-let timerTicksSinceSave = 0;
-const touchStudyActivity = () => {
-  lastStudyActivityAt = Date.now();
-};
-window.addEventListener('pointerdown', touchStudyActivity, { passive: true });
-window.addEventListener('keydown', touchStudyActivity, { passive: true });
-window.addEventListener('scroll', touchStudyActivity, { passive: true });
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    saveLessonTimes(state.lessonTimes);
-  } else {
-    touchStudyActivity();
-  }
-});
-window.addEventListener('beforeunload', () => saveLessonTimes(state.lessonTimes));
-
-window.setInterval(() => {
-  if (
-    state.view !== 'academia' ||
-    state.timerPaused ||
-    document.visibilityState !== 'visible' ||
-    state.showProgressModal ||
-    state.showThemeModal ||
-    state.showDiagnosticModal ||
-    state.showGuideModal ||
-    Date.now() - lastStudyActivityAt > 180_000
-  ) {
-    return;
-  }
-  const nextSecs = (state.lessonTimes[state.lessonId] ?? 0) + 1;
-  state.lessonTimes[state.lessonId] = nextSecs;
-  const clockEl = document.getElementById('lesson-timer-clock');
-  if (clockEl) clockEl.textContent = formatTimerClock(nextSecs);
-  timerTicksSinceSave++;
-  if (timerTicksSinceSave >= 10) {
-    timerTicksSinceSave = 0;
-    saveLessonTimes(state.lessonTimes);
-  }
-}, 1000);
+void cloudSync.bootstrap();
+cloudSync.attachCrossTabStorageSync();
+startStudyTimer(state);

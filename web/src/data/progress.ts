@@ -9,6 +9,10 @@ export interface LessonProgressRecord {
   status: LessonCompletionStatus;
   quizPassed?: boolean;
   completedAt: string;
+  /** Número de revisões espaçadas concluídas nesta etapa (opcional). */
+  reviewCount?: number;
+  /** Data ISO da última revisão espaçada (opcional). */
+  lastReviewedAt?: string;
 }
 
 export type UserProgressMap = Record<string, LessonProgressRecord>;
@@ -367,12 +371,16 @@ function base64UrlToBytes(str: string): Uint8Array {
 
 export interface CompactProgressPayload {
   v: 1;
-  p: Record<string, ['a' | 'h', number?]>;
+  p: Record<string, ['a' | 'h', number?, number?, string?]>;
   q: Record<string, number>;
   d: Record<string, string>;
   /** Treinos resolvidos (opcional). */
   t?: string[];
   l?: { t: string; l: string; v: 'academia' | 'explorador' | 'referencia' | 'cronograma' };
+  /** Tempo real registado por etapa em segundos (opcional). */
+  tm?: LessonTimeMap;
+  /** Diagnóstico inicial compacto [background, hoursPerWeek, targetMonths] (opcional). */
+  dg?: ['zero' | 'negocio' | 'tech', number, number];
 }
 
 export async function encodeProgressCode(
@@ -381,11 +389,20 @@ export async function encodeProgressCode(
   quizzes: Record<string, number>,
   lastLoc: LastVisitedLocation | null,
   practice: string[] = [],
+  timeSpent: LessonTimeMap = {},
+  diagnostic: DiagnosticProfile | null = null,
 ): Promise<string> {
-  const compactP: Record<string, ['a' | 'h', number?]> = {};
+  const compactP: Record<string, ['a' | 'h', number?, number?, string?]> = {};
   for (const [id, rec] of Object.entries(progress)) {
-    compactP[id] = rec.quizPassed ? [rec.status === 'helped' ? 'h' : 'a', 1] : [rec.status === 'helped' ? 'h' : 'a'];
+    const statusCode: 'a' | 'h' = rec.status === 'helped' ? 'h' : 'a';
+    const hasReview = Boolean(rec.reviewCount && rec.reviewCount > 0);
+    if (hasReview) {
+      compactP[id] = [statusCode, rec.quizPassed ? 1 : 0, rec.reviewCount, rec.lastReviewedAt];
+    } else {
+      compactP[id] = rec.quizPassed ? [statusCode, 1] : [statusCode];
+    }
   }
+  const cleanTimes = sanitizeLessonTimes(timeSpent);
   const payload: CompactProgressPayload = {
     v: 1,
     p: compactP,
@@ -393,6 +410,8 @@ export async function encodeProgressCode(
     d: drafts,
     ...(practice.length ? { t: practice } : {}),
     ...(lastLoc ? { l: { t: lastLoc.trackId, l: lastLoc.lessonId, v: lastLoc.view } } : {}),
+    ...(Object.keys(cleanTimes).length ? { tm: cleanTimes } : {}),
+    ...(diagnostic ? { dg: [diagnostic.background, diagnostic.hoursPerWeek, diagnostic.targetMonths] } : {}),
   };
   const jsonBytes = new TextEncoder().encode(JSON.stringify(payload));
 
@@ -413,6 +432,8 @@ export async function decodeProgressCode(rawCode: string): Promise<{
   drafts: Record<string, string>;
   quizzes: Record<string, number>;
   practice: string[];
+  timeSpent: LessonTimeMap;
+  diagnostic: DiagnosticProfile | null;
   lastLocation: LastVisitedLocation | null;
 }> {
   const code = rawCode.trim();
@@ -445,10 +466,14 @@ export async function decodeProgressCode(rawCode: string): Promise<{
   const progress: UserProgressMap = {};
   for (const [id, tuple] of Object.entries(parsed.p)) {
     if (Array.isArray(tuple)) {
+      const reviewCount = typeof tuple[2] === 'number' && tuple[2] > 0 ? Math.floor(tuple[2]) : undefined;
+      const lastReviewedAt = typeof tuple[3] === 'string' && tuple[3].length <= 40 ? tuple[3] : undefined;
       progress[id] = {
         status: tuple[0] === 'h' ? 'helped' : 'autonomous',
         quizPassed: tuple[1] === 1,
         completedAt: now,
+        ...(reviewCount ? { reviewCount } : {}),
+        ...(lastReviewedAt ? { lastReviewedAt } : {}),
       };
     }
   }
@@ -470,8 +495,19 @@ export async function decodeProgressCode(rawCode: string): Promise<{
   if (lastLocation) saveLastLocation(lastLocation);
   const practice = sanitizePractice(parsed.t);
   savePractice(practice);
+  const timeSpent = sanitizeLessonTimes(parsed.tm);
+  if (Object.keys(timeSpent).length) saveLessonTimes(timeSpent);
+  const diagnostic = Array.isArray(parsed.dg)
+    ? sanitizeDiagnostic({
+        background: parsed.dg[0],
+        hoursPerWeek: parsed.dg[1],
+        targetMonths: parsed.dg[2],
+        updatedAt: now,
+      })
+    : null;
+  if (diagnostic) saveDiagnostic(diagnostic);
 
-  return { progress, drafts, quizzes, practice, lastLocation };
+  return { progress, drafts, quizzes, practice, timeSpent, diagnostic, lastLocation };
 }
 
 // Aceita códigos novos (3 blocos) e antigos (2 blocos).
@@ -530,6 +566,13 @@ export function mergeProgressRecords(
     if (!existing) {
       merged[id] = rec;
     } else {
+      const reviewCount = Math.max(rec.reviewCount ?? 0, existing.reviewCount ?? 0);
+      const lastReviewedAt =
+        rec.lastReviewedAt && existing.lastReviewedAt
+          ? rec.lastReviewedAt > existing.lastReviewedAt
+            ? rec.lastReviewedAt
+            : existing.lastReviewedAt
+          : rec.lastReviewedAt ?? existing.lastReviewedAt;
       merged[id] = {
         status:
           rec.status === 'autonomous' || existing.status === 'autonomous'
@@ -538,6 +581,8 @@ export function mergeProgressRecords(
         quizPassed: Boolean(rec.quizPassed || existing.quizPassed),
         completedAt:
           rec.completedAt > existing.completedAt ? rec.completedAt : existing.completedAt,
+        ...(reviewCount > 0 ? { reviewCount } : {}),
+        ...(lastReviewedAt ? { lastReviewedAt } : {}),
       };
     }
   }

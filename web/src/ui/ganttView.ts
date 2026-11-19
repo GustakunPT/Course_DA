@@ -14,6 +14,9 @@ import {
   type LessonTimingInfo,
 } from '../data/studyPlan';
 import { compareActualVsProjected, type LessonTimeMap, type PaceComparison } from '../data/timeTracker';
+import { buildSpacedReviewSummary } from '../data/spacedReview';
+import { buildStudyTimeReport } from '../data/studyStats';
+import { TRACK_INDEX } from '../data/trackIndex';
 import { escapeHtml } from './html';
 
 export interface GanttLessonRef extends LessonTimingInfo {
@@ -343,6 +346,7 @@ export interface GanttRenderOptions {
   currentLessonId: string;
   lessonTimes?: LessonTimeMap;
   diagnostic?: DiagnosticProfile | null;
+  quizSelection?: Record<string, number>;
 }
 
 export function renderGanttHtml(
@@ -567,7 +571,7 @@ export function renderGanttHtml(
                 <button
                   type="button"
                   class="mode-btn"
-                  aria-selected="${opts.paceMinutesPerWeek === opt.minutes}"
+                  aria-pressed="${opts.paceMinutesPerWeek === opt.minutes}"
                   data-gantt-pace="${opt.minutes}"
                 >${escapeHtml(opt.label)}</button>
               `,
@@ -576,9 +580,9 @@ export function renderGanttHtml(
 
           <div class="gantt-control-group" role="group" aria-label="Filtrar etapas por estado">
             <span class="gantt-control-label">Mostrar:</span>
-            <button type="button" class="mode-btn" aria-selected="${opts.filterStatus === 'all'}" data-gantt-filter="all">Todas</button>
-            <button type="button" class="mode-btn" aria-selected="${opts.filterStatus === 'todo'}" data-gantt-filter="todo">Por fazer</button>
-            <button type="button" class="mode-btn" aria-selected="${opts.filterStatus === 'done'}" data-gantt-filter="done">Concluídas</button>
+            <button type="button" class="mode-btn" aria-pressed="${opts.filterStatus === 'all'}" data-gantt-filter="all">Todas</button>
+            <button type="button" class="mode-btn" aria-pressed="${opts.filterStatus === 'todo'}" data-gantt-filter="todo">Por fazer</button>
+            <button type="button" class="mode-btn" aria-pressed="${opts.filterStatus === 'done'}" data-gantt-filter="done">Concluídas</button>
           </div>
 
           <div class="gantt-control-group">
@@ -624,6 +628,83 @@ export function renderGanttHtml(
               </ul>
             </details>
           `;
+        })()}
+
+        ${(() => {
+          const review = buildSpacedReviewSummary(TRACK_INDEX, progress, opts.quizSelection ?? {});
+          const timeReport = buildStudyTimeReport(TRACK_INDEX, progress, opts.lessonTimes ?? {});
+          if (review.totalTracked === 0 && timeReport.trackedLessonsCount === 0) return '';
+
+          const reviewHtml =
+            review.totalTracked > 0
+              ? `
+                <div class="study-insight-card">
+                  <div class="review-panel-head">
+                    <strong>Revisão espaçada (1 · 3 · 7 · 14 · 30 dias)</strong>
+                    <span class="status-chip ${review.dueNow.length > 0 ? 'is-person' : 'is-ok'}">
+                      ${review.dueNow.length > 0 ? `${review.dueNow.length} para rever hoje` : 'Tudo em dia'}
+                    </span>
+                  </div>
+                  ${
+                    review.dueNow.length > 0
+                      ? `<ul class="review-list">
+                          ${review.dueNow
+                            .slice(0, 4)
+                            .map(
+                              (item) => `
+                            <li class="review-item">
+                              <div class="review-item-info">
+                                <strong>${escapeHtml(item.lessonCode)} · ${escapeHtml(item.lessonTitle)}</strong>
+                                <span class="measured">${escapeHtml(item.trackShortTitle)} · ${escapeHtml(item.reason)}</span>
+                              </div>
+                              <div class="action-pair">
+                                <button type="button" class="btn" data-review-go-track="${escapeHtml(item.trackId)}" data-review-go-lesson="${escapeHtml(item.lessonId)}">Rever →</button>
+                                <button type="button" class="btn btn-primary" data-review-done="${escapeHtml(item.lessonId)}">Revista ✓</button>
+                              </div>
+                            </li>
+                          `,
+                            )
+                            .join('')}
+                        </ul>`
+                      : `<p class="measured">${review.upcoming.length} próxima(s) nos próximos 3 dias · ${review.consolidatedCount} já consolidadas.</p>`
+                  }
+                </div>
+              `
+              : '';
+
+          const timeHtml =
+            timeReport.trackedLessonsCount > 0
+              ? `
+                <div class="study-insight-card">
+                  <div class="review-panel-head">
+                    <strong>${timeReport.hasOverBudget ? 'Onde gastaste mais tempo do que o previsto' : 'Etapas com mais tempo útil registado'}</strong>
+                    <span class="status-chip">${timeReport.trackedLessonsCount} etapa(s) medidas · ${timeReport.overBudgetCount} acima da margem</span>
+                  </div>
+                  <ul class="review-list">
+                    ${timeReport.topTimeDrains
+                      .slice(0, 5)
+                      .map((st) => {
+                        const deltaText =
+                          st.deltaMinutes > 0
+                            ? `+${st.deltaMinutes.toFixed(0)} min acima`
+                            : `${Math.abs(st.deltaMinutes).toFixed(0)} min abaixo`;
+                        return `
+                          <li class="review-item">
+                            <div class="review-item-info">
+                              <strong>${escapeHtml(st.lessonCode)} · ${escapeHtml(st.lessonTitle)}</strong>
+                              <span class="measured">${escapeHtml(st.trackShortTitle)} · ${st.actualMinutes.toFixed(0)} min reais vs ${st.projectedMinutes} min prev. (${deltaText})</span>
+                            </div>
+                            <button type="button" class="btn" data-gantt-jump-track="${escapeHtml(st.trackId)}" data-gantt-jump-lesson="${escapeHtml(st.lessonId)}">Abrir →</button>
+                          </li>
+                        `;
+                      })
+                      .join('')}
+                  </ul>
+                </div>
+              `
+              : '';
+
+          return `<div class="study-insights-grid">${reviewHtml}${timeHtml}</div>`;
         })()}
       </section>
 

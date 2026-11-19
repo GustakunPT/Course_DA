@@ -25,7 +25,11 @@ export function selectorForControl(el: Element | null): string | null {
     ['data-diag-bg', el.dataset.diagBg],
     ['data-diag-hours', el.dataset.diagHours],
     ['data-diag-months', el.dataset.diagMonths],
+    ['data-placement-q', el.dataset.placementQ && el.dataset.placementOpt ? undefined : undefined],
   ];
+  if (el.dataset.placementQ && el.dataset.placementOpt) {
+    return `[data-placement-q="${CSS.escape(el.dataset.placementQ)}"][data-placement-opt="${CSS.escape(el.dataset.placementOpt)}"]`;
+  }
   for (const [attr, val] of attrPairs) {
     if (val) return `[${attr}="${CSS.escape(val)}"]`;
   }
@@ -99,4 +103,24 @@ export function restoreFocusFromSelectors(selectors: (string | null | undefined)
       return;
     }
   }
+}
+
+/** Suporte de teclado (setas Esquerda/Direita, Home/End) para grupos role="tablist" (WAI-ARIA). */
+export function handleTablistArrowKeys(tablist: HTMLElement, ev: KeyboardEvent): boolean {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) return false;
+  const tabs = Array.from(tablist.querySelectorAll<HTMLElement>('[role="tab"]:not([disabled])'));
+  if (tabs.length < 2) return false;
+  const idx = tabs.indexOf(ev.target as HTMLElement);
+  if (idx < 0) return false;
+
+  ev.preventDefault();
+  let nextIdx = idx;
+  if (ev.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+  else if (ev.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+  else if (ev.key === 'Home') nextIdx = 0;
+  else if (ev.key === 'End') nextIdx = tabs.length - 1;
+
+  tabs[nextIdx].focus();
+  tabs[nextIdx].click();
+  return true;
 }

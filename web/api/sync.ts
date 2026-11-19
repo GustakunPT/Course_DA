@@ -24,6 +24,79 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+function sanitizeProgressMap(raw: unknown): Record<string, unknown> {
+  if (!isPlainObject(raw)) return {};
+  const out: Record<string, unknown> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(raw)) {
+    if (count >= 300) break;
+    if (k.length > 80 || !isPlainObject(v)) continue;
+    const status = v.status === 'helped' ? 'helped' : v.status === 'autonomous' ? 'autonomous' : null;
+    if (!status) continue;
+    const rec: Record<string, unknown> = {
+      status,
+      completedAt: typeof v.completedAt === 'string' ? v.completedAt.slice(0, 40) : new Date().toISOString(),
+    };
+    if (typeof v.quizPassed === 'boolean') rec.quizPassed = v.quizPassed;
+    if (typeof v.reviewCount === 'number' && Number.isFinite(v.reviewCount) && v.reviewCount > 0) {
+      rec.reviewCount = Math.min(1000, Math.floor(v.reviewCount));
+    }
+    if (typeof v.lastReviewedAt === 'string' && v.lastReviewedAt.length <= 40) {
+      rec.lastReviewedAt = v.lastReviewedAt;
+    }
+    out[k] = rec;
+    count++;
+  }
+  return out;
+}
+
+function sanitizeDraftsMap(raw: unknown): Record<string, string> {
+  if (!isPlainObject(raw)) return {};
+  const out: Record<string, string> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(raw)) {
+    if (count >= 600) break;
+    if (k.length <= 120 && typeof v === 'string' && v.length <= 35_000) {
+      out[k] = v;
+      count++;
+    }
+  }
+  return out;
+}
+
+function sanitizeQuizzesMap(raw: unknown): Record<string, number> {
+  if (!isPlainObject(raw)) return {};
+  const out: Record<string, number> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(raw)) {
+    if (count >= 600) break;
+    if (k.length <= 80 && typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 10) {
+      out[k] = v;
+      count++;
+    }
+  }
+  return out;
+}
+
+function sanitizeLastLocation(raw: unknown): {
+  trackId: string;
+  lessonId: string;
+  view: 'academia' | 'explorador' | 'referencia' | 'cronograma';
+  timestamp: string;
+} | null {
+  if (!isPlainObject(raw)) return null;
+  const view = raw.view;
+  if (view !== 'academia' && view !== 'explorador' && view !== 'referencia' && view !== 'cronograma') return null;
+  if (typeof raw.trackId !== 'string' || raw.trackId.length > 80) return null;
+  if (typeof raw.lessonId !== 'string' || raw.lessonId.length > 80) return null;
+  return {
+    trackId: raw.trackId,
+    lessonId: raw.lessonId,
+    view,
+    timestamp: typeof raw.timestamp === 'string' ? raw.timestamp.slice(0, 40) : new Date().toISOString(),
+  };
+}
+
 function sanitizeTimeMap(raw: unknown): Record<string, number> {
   if (!isPlainObject(raw)) return {};
   const out: Record<string, number> = {};
@@ -126,10 +199,10 @@ export async function POST(request: Request): Promise<Response> {
       code = generateSyncCode();
     }
 
-    const progress = isPlainObject(body.progress) ? body.progress : {};
-    const drafts = isPlainObject(body.drafts) ? body.drafts : {};
-    const quizzes = isPlainObject(body.quizzes) ? body.quizzes : {};
-    const lastLocation = isPlainObject(body.lastLocation) ? body.lastLocation : null;
+    const progress = sanitizeProgressMap(body.progress);
+    const drafts = sanitizeDraftsMap(body.drafts);
+    const quizzes = sanitizeQuizzesMap(body.quizzes);
+    const lastLocation = sanitizeLastLocation(body.lastLocation);
     const practice = Array.isArray(body.practice)
       ? body.practice.filter((x: unknown) => typeof x === 'string' && x.length <= 80).slice(0, 500)
       : [];

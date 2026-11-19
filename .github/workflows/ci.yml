@@ -34,5 +34,11 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run test:mockups
       - run: npm test
       - run: npm run build
+      - name: E2E Smoke (Playwright Chromium)
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          npm run test:e2e

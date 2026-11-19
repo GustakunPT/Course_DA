@@ -64,4 +64,6 @@ export interface AppState {
   showGuideModal: boolean;
   diagnostic: DiagnosticProfile | null;
   diagnosticDraft: DiagnosticProfile;
+  showPlacementQuiz: boolean;
+  placementAnswers: Record<string, number>;
 }

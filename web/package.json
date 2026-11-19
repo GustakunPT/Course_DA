@@ -9,6 +9,7 @@
     "build": "npm run sync && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test:mockups": "node scripts/test-mockups.mjs",
+    "test:e2e": "node scripts/smoke-e2e.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

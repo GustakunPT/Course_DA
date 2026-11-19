@@ -75,6 +75,23 @@ button, input, select, textarea { font: inherit; }
   clip-path: inset(50%);
   white-space: nowrap;
 }
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: var(--space-sm);
+  z-index: var(--z-tooltip);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.skip-link:focus {
+  top: var(--space-sm);
+}
 @media (max-width: 60rem) { :root { --gutter: 20px; } }
 @media (max-width: 48rem) {
   :root { --gutter: 12px; }

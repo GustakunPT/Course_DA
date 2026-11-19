@@ -7,6 +7,8 @@ import {
   TARGET_MONTHS_OPTIONS,
   THREE_RISKS,
 } from '../data/diagnostic';
+import { evaluatePlacementAnswers, PLACEMENT_QUESTIONS } from '../data/placementQuiz';
+import { buildSpacedReviewSummary } from '../data/spacedReview';
 import {
   formatHoursApproxPt,
   formatMinutesPt,
@@ -183,6 +185,44 @@ export function renderProgressModal(state: AppState): string {
           </div>
         </details>
 
+        ${(() => {
+          const review = buildSpacedReviewSummary(allTracks, state.completedLessons, state.quizSelection);
+          if (review.totalTracked === 0) return '';
+          return `
+            <div class="hints-panel review-panel">
+              <div class="review-panel-head">
+                <strong>Revisão espaçada (memória ativa)</strong>
+                <span class="status-chip ${review.dueNow.length > 0 ? 'is-person' : 'is-ok'}">
+                  ${review.dueNow.length > 0 ? `${review.dueNow.length} para rever hoje` : 'Em dia · 0 atrasadas'}
+                </span>
+              </div>
+              ${
+                review.dueNow.length > 0
+                  ? `<ul class="review-list">
+                      ${review.dueNow
+                        .slice(0, 4)
+                        .map(
+                          (item) => `
+                        <li class="review-item">
+                          <div class="review-item-info">
+                            <strong>${escapeHtml(item.trackShortTitle)} · ${escapeHtml(item.lessonCode)} ${escapeHtml(item.lessonTitle)}</strong>
+                            <span class="measured">${escapeHtml(item.reason)}</span>
+                          </div>
+                          <div class="action-pair">
+                            <button type="button" class="btn" data-review-go-track="${escapeHtml(item.trackId)}" data-review-go-lesson="${escapeHtml(item.lessonId)}">Rever →</button>
+                            <button type="button" class="btn btn-primary" data-review-done="${escapeHtml(item.lessonId)}">Revista ✓</button>
+                          </div>
+                        </li>
+                      `,
+                        )
+                        .join('')}
+                    </ul>`
+                  : `<p class="measured">Todas as ${review.totalTracked} etapas concluídas estão dentro do ciclo de revisão (${review.upcoming.length} nos próximos 3 dias · ${review.consolidatedCount} consolidadas).</p>`
+              }
+            </div>
+          `;
+        })()}
+
         <div class="hints-panel">
           <strong>Sincronização na Cloud (sem login)</strong>
           <p class="measured">Liga este dispositivo a um código (<code>MB-XXXX-XXXX-XXXX</code>) para sincronizar automaticamente o progresso entre telemóvel e PC.</p>
@@ -273,7 +313,79 @@ export function renderDiagnosticModal(state: AppState): string {
         </div>
 
         <div class="diag-section">
-          <strong>1. Bagagem prévia</strong>
+          <div class="workbench-toolbar">
+            <strong>1. Bagagem prévia (ou faz o nivelamento prático)</strong>
+            <button
+              type="button"
+              class="btn"
+              data-action="toggle-placement-quiz"
+              aria-pressed="${state.showPlacementQuiz}"
+            >
+              ${state.showPlacementQuiz ? 'Ocultar nivelamento' : '⚡ Nivelamento prático (4 perguntas · 1 min)'}
+            </button>
+          </div>
+          ${
+            state.showPlacementQuiz
+              ? (() => {
+                  const placement = evaluatePlacementAnswers(state.placementAnswers);
+                  return `
+                    <div class="placement-quiz-box">
+                      <p class="measured">Responde a 4 perguntas rápidas (Negócio, SQL, Pandas e Estatística) para sugerirmos o ponto de partida com base prática, em vez de adivinhares.</p>
+                      ${PLACEMENT_QUESTIONS.map((q, idx) => {
+                        const sel = state.placementAnswers[q.id];
+                        return `
+                          <div class="placement-q-card">
+                            <p><strong>${idx + 1}. [${escapeHtml(q.pillar)}]</strong> ${escapeHtml(q.question)}</p>
+                            <div class="action-pair" style="flex-wrap:wrap;">
+                              ${q.options
+                                .map((opt, optIdx) => {
+                                  const picked = sel === optIdx;
+                                  const cls =
+                                    sel !== undefined
+                                      ? optIdx === q.correctIndex
+                                        ? 'is-ok'
+                                        : picked
+                                          ? 'is-bad'
+                                          : ''
+                                      : '';
+                                  return `
+                                    <button
+                                      type="button"
+                                      class="mode-btn ${cls}"
+                                      aria-pressed="${picked}"
+                                      data-placement-q="${escapeHtml(q.id)}"
+                                      data-placement-opt="${optIdx}"
+                                    >${escapeHtml(opt)}</button>
+                                  `;
+                                })
+                                .join('')}
+                            </div>
+                            ${sel !== undefined ? `<p class="measured">${sel === q.correctIndex ? 'Certo! ' : 'Dica: '}${escapeHtml(q.explanation)}</p>` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                      ${
+                        placement.answeredCount > 0
+                          ? `<div class="diag-verdict ${placement.complete ? 'is-ok' : ''}">
+                              <strong>${escapeHtml(placement.headline)}</strong>
+                              <p class="measured">${escapeHtml(placement.detail)}</p>
+                              ${
+                                placement.complete
+                                  ? `<div class="action-pair" style="margin-top:6px;">
+                                      <button type="button" class="btn btn-primary" data-action="apply-placement-result">
+                                        Usar resultado (${placement.score}/${placement.totalQuestions}) e ir para a etapa →
+                                      </button>
+                                    </div>`
+                                  : ''
+                              }
+                            </div>`
+                          : ''
+                      }
+                    </div>
+                  `;
+                })()
+              : ''
+          }
           <div class="diag-options-grid">
             ${BACKGROUND_OPTIONS.map((opt) => {
               const active = draft.background === opt.id;
@@ -301,7 +413,7 @@ export function renderDiagnosticModal(state: AppState): string {
                   <button
                     type="button"
                     class="mode-btn"
-                    aria-selected="${draft.hoursPerWeek === h}"
+                    aria-pressed="${draft.hoursPerWeek === h}"
                     data-diag-hours="${h}"
                   >${h} h/sem</button>
                 `,
@@ -317,7 +429,7 @@ export function renderDiagnosticModal(state: AppState): string {
                   <button
                     type="button"
                     class="mode-btn"
-                    aria-selected="${draft.targetMonths === m}"
+                    aria-pressed="${draft.targetMonths === m}"
                     data-diag-months="${m}"
                   >${m} meses</button>
                 `,

@@ -52,12 +52,32 @@ describe('POST /api/sync', () => {
     expect(store.size).toBe(0);
   });
 
-  it('descarta campos com tipo errado', async () => {
-    const { code } = await (await post({ progress: [1], drafts: 'x', lastLocation: [] })).json();
+  it('descarta campos com tipo errado e sanitiza entradas inválidas em progress, drafts, quizzes e lastLocation', async () => {
+    const { code } = await (
+      await post({
+        progress: {
+          'py-01-sintaxe': { status: 'autonomous', completedAt: '2026-11-19T10:00:00Z', reviewCount: 2, lastReviewedAt: '2026-11-19T11:00:00Z' },
+          lixo: { status: 'hack' },
+          numero: 123,
+        },
+        drafts: { 'py-01:challenge': 'x = 1', invalido: 42 },
+        quizzes: { 'py-01': 2, negativo: -1, texto: 'a' },
+        lastLocation: { trackId: 'python', lessonId: 'py-01-sintaxe', view: 'academia', timestamp: '2026-11-19T10:00:00Z' },
+      })
+    ).json();
     const saved = JSON.parse(store.get(`sync/${code}.json`)!);
-    expect(saved.progress).toEqual({});
-    expect(saved.drafts).toEqual({});
-    expect(saved.lastLocation).toBeNull();
+    expect(saved.progress).toEqual({
+      'py-01-sintaxe': { status: 'autonomous', completedAt: '2026-11-19T10:00:00Z', reviewCount: 2, lastReviewedAt: '2026-11-19T11:00:00Z' },
+    });
+    expect(saved.drafts).toEqual({ 'py-01:challenge': 'x = 1' });
+    expect(saved.quizzes).toEqual({ 'py-01': 2 });
+    expect(saved.lastLocation.view).toBe('academia');
+
+    const badRes = await (await post({ progress: [1], drafts: 'x', lastLocation: { trackId: 'a', lessonId: 'b', view: 'invalida' } })).json();
+    const savedBad = JSON.parse(store.get(`sync/${badRes.code}.json`)!);
+    expect(savedBad.progress).toEqual({});
+    expect(savedBad.drafts).toEqual({});
+    expect(savedBad.lastLocation).toBeNull();
   });
 
   it('guarda os treinos resolvidos e ignora entradas que não são texto', async () => {
