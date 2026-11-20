@@ -5,6 +5,7 @@ import { isAnswerSheetMode, renderAnswerSheetPanel } from '../ui/answerSheetPane
 import { highlightCode } from '../ui/codeEditor';
 import { renderPreviaCodigo } from '../ui/mobileEditor';
 import { renderOutputRegion } from '../ui/outputView';
+import { splitterAriaAttrs } from '../ui/layout';
 import { renderPainelProjeto } from '../ui/projectPanel';
 import { activeEngine, getEditorValue, linkDoProjeto } from './lessonContext';
 import { aparelhoPedeEcraDeEscrita, usaEcraDeEscrita } from './mobileWriting';
@@ -83,6 +84,7 @@ export function renderWorkbenchPanel(lesson: Lesson): string {
           tabindex="0"
           aria-orientation="horizontal"
           aria-label="Redimensionar altura do editor de código"
+          ${splitterAriaAttrs('editorHeight', state.layout.editorHeight)}
           title="Arrasta para aumentar ou diminuir a altura do editor (duplo clique para repor)"
         ></div>`
         }

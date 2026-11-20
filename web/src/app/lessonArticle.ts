@@ -226,7 +226,7 @@ export function renderLessonArticle(track: Track, trackMeta: TrackIndexEntry, le
             ? `
           <section class="prose-section error-demo" aria-label="Exemplo de erro">
             <h2>O que acontece se…</h2>
-            <pre class="code-sample"><code>${highlightCode(lesson.errorDemo.code, lesson.engine)}</code></pre>
+            <pre class="code-sample" tabindex="0" aria-label="Código com erro"><code>${highlightCode(lesson.errorDemo.code, lesson.engine)}</code></pre>
             <p class="error-demo-label">${
               lesson.engine === 'sql'
                 ? 'O SQLite responde:'
@@ -272,7 +272,7 @@ export function renderLessonArticle(track: Track, trackMeta: TrackIndexEntry, le
 
         <section class="prose-section">
           <h2>${escapeHtml(lesson.referenceTitle)}</h2>
-          <div class="table-scroll">
+          <div class="table-scroll" tabindex="0">
             <table class="data-table">
               <caption class="visually-hidden">${escapeHtml(lesson.referenceTitle)}</caption>
               <thead>
@@ -304,7 +304,7 @@ export function renderLessonArticle(track: Track, trackMeta: TrackIndexEntry, le
             <h2>Exemplo demonstrativo</h2>
             ${lesson.engine === 'projeto' ? '' : '<button type="button" class="btn" data-action="load-example-tab">Experimentar no editor</button>'}
           </div>
-          <pre class="code-sample"><code>${highlightCode(lesson.exampleCode, lesson.engine)}</code></pre>
+          <pre class="code-sample" tabindex="0" aria-label="Exemplo demonstrativo"><code>${highlightCode(lesson.exampleCode, lesson.engine)}</code></pre>
         </section>
 
         ${renderQuizzes(lesson)}

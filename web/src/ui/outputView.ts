@@ -147,7 +147,7 @@ export function renderOutputRegion(
       ${
         out.table && out.table.columns.length > 0
           ? `
-        <div class="table-scroll">
+        <div class="table-scroll" tabindex="0">
           <table class="data-table">
             <caption class="visually-hidden">Resultados da execução SQL ou Python/Pandas</caption>
             <thead>

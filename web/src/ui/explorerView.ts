@@ -192,7 +192,7 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
               .join('')}
           </svg>
         </div>
-        <div class="table-scroll">
+        <div class="table-scroll" tabindex="0">
           <table class="data-table">
             <caption class="visually-hidden">Faturação mensal, clientes ativos e gasto médio por cliente em 2025</caption>
             <thead>
@@ -241,7 +241,7 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
       <div class="seam-panel prose-section">
         <h2>Auditoria linha a linha de dados/vendas_sujas.csv</h2>
         <p>As 12 linhas reais usadas na Etapa 16 de limpeza: registos a verde estão limpos; registos assinalados a vermelho exigem tratamento.</p>
-        <div class="table-scroll">
+        <div class="table-scroll" tabindex="0">
           <table class="data-table">
             <caption class="visually-hidden">Auditoria de anomalias e qualidade de dados em vendas_sujas.csv</caption>
             <thead>
@@ -292,7 +292,7 @@ export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerF
         </div>
 
         <h2>Catálogo oficial (dados/produtos.csv)</h2>
-        <div class="table-scroll">
+        <div class="table-scroll" tabindex="0">
           <table class="data-table">
             <caption class="visually-hidden">Catálogo de produtos e preços unitários da Mercearia do Bairro</caption>
             <thead>
