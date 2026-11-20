@@ -1,0 +1,403 @@
+/* Right Column: Live Code & SQL Workbench */
+.workbench-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.workbench-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+.mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.mode-btn {
+  height: 32px;
+  padding-inline: var(--space-sm);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-chip);
+  background: var(--color-paper-2);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mode-btn:hover {
+  color: var(--color-ink);
+}
+
+.mode-btn[aria-selected="true"],
+.mode-btn[aria-pressed="true"] {
+  background: transparent;
+  border-color: var(--color-cool);
+  color: var(--color-cool);
+}
+
+.challenge-prompt {
+  background: var(--color-paper-2);
+  padding: var(--space-md);
+  border-radius: var(--radius-pill);
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.challenge-prompt p {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+  white-space: pre-line;
+}
+
+/* Painel das etapas de projeto (no lugar do editor) */
+.projeto-painel {
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.projeto-painel h3 {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+  margin-top: var(--space-xs);
+}
+
+.projeto-aviso {
+  background: var(--color-paper-2);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-pill);
+  border-left: 3px solid var(--color-ink-2);
+}
+
+.projeto-estado {
+  justify-self: start;
+  padding: var(--space-2xs) var(--space-xs);
+  border: var(--rule-hair) solid var(--color-ink-2);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-xs);
+}
+
+.projeto-entregaveis {
+  padding-left: var(--space-lg);
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-lista {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-lista label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  min-height: 32px;
+  padding: var(--space-2xs) 0;
+  cursor: pointer;
+}
+
+.projeto-lista input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-ink-2);
+}
+
+.projeto-grelha {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  table-layout: fixed;
+}
+
+.projeto-grelha th,
+.projeto-grelha td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  overflow-wrap: anywhere;
+}
+
+.projeto-grelha thead th {
+  color: var(--color-muted);
+  font-weight: 500;
+  border-bottom-color: var(--color-rule-2);
+}
+
+.projeto-grelha tbody th {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.projeto-link {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.projeto-link input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: max(16px, var(--text-sm)); /* 16px evita o zoom ao focar no iPhone */
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-chip);
+}
+
+@media (pointer: coarse) {
+  .projeto-link input {
+    height: 44px;
+  }
+}
+
+.projeto-link-msg {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.projeto-link-msg.ok {
+  color: var(--color-ink-2); /* só o formato; neutro para não parecer validação */
+}
+
+.projeto-link-msg.erro {
+  color: var(--color-bad);
+}
+
+.code-editor-shell {
+  --gutter-w: 44px;
+  display: grid;
+  grid-template-columns: var(--gutter-w) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-pill);
+  background: var(--color-code-bg);
+  overflow: hidden;
+  height: var(--editor-h, 250px);
+  min-height: 140px;
+  max-height: 680px;
+}
+
+.code-editor-shell:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.code-gutter {
+  background: var(--color-code-gutter);
+  border-right: var(--rule-hair) solid var(--color-rule);
+  padding: var(--space-md) var(--space-xs);
+  font-family: var(--font-outlier);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-code-line);
+  text-align: right;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+.code-stage {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+.code-highlight-layer,
+.code-editor {
+  margin: 0;
+  padding: var(--space-md);
+  font-family: var(--font-outlier);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.code-highlight-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: var(--color-ink);
+  z-index: var(--z-base);
+}
+
+.code-editor {
+  position: relative;
+  z-index: var(--z-raised);
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--color-accent);
+  resize: none;
+}
+
+.code-editor:focus-visible {
+  outline: none;
+}
+
+/* VS Code Dark+ / Light+ Prettier Syntax Token Classes */
+.tok-keyword { color: var(--color-syn-keyword); }
+.tok-function { color: var(--color-syn-function); }
+.tok-string { color: var(--color-syn-string); }
+.tok-number { color: var(--color-syn-number); }
+.tok-comment { color: var(--color-syn-comment); }
+.tok-variable { color: var(--color-syn-variable); }
+.tok-constant { color: var(--color-syn-constant); }
+.tok-type { color: var(--color-syn-type); }
+.tok-punctuation { color: var(--color-syn-punct); }
+
+.workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+.action-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* Output Region with 4 Required States: loading, empty, error, full */
+.output-panel {
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+  min-height: 180px;
+  align-content: start;
+}
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+
+.output-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.output-stdout {
+  margin: 0;
+  padding: var(--space-sm);
+  background: var(--color-code-bg);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.output-stdout--tabular {
+  white-space: pre;
+}
+
+.output-panel .table-scroll {
+  max-height: 60dvh;
+  overflow-y: auto;
+}
+
+.skeleton-stack {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.skeleton-bar {
+  height: 16px;
+  border-radius: var(--radius-chip);
+  background: var(--color-rule);
+  opacity: 0.6;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar {
+    animation: none;
+  }
+}
+
+.empty-state,
+.error-state {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-sm) 0;
+}
+
+.error-state {
+  color: var(--color-bad);
+}
+
+.check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.check-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-sm);
+}
+
+.check-row.pass {
+  background: var(--color-ok-soft);
+  color: var(--color-ink);
+}
+
+.check-row.fail {
+  background: var(--color-bad-soft);
+  color: var(--color-ink);
+}

@@ -113,8 +113,8 @@ describe('renderPreviaCodigo', () => {
 
 describe('estilos do ecrã de escrita', () => {
   it('o editor do ecrã usa pelo menos 16px, para o Safari do iPhone não fazer zoom ao focar', async () => {
-    const { readFileSync } = await import('node:fs');
-    const css = readFileSync(new URL('../src/styles/app.css', import.meta.url), 'utf-8');
+    const { lerCssDaApp } = await import('./helpers/css');
+    const css = lerCssDaApp();
     const regra = /\.ecra-escrita \.code-editor,[^{]*\.ecra-escrita \.code-highlight-layer[^{]*\{([^}]*)\}/.exec(css);
     expect(regra, 'falta a regra para .ecra-escrita .code-editor e .code-highlight-layer').not.toBeNull();
     expect(regra![1]).toMatch(/font-size:\s*max\(16px/);

@@ -1,0 +1,68 @@
+/* KPI Stat Strip (Console measured reading) */
+.kpi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.kpi-reading {
+  font-family: var(--font-outlier);
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-label {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-top: var(--space-2xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Analytics & Explorer View */
+.explorer-two-col {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 92px;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.bar-track {
+  height: 10px;
+  background: var(--color-paper-3);
+  border-radius: var(--radius-chip);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--color-cool);
+  border-radius: var(--radius-chip);
+}
+
+.bar-fill.is-accent {
+  background: var(--color-accent);
+}
+
+.diff-minus { background: var(--color-bad-soft); }
+.diff-plus { background: var(--color-ok-soft); }

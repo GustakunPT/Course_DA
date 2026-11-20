@@ -1,0 +1,297 @@
+/* Ecrã de escrita para telemóvel: ocupa a área que o teclado deixa livre (--vv-altura/--vv-topo
+   vêm de window.visualViewport), por cima da barra do topo e por baixo dos modais. */
+.ecra-escrita {
+  position: fixed;
+  left: var(--vv-esq, 0px);
+  width: var(--vv-largura, 100%);
+  top: var(--vv-topo, 0px);
+  height: var(--vv-altura, 100dvh);
+  z-index: calc(var(--z-sticky-nav) + 50);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* Sem isto a coluna cresce até à linha de código mais comprida e o ecrã fica mais largo do que o telemóvel. */
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.ecra-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: max(var(--space-xs), var(--safe-top)) max(var(--space-sm), var(--safe-right)) var(--space-xs) max(var(--space-sm), var(--safe-left));
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+.ecra-abas {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-3xs);
+}
+
+.ecra-aba {
+  flex: 1 1 0;
+  min-height: 44px;
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-chip);
+  background: var(--color-paper-3);
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.ecra-aba[aria-selected="true"] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+}
+
+.ecra-fechar {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.ecra-painel {
+  overflow: auto;
+  padding: var(--space-sm) max(var(--space-sm), var(--safe-right)) var(--space-sm) max(var(--space-sm), var(--safe-left));
+  display: grid;
+  align-content: start;
+  gap: var(--space-sm);
+}
+
+.ecra-painel[hidden] {
+  display: none;
+}
+
+.ecra-painel[data-painel="codigo"] {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ecra-acoes-barra {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) max(var(--space-sm), var(--safe-right)) var(--space-2xs) max(var(--space-sm), var(--safe-left));
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.ecra-acoes-barra::-webkit-scrollbar {
+  display: none;
+}
+
+.ecra-acoes-barra .btn {
+  min-height: 36px;
+  padding: 4px var(--space-xs);
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+.ecra-painel[data-painel="codigo"] .code-editor-shell {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  border-radius: 0;
+  border: 0;
+}
+
+.ecra-barra {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) max(var(--space-sm), var(--safe-right)) max(var(--space-xs), var(--safe-bottom)) max(var(--space-sm), var(--safe-left));
+  border-top: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+.schema-drawer {
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-chip);
+  background: var(--color-paper-3);
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--text-xs);
+}
+
+.schema-drawer summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-ink);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.schema-drawer-list {
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.schema-drawer-list li {
+  color: var(--color-ink-2);
+  line-height: 1.45;
+}
+
+.schema-drawer-list code {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.ecra-simbolos {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ecra-simbolos::-webkit-scrollbar {
+  display: none;
+}
+
+.ecra-barra .btn {
+  flex-shrink: 0;
+}
+
+.link-btn {
+  justify-self: start;
+  border: 0;
+  padding: var(--space-2xs) 0;
+  background: transparent;
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.codigo-previa {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-height: 12rem;
+  overflow: hidden;
+  padding: var(--space-sm);
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-pill);
+  background: var(--color-code-bg);
+  color: var(--color-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.codigo-previa pre {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.codigo-previa-rotulo {
+  position: absolute;
+  right: var(--space-xs);
+  bottom: var(--space-xs);
+  padding: var(--space-3xs) var(--space-xs);
+  border-radius: var(--radius-chip);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: var(--text-xs);
+}
+
+body.tem-ecra-escrita {
+  overflow: hidden;
+}
+
+/* O Safari do iPhone faz zoom ao focar um campo com menos de 16px; o zoom desalinhava o ecrã
+   de escrita. As três camadas (texto, cores e números de linha) têm de ter o mesmo tamanho. */
+.ecra-escrita .code-editor,
+.ecra-escrita .code-highlight-layer,
+.ecra-escrita .code-gutter {
+  font-size: max(16px, var(--text-sm));
+}
+
+/* Botão "Aa" e menu do tamanho do texto (ao lado do botão do tema). */
+.font-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-font-btn {
+  min-width: 40px;
+  justify-content: center;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.nav-font-btn small {
+  font-size: 0.72em;
+}
+
+.font-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2xs));
+  right: 0;
+  z-index: var(--z-dropdown);
+  display: grid;
+  min-width: 15rem;
+  max-height: min(70dvh, 24rem);
+  overflow-y: auto;
+  padding: var(--space-2xs);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+}
+
+.font-menu-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-chip);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.font-menu-item:hover,
+.font-menu-item:focus-visible {
+  background: var(--color-paper-3);
+}
+
+.font-menu-item[aria-checked="true"] {
+  background: var(--color-paper-3);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.font-menu-sample {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.font-menu-pct {
+  color: var(--color-ink-2);
+  font-size: var(--text-xs);
+}
