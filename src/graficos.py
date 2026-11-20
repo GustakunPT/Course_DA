@@ -10,6 +10,7 @@ Como correr (precisa de: pip install -r requirements.txt):
     python src/graficos.py
 """
 
+from collections.abc import Callable
 from pathlib import Path
 
 import matplotlib
@@ -17,6 +18,7 @@ import matplotlib
 matplotlib.use("Agg")  # gera ficheiros sem abrir janelas (funciona também no CI)
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
+from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -28,7 +30,7 @@ COR_SECUNDARIA = "#d97706"
 COR_NEUTRA = "#94a3b8"
 
 
-def carregar_vendas(nome="vendas.csv"):
+def carregar_vendas(nome: str = "vendas.csv") -> pd.DataFrame:
     """Lê um ficheiro de vendas e acrescenta as colunas subtotal e mes."""
     vendas = pd.read_csv(PASTA_DADOS / nome, parse_dates=["data"])
     vendas["subtotal"] = vendas["quantidade"] * vendas["preco"]
@@ -36,7 +38,7 @@ def carregar_vendas(nome="vendas.csv"):
     return vendas
 
 
-def _estilo(ax, titulo, subtitulo=None):
+def _estilo(ax: Axes, titulo: str, subtitulo: str | None = None) -> None:
     ax.set_title(titulo, loc="left", fontsize=13, fontweight="bold", pad=18 if subtitulo else 8)
     if subtitulo:
         ax.text(0, 1.02, subtitulo, transform=ax.transAxes, fontsize=9, color="#64748b")
@@ -45,22 +47,22 @@ def _estilo(ax, titulo, subtitulo=None):
     ax.set_axisbelow(True)
 
 
-def _euros(valor, _pos=None):
+def _euros(valor: float, _pos: float | None = None) -> str:
     return f"{valor:,.0f} €".replace(",", " ")
 
 
-def grafico_faturacao_mensal(base, sazonal, destino):
+def grafico_faturacao_mensal(base: pd.DataFrame, sazonal: pd.DataFrame, destino: Path) -> None:
     meses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
     por_mes_base = base.groupby("mes")["subtotal"].sum().reindex(range(1, 13), fill_value=0)
     por_mes_saz = sazonal.groupby("mes")["subtotal"].sum().reindex(range(1, 13), fill_value=0)
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(meses, por_mes_saz.values, marker="o", color=COR_PRINCIPAL, linewidth=2.5, label="Sazonal (realista)")
-    ax.plot(meses, por_mes_base.values, marker="o", color=COR_NEUTRA, linewidth=1.8, label="Base (uniforme)")
-    pico = por_mes_saz.idxmax()
+    ax.plot(meses, por_mes_saz.to_numpy(), marker="o", color=COR_PRINCIPAL, linewidth=2.5, label="Sazonal (realista)")
+    ax.plot(meses, por_mes_base.to_numpy(), marker="o", color=COR_NEUTRA, linewidth=1.8, label="Base (uniforme)")
+    pico = int(por_mes_saz.to_numpy().argmax())  # posição 0-11 do mês com mais faturação
     ax.annotate(
         f"Pico: {_euros(por_mes_saz.max())}",
-        xy=(pico - 1, por_mes_saz.max()),
+        xy=(pico, por_mes_saz.max()),
         xytext=(-110, -6),
         textcoords="offset points",
         fontsize=9,
@@ -76,14 +78,14 @@ def grafico_faturacao_mensal(base, sazonal, destino):
     plt.close(fig)
 
 
-def grafico_faturacao_categoria(vendas, produtos, destino):
+def grafico_faturacao_categoria(vendas: pd.DataFrame, produtos: pd.DataFrame, destino: Path) -> None:
     juntas = vendas.merge(produtos[["id", "categoria"]], left_on="produto_id", right_on="id")
     por_cat = juntas.groupby("categoria")["subtotal"].sum().sort_values()
     quota = por_cat / por_cat.sum() * 100
 
     fig, ax = plt.subplots(figsize=(9, 4.8))
-    barras = ax.barh(por_cat.index, por_cat.values, color=COR_PRINCIPAL)
-    for barra, pct in zip(barras, quota.values):
+    barras = ax.barh(por_cat.index, por_cat.to_numpy(), color=COR_PRINCIPAL)
+    for barra, pct in zip(barras, quota.values, strict=True):
         ax.text(barra.get_width(), barra.get_y() + barra.get_height() / 2, f"  {pct:.1f}%", va="center", fontsize=9)
     ax.xaxis.set_major_formatter(_euros)
     _estilo(ax, "Faturação por categoria", "Série base, 2025")
@@ -94,7 +96,7 @@ def grafico_faturacao_categoria(vendas, produtos, destino):
     plt.close(fig)
 
 
-def curva_abc(vendas):
+def curva_abc(vendas: pd.DataFrame) -> pd.DataFrame:
     """Devolve um DataFrame por produto com faturação, % acumulada e classe A/B/C."""
     por_prod = vendas.groupby("produto")["subtotal"].sum().sort_values(ascending=False).to_frame("faturacao")
     por_prod["pct_acumulada"] = por_prod["faturacao"].cumsum() / por_prod["faturacao"].sum() * 100
@@ -102,7 +104,7 @@ def curva_abc(vendas):
     return por_prod
 
 
-def grafico_curva_abc(vendas, destino):
+def grafico_curva_abc(vendas: pd.DataFrame, destino: Path) -> None:
     abc = curva_abc(vendas)
     cores = abc["classe"].map({"A": COR_PRINCIPAL, "B": COR_SECUNDARIA, "C": COR_NEUTRA})
 
@@ -111,7 +113,7 @@ def grafico_curva_abc(vendas, destino):
     ax.yaxis.set_major_formatter(_euros)
     ax.tick_params(axis="x", rotation=45)
     for rotulo in ax.get_xticklabels():
-        rotulo.set_ha("right")
+        rotulo.set_horizontalalignment("right")
     ax2 = ax.twinx()
     ax2.plot(abc.index, abc["pct_acumulada"], color="#0f172a", marker="o", linewidth=1.5)
     ax2.axhline(80, color=COR_PRINCIPAL, linestyle="--", linewidth=1)
@@ -131,7 +133,7 @@ def grafico_curva_abc(vendas, destino):
     plt.close(fig)
 
 
-def grafico_distribuicao(vendas, destino):
+def grafico_distribuicao(vendas: pd.DataFrame, destino: Path) -> None:
     media = vendas["subtotal"].mean()
     mediana = vendas["subtotal"].median()
 
@@ -148,20 +150,20 @@ def grafico_distribuicao(vendas, destino):
     plt.close(fig)
 
 
-def gerar_graficos(pasta_destino=PASTA_GRAFICOS):
+def gerar_graficos(pasta_destino: Path | str = PASTA_GRAFICOS) -> list[Path]:
     pasta_destino = Path(pasta_destino)
     pasta_destino.mkdir(parents=True, exist_ok=True)
     base = carregar_vendas("vendas.csv")
     sazonal = carregar_vendas("vendas_sazonais.csv")
     produtos = pd.read_csv(PASTA_DADOS / "produtos.csv")
 
-    ficheiros = {
+    ficheiros: dict[str, Callable[[Path], None]] = {
         "faturacao_mensal.png": lambda d: grafico_faturacao_mensal(base, sazonal, d),
         "faturacao_categoria.png": lambda d: grafico_faturacao_categoria(base, produtos, d),
         "curva_abc.png": lambda d: grafico_curva_abc(base, d),
         "distribuicao_vendas.png": lambda d: grafico_distribuicao(base, d),
     }
-    criados = []
+    criados: list[Path] = []
     for nome, desenhar in ficheiros.items():
         destino = pasta_destino / nome
         desenhar(destino)
@@ -169,7 +171,7 @@ def gerar_graficos(pasta_destino=PASTA_GRAFICOS):
     return criados
 
 
-def main():
+def main() -> None:
     for caminho in gerar_graficos():
         print(f"Gráfico criado: {caminho.relative_to(RAIZ)}")
 

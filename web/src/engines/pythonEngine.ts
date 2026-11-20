@@ -1,3 +1,4 @@
+import type { PyodideInterface } from 'pyodide';
 import { loadMerceariaDataset } from './csvEngine';
 import {
   PYODIDE_INDEX_URL,
@@ -25,15 +26,15 @@ export {
 
 declare global {
   interface Window {
-    loadPyodide?: (opts: { indexURL: string }) => Promise<any>;
+    loadPyodide?: (opts: { indexURL: string }) => Promise<PyodideInterface>;
   }
 }
 
 export type PythonWorkerLike = SandboxWorkerLike<PythonWorkerRequest, PythonExecutionResult>;
 
-type PyodideLoader = () => Promise<any>;
+type PyodideLoader = () => Promise<PyodideInterface>;
 
-let pyodidePromise: Promise<any> | null = null;
+let pyodidePromise: Promise<PyodideInterface> | null = null;
 const loadedPackages = new Set<string>();
 const loadedFiles = new Set<string>();
 let customPyodideLoader: PyodideLoader | null = null;
@@ -79,7 +80,9 @@ function loadPyodideScript(): Promise<void> {
     const existing = document.querySelector('script[data-pyodide]') as HTMLScriptElement | null;
     if (existing) {
       existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error('Falha ao transferir o motor Pyodide da CDN.')), { once: true });
+      existing.addEventListener('error', () => reject(new Error('Falha ao transferir o motor Pyodide da CDN.')), {
+        once: true,
+      });
       return;
     }
     const script = document.createElement('script');
@@ -90,12 +93,13 @@ function loadPyodideScript(): Promise<void> {
     script.async = true;
     script.dataset.pyodide = 'true';
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Falha ao transferir o motor Python (Pyodide). Verifica a ligação à internet.'));
+    script.onerror = () =>
+      reject(new Error('Falha ao transferir o motor Python (Pyodide). Verifica a ligação à internet.'));
     document.head.appendChild(script);
   });
 }
 
-export async function getPyodideEngine(onStatus?: (msg: string) => void): Promise<any> {
+export async function getPyodideEngine(onStatus?: (msg: string) => void): Promise<PyodideInterface> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
       onStatus?.('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');

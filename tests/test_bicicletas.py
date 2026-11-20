@@ -18,18 +18,28 @@ def test_tamanho_e_linhas_retiradas():
 
 def test_cada_problema_aparece():
     _, _, c = gerar_dados.gerar_viagens_bicicletas()
-    for chave in ["duplicadas", "duracao_impossivel", "fim_antes_inicio", "data_formato_dd_mm", "data_formato_h",
-                  "estacao_variante", "tipo_vazio", "tipo_variante", "valor_vazio", "valor_virgula"]:
+    for chave in [
+        "duplicadas",
+        "duracao_impossivel",
+        "fim_antes_inicio",
+        "data_formato_dd_mm",
+        "data_formato_h",
+        "estacao_variante",
+        "tipo_vazio",
+        "tipo_variante",
+        "valor_vazio",
+        "valor_virgula",
+    ]:
         assert c[chave] >= 30, chave
 
 
 def test_versao_limpa_coerente():
     _, limpas, _ = gerar_dados.gerar_viagens_bicicletas()
-    ids = [l["viagem_id"] for l in limpas]
+    ids = [linha["viagem_id"] for linha in limpas]
     assert len(ids) == len(set(ids))
-    assert {l["tipo_cliente"] for l in limpas} == {"Anual", "Ocasional", "Desconhecido"}
-    assert all(l["estacao_partida"].startswith("Estação ") for l in limpas)
-    assert all(0 < float(l["duracao_min"]) <= 1440 for l in limpas)
+    assert {linha["tipo_cliente"] for linha in limpas} == {"Anual", "Ocasional", "Desconhecido"}
+    assert all(linha["estacao_partida"].startswith("Estação ") for linha in limpas)
+    assert all(0 < float(linha["duracao_min"]) <= 1440 for linha in limpas)
 
 
 def test_mercearia_nao_mudou():

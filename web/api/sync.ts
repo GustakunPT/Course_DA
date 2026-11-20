@@ -7,6 +7,54 @@ const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 símbolos: 256 % 32 =
 const CODE_BLOCKS = 3;
 const MAX_BODY_BYTES = 512 * 1024; // progresso + rascunhos cabem folgadamente em 512 KB
 const INVALID_CODE_MSG = 'Formato de código inválido. Usa MB-XXXX-XXXX-XXXX.';
+/** Códigos antigos de 2 blocos (~40 bits): continuam a funcionar, mas já não se podem criar. */
+const LEGACY_CODE_RE = /^MB-[A-Z2-9]{4}-[A-Z2-9]{4}$/;
+
+// ---- Limite de pedidos por IP ----
+// Janela deslizante em memória: vale por instância da função (a Vercel reutiliza instâncias),
+// por isso trava tentativas em massa de adivinhar códigos sem depender de um serviço externo.
+// O cliente envia no máximo um POST a cada 1,2 s e só faz GET ao arrancar ou ao ligar um código.
+const RATE_WINDOW_MS = 60_000;
+export const RATE_LIMITS = { GET: 20, POST: 120 } as const;
+const MAX_TRACKED_IPS = 5_000;
+const hits = new Map<string, number[]>();
+
+function clientIp(request: Request): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return request.headers.get('x-real-ip')?.trim() || 'desconhecido';
+}
+
+/** Regista o pedido e devolve quantos segundos faltam para poder tentar de novo (0 = pode seguir). */
+function rateLimitRetryAfter(request: Request, method: keyof typeof RATE_LIMITS, now = Date.now()): number {
+  const key = `${method}:${clientIp(request)}`;
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (recent.length >= RATE_LIMITS[method]) {
+    hits.set(key, recent);
+    return Math.max(1, Math.ceil((recent[0] + RATE_WINDOW_MS - now) / 1000));
+  }
+  recent.push(now);
+  hits.delete(key); // reinsere no fim: o Map fica ordenado do menos para o mais recente
+  hits.set(key, recent);
+  if (hits.size > MAX_TRACKED_IPS) hits.delete(hits.keys().next().value!);
+  return 0;
+}
+
+/** Só para os testes: limpa os contadores. */
+export function resetRateLimits(): void {
+  hits.clear();
+}
+
+function tooManyRequests(retryAfter: number): Response {
+  return new Response(JSON.stringify({ error: 'Demasiados pedidos. Espera um pouco e tenta novamente.' }), {
+    status: 429,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Retry-After': String(retryAfter),
+    },
+  });
+}
 
 function generateSyncCode(): string {
   const bytes = new Uint8Array(CODE_BLOCKS * 4);
@@ -143,6 +191,8 @@ function jsonResponse(data: unknown, status = 200): Response {
 }
 
 export async function GET(request: Request): Promise<Response> {
+  const retryAfter = rateLimitRetryAfter(request, 'GET');
+  if (retryAfter) return tooManyRequests(retryAfter);
   try {
     const url = new URL(request.url);
     const code = (url.searchParams.get('code') ?? '').trim().toUpperCase();
@@ -170,6 +220,8 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const retryAfter = rateLimitRetryAfter(request, 'POST');
+  if (retryAfter) return tooManyRequests(retryAfter);
   try {
     const declaredLength = Number(request.headers.get('content-length') ?? 0);
     if (declaredLength > MAX_BODY_BYTES) {
@@ -194,6 +246,14 @@ export async function POST(request: Request): Promise<Response> {
     if (code) {
       if (!CODE_RE.test(code)) {
         return jsonResponse({ error: INVALID_CODE_MSG }, 400);
+      }
+      // Um código antigo só pode atualizar progresso que já existe: não se criam códigos fracos novos.
+      if (LEGACY_CODE_RE.test(code)) {
+        const existing = await get(`sync/${code}.json`, { access: 'private' });
+        if (!existing || existing.statusCode !== 200) {
+          return jsonResponse({ error: 'Código de sincronização não encontrado.' }, 404);
+        }
+        await existing.stream?.cancel(); // só interessava saber se existe
       }
     } else {
       code = generateSyncCode();

@@ -21,9 +21,7 @@ export function getCachedTrack(trackId: string): Track | undefined {
 }
 
 export function getCachedAllTracks(): Track[] | null {
-  return TRACK_INDEX.every((t) => trackCache.has(t.id))
-    ? TRACK_INDEX.map((t) => trackCache.get(t.id)!)
-    : null;
+  return TRACK_INDEX.every((t) => trackCache.has(t.id)) ? TRACK_INDEX.map((t) => trackCache.get(t.id)!) : null;
 }
 
 async function fetchAndAssembleTrack(trackId: string): Promise<Track> {
@@ -64,24 +62,50 @@ async function fetchAndAssembleTrack(trackId: string): Promise<Track> {
       return assembleGitTrack(gitTrack, gitPractice, moreQuiz);
     }
     case 'bi': {
-      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }, { statsBiExplained }] = await Promise.all([
+      const [
+        { statsBiTrack },
+        { statsPractice },
+        { biProPractice, biProSqlPractice },
+        { moreQuiz },
+        { statsBiExplained },
+      ] = await Promise.all([
         import('./trackGitAndBi'),
         import('./practiceStats'),
         import('./practiceBiPro'),
         import('./moreQuiz'),
         import('./statsBiExplained'),
       ]);
-      return assembleVisualBiTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained);
+      return assembleVisualBiTrack(
+        statsBiTrack,
+        statsPractice,
+        biProPractice,
+        biProSqlPractice,
+        moreQuiz,
+        statsBiExplained,
+      );
     }
     case 'estatistica': {
-      const [{ statsBiTrack }, { statsPractice }, { biProPractice, biProSqlPractice }, { moreQuiz }, { statsBiExplained }] = await Promise.all([
+      const [
+        { statsBiTrack },
+        { statsPractice },
+        { biProPractice, biProSqlPractice },
+        { moreQuiz },
+        { statsBiExplained },
+      ] = await Promise.all([
         import('./trackGitAndBi'),
         import('./practiceStats'),
         import('./practiceBiPro'),
         import('./moreQuiz'),
         import('./statsBiExplained'),
       ]);
-      return assembleEstatisticaTrack(statsBiTrack, statsPractice, biProPractice, biProSqlPractice, moreQuiz, statsBiExplained);
+      return assembleEstatisticaTrack(
+        statsBiTrack,
+        statsPractice,
+        biProPractice,
+        biProSqlPractice,
+        moreQuiz,
+        statsBiExplained,
+      );
     }
     case 'carreira': {
       const [{ careerProTrack }, { biProPractice, biProSqlPractice }, { moreQuiz }] = await Promise.all([
@@ -129,10 +153,9 @@ export async function loadAllTracksAsync(): Promise<Track[]> {
   const existing = getCachedAllTracks();
   if (existing) return existing;
   if (!allTracksPromise) {
-    allTracksPromise = Promise.all(TRACK_INDEX.map((t) => ensureTrackLoaded(t.id)))
-      .finally(() => {
-        allTracksPromise = null;
-      });
+    allTracksPromise = Promise.all(TRACK_INDEX.map((t) => ensureTrackLoaded(t.id))).finally(() => {
+      allTracksPromise = null;
+    });
   }
   return allTracksPromise;
 }

@@ -90,7 +90,9 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
       continue;
     }
     if (!cmd.startsWith('git ')) {
-      logs.push(`$ ${cmd}\nComando simulado desconhecido. Experimenta: pwd, ls, cat .gitignore, git init, git status, git add, git commit, git switch, git merge, git log, git remote, git push.`);
+      logs.push(
+        `$ ${cmd}\nComando simulado desconhecido. Experimenta: pwd, ls, cat .gitignore, git init, git status, git add, git commit, git switch, git merge, git log, git remote, git push.`,
+      );
       continue;
     }
     if (!s.initialized) {
@@ -128,7 +130,9 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
         }
         s.modified = [];
         s.untracked = s.untracked.filter((f) => isIgnored(f, s.gitignore));
-        logs.push(`$ ${cmd}\n${toStage.length} ficheiro(s) adicionados à área de preparação (ficheiros no .gitignore foram protegidos).`);
+        logs.push(
+          `$ ${cmd}\n${toStage.length} ficheiro(s) adicionados à área de preparação (ficheiros no .gitignore foram protegidos).`,
+        );
       } else {
         if (isIgnored(target, s.gitignore)) {
           logs.push(`$ ${cmd}\nAviso: "${target}" está protegido pelo .gitignore e não foi adicionado.`);
@@ -201,7 +205,9 @@ export function runGitSimulator(state: GitRepoState, scriptText: string): { outp
         logs.push(`$ ${cmd}\nerro: faz pelo menos um commit antes de enviar para o GitHub.`);
       } else {
         if (!s.pushedBranches.includes(s.currentBranch)) s.pushedBranches.push(s.currentBranch);
-        logs.push(`$ ${cmd}\nA enviar objetos: 100% concluído.\nPara ${s.remoteUrl}\n * [new branch] ${s.currentBranch} -> ${s.currentBranch}`);
+        logs.push(
+          `$ ${cmd}\nA enviar objetos: 100% concluído.\nPara ${s.remoteUrl}\n * [new branch] ${s.currentBranch} -> ${s.currentBranch}`,
+        );
       }
     } else {
       logs.push(`$ ${cmd}\nSubcomando git não suportado no simulador.`);

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 // Usa no "npm run preview" os mesmos cabeçalhos de segurança (incluindo a CSP) que o vercel.json
 // aplica em produção, para que um problema de CSP apareça localmente antes do deploy.
@@ -40,5 +40,14 @@ export default defineConfig({
   },
   preview: {
     headers: securityHeaders,
+  },
+  test: {
+    coverage: {
+      provider: 'v8',
+      include: ['src/**', 'api/**'],
+      reporter: ['text-summary', 'html'],
+      // Mínimos 3 pontos abaixo dos valores atuais: o CI falha se a cobertura descer a sério.
+      thresholds: { statements: 78, branches: 78, functions: 58, lines: 78 },
+    },
   },
 });

@@ -10,11 +10,7 @@ import {
 } from './sqlRunnerCore';
 import type { SqlWorkerRequest } from './sqlWorker';
 
-export {
-  SQL_EXECUTION_TIMEOUT_MS,
-  validateSqlReadOnly,
-  type SqlExecutionResult,
-} from './sqlRunnerCore';
+export { SQL_EXECUTION_TIMEOUT_MS, validateSqlReadOnly, type SqlExecutionResult } from './sqlRunnerCore';
 
 export type SqlWorkerLike = SandboxWorkerLike<SqlWorkerRequest, SqlExecutionResult>;
 
@@ -32,7 +28,10 @@ const sqlWorkerClient = createSandboxWorkerClient<SqlWorkerRequest, SqlExecution
   makeErrorResult: (error, elapsedMs) => ({ columns: [], rows: [], elapsedMs, error }),
 });
 
-export function setSqlWorkerForTests(factory: (() => SqlWorkerLike) | null, timeoutMs = SQL_EXECUTION_TIMEOUT_MS): void {
+export function setSqlWorkerForTests(
+  factory: (() => SqlWorkerLike) | null,
+  timeoutMs = SQL_EXECUTION_TIMEOUT_MS,
+): void {
   sqlWorkerClient.setTestWorkerFactory(factory, timeoutMs);
 }
 
@@ -44,10 +43,7 @@ export function stopSqlExecution(): boolean {
 export async function getSqlDatabase(forceReset = false): Promise<Database> {
   if (!dbPromise || forceReset) {
     dbPromise = (async () => {
-      const [sqlJsMod, dataset] = await Promise.all([
-        import('sql.js'),
-        loadMerceariaDataset(),
-      ]);
+      const [sqlJsMod, dataset] = await Promise.all([import('sql.js'), loadMerceariaDataset()]);
       const SQL = await sqlJsMod.default({ locateFile: () => '/sql-wasm.wasm' });
       return buildSqlDatabaseFromDataset(SQL, dataset);
     })();

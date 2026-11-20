@@ -93,8 +93,13 @@ Cada `git push` corre os testes no GitHub Actions (ver o selo CI acima). Para os
 ```bash
 pip install -r requirements-dev.txt
 pytest tests                       # Python: gerador, auditoria e gráficos
+ruff check . && ruff format --check . && mypy   # Python: estilo, formatação e tipos
 cd web && npm test                 # Web: motores, API de sync e as 72 etapas e os treinos
+npm run typecheck && npm run lint && npm run format:check   # Web: tipos, ESLint e Prettier
+npm run test:coverage              # Web: testes com mínimo de cobertura
 ```
+
+Como as peças encaixam (Python, SQL, app web, workers e API): ver [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
 na própria correção automática e que o código inicial ainda não passa. Os desafios Python correm no
@@ -192,3 +197,8 @@ Ao correr `python src/auditoria_dados.py`, são gerados automaticamente na pasta
 - `relatorios/relatorio_executivo_2025.md`: relatório executivo comparando a série sazonal e a série base.
 - `relatorios/Dashboard_Mercearia_do_Bairro_2025.xlsx`: livro Excel multi-folha (`Resumo_KPIs`, `Sazonalidade_Mensal`, `Curva_ABC_Produtos`, `Analise_Cidades` e `Medidas_DAX_PowerBI`).
 - `relatorios/powerbi/MerceariaDoBairro.pbip` e `relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip`: projeto Power BI Desktop com modelo semântico Star Schema (`model.bim` e pasta `definition/*.tmdl`), relacionamentos `1:*` e 8 medidas DAX prontas.
+
+## Licença
+
+O código está sob a licença [MIT](LICENSE). As lições e o restante conteúdo pedagógico estão sob
+[CC BY 4.0](LICENSE-CONTEUDO.md): podes reutilizá-los desde que indiques a autoria.

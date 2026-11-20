@@ -233,12 +233,9 @@ export function importProgressJson(jsonStr: string): {
     throw new Error('O ficheiro JSON não contém um formato válido.');
   }
 
-  const progress: UserProgressMap =
-    parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {};
-  const drafts: Record<string, string> =
-    parsed.drafts && typeof parsed.drafts === 'object' ? parsed.drafts : {};
-  const quizzes: Record<string, number> =
-    parsed.quizzes && typeof parsed.quizzes === 'object' ? parsed.quizzes : {};
+  const progress: UserProgressMap = parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {};
+  const drafts: Record<string, string> = parsed.drafts && typeof parsed.drafts === 'object' ? parsed.drafts : {};
+  const quizzes: Record<string, number> = parsed.quizzes && typeof parsed.quizzes === 'object' ? parsed.quizzes : {};
 
   saveProgress(progress);
   saveDrafts(drafts, true);
@@ -288,7 +285,9 @@ export function generatePortfolioMarkdown(
   }
 
   lines.push('');
-  lines.push(`> **Total Global:** ${totalSolved} desafios resolvidos (${autonomousCount} autónomos, ${helpedCount} com apoio técnico).`);
+  lines.push(
+    `> **Total Global:** ${totalSolved} desafios resolvidos (${autonomousCount} autónomos, ${helpedCount} com apoio técnico).`,
+  );
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -556,10 +555,7 @@ export function saveSyncCode(code: string | null): void {
   }
 }
 
-export function mergeProgressRecords(
-  local: UserProgressMap,
-  remote: UserProgressMap,
-): UserProgressMap {
+export function mergeProgressRecords(local: UserProgressMap, remote: UserProgressMap): UserProgressMap {
   const merged: UserProgressMap = { ...remote };
   for (const [id, rec] of Object.entries(local)) {
     const existing = merged[id];
@@ -572,15 +568,11 @@ export function mergeProgressRecords(
           ? rec.lastReviewedAt > existing.lastReviewedAt
             ? rec.lastReviewedAt
             : existing.lastReviewedAt
-          : rec.lastReviewedAt ?? existing.lastReviewedAt;
+          : (rec.lastReviewedAt ?? existing.lastReviewedAt);
       merged[id] = {
-        status:
-          rec.status === 'autonomous' || existing.status === 'autonomous'
-            ? 'autonomous'
-            : 'helped',
+        status: rec.status === 'autonomous' || existing.status === 'autonomous' ? 'autonomous' : 'helped',
         quizPassed: Boolean(rec.quizPassed || existing.quizPassed),
-        completedAt:
-          rec.completedAt > existing.completedAt ? rec.completedAt : existing.completedAt,
+        completedAt: rec.completedAt > existing.completedAt ? rec.completedAt : existing.completedAt,
         ...(reviewCount > 0 ? { reviewCount } : {}),
         ...(lastReviewedAt ? { lastReviewedAt } : {}),
       };

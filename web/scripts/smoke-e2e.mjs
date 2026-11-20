@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4178);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
@@ -23,14 +24,19 @@ async function run() {
   try {
     ({ chromium } = await import('playwright'));
   } catch {
-    throw new Error('Playwright não está instalado. Instala com: npm install --no-save playwright && npx playwright install chromium');
+    throw new Error(
+      'Playwright não está instalado. Instala com: npm install --no-save playwright && npx playwright install chromium',
+    );
   }
 
-  const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  const server = spawn(npxCmd, ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
-    stdio: 'pipe',
-    shell: process.platform === 'win32',
-  });
+  // O vite corre diretamente com o node (sem npx nem shell): assim o kill() acerta no próprio servidor.
+  // Com npx, no Linux o SIGTERM ficava no npx, o vite continuava vivo e o passo do CI nunca acabava.
+  const viteBin = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url));
+  const server = spawn(
+    process.execPath,
+    [viteBin, 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'],
+    { stdio: 'ignore' },
+  );
 
   const consoleErrors = [];
   const pageErrors = [];
@@ -59,7 +65,9 @@ async function run() {
       for (let i = 0; i < 6; i++) {
         await page.keyboard.press('Tab');
       }
-      const focusInside = await page.evaluate(() => Boolean(document.activeElement?.closest('.modal-backdrop[role="dialog"]')));
+      const focusInside = await page.evaluate(() =>
+        Boolean(document.activeElement?.closest('.modal-backdrop[role="dialog"]')),
+      );
       if (!focusInside) throw new Error('Foco escapou da modal ? Guia ao premir Tab.');
       await page.keyboard.press('Escape');
       await page.locator('.modal-backdrop[role="dialog"]').waitFor({ state: 'detached' });
@@ -80,25 +88,34 @@ async function run() {
       await page.keyboard.press('Escape');
 
       // 4) Trilha SQL + execução no Worker SQLite
-      await page.locator('[data-select-track="sql"]').click();
+      // A trilha aparece na barra de topo e nos botões do índice lateral: usa-se a da barra de topo.
+      await page.locator('.track-strip [data-select-track="sql"]').click();
       await page.locator('h1', { hasText: 'SELECT' }).waitFor({ state: 'visible' });
       await page.locator('[data-wb-tab="sqlfree"]').click();
-      await page.locator('[data-action="run-code"]').click();
-      await page.locator('.output-panel table.data-table tbody tr').first().waitFor({ state: 'visible', timeout: 15_000 });
+      // O resultado vazio também tem um botão "Executar código atual": usa-se o botão principal da bancada.
+      await page.locator('.workbench-actions [data-action="run-code"]').click();
+      await page
+        .locator('.output-panel table.data-table tbody tr')
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
 
       // 5) Cronograma Gantt + verificação ARIA (zero aria-selected em botões fora de role="tab")
       await page.locator('[data-select-view="cronograma"]').click();
       await page.locator('.gantt-board').waitFor({ state: 'visible' });
-      const badAria = await page.evaluate(() =>
-        Array.from(document.querySelectorAll('button[aria-selected]:not([role="tab"])')).length,
+      const badAria = await page.evaluate(
+        () => Array.from(document.querySelectorAll('button[aria-selected]:not([role="tab"])')).length,
       );
       if (badAria > 0) throw new Error(`Encontrados ${badAria} botões com aria-selected sem role="tab".`);
 
       if (consoleErrors.length || pageErrors.length) {
-        throw new Error(`Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`);
+        throw new Error(
+          `Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`,
+        );
       }
 
-      console.log('✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).');
+      console.log(
+        '✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).',
+      );
     } finally {
       await browser.close();
     }
@@ -107,7 +124,11 @@ async function run() {
   }
 }
 
-run().catch((err) => {
-  console.error('✗ E2E smoke test FAILED:', err);
-  process.exit(1);
-});
+// Termina sempre de forma explícita: um processo filho esquecido não pode deixar o CI à espera.
+run().then(
+  () => process.exit(0),
+  (err) => {
+    console.error('✗ E2E smoke test FAILED:', err);
+    process.exit(1);
+  },
+);

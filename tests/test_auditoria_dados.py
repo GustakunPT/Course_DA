@@ -42,8 +42,14 @@ CLIENTES = [{"id": "1", "nome": "Ana", "cidade": "Porto"}]
 
 
 def venda(cliente="1", produto_id="1", quantidade="4", preco="0.25", data="2025-01-01"):
-    return {"data": data, "cliente_id": cliente, "produto_id": produto_id, "produto": "Pão",
-            "quantidade": quantidade, "preco": preco}
+    return {
+        "data": data,
+        "cliente_id": cliente,
+        "produto_id": produto_id,
+        "produto": "Pão",
+        "quantidade": quantidade,
+        "preco": preco,
+    }
 
 
 class TestAnalisarDataset:
@@ -63,8 +69,9 @@ class TestAnalisarDataset:
 
     def test_numeros_do_readme(self):
         """O README promete 26 902,89 € em 5 078 vendas."""
-        r = aud.analisar_dataset(aud.carregar_csv("vendas.csv"), aud.carregar_csv("produtos.csv"),
-                                 aud.carregar_csv("clientes.csv"))
+        r = aud.analisar_dataset(
+            aud.carregar_csv("vendas.csv"), aud.carregar_csv("produtos.csv"), aud.carregar_csv("clientes.csv")
+        )
         assert r["n_linhas"] == 5078
         assert r["total_fat"] == pytest.approx(26902.89, abs=0.01)
         assert r["chaves_orfas"] == 0

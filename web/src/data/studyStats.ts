@@ -94,7 +94,10 @@ export function buildStudyTimeReport(
       projectedMinutes: trProjectedDoneMins,
       doneCount,
       totalCount: tr.lessons.length,
-      ratio: trProjectedDoneMins > 0 && actualMinutes > 0 ? Math.round((actualMinutes / trProjectedDoneMins) * 100) / 100 : null,
+      ratio:
+        trProjectedDoneMins > 0 && actualMinutes > 0
+          ? Math.round((actualMinutes / trProjectedDoneMins) * 100) / 100
+          : null,
     });
   }
 

@@ -22,12 +22,12 @@ PASTA_DADOS = RAIZ / "dados"
 ESQUEMA = RAIZ / "sql" / "01_esquema.sql"
 
 
-def _ler(nome):
+def _ler(nome: str) -> list[dict[str, str]]:
     with open(PASTA_DADOS / nome, encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def carregar(ligacao):
+def carregar(ligacao: sqlite3.Connection) -> int:
     """Cria as tabelas e carrega os CSV numa ligação SQLite já aberta."""
     ligacao.execute("PRAGMA foreign_keys = ON")
     ligacao.executescript(ESQUEMA.read_text(encoding="utf-8"))
@@ -50,7 +50,9 @@ def carregar(ligacao):
                 f"Linha {i} de vendas.csv: produto '{v['produto']}' não corresponde ao "
                 f"produto_id {v['produto_id']} do catálogo."
             )
-        linhas.append((i, v["data"], int(v["cliente_id"]), int(v["produto_id"]), int(v["quantidade"]), float(v["preco"])))
+        linhas.append(
+            (i, v["data"], int(v["cliente_id"]), int(v["produto_id"]), int(v["quantidade"]), float(v["preco"]))
+        )
     ligacao.executemany(
         "INSERT INTO vendas (id, data, cliente_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?, ?, ?)",
         linhas,
@@ -59,7 +61,7 @@ def carregar(ligacao):
     return len(linhas)
 
 
-def main():
+def main() -> None:
     destino = Path(sys.argv[1]) if len(sys.argv) > 1 else RAIZ / "mercearia.db"
     destino.unlink(missing_ok=True)
     with sqlite3.connect(destino) as ligacao:

@@ -62,19 +62,28 @@ describe('desafios Python e pandas', () => {
     }
   });
 
-  it.each(treinos)('%s: a solução passa e o código inicial não', async (_nome, ch, l) => {
-    const certo = await runPythonCode(ch.solutionCode, ch.checks, undefined, l.ficheirosDados);
-    expect(certo.error).toBeUndefined();
-    expect((certo.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`)).toEqual([]);
-    const inicial = await runPythonCode(ch.starterCode, ch.checks, undefined, l.ficheirosDados);
-    expect(!inicial.error && inicial.checks!.every((c) => c.passed)).toBe(false);
-  }, 120_000);
+  it.each(treinos)(
+    '%s: a solução passa e o código inicial não',
+    async (_nome, ch, l) => {
+      const certo = await runPythonCode(ch.solutionCode, ch.checks, undefined, l.ficheirosDados);
+      expect(certo.error).toBeUndefined();
+      expect((certo.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`)).toEqual([]);
+      const inicial = await runPythonCode(ch.starterCode, ch.checks, undefined, l.ficheirosDados);
+      expect(!inicial.error && inicial.checks!.every((c) => c.passed)).toBe(false);
+    },
+    120_000,
+  );
 
   it('ficheiros extra carregam uma só vez e só quando pedidos', async () => {
     pedidosBicicletas = 0;
     await runPythonCode('x = 1', []);
     expect(pedidosBicicletas).toBe(0);
-    const a = await runPythonCode('import pandas as pd\nn = len(pd.read_csv("dados/bicicletas_viagens_sujas.csv"))', [{ label: 'n', expr: 'n > 19000', actualExpr: 'n', hint: '' }], undefined, ['bicicletas_viagens_sujas.csv']);
+    const a = await runPythonCode(
+      'import pandas as pd\nn = len(pd.read_csv("dados/bicicletas_viagens_sujas.csv"))',
+      [{ label: 'n', expr: 'n > 19000', actualExpr: 'n', hint: '' }],
+      undefined,
+      ['bicicletas_viagens_sujas.csv'],
+    );
     const b = await runPythonCode('y = 2', [], undefined, ['bicicletas_viagens_sujas.csv']);
     expect(a.checks![0].passed).toBe(true);
     expect(b.error).toBeUndefined();
@@ -84,9 +93,14 @@ describe('desafios Python e pandas', () => {
   it('pf-01: a solução reproduz o ficheiro limpo de referência', async () => {
     // O ficheiro limpo é lido aqui, pelo teste, e nunca pela app: a solução da etapa tem de o reproduzir.
     const l = licoes.find((x) => x.id === 'pf-01-limpeza-bicicletas')!;
-    const ref = readFileSync(new URL('../../dados/bicicletas_viagens_limpas.csv', import.meta.url), 'utf-8').replace(/\r\n/g, '\n').trim();
+    const ref = readFileSync(new URL('../../dados/bicicletas_viagens_limpas.csv', import.meta.url), 'utf-8')
+      .replace(/\r\n/g, '\n')
+      .trim();
     const linhas = ref.split('\n');
-    const ids = linhas.slice(1).map((x) => x.split(',')[0]).sort();
+    const ids = linhas
+      .slice(1)
+      .map((x) => x.split(',')[0])
+      .sort();
     const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
     // Volta a escrever limpo no formato do CSV de referência (datas ISO, valor com 2 casas, vazio = "").
     const exportar = String.raw`
@@ -99,12 +113,32 @@ _ref = limpo.assign(
 _csv = _ref.to_csv(index=False, lineterminator="\n").strip()
 `;
     const checks = [
-      { label: 'removidas', expr: 'removidas == {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}', actualExpr: 'removidas', hint: '' },
+      {
+        label: 'removidas',
+        expr: 'removidas == {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}',
+        actualExpr: 'removidas',
+        hint: '',
+      },
       { label: 'linhas', expr: `len(limpo) == ${linhas.length - 1}`, actualExpr: 'len(limpo)', hint: '' },
-      { label: 'viagem_id', expr: String.raw`hashlib.sha256("\n".join(sorted(limpo["viagem_id"])).encode()).hexdigest() == "${sha(ids.join('\n'))}"`, actualExpr: 'limpo["viagem_id"].iloc[0]', hint: '' },
-      { label: 'csv igual', expr: `hashlib.sha256(_csv.encode()).hexdigest() == "${sha(ref)}"`, actualExpr: '_csv[:300]', hint: '' },
+      {
+        label: 'viagem_id',
+        expr: String.raw`hashlib.sha256("\n".join(sorted(limpo["viagem_id"])).encode()).hexdigest() == "${sha(ids.join('\n'))}"`,
+        actualExpr: 'limpo["viagem_id"].iloc[0]',
+        hint: '',
+      },
+      {
+        label: 'csv igual',
+        expr: `hashlib.sha256(_csv.encode()).hexdigest() == "${sha(ref)}"`,
+        actualExpr: '_csv[:300]',
+        hint: '',
+      },
     ];
-    const res = await runPythonCode(l.pythonChallenge!.solutionCode + '\n' + exportar, checks, undefined, l.ficheirosDados);
+    const res = await runPythonCode(
+      l.pythonChallenge!.solutionCode + '\n' + exportar,
+      checks,
+      undefined,
+      l.ficheirosDados,
+    );
     expect(res.error).toBeUndefined();
     expect(linhas.length - 1).toBe(19650);
     expect((res.checks ?? []).filter((c) => !c.passed).map((c) => `${c.label} (obtido: ${c.actual})`)).toEqual([]);
@@ -112,33 +146,57 @@ _csv = _ref.to_csv(index=False, lineterminator="\n").strip()
 
   it('os gráficos matplotlib voltam como PNG', async () => {
     const l = licoes.find((x) => x.id === 'bi-07-graficos-matplotlib')!;
-    const res = await runPythonCode(l.pythonChallenge!.solutionCode, l.pythonChallenge!.checks, undefined, l.ficheirosDados);
+    const res = await runPythonCode(
+      l.pythonChallenge!.solutionCode,
+      l.pythonChallenge!.checks,
+      undefined,
+      l.ficheirosDados,
+    );
     expect(res.images).toHaveLength(1);
     expect(res.images![0].startsWith('iVBORw0KGgo')).toBe(true); // assinatura PNG em base64
   }, 120_000);
 
   it.each([
-    ['py-04-condicoes', 'total = 37.5\ndesconto_pct = 5\ntotal_final = 35.625\nidade = 17\npode_entrar = False\ncidade = "Porto"\nentrega_gratis = True'],
-    ['py-06-while', 'vendas = [120, 80, 250, 40, 100, 310]\ntotal_vendas = 900\nmedia_vendas = 150\nsaldo = 100\nsemanas = 12\nsaldo_final = 520'],
-    ['py-09-funcoes', 'def calcular_subtotal(quantidade, preco):\n    return 2.67\ndef limpar_nome_produto(texto):\n    return "Pão"\ndef aplicar_iva(valor, taxa=0.23):\n    return round(valor * (1 + taxa), 2)'],
-    ['py-11-revisao', `carrinho = [("Pão", 6, 0.25), ("Leite", 4, 0.89), ("Azeite", 1, 7.50), ("Café", 2, 3.40), ("Queijo", 1, 4.90)]
+    [
+      'py-04-condicoes',
+      'total = 37.5\ndesconto_pct = 5\ntotal_final = 35.625\nidade = 17\npode_entrar = False\ncidade = "Porto"\nentrega_gratis = True',
+    ],
+    [
+      'py-06-while',
+      'vendas = [120, 80, 250, 40, 100, 310]\ntotal_vendas = 900\nmedia_vendas = 150\nsaldo = 100\nsemanas = 12\nsaldo_final = 520',
+    ],
+    [
+      'py-09-funcoes',
+      'def calcular_subtotal(quantidade, preco):\n    return 2.67\ndef limpar_nome_produto(texto):\n    return "Pão"\ndef aplicar_iva(valor, taxa=0.23):\n    return round(valor * (1 + taxa), 2)',
+    ],
+    [
+      'py-11-revisao',
+      `carrinho = [("Pão", 6, 0.25), ("Leite", 4, 0.89), ("Azeite", 1, 7.50), ("Café", 2, 3.40), ("Queijo", 1, 4.90)]
 def linha_talao(produto, quantidade, preco):
     return f"{produto} x{quantidade} = {quantidade * preco:.2f} €"
 subtotal = 24.26
 desconto_pct = 5
 total = 23.05
 unidades_por_categoria = {"Padaria": 6, "Laticínios": 4, "Mercearia": 3, "Charcutaria": 1}
-produtos_caros = ["Azeite", "Café", "Queijo"]`],
-    ['pf-01-limpeza-bicicletas', `import pandas as pd
+produtos_caros = ["Azeite", "Café", "Queijo"]`,
+    ],
+    [
+      'pf-01-limpeza-bicicletas',
+      `import pandas as pd
 viagens = pd.read_csv("dados/bicicletas_viagens_sujas.csv")
 removidas = {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}
-limpo = viagens.drop_duplicates(subset="viagem_id").iloc[:19650]`],
-  ])('%s: resultados escritos à mão não passam', async (id, codigo) => {
-    const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
-    const res = await runPythonCode(codigo, ch.checks, undefined, licoes.find((l) => l.id === id)!.ficheirosDados);
-    expect(res.error).toBeUndefined();
-    expect(res.checks!.some((c) => !c.passed)).toBe(true);
-  }, 120_000);
+limpo = viagens.drop_duplicates(subset="viagem_id").iloc[:19650]`,
+    ],
+  ])(
+    '%s: resultados escritos à mão não passam',
+    async (id, codigo) => {
+      const ch = licoes.find((l) => l.id === id)!.pythonChallenge!;
+      const res = await runPythonCode(codigo, ch.checks, undefined, licoes.find((l) => l.id === id)!.ficheirosDados);
+      expect(res.error).toBeUndefined();
+      expect(res.checks!.some((c) => !c.passed)).toBe(true);
+    },
+    120_000,
+  );
 
   it.each(licoes.map((l) => [l.id, l] as const))(
     '%s: o código inicial ainda não passa',
@@ -157,11 +215,15 @@ limpo = viagens.drop_duplicates(subset="viagem_id").iloc[:19650]`],
     for (const l of demos) expect(l.explained!.join(' ').length, l.id).toBeGreaterThan(600);
   });
 
-  it.each(demos.map((l) => [l.id, l.errorDemo!] as const))('%s: o erro típico dá a mensagem anunciada', async (_id, demo) => {
-    const res = await runPythonCode(demo.code, []);
-    expect(res.error).toBeDefined();
-    expect(res.error).toContain(demo.message);
-  }, 120_000);
+  it.each(demos.map((l) => [l.id, l.errorDemo!] as const))(
+    '%s: o erro típico dá a mensagem anunciada',
+    async (_id, demo) => {
+      const res = await runPythonCode(demo.code, []);
+      expect(res.error).toBeDefined();
+      expect(res.error).toContain(demo.message);
+    },
+    120_000,
+  );
 
   it.each(cheatsheets.filter((c) => c.tryEngine === 'python').map((c) => [c.topic, c.trySnippet!] as const))(
     'Referência "%s": o exemplo Python corre sem erros',

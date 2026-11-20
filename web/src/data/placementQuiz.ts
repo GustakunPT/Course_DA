@@ -25,20 +25,17 @@ export const PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   {
     id: 'negocio',
     pillar: 'Negócio & Excel',
-    question: 'Numa loja, 9 clientes gastam entre 2 € e 8 € e 1 restaurante gasta 120 €. Que métrica mostra o cliente típico?',
-    options: [
-      'A média aritmética',
-      'A mediana (P50)',
-      'A soma total',
-      'O valor máximo',
-    ],
+    question:
+      'Numa loja, 9 clientes gastam entre 2 € e 8 € e 1 restaurante gasta 120 €. Que métrica mostra o cliente típico?',
+    options: ['A média aritmética', 'A mediana (P50)', 'A soma total', 'O valor máximo'],
     correctIndex: 1,
     explanation: 'A mediana resiste ao valor extremo de 120 € e representa o cliente habitual.',
   },
   {
     id: 'sql',
     pillar: 'SQL',
-    question: 'Em SQL, queres ficar só com os produtos cuja soma de vendas ultrapassa 2 000 €. Onde colocas SUM(valor) > 2000?',
+    question:
+      'Em SQL, queres ficar só com os produtos cuja soma de vendas ultrapassa 2 000 €. Onde colocas SUM(valor) > 2000?',
     options: [
       'No WHERE, antes do GROUP BY',
       'No HAVING, depois do GROUP BY',
@@ -138,6 +135,7 @@ export function evaluatePlacementAnswers(answers: Record<string, number>): Place
     suggestedTrackId: 'python',
     suggestedLessonId: 'py-00-pensamento',
     headline: `Nivelamento: ${score}/${totalQuestions} — Construir a base desde o zero`,
-    detail: 'Começa no Ponto Zero (py-00) e segue a sequência natural 1 → 8 sem saltar etapas: em poucas semanas ganhas base sólida.',
+    detail:
+      'Começa no Ponto Zero (py-00) e segue a sequência natural 1 → 8 sem saltar etapas: em poucas semanas ganhas base sólida.',
   };
 }

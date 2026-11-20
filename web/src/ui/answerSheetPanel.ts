@@ -237,10 +237,7 @@ export function normalizePtNumberInput(raw: string): string {
 function unquotePythonLiteral(rawExpr: string): string {
   const trimmed = rawExpr.trim();
   if (!trimmed || trimmed === 'None') return '';
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
     try {
       if (trimmed.startsWith('"')) return String(JSON.parse(trimmed));
     } catch {

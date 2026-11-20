@@ -1,0 +1,5 @@
+# Gerado ou copiado (npm run build / npm run sync)
+dist/
+public/
+coverage/
+package-lock.json

@@ -1,3 +1,6 @@
 .vercel
 .env*
 public/pyodide/
+
+# Relatório de cobertura (npm run test:coverage)
+coverage/

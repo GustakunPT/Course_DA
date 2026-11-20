@@ -15,6 +15,7 @@ import statistics
 import zipfile
 from collections import Counter, defaultdict
 from pathlib import Path
+from typing import TypedDict
 from xml.sax.saxutils import escape
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -22,12 +23,38 @@ PASTA_DADOS = RAIZ / "dados"
 PASTA_RELATORIOS = RAIZ / "relatorios"
 
 
-def carregar_csv(nome):
+Linha = dict[str, str]
+Celula = str | int | float | None
+Folha = tuple[str, list[list[Celula]]]
+
+
+class Analise(TypedDict):
+    """Resumo de uma tabela de vendas, usado no relatório e no Excel."""
+
+    total_fat: float
+    n_linhas: int
+    media_linha: float
+    mediana_linha: float
+    desvio_linha: float
+    melhor_dia: tuple[str, float]
+    prod_top_qtd: tuple[str, int]
+    prod_top_fat: tuple[str, float]
+    qtd_por_produto: Counter[str]
+    fat_por_produto: defaultdict[str, float]
+    fat_por_categoria: defaultdict[str, float]
+    fat_por_cidade: defaultdict[str, float]
+    cli_por_cidade: defaultdict[str, set[str]]
+    fat_por_mes: defaultdict[str, float]
+    cli_por_mes: defaultdict[str, set[str]]
+    chaves_orfas: int
+
+
+def carregar_csv(nome: str) -> list[Linha]:
     with open(PASTA_DADOS / nome, encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def auditar_vendas_sujas(linhas):
+def auditar_vendas_sujas(linhas: list[Linha]) -> dict[str, int]:
     anomalias = {
         "valores_em_falta": 0,
         "duplicados_exatos": 0,
@@ -64,7 +91,7 @@ def auditar_vendas_sujas(linhas):
     return anomalias
 
 
-def _col_letter(idx):
+def _col_letter(idx: int) -> str:
     res = ""
     n = idx + 1
     while n > 0:
@@ -73,7 +100,7 @@ def _col_letter(idx):
     return res
 
 
-def _gerar_sheet_xml(rows):
+def _gerar_sheet_xml(rows: list[list[Celula]]) -> str:
     xml_rows = []
     for r_idx, row in enumerate(rows, start=1):
         cells = []
@@ -89,12 +116,12 @@ def _gerar_sheet_xml(rows):
     return (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-        f'<sheetData>{"".join(xml_rows)}</sheetData>'
+        f"<sheetData>{''.join(xml_rows)}</sheetData>"
         "</worksheet>"
     )
 
 
-def criar_excel_multi_folha(caminho_xlsx, folhas):
+def criar_excel_multi_folha(caminho_xlsx: Path, folhas: list[Folha]) -> None:
     """Cria um ficheiro .xlsx OpenXML nativo com múltiplas folhas sem dependências externas."""
     content_types = [
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -140,7 +167,7 @@ def criar_excel_multi_folha(caminho_xlsx, folhas):
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
         'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        f'<sheets>{"".join(wb_sheets)}</sheets>'
+        f"<sheets>{''.join(wb_sheets)}</sheets>"
         "</workbook>"
     )
 
@@ -171,7 +198,7 @@ def criar_excel_multi_folha(caminho_xlsx, folhas):
             zf.writestr(f"xl/worksheets/sheet{i}.xml", _gerar_sheet_xml(rows))
 
 
-def empacotar_powerbi_zip(caminho_zip):
+def empacotar_powerbi_zip(caminho_zip: Path) -> None:
     pasta_pbi = PASTA_RELATORIOS / "powerbi"
     if not pasta_pbi.exists():
         return
@@ -185,21 +212,21 @@ def empacotar_powerbi_zip(caminho_zip):
                 zf.write(p_csv, f"dados/{csv_name}")
 
 
-def analisar_dataset(vendas, produtos, clientes):
+def analisar_dataset(vendas: list[Linha], produtos: list[Linha], clientes: list[Linha]) -> Analise:
     ids_produtos = {p["id"] for p in produtos}
     ids_clientes = {c["id"] for c in clientes}
     cat_por_id = {p["id"]: p["categoria"] for p in produtos}
     cidade_por_cliente = {c["id"]: c["cidade"] for c in clientes}
 
-    valores_linha = []
-    qtd_por_produto = Counter()
-    fat_por_produto = defaultdict(float)
-    fat_por_categoria = defaultdict(float)
-    fat_por_cidade = defaultdict(float)
-    cli_por_cidade = defaultdict(set)
-    fat_por_dia = defaultdict(float)
-    fat_por_mes = defaultdict(float)
-    cli_por_mes = defaultdict(set)
+    valores_linha: list[float] = []
+    qtd_por_produto: Counter[str] = Counter()
+    fat_por_produto: defaultdict[str, float] = defaultdict(float)
+    fat_por_categoria: defaultdict[str, float] = defaultdict(float)
+    fat_por_cidade: defaultdict[str, float] = defaultdict(float)
+    cli_por_cidade: defaultdict[str, set[str]] = defaultdict(set)
+    fat_por_dia: defaultdict[str, float] = defaultdict(float)
+    fat_por_mes: defaultdict[str, float] = defaultdict(float)
+    cli_por_mes: defaultdict[str, set[str]] = defaultdict(set)
     chaves_orfas = 0
 
     for v in vendas:
@@ -242,7 +269,7 @@ def analisar_dataset(vendas, produtos, clientes):
     }
 
 
-def gerar_relatorio():
+def gerar_relatorio() -> None:
     produtos = carregar_csv("produtos.csv")
     clientes = carregar_csv("clientes.csv")
     vendas_base = carregar_csv("vendas.csv")
@@ -283,41 +310,45 @@ def gerar_relatorio():
             f"| {mes} | {s['fat_por_mes'][mes]:.2f} € | {len(s['cli_por_mes'][mes])} | {b['fat_por_mes'][mes]:.2f} € |"
         )
 
-    linhas_md.extend([
-        "",
-        "## 3. Faturação por Categoria (`vendas_sazonais.csv`)",
-        "",
-        "| Categoria | Faturação Sazonal (€) | Quota (%) |",
-        "| --- | --- | --- |",
-    ])
+    linhas_md.extend(
+        [
+            "",
+            "## 3. Faturação por Categoria (`vendas_sazonais.csv`)",
+            "",
+            "| Categoria | Faturação Sazonal (€) | Quota (%) |",
+            "| --- | --- | --- |",
+        ]
+    )
     for cat, valor in sorted(s["fat_por_categoria"].items(), key=lambda kv: kv[1], reverse=True):
         quota = 100.0 * valor / s["total_fat"]
         linhas_md.append(f"| {cat} | {valor:.2f} € | {quota:.1f} % |")
 
-    linhas_md.extend([
-        "",
-        "## 4. Auditoria de Integridade",
-        "",
-        f"- **`vendas.csv`**: {b['n_linhas']} registos verificados, **{b['chaves_orfas']}** chaves estrangeiras órfãs.",
-        f"- **`vendas_sazonais.csv`**: {s['n_linhas']} registos verificados, **{s['chaves_orfas']}** chaves estrangeiras órfãs.",
-        f"- **`vendas_sujas.csv`** ({len(sujas)} registos de teste de limpeza):",
-        f"  - Células obrigatórias em falta: **{anomalias['valores_em_falta']}**",
-        f"  - Linhas duplicadas exatas: **{anomalias['duplicados_exatos']}**",
-        f"  - Problemas de espaços/capitalização: **{anomalias['espacos_ou_capitalizacao']}**",
-        f"  - Preços com vírgula decimal: **{anomalias['virgula_decimal']}**",
-        f"  - Preços nulos ou negativos: **{anomalias['precos_nao_positivos']}**",
-        "",
-        "## 5. Artefactos BI Gerados",
-        "",
-        "- **Excel Analítico:** `relatorios/Dashboard_Mercearia_do_Bairro_2025.xlsx`",
-        "- **Projeto Power BI (PBIP + TMDL + BIM):** `relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip`",
-        "",
-    ])
+    linhas_md.extend(
+        [
+            "",
+            "## 4. Auditoria de Integridade",
+            "",
+            f"- **`vendas.csv`**: {b['n_linhas']} registos verificados, **{b['chaves_orfas']}** chaves estrangeiras órfãs.",
+            f"- **`vendas_sazonais.csv`**: {s['n_linhas']} registos verificados, **{s['chaves_orfas']}** chaves estrangeiras órfãs.",
+            f"- **`vendas_sujas.csv`** ({len(sujas)} registos de teste de limpeza):",
+            f"  - Células obrigatórias em falta: **{anomalias['valores_em_falta']}**",
+            f"  - Linhas duplicadas exatas: **{anomalias['duplicados_exatos']}**",
+            f"  - Problemas de espaços/capitalização: **{anomalias['espacos_ou_capitalizacao']}**",
+            f"  - Preços com vírgula decimal: **{anomalias['virgula_decimal']}**",
+            f"  - Preços nulos ou negativos: **{anomalias['precos_nao_positivos']}**",
+            "",
+            "## 5. Artefactos BI Gerados",
+            "",
+            "- **Excel Analítico:** `relatorios/Dashboard_Mercearia_do_Bairro_2025.xlsx`",
+            "- **Projeto Power BI (PBIP + TMDL + BIM):** `relatorios/PowerBI_Mercearia_do_Bairro_PBIP.zip`",
+            "",
+        ]
+    )
 
     destino_md.write_text("\n".join(linhas_md), encoding="utf-8")
 
     # Gerar Excel Analítico multi-folha (.xlsx)
-    folha_kpis = [
+    folha_kpis: list[list[Celula]] = [
         ["Indicador", "Base Uniforme (vendas.csv)", "Sazonal Realista (vendas_sazonais.csv)"],
         ["Faturacao Anual Total (EUR)", round(b["total_fat"], 2), round(s["total_fat"], 2)],
         ["Linhas de Venda", b["n_linhas"], s["n_linhas"]],
@@ -329,16 +360,22 @@ def gerar_relatorio():
         ["Dia Recorde", b["melhor_dia"][0], s["melhor_dia"][0]],
     ]
 
-    folha_mensal = [["Ano_Mes", "Faturacao_Sazonal_EUR", "Clientes_Ativos_Sazonal", "Faturacao_Base_EUR"]]
+    folha_mensal: list[list[Celula]] = [
+        ["Ano_Mes", "Faturacao_Sazonal_EUR", "Clientes_Ativos_Sazonal", "Faturacao_Base_EUR"]
+    ]
     for mes in sorted(s["fat_por_mes"]):
-        folha_mensal.append([
-            mes,
-            round(s["fat_por_mes"][mes], 2),
-            len(s["cli_por_mes"][mes]),
-            round(b["fat_por_mes"][mes], 2),
-        ])
+        folha_mensal.append(
+            [
+                mes,
+                round(s["fat_por_mes"][mes], 2),
+                len(s["cli_por_mes"][mes]),
+                round(b["fat_por_mes"][mes], 2),
+            ]
+        )
 
-    folha_abc = [["Produto", "Unidades_Sazonais", "Faturacao_Sazonal_EUR", "Quota_Pct", "Acumulado_Pct", "Classe_ABC"]]
+    folha_abc: list[list[Celula]] = [
+        ["Produto", "Unidades_Sazonais", "Faturacao_Sazonal_EUR", "Quota_Pct", "Acumulado_Pct", "Classe_ABC"]
+    ]
     acum = 0.0
     for prod, val in sorted(s["fat_por_produto"].items(), key=lambda kv: kv[1], reverse=True):
         q_pct = round(100.0 * val / s["total_fat"], 2)
@@ -346,21 +383,43 @@ def gerar_relatorio():
         classe = "A" if acum <= 75.0 else ("B" if acum <= 92.0 else "C")
         folha_abc.append([prod, s["qtd_por_produto"][prod], round(val, 2), q_pct, min(100.0, acum), classe])
 
-    folha_cidades = [["Cidade", "Clientes_Ativos", "Faturacao_Sazonal_EUR", "Gasto_Medio_Cliente_EUR"]]
+    folha_cidades: list[list[Celula]] = [
+        ["Cidade", "Clientes_Ativos", "Faturacao_Sazonal_EUR", "Gasto_Medio_Cliente_EUR"]
+    ]
     for cid, val in sorted(s["fat_por_cidade"].items(), key=lambda kv: kv[1], reverse=True):
         n_cli = len(s["cli_por_cidade"][cid])
         folha_cidades.append([cid, n_cli, round(val, 2), round(val / max(1, n_cli), 2)])
 
-    folha_dax = [
+    folha_dax: list[list[Celula]] = [
         ["Medida_DAX", "Pasta", "Expressao_DAX", "Formato"],
-        ["Faturacao Total", "01. KPIs Globais", "SUMX(vendas_sazonais, vendas_sazonais[quantidade] * vendas_sazonais[preco])", "#,0.00 €"],
+        [
+            "Faturacao Total",
+            "01. KPIs Globais",
+            "SUMX(vendas_sazonais, vendas_sazonais[quantidade] * vendas_sazonais[preco])",
+            "#,0.00 €",
+        ],
         ["Total Unidades", "01. KPIs Globais", "SUM(vendas_sazonais[quantidade])", "#,0"],
         ["Transacoes", "01. KPIs Globais", "COUNTROWS(vendas_sazonais)", "#,0"],
         ["Ticket Medio por Linha", "01. KPIs Globais", "DIVIDE([Faturacao Total], [Transacoes], 0)", "#,0.00 €"],
         ["Clientes Ativos", "02. Clientes & LTV", "DISTINCTCOUNT(vendas_sazonais[cliente_id])", "#,0"],
-        ["Gasto Medio por Cliente", "02. Clientes & LTV", "DIVIDE([Faturacao Total], [Clientes Ativos], 0)", "#,0.00 €"],
-        ["Quota Produto %", "03. Quotas & Time Intelligence", "DIVIDE([Faturacao Total], CALCULATE([Faturacao Total], ALL(produtos)), 0)", "0.00%"],
-        ["Faturacao Acumulada YTD", "03. Quotas & Time Intelligence", "TOTALYTD([Faturacao Total], calendario[Date])", "#,0.00 €"],
+        [
+            "Gasto Medio por Cliente",
+            "02. Clientes & LTV",
+            "DIVIDE([Faturacao Total], [Clientes Ativos], 0)",
+            "#,0.00 €",
+        ],
+        [
+            "Quota Produto %",
+            "03. Quotas & Time Intelligence",
+            "DIVIDE([Faturacao Total], CALCULATE([Faturacao Total], ALL(produtos)), 0)",
+            "0.00%",
+        ],
+        [
+            "Faturacao Acumulada YTD",
+            "03. Quotas & Time Intelligence",
+            "TOTALYTD([Faturacao Total], calendario[Date])",
+            "#,0.00 €",
+        ],
     ]
 
     destino_xlsx = PASTA_RELATORIOS / "Dashboard_Mercearia_do_Bairro_2025.xlsx"

@@ -43,12 +43,15 @@ const checks = [
   ['Flow 2 (Theory) present', html.includes('view-theory')],
   ['Flow 3 (Workbench) present', html.includes('view-workbench')],
   ['Flow 4 (Explorer) present', html.includes('view-explorer')],
-  ['6 Tracks represented', ['python', 'sql', 'pandas', 'git', 'bi', 'carreira'].every(t => html.includes(t))],
+  ['6 Tracks represented', ['python', 'sql', 'pandas', 'git', 'bi', 'carreira'].every((t) => html.includes(t))],
   ['Quick Symbol Touch Bar present', html.includes('m-symbol-bar')],
   ['Segmented View Switcher present', html.includes('m-segmented-switcher')],
   ['Dynamic Island present', html.includes('dynamic-island')],
   ['Realistic Status Bar present', html.includes('device-status-bar')],
-  ['Device presets (SE, 15, Pro Max, Fluid)', ['iphone-se', 'iphone-15', 'iphone-16-promax', 'fluid'].every(p => html.includes(p))],
+  [
+    'Device presets (SE, 15, Pro Max, Fluid)',
+    ['iphone-se', 'iphone-15', 'iphone-16-promax', 'fluid'].every((p) => html.includes(p)),
+  ],
 ];
 
 for (const [desc, ok] of checks) {

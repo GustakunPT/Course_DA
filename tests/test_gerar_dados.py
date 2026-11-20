@@ -53,5 +53,8 @@ def test_vendas_sao_coerentes(pasta_gerada, nome):
 
 def test_sazonalidade_dezembro_maior_que_fevereiro(pasta_gerada):
     vendas = ler(pasta_gerada, "vendas_sazonais.csv")
-    fat = lambda mes: sum(int(v["quantidade"]) * float(v["preco"]) for v in vendas if v["data"][5:7] == mes)
+
+    def fat(mes):
+        return sum(int(v["quantidade"]) * float(v["preco"]) for v in vendas if v["data"][5:7] == mes)
+
     assert fat("12") > fat("02") * 1.5

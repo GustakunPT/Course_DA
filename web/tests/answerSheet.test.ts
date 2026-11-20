@@ -31,7 +31,12 @@ beforeAll(() => {
 
 describe('folha de respostas em formulário (Excel & Power BI)', () => {
   it('ativa o formulário apenas no desafio principal de bi-10, bi-20, bi-21 e bi-22', () => {
-    for (const id of ['bi-10-pratica-excel-powerbi', 'bi-20-excel-powerquery-limpeza', 'bi-21-excel-dinamicas-procx', 'bi-22-powerbi-dax-relatorio']) {
+    for (const id of [
+      'bi-10-pratica-excel-powerbi',
+      'bi-20-excel-powerquery-limpeza',
+      'bi-21-excel-dinamicas-procx',
+      'bi-22-powerbi-dax-relatorio',
+    ]) {
       expect(isAnswerSheetMode(id, 'challenge', 0)).toBe(true);
       expect(isAnswerSheetMode(id, 'challenge', 1)).toBe(false);
       expect(isAnswerSheetMode(id, 'example', 0)).toBe(false);
@@ -48,7 +53,10 @@ describe('folha de respostas em formulário (Excel & Power BI)', () => {
   });
 
   it('renderiza campos sem None quando recebe o starterCode e escapa HTML', () => {
-    const html = renderAnswerSheetPanel('bi-10-pratica-excel-powerbi', 'total_faturacao = None\ncidade_top = "<script>x</script>"');
+    const html = renderAnswerSheetPanel(
+      'bi-10-pratica-excel-powerbi',
+      'total_faturacao = None\ncidade_top = "<script>x</script>"',
+    );
     expect(html).toContain('data-answer-var="total_faturacao"');
     expect(html).toContain('&lt;script&gt;x&lt;/script&gt;');
     expect(html).not.toContain('value="None"');

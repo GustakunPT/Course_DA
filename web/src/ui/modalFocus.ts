@@ -39,7 +39,8 @@ export function selectorForControl(el: Element | null): string | null {
 export function getFocusableElements(container: HTMLElement): HTMLElement[] {
   const candidates = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
   return candidates.filter(
-    (el) => !el.closest('[hidden]') && el.getAttribute('aria-hidden') !== 'true' && getComputedStyle(el).display !== 'none',
+    (el) =>
+      !el.closest('[hidden]') && el.getAttribute('aria-hidden') !== 'true' && getComputedStyle(el).display !== 'none',
   );
 }
 

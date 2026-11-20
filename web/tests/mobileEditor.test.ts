@@ -52,7 +52,10 @@ describe('renderEcraDeEscrita', () => {
     enunciadoHtml: '<p>Soma as vendas</p>',
     editorHtml: '<textarea id="workbench-editor"></textarea>',
     resultadoHtml: '<div class="out">ok</div>',
-    simbolos: [[':', ':'], ['"', '"']] as [string, string][],
+    simbolos: [
+      [':', ':'],
+      ['"', '"'],
+    ] as [string, string][],
     rotuloExecutar: 'Executar',
     aCorrer: false,
   };
@@ -61,7 +64,9 @@ describe('renderEcraDeEscrita', () => {
     const html = renderEcraDeEscrita({ ...base, aba: 'codigo' });
     const abas = [...html.matchAll(/data-ecra-aba="(\w+)"/g)].map((m) => m[1]);
     expect(abas).toEqual(['enunciado', 'codigo', 'resultado']);
-    expect(html).toMatch(/aria-selected="true"[^>]*data-ecra-aba="codigo"|data-ecra-aba="codigo"[^>]*aria-selected="true"/);
+    expect(html).toMatch(
+      /aria-selected="true"[^>]*data-ecra-aba="codigo"|data-ecra-aba="codigo"[^>]*aria-selected="true"/,
+    );
   });
 
   it('o editor existe uma só vez, mesmo noutro separador', () => {

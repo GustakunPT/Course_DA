@@ -1,7 +1,6 @@
 import { cheatsheets } from '../data/cheatsheetsData';
 import { escapeHtml } from './html';
 
-
 export function renderCheatsheetHtml(query: string, categoryFilter: string): string {
   const categories = ['Todas', 'Python', 'SQL', 'Pandas', 'NumPy & Gráficos', 'Estatística', 'Git', 'BI & DAX'];
   const q = query.trim().toLowerCase();
@@ -38,7 +37,10 @@ export function renderCheatsheetHtml(query: string, categoryFilter: string): str
             <label for="ref-cat" class="visually-hidden">Filtrar ferramenta</label>
             <select id="ref-cat" name="ferramenta" class="select-field">
               ${categories
-                .map((c) => `<option value="${escapeHtml(c)}" ${categoryFilter === c ? 'selected' : ''}>${escapeHtml(c)}</option>`)
+                .map(
+                  (c) =>
+                    `<option value="${escapeHtml(c)}" ${categoryFilter === c ? 'selected' : ''}>${escapeHtml(c)}</option>`,
+                )
                 .join('')}
             </select>
           </div>

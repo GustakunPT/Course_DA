@@ -1,10 +1,5 @@
 import type { UserProgressMap } from '../data/progress';
-import {
-  evaluateDiagnosticPlan,
-  FOUR_PILLARS,
-  THREE_RISKS,
-  type DiagnosticProfile,
-} from '../data/diagnostic';
+import { evaluateDiagnosticPlan, FOUR_PILLARS, THREE_RISKS, type DiagnosticProfile } from '../data/diagnostic';
 import {
   formatHoursApproxPt,
   formatMinutesPt,
@@ -259,8 +254,7 @@ export function buildGanttModel(
     }
 
     const totalMinutes = cursor - trackStart;
-    const progressTimePct =
-      totalMinutes > 0 ? Math.min(100, Math.round((trackEffectiveMin / totalMinutes) * 100)) : 0;
+    const progressTimePct = totalMinutes > 0 ? Math.min(100, Math.round((trackEffectiveMin / totalMinutes) * 100)) : 0;
 
     return {
       track,
@@ -349,20 +343,13 @@ export interface GanttRenderOptions {
   quizSelection?: Record<string, number>;
 }
 
-export function renderGanttHtml(
-  tracks: GanttTrackRef[],
-  progress: UserProgressMap,
-  opts: GanttRenderOptions,
-): string {
+export function renderGanttHtml(tracks: GanttTrackRef[], progress: UserProgressMap, opts: GanttRenderOptions): string {
   const model = buildGanttModel(tracks, progress, opts.paceMinutesPerWeek, opts.lessonTimes ?? {});
   const weekColsStyle = `grid-template-columns: repeat(${model.totalWeeks}, minmax(34px, 1fr))`;
   const minTimelinePx = Math.max(540, model.totalWeeks * 42);
 
   const monthCells = model.months
-    .map(
-      (m) =>
-        `<div class="gantt-month-cell" style="grid-column: span ${m.weekSpan};">${escapeHtml(m.label)}</div>`,
-    )
+    .map((m) => `<div class="gantt-month-cell" style="grid-column: span ${m.weekSpan};">${escapeHtml(m.label)}</div>`)
     .join('');
 
   const weekCells = Array.from({ length: model.totalWeeks }, (_, i) => {
@@ -385,9 +372,7 @@ export function renderGanttHtml(
       if (opts.filterStatus !== 'all' && filteredLessons.length === 0) return '';
 
       const actualTrackTxt =
-        group.actualMinutes > 0
-          ? `${formatMinutesPt(Math.round(group.actualMinutes))} real`
-          : '0 min real';
+        group.actualMinutes > 0 ? `${formatMinutesPt(Math.round(group.actualMinutes))} real` : '0 min real';
       const trackMetaTxt = `${group.doneCount}/${group.track.lessons.length} · ${group.progressTimePct}% · ${actualTrackTxt} / ${formatHoursApproxPt(group.totalMinutes)}`;
       const trackTip =
         `${group.track.fullTitle} — ${group.doneCount}/${group.track.lessons.length} etapas · ` +
@@ -595,9 +580,7 @@ export function renderGanttHtml(
         </div>
 
         ${(() => {
-          const diagEval = opts.diagnostic
-            ? evaluateDiagnosticPlan(opts.diagnostic, model.totalCourseMinutes)
-            : null;
+          const diagEval = opts.diagnostic ? evaluateDiagnosticPlan(opts.diagnostic, model.totalCourseMinutes) : null;
           return `
             <div class="gantt-diag-strip ${diagEval ? (diagEval.fitsTarget ? 'is-ok' : 'is-tight') : ''}">
               <div class="gantt-diag-info">
@@ -726,10 +709,7 @@ export function renderGanttHtml(
               </div>
             </div>
             <div class="gantt-body">
-              ${
-                rowsHtml ||
-                `<p class="gantt-empty">Nenhuma etapa corresponde ao filtro atual.</p>`
-              }
+              ${rowsHtml || `<p class="gantt-empty">Nenhuma etapa corresponde ao filtro atual.</p>`}
             </div>
           </div>
         </div>

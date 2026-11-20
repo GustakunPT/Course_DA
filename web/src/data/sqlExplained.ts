@@ -21,7 +21,7 @@ export const sqlExplained: Record<string, Extra> = {
   'sql-05-having': {
     explained: [
       'A confusão entre WHERE e HAVING desaparece quando recordas a ordem real de execução do SQL: primeiro FROM escolhe a tabela, depois WHERE filtra linhas brutas, depois GROUP BY forma os grupos e só no fim HAVING filtra esses grupos já somados.',
-      'Exemplo pequeno com 4 vendas de dois produtos: Azeite vendeu 100 € em junho e 200 € em julho; Pão vendeu 10 € em junho e 15 € em julho. Se quiseres só vendas de julho (WHERE data >= \'2025-07-01\'), cortas metade das linhas antes de somar. Se quiseres só produtos com total acima de 50 € (HAVING SUM(valor) > 50), o motor precisa primeiro de somar cada caixa para ver que Azeite soma 200 € e Pão apenas 15 €.',
+      "Exemplo pequeno com 4 vendas de dois produtos: Azeite vendeu 100 € em junho e 200 € em julho; Pão vendeu 10 € em junho e 15 € em julho. Se quiseres só vendas de julho (WHERE data >= '2025-07-01'), cortas metade das linhas antes de somar. Se quiseres só produtos com total acima de 50 € (HAVING SUM(valor) > 50), o motor precisa primeiro de somar cada caixa para ver que Azeite soma 200 € e Pão apenas 15 €.",
       'Podes — e deves — usar WHERE e HAVING juntos: o WHERE limpa logo linhas irrelevantes (ex.: pedidos cancelados ou anos antigos), poupando memória e tempo, enquanto o HAVING aplica o critério sobre a métrica agregada (ex.: clientes com >= 5 compras ou produtos com faturação > 2 000 €).',
       'Na prática diária, HAVING COUNT(*) > 1 é também o comando mais rápido de auditoria para apanhar duplicados antes de ligar uma tabela ao Power BI.',
     ],
@@ -35,7 +35,7 @@ export const sqlExplained: Record<string, Extra> = {
     explained: [
       'Em bases de dados bem modeladas, os nomes e moradas dos clientes vivem numa tabela separada (clientes) para não repetir "Ana Silva, Porto" em 50 talões diferentes. O JOIN volta a ligar cada linha de vendas à ficha correspondente usando a chave partilhada (v.cliente_id = c.id).',
       'Exemplo pequeno: imagina 3 clientes (#1 Ana, #2 Bruno, #3 Carla) e 2 vendas (ambas do cliente #1). Um INNER JOIN devolve apenas 2 linhas (só a Ana, que comprou). Um LEFT JOIN clientes c LEFT JOIN vendas v devolve 4 linhas: as 2 compras da Ana mais 1 linha para Bruno e 1 para Carla com NULL nas colunas de vendas — perfeito para descobrir clientes inativos.',
-      'Cuidado com dois erros clássicos de produção: 1) num LEFT JOIN, pôr uma condição da tabela da direita no WHERE (ex.: WHERE v.produto = \'Azeite\') apaga as linhas NULL e converte o LEFT JOIN num INNER JOIN escondido; 2) juntar duas tabelas onde a chave se repete dos dois lados multiplica linhas e inflaciona a faturação. Compara sempre COUNT(*) e SUM() antes e depois do JOIN.',
+      "Cuidado com dois erros clássicos de produção: 1) num LEFT JOIN, pôr uma condição da tabela da direita no WHERE (ex.: WHERE v.produto = 'Azeite') apaga as linhas NULL e converte o LEFT JOIN num INNER JOIN escondido; 2) juntar duas tabelas onde a chave se repete dos dois lados multiplica linhas e inflaciona a faturação. Compara sempre COUNT(*) e SUM() antes e depois do JOIN.",
       'Na decisão de negócio, INNER JOIN responde a "quanto faturou cada cidade ou categoria?", enquanto LEFT JOIN com IS NULL responde a "que clientes nunca compraram este artigo ou deixaram de visitar a loja?".',
     ],
     errorDemo: {
@@ -47,14 +47,14 @@ export const sqlExplained: Record<string, Extra> = {
   'sql-07-case-coalesce': {
     explained: [
       'Nem sempre precisas de exportar para Python ou Excel para criar escalões de negócio ou limpar valores em falta. O CASE WHEN funciona como um if / elif / else avaliado linha a linha (ou grupo a grupo) dentro da própria consulta SQL.',
-      'Exemplo pequeno com 3 clientes que gastaram 450 €, 210 € e 80 €: com CASE WHEN gasto >= 300 THEN \'Ouro\' WHEN gasto >= 150 THEN \'Prata\' ELSE \'Bronze\' END, o motor testa de cima para baixo e pára no primeiro ramo verdadeiro. Se trocasses a ordem e testasses >= 150 antes de >= 300, o cliente de 450 € ficaria mal classificado como Prata.',
+      "Exemplo pequeno com 3 clientes que gastaram 450 €, 210 € e 80 €: com CASE WHEN gasto >= 300 THEN 'Ouro' WHEN gasto >= 150 THEN 'Prata' ELSE 'Bronze' END, o motor testa de cima para baixo e pára no primeiro ramo verdadeiro. Se trocasses a ordem e testasses >= 150 antes de >= 300, o cliente de 450 € ficaria mal classificado como Prata.",
       'Já COALESCE(valor, 0) e NULLIF(divisor, 0) resolvem o pesadelo silencioso dos valores nulos e das divisões por zero: qualquer conta com NULL dá NULL (10 + NULL = NULL). Envolver colunas opcionais em COALESCE(..., 0) e denominadores em NULLIF(..., 0) impede que relatórios rebentem quando um dia não tem vendas.',
-      'Na decisão de negócio, o CASE WHEN permite criar bandeiras 1/0 (SUM(CASE WHEN cidade = \'Porto\' THEN 1 ELSE 0 END)) para comparar segmentos lado a lado sem correr duas queries separadas.',
+      "Na decisão de negócio, o CASE WHEN permite criar bandeiras 1/0 (SUM(CASE WHEN cidade = 'Porto' THEN 1 ELSE 0 END)) para comparar segmentos lado a lado sem correr duas queries separadas.",
     ],
     errorDemo: {
       code: "SELECT nome,\n  CASE WHEN preco > 5 THEN 'Caro' ELSE 'Normal'\nFROM produtos;",
       message: 'syntax error',
-      fix: 'Todo o bloco CASE WHEN tem de fechar obrigatoriamente com a palavra END (ex.: ... ELSE \'Normal\' END AS escalao).',
+      fix: "Todo o bloco CASE WHEN tem de fechar obrigatoriamente com a palavra END (ex.: ... ELSE 'Normal' END AS escalao).",
     },
   },
   'sql-08-cte-windows': {
