@@ -1,0 +1,27 @@
+# O Dependabot abre um PR por semana quando há versões novas das dependências.
+# Cada PR passa pelo CI (testes, lint, build, E2E) antes de alguém fazer merge.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Ferramentas de desenvolvimento numa só PR, para não encher a lista.
+      ferramentas-dev:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

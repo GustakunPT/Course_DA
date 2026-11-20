@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4178);
@@ -17,6 +18,24 @@ async function waitForServer(url, timeoutMs = 15_000) {
     await delay(250);
   }
   throw new Error(`Servidor preview não respondeu em ${url} dentro de ${timeoutMs}ms.`);
+}
+
+/** Corre o axe-core na página e falha se houver violações sérias ou críticas (WCAG 2.1 AA). */
+async function verificarAcessibilidade(page, nome) {
+  let axePath;
+  try {
+    axePath = createRequire(import.meta.url).resolve('axe-core/axe.min.js');
+  } catch {
+    throw new Error('axe-core não está instalado. Instala com: npm install --no-save playwright axe-core');
+  }
+  await page.addScriptTag({ path: axePath });
+  const violacoes = await page.evaluate(async () => {
+    const res = await window.axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa'] });
+    return res.violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target?.join(' ')}`);
+  });
+  if (violacoes.length) throw new Error(`Acessibilidade (${nome}):\n${violacoes.join('\n')}`);
 }
 
 async function run() {
@@ -45,7 +64,8 @@ async function run() {
     await waitForServer(BASE_URL);
     const browser = await chromium.launch({ headless: true });
     try {
-      const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+      // bypassCSP: só para poder injetar o axe-core na página (a CSP de produção não aceita scripts inline).
+      const page = await browser.newPage({ viewport: { width: 1366, height: 900 }, bypassCSP: true });
       page.on('console', (msg) => {
         if (msg.type() === 'error') consoleErrors.push(msg.text());
       });
@@ -107,6 +127,13 @@ async function run() {
       );
       if (badAria > 0) throw new Error(`Encontrados ${badAria} botões com aria-selected sem role="tab".`);
 
+      // 6) Acessibilidade (axe-core, as regras do Lighthouse): sem violações sérias ou críticas
+      //    numa lição com bancada e no Cronograma.
+      await verificarAcessibilidade(page, 'Cronograma');
+      await page.goto(`${BASE_URL}/#vista=academia&trilha=python&licao=py-02-variaveis`, { waitUntil: 'networkidle' });
+      await page.locator('#workbench-editor').waitFor({ state: 'visible' });
+      await verificarAcessibilidade(page, 'lição Python');
+
       if (consoleErrors.length || pageErrors.length) {
         throw new Error(
           `Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`,
@@ -114,7 +141,7 @@ async function run() {
       }
 
       console.log(
-        '✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).',
+        '✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, axe-core WCAG AA, 0 erros).',
       );
     } finally {
       await browser.close();
