@@ -157,7 +157,7 @@ export function renderProgressModal(state: AppState): string {
 
         <details class="study-plan-panel">
           <summary><strong>Plano de estudo sugerido: 10 semanas a ~5–6 h/semana</strong></summary>
-          <div class="table-scroll" style="margin-top:8px;">
+          <div class="table-scroll" tabindex="0" style="margin-top:8px;">
             <table class="data-table study-plan-table">
               <thead>
                 <tr>

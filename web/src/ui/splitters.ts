@@ -1,5 +1,5 @@
 import type { AppState } from './appState';
-import { DEFAULT_LAYOUT, saveLayoutPrefs } from './layout';
+import { clampLayout, DEFAULT_LAYOUT, saveLayoutPrefs, splitterValueText, type SplitterKind } from './layout';
 
 /** Liga drag por ponteiro, duplo clique e atalhos de teclado às 3 divisórias redimensionáveis da bancada. */
 export function attachSplitterListeners(state: AppState, renderApp: () => void): void {
@@ -14,6 +14,17 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
     gridEl.style.setProperty('--lesson-fr', `${state.layout.lessonRatio}fr`);
     gridEl.style.setProperty('--workbench-fr', `${100 - state.layout.lessonRatio}fr`);
     gridEl.style.setProperty('--editor-h', `${state.layout.editorHeight}px`);
+    // O leitor de ecrã anuncia o novo valor enquanto se arrasta ou se usam as setas.
+    const aria: [HTMLElement | null, SplitterKind][] = [
+      [sidebarSplitter, 'sidebarWidth'],
+      [mainSplitter, 'lessonRatio'],
+      [editorSplitter, 'editorHeight'],
+    ];
+    for (const [el, kind] of aria) {
+      if (!el) continue;
+      el.setAttribute('aria-valuenow', String(state.layout[kind]));
+      el.setAttribute('aria-valuetext', splitterValueText(kind, state.layout[kind]));
+    }
   };
 
   if (sidebarSplitter && gridEl) {
@@ -23,7 +34,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
       sidebarSplitter.classList.add('is-dragging');
       const rect = gridEl.getBoundingClientRect();
       const onMove = (moveEv: PointerEvent): void => {
-        const nextW = Math.round(Math.min(420, Math.max(180, moveEv.clientX - rect.left)));
+        const nextW = Math.round(clampLayout('sidebarWidth', moveEv.clientX - rect.left));
         state.layout.sidebarWidth = nextW;
         applyCssVarsLive();
       };
@@ -45,7 +56,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
       if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
         ev.preventDefault();
         const delta = ev.key === 'ArrowRight' ? 16 : -16;
-        state.layout.sidebarWidth = Math.min(420, Math.max(180, state.layout.sidebarWidth + delta));
+        state.layout.sidebarWidth = clampLayout('sidebarWidth', state.layout.sidebarWidth + delta);
         applyCssVarsLive();
         saveLayoutPrefs(state.layout);
       }
@@ -62,7 +73,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
         const sideOffset = state.layout.sidebarCollapsed ? 0 : state.layout.sidebarWidth + 8;
         const availW = Math.max(400, rect.width - sideOffset);
         const relX = moveEv.clientX - (rect.left + sideOffset);
-        const ratio = Math.round(Math.min(70, Math.max(30, (relX / availW) * 100)));
+        const ratio = Math.round(clampLayout('lessonRatio', (relX / availW) * 100));
         state.layout.lessonRatio = ratio;
         applyCssVarsLive();
       };
@@ -85,7 +96,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
       if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
         ev.preventDefault();
         const delta = ev.key === 'ArrowRight' ? 4 : -4;
-        state.layout.lessonRatio = Math.min(70, Math.max(30, state.layout.lessonRatio + delta));
+        state.layout.lessonRatio = clampLayout('lessonRatio', state.layout.lessonRatio + delta);
         applyCssVarsLive();
         saveLayoutPrefs(state.layout);
       }
@@ -101,7 +112,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
       const startY = ev.clientY;
       const startH = editorShell?.getBoundingClientRect().height ?? state.layout.editorHeight;
       const onMove = (moveEv: PointerEvent): void => {
-        const nextH = Math.round(Math.min(640, Math.max(140, startH + (moveEv.clientY - startY))));
+        const nextH = Math.round(clampLayout('editorHeight', startH + (moveEv.clientY - startY)));
         state.layout.editorHeight = nextH;
         applyCssVarsLive();
       };
@@ -123,7 +134,7 @@ export function attachSplitterListeners(state: AppState, renderApp: () => void):
       if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
         ev.preventDefault();
         const delta = ev.key === 'ArrowDown' ? 24 : -24;
-        state.layout.editorHeight = Math.min(640, Math.max(140, state.layout.editorHeight + delta));
+        state.layout.editorHeight = clampLayout('editorHeight', state.layout.editorHeight + delta);
         applyCssVarsLive();
         saveLayoutPrefs(state.layout);
       }

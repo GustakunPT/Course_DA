@@ -9,6 +9,33 @@ export interface LayoutPrefs {
   sidebarCollapsed: boolean;
 }
 
+/** Limites de cada painel: usados ao carregar, ao arrastar, com o teclado e no ARIA das divisórias. */
+export const LAYOUT_LIMITS = {
+  sidebarWidth: { min: 180, max: 420 },
+  lessonRatio: { min: 30, max: 70 },
+  editorHeight: { min: 140, max: 640 },
+} as const;
+
+export type SplitterKind = keyof typeof LAYOUT_LIMITS;
+
+export function clampLayout(kind: SplitterKind, value: number): number {
+  const { min, max } = LAYOUT_LIMITS[kind];
+  return Math.min(max, Math.max(min, value));
+}
+
+/** Texto que o leitor de ecrã anuncia para o valor atual de cada divisória. */
+export function splitterValueText(kind: SplitterKind, value: number): string {
+  if (kind === 'lessonRatio') return `Lição ${value}%, editor ${100 - value}%`;
+  if (kind === 'sidebarWidth') return `Índice com ${value} píxeis de largura`;
+  return `Editor com ${value} píxeis de altura`;
+}
+
+/** Atributos ARIA de uma divisória que se move com o teclado (role="separator" com foco). */
+export function splitterAriaAttrs(kind: SplitterKind, value: number): string {
+  const { min, max } = LAYOUT_LIMITS[kind];
+  return `aria-valuemin="${min}" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${splitterValueText(kind, value)}"`;
+}
+
 export const DEFAULT_LAYOUT: LayoutPrefs = {
   sidebarWidth: 256,
   lessonRatio: 48,
@@ -22,9 +49,9 @@ export function loadSavedLayout(): LayoutPrefs {
     if (!raw) return { ...DEFAULT_LAYOUT };
     const parsed = JSON.parse(raw);
     return {
-      sidebarWidth: Math.min(420, Math.max(180, Number(parsed.sidebarWidth) || DEFAULT_LAYOUT.sidebarWidth)),
-      lessonRatio: Math.min(72, Math.max(28, Number(parsed.lessonRatio) || DEFAULT_LAYOUT.lessonRatio)),
-      editorHeight: Math.min(640, Math.max(140, Number(parsed.editorHeight) || DEFAULT_LAYOUT.editorHeight)),
+      sidebarWidth: clampLayout('sidebarWidth', Number(parsed.sidebarWidth) || DEFAULT_LAYOUT.sidebarWidth),
+      lessonRatio: clampLayout('lessonRatio', Number(parsed.lessonRatio) || DEFAULT_LAYOUT.lessonRatio),
+      editorHeight: clampLayout('editorHeight', Number(parsed.editorHeight) || DEFAULT_LAYOUT.editorHeight),
       sidebarCollapsed: Boolean(parsed.sidebarCollapsed),
     };
   } catch {

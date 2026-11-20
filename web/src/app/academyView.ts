@@ -2,6 +2,7 @@
 
 import { ensureTrackLoaded, getCachedTrack } from '../data/trackLoaders';
 import { escapeHtml } from '../ui/html';
+import { splitterAriaAttrs } from '../ui/layout';
 import { renderAcademyShell } from './academySidebar';
 import { currentLessonMeta, currentTrackMeta } from './lessonContext';
 import { renderLessonArticle } from './lessonArticle';
@@ -66,7 +67,9 @@ export function renderAcademyWorkspace(): string {
         <div class="skeleton-bar"></div>
         <div class="skeleton-bar"></div>
       </article>
-      <div id="splitter-main" class="pane-splitter-v" role="separator" tabindex="0" aria-orientation="vertical"></div>
+      <div id="splitter-main" class="pane-splitter-v" role="separator" tabindex="0" aria-orientation="vertical"
+        aria-label="Redimensionar largura entre a lição e o editor de código"
+        ${splitterAriaAttrs('lessonRatio', state.layout.lessonRatio)}></div>
       <section class="seam-panel seam-panel-deep workbench-panel skeleton-stack" aria-label="Bancada a carregar">
         <span class="status-chip">A preparar bancada…</span>
         <div class="skeleton-bar"></div>
@@ -92,6 +95,7 @@ export function renderAcademyWorkspace(): string {
         tabindex="0"
         aria-orientation="vertical"
         aria-label="Redimensionar largura entre a lição e o editor de código"
+        ${splitterAriaAttrs('lessonRatio', state.layout.lessonRatio)}
         title="Arrasta para redimensionar lição vs editor (duplo clique para 50/50)"
       ></div>
 

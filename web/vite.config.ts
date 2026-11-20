@@ -47,7 +47,7 @@ export default defineConfig({
       include: ['src/**', 'api/**'],
       reporter: ['text-summary', 'html'],
       // Mínimos 3 pontos abaixo dos valores atuais: o CI falha se a cobertura descer a sério.
-      thresholds: { statements: 78, branches: 78, functions: 58, lines: 78 },
+      thresholds: { statements: 84, branches: 78, functions: 68, lines: 84 },
     },
   },
 });

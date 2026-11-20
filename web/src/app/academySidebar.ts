@@ -3,6 +3,7 @@
 import { TRACK_INDEX, type LessonIndexEntry, type TrackIndexEntry } from '../data/trackIndex';
 import { formatHoursApproxPt, getTrackMinutes } from '../data/studyPlan';
 import { escapeHtml } from '../ui/html';
+import { splitterAriaAttrs } from '../ui/layout';
 import { ESTADO_PROJETO } from '../ui/projectPanel';
 import { state } from './store';
 
@@ -137,6 +138,7 @@ export function renderAcademyShell(
         tabindex="0"
         aria-orientation="vertical"
         aria-label="Redimensionar largura do índice lateral"
+        ${splitterAriaAttrs('sidebarWidth', sidebarWidth)}
         title="Arrasta para redimensionar o índice lateral (duplo clique para repor)"
       ></div>
 

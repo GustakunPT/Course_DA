@@ -64,7 +64,7 @@ export function renderCheatsheetHtml(query: string, categoryFilter: string): str
         : `
       <section class="seam-panels">
         <div class="seam-panel">
-          <div class="table-scroll">
+          <div class="table-scroll" tabindex="0">
             <table class="data-table">
               <caption class="visually-hidden">Folha de referência rápida W3Schools de Python, SQL, Pandas, Git e BI</caption>
               <thead>
