@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Um push novo no mesmo ramo cancela a execução anterior, que já não interessa.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   python:
     name: Python (pytest)
@@ -43,6 +48,8 @@ jobs:
       - run: npm run test:coverage
       - run: npm run build
       - name: E2E Smoke (Playwright Chromium)
+        # Instalar o Chromium leva ~6 min; se o passo passar dos 15, algo ficou pendurado.
+        timeout-minutes: 15
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium

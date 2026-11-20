@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4178);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
@@ -28,11 +29,14 @@ async function run() {
     );
   }
 
-  const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  const server = spawn(npxCmd, ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
-    stdio: 'pipe',
-    shell: process.platform === 'win32',
-  });
+  // O vite corre diretamente com o node (sem npx nem shell): assim o kill() acerta no próprio servidor.
+  // Com npx, no Linux o SIGTERM ficava no npx, o vite continuava vivo e o passo do CI nunca acabava.
+  const viteBin = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url));
+  const server = spawn(
+    process.execPath,
+    [viteBin, 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'],
+    { stdio: 'ignore' },
+  );
 
   const consoleErrors = [];
   const pageErrors = [];
@@ -120,7 +124,11 @@ async function run() {
   }
 }
 
-run().catch((err) => {
-  console.error('✗ E2E smoke test FAILED:', err);
-  process.exit(1);
-});
+// Termina sempre de forma explícita: um processo filho esquecido não pode deixar o CI à espera.
+run().then(
+  () => process.exit(0),
+  (err) => {
+    console.error('✗ E2E smoke test FAILED:', err);
+    process.exit(1);
+  },
+);
