@@ -13,7 +13,7 @@ vi.mock('@vercel/blob', () => ({
   }),
 }));
 
-const { GET, POST } = await import('../api/sync');
+const { GET, POST, RATE_LIMITS, resetRateLimits } = await import('../api/sync');
 
 const post = (body: unknown) =>
   POST(
@@ -23,7 +23,10 @@ const post = (body: unknown) =>
     }),
   );
 
-beforeEach(() => store.clear());
+beforeEach(() => {
+  store.clear();
+  resetRateLimits();
+});
 
 describe('POST /api/sync', () => {
   it('cria um código novo com 3 blocos', async () => {
@@ -33,8 +36,15 @@ describe('POST /api/sync', () => {
     expect(data.code).toMatch(/^MB-[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   });
 
-  it('aceita códigos antigos de 2 blocos', async () => {
+  it('aceita códigos antigos de 2 blocos que já existem', async () => {
+    store.set('sync/MB-ABCD-EF23.json', JSON.stringify({ version: 2, code: 'MB-ABCD-EF23' }));
     expect((await post({ code: 'MB-ABCD-EF23', progress: {} })).status).toBe(200);
+  });
+
+  it('não cria códigos novos de 2 blocos', async () => {
+    const res = await post({ code: 'MB-ABCD-EF23', progress: {} });
+    expect(res.status).toBe(404);
+    expect(store.size).toBe(0);
   });
 
   it('recusa códigos mal formados', async () => {
@@ -56,24 +66,41 @@ describe('POST /api/sync', () => {
     const { code } = await (
       await post({
         progress: {
-          'py-01-sintaxe': { status: 'autonomous', completedAt: '2026-11-19T10:00:00Z', reviewCount: 2, lastReviewedAt: '2026-11-19T11:00:00Z' },
+          'py-01-sintaxe': {
+            status: 'autonomous',
+            completedAt: '2026-11-19T10:00:00Z',
+            reviewCount: 2,
+            lastReviewedAt: '2026-11-19T11:00:00Z',
+          },
           lixo: { status: 'hack' },
           numero: 123,
         },
         drafts: { 'py-01:challenge': 'x = 1', invalido: 42 },
         quizzes: { 'py-01': 2, negativo: -1, texto: 'a' },
-        lastLocation: { trackId: 'python', lessonId: 'py-01-sintaxe', view: 'academia', timestamp: '2026-11-19T10:00:00Z' },
+        lastLocation: {
+          trackId: 'python',
+          lessonId: 'py-01-sintaxe',
+          view: 'academia',
+          timestamp: '2026-11-19T10:00:00Z',
+        },
       })
     ).json();
     const saved = JSON.parse(store.get(`sync/${code}.json`)!);
     expect(saved.progress).toEqual({
-      'py-01-sintaxe': { status: 'autonomous', completedAt: '2026-11-19T10:00:00Z', reviewCount: 2, lastReviewedAt: '2026-11-19T11:00:00Z' },
+      'py-01-sintaxe': {
+        status: 'autonomous',
+        completedAt: '2026-11-19T10:00:00Z',
+        reviewCount: 2,
+        lastReviewedAt: '2026-11-19T11:00:00Z',
+      },
     });
     expect(saved.drafts).toEqual({ 'py-01:challenge': 'x = 1' });
     expect(saved.quizzes).toEqual({ 'py-01': 2 });
     expect(saved.lastLocation.view).toBe('academia');
 
-    const badRes = await (await post({ progress: [1], drafts: 'x', lastLocation: { trackId: 'a', lessonId: 'b', view: 'invalida' } })).json();
+    const badRes = await (
+      await post({ progress: [1], drafts: 'x', lastLocation: { trackId: 'a', lessonId: 'b', view: 'invalida' } })
+    ).json();
     const savedBad = JSON.parse(store.get(`sync/${badRes.code}.json`)!);
     expect(savedBad.progress).toEqual({});
     expect(savedBad.drafts).toEqual({});
@@ -130,5 +157,33 @@ describe('GET /api/sync', () => {
   it('404 para código inexistente e 400 para formato inválido', async () => {
     expect((await GET(new Request('https://x/api/sync?code=MB-ABCD-EF23-XY45'))).status).toBe(404);
     expect((await GET(new Request('https://x/api/sync?code=../../x'))).status).toBe(400);
+  });
+});
+
+describe('limite de pedidos por IP', () => {
+  const fromIp = (ip: string, url = 'https://x/api/sync?code=MB-ABCD-EF23-XY45') =>
+    new Request(url, { headers: { 'x-forwarded-for': `${ip}, 10.0.0.1` } });
+
+  it('responde 429 com Retry-After quando um IP faz demasiados GET', async () => {
+    for (let i = 0; i < RATE_LIMITS.GET; i++) {
+      expect((await GET(fromIp('203.0.113.7'))).status).toBe(404);
+    }
+    const blocked = await GET(fromIp('203.0.113.7'));
+    expect(blocked.status).toBe(429);
+    expect(Number(blocked.headers.get('Retry-After'))).toBeGreaterThan(0);
+    // Outro IP não é afetado.
+    expect((await GET(fromIp('198.51.100.2'))).status).toBe(404);
+  });
+
+  it('conta GET e POST em separado', async () => {
+    for (let i = 0; i < RATE_LIMITS.GET; i++) await GET(fromIp('203.0.113.8'));
+    const res = await POST(
+      new Request('https://x/api/sync', {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '203.0.113.8' },
+        body: JSON.stringify({}),
+      }),
+    );
+    expect(res.status).toBe(200);
   });
 });
