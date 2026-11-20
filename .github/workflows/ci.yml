@@ -47,10 +47,16 @@ jobs:
       - run: npm run test:mockups
       - run: npm run test:coverage
       - run: npm run build
-      - name: E2E Smoke (Playwright Chromium)
-        # Instalar o Chromium leva ~6 min; se o passo passar dos 15, algo ficou pendurado.
-        timeout-minutes: 15
+      - name: Lighthouse (desempenho, acessibilidade, boas práticas, SEO e limites de tamanho)
+        # Os limites estão em web/lighthouserc.json; o Chrome já vem instalado no runner do GitHub.
+        timeout-minutes: 10
+        run: npm run test:lighthouse
+      - name: E2E Smoke (Playwright Chromium, Firefox e WebKit, computador e telemóvel)
+        # Instalar os três browsers leva alguns minutos; se o passo passar dos 20, algo ficou pendurado.
+        timeout-minutes: 20
+        env:
+          SMOKE_BROWSERS: chromium,firefox,webkit
         run: |
           npm install --no-save playwright axe-core
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox webkit
           npm run test:e2e

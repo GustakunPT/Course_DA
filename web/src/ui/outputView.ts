@@ -53,7 +53,7 @@ export function renderOutputRegion(
         ? 'Simulador Git'
         : engine === 'projeto'
           ? 'Projeto'
-          : 'Python 3.12 (Pyodide)';
+          : 'Python 3.14 (Pyodide)';
 
   if (out.kind === 'loading') {
     return `

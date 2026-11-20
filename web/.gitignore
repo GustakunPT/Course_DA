@@ -4,3 +4,6 @@ public/pyodide/
 
 # Relatório de cobertura (npm run test:coverage)
 coverage/
+
+# Relatórios do Lighthouse CI (npm run test:lighthouse)
+.lighthouseci/

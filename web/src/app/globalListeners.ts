@@ -1,6 +1,7 @@
 // Eventos da janela que ficam ligados uma só vez (não dependem do HTML de cada render).
 
 import { saveDrafts } from '../data/progress';
+import { installErrorNotice } from '../ui/errorNotice';
 import { handleDialogTabTrap } from '../ui/modalFocus';
 import { fecharEcraDeEscrita, installEcraHistoryListener } from './mobileWriting';
 import { renderApp } from './rerender';
@@ -53,6 +54,8 @@ function handleGlobalKeydown(ev: KeyboardEvent): void {
 }
 
 export function installGlobalListeners(): void {
+  // Antes de recarregar por causa de um erro, guarda já os rascunhos do editor.
+  installErrorNotice(() => saveDrafts(state.editorDrafts, true));
   installEcraHistoryListener();
 
   window.addEventListener('hashchange', () => {

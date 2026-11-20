@@ -24,22 +24,45 @@ export interface PythonCheckSpec {
   hint: string;
 }
 
-export const PYODIDE_INDEX_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
-export const PYODIDE_SCRIPT_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
-export const PYODIDE_MJS_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.mjs';
-export const PYODIDE_SCRIPT_SRI = 'sha384-i3R37b3tF+HWudsUf1VSEOY2YxwSNMqY8DQa9Z0O3xh+NkJ9o+yjcGyIi5huj+nB';
-/** Hashes SHA-384 oficiais dos artefactos Pyodide v0.26.4 (verificados nos testes contra node_modules/pyodide). */
+/**
+ * Versão do Pyodide (Python 3.14). Tem de ser igual à do pacote npm "pyodide" (os testes verificam);
+ * ao mudar de versão, atualizar também os hashes SRI abaixo, que os testes recalculam.
+ */
+export const PYODIDE_VERSION = '314.0.8';
+/** Versão do Python que o Pyodide traz, para mostrar ao aluno. */
+export const PYTHON_VERSION_LABEL = 'Python 3.14';
+export const PYODIDE_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+export const PYODIDE_SCRIPT_URL = `${PYODIDE_INDEX_URL}pyodide.js`;
+export const PYODIDE_MJS_URL = `${PYODIDE_INDEX_URL}pyodide.mjs`;
+export const PYODIDE_SCRIPT_SRI = 'sha384-0Tw0jFeRF+UzB1HbzjzDi5ZNMyMclQPHmYkEquv9V+lAj/rZBHxu1c35Uq28kDPo';
+/** Hashes SHA-384 oficiais dos artefactos do Pyodide (verificados nos testes contra node_modules/pyodide). */
 export const PYODIDE_CORE_SRI: Record<string, string> = {
-  'pyodide.mjs': 'sha384-UiKiawyJJUwQkJq6d192fVAdFQWHEF0d5giIIehJbb9IRKdfMT6CKXZBoHX1KaR8',
-  'pyodide.asm.js': 'sha384-yZKhBBiP0ZceJh1RKKbMUfptsNLc0SyfFA4nZmJysRCsIJg0eYjy5Bonr0NN9U3X',
-  'pyodide.asm.wasm': 'sha384-UPLqVXovAmYvDGP3QsAICvyhkugIB8nhuGo3wgsxZD7DlcFDUSpYlRUfpwfq87uX',
-  'python_stdlib.zip': 'sha384-PawoekFvzx+5AUUlZ8VtwwUSpml23vie0wrGq/euGJEkRjl0FXWCXytybeVgbK5c',
-  'pyodide-lock.json': 'sha384-N3VHChchW0Cig+dw+pboPe9oVagcHuwzNGe4VFUqwaMPrEe/ewVorZ58G5lGQxHc',
+  'pyodide.mjs': 'sha384-VR+eYp8LZKGhhQ7Nql3TONJIMizM0VRxz87k6V7IyuQHElicjy7ULmkOuB2LFR3b',
+  'pyodide.asm.mjs': 'sha384-zZV4ZBUhsbFzcmaHqwfipWI/BS8YH7Duesu1Rrtyx1HRqFAyz+Mt/HRiMtNyWdwU',
+  'pyodide.asm.wasm': 'sha384-L3e25SSwmf8Q0I8qcgGD/PNkK1wyivO8lWFSko3xXQZ8uLNcYkZXJlX8LU3oVH/o',
+  'python_stdlib.zip': 'sha384-ShW1Tjb4ytDLumQGuwRa/PTLxHcN6agBzp2wIRZSJNK8tEt2QMRDnG69N58KhHqM',
+  'pyodide-lock.json': 'sha384-o8SQQvpVlZnOl04+3dFTJipKxul9GbViVusA379wlOrfHSgxbzt0yPiqCTxOiYES',
 };
+
+function formatMb(bytes: number): string {
+  return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',');
+}
+
+/**
+ * Texto do progresso de uma transferência. O Content-Length é o tamanho comprimido (br/gzip) e a
+ * contagem é feita depois de descomprimir: quando passa o total, mostra-se só o que já chegou,
+ * em vez de "9,2 / 3,3 MB".
+ */
+export function mensagemDeTransferencia(label: string, carregado: number, total: number): string {
+  return total > 0 && carregado <= total
+    ? `A transferir ${label} (${formatMb(carregado)} / ${formatMb(total)} MB)…`
+    : `A transferir ${label} (${formatMb(carregado)} MB)…`;
+}
 
 export const MAX_PYTHON_CODE_CHARS = 30_000;
 export const PYTHON_EXECUTION_TIMEOUT_MS = 18_000;
-export const ALLOWED_PYODIDE_PACKAGES = ['pandas', 'numpy', 'matplotlib', 'sqlite3'] as const;
+// Pacotes que se descarregam à parte. O sqlite3 já vem no Python do Pyodide (desde a 0.28), não se pede.
+export const ALLOWED_PYODIDE_PACKAGES = ['pandas', 'numpy', 'matplotlib'] as const;
 export const BASE_CSV_FILES = [
   'produtos.csv',
   'clientes.csv',
@@ -264,17 +287,17 @@ _res_bancada
 `;
 
 export function writeCsvPairToPyodide(pyodide: PyodideInterface, name: string, content: string): void {
-  pyodide.FS.writeFile(`/home/pyodide/dados/${name}`, content, { encoding: 'utf8' });
+  pyodide.FS.writeFile(`/home/pyodide/dados/${name}`, content); // texto: grava em UTF-8
   // Se /home/dados for um atalho para /home/pyodide/dados, o ficheiro já lá está.
   let isSymlink: boolean;
   try {
     const stat = pyodide.FS.lstat('/home/dados');
-    isSymlink = Boolean(pyodide.FS.isSymlink(stat.mode));
+    isSymlink = pyodide.FS.isLink(stat.mode);
   } catch {
     isSymlink = false;
   }
   if (!isSymlink) {
-    pyodide.FS.writeFile(`/home/dados/${name}`, content, { encoding: 'utf8' });
+    pyodide.FS.writeFile(`/home/dados/${name}`, content);
   }
 }
 

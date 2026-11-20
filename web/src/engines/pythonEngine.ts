@@ -5,6 +5,7 @@ import {
   PYODIDE_SCRIPT_SRI,
   PYODIDE_SCRIPT_URL,
   PYTHON_EXECUTION_TIMEOUT_MS,
+  PYTHON_VERSION_LABEL,
   executeInPyodideInstance,
   validatePythonCodeScope,
   writeCsvPairToPyodide,
@@ -87,7 +88,7 @@ function loadPyodideScript(): Promise<void> {
     }
     const script = document.createElement('script');
     script.src = PYODIDE_SCRIPT_URL;
-    // SRI: o browser recusa o script se a CDN servir um ficheiro diferente do v0.26.4 oficial.
+    // SRI: o browser recusa o script se a CDN servir um ficheiro diferente do oficial desta versão.
     script.integrity = PYODIDE_SCRIPT_SRI;
     script.crossOrigin = 'anonymous';
     script.async = true;
@@ -102,7 +103,7 @@ function loadPyodideScript(): Promise<void> {
 export async function getPyodideEngine(onStatus?: (msg: string) => void): Promise<PyodideInterface> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
-      onStatus?.('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');
+      onStatus?.(`A iniciar ${PYTHON_VERSION_LABEL} WebAssembly (primeira execução demora alguns segundos)…`);
       const [pyodide, dataset] = await Promise.all([pyodideLoader(), loadMerceariaDataset()]);
 
       pyodide.FS.mkdirTree('/home/pyodide/dados');
@@ -154,7 +155,9 @@ export async function runPythonCode(
       onStatus,
     });
   } catch (err) {
+    // O Python é recriado na próxima execução: os pacotes e ficheiros carregados perdem-se com ele.
     pyodidePromise = null;
+    loadedPackages.clear();
     loadedFiles.clear();
     return {
       stdout: '',

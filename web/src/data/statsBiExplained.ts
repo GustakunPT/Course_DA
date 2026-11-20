@@ -42,7 +42,7 @@ export const statsBiExplained: Record<string, Extra> = {
     ],
     errorDemo: {
       code: 'fat_atual = 1200.0\nfat_anterior = 0.0\nvariacao_mom = (fat_atual - fat_anterior) / fat_anterior',
-      message: 'ZeroDivisionError: float division by zero',
+      message: 'ZeroDivisionError: division by zero',
       fix: 'No primeiro mês ou numa categoria nova o mês anterior é 0 (ou vazio). Em Python protege com if fat_anterior > 0; em DAX usa sempre DIVIDE(atual - anterior, anterior, 0).',
     },
   },
@@ -55,7 +55,7 @@ export const statsBiExplained: Record<string, Extra> = {
     ],
     errorDemo: {
       code: 'faturacao_web = 12000.0\nfaturacao_liquida = 0.0\nquota_web_pct = (faturacao_web / faturacao_liquida) * 100',
-      message: 'ZeroDivisionError: float division by zero',
+      message: 'ZeroDivisionError: division by zero',
       fix: 'Quando um filtro deixa o denominador a zero, a divisão direta rebenta. Em DAX usa DIVIDE([Faturação Web], [Faturação Líquida], 0); em Python valida o denominador antes de dividir.',
     },
   },
@@ -135,7 +135,7 @@ export const statsBiExplained: Record<string, Extra> = {
     ],
     errorDemo: {
       code: 'import statistics\na, b = [5.0, 5.0, 5.0], [5.0, 5.0, 5.0]\nerro_padrao = (statistics.variance(a) / len(a) + statistics.variance(b) / len(b)) ** 0.5\nt = (statistics.mean(a) - statistics.mean(b)) / erro_padrao',
-      message: 'ZeroDivisionError: float division by zero',
+      message: 'ZeroDivisionError: division by zero',
       fix: 'Quando todos os valores nos dois grupos são idênticos, a variância e o erro padrão são 0. Confirma que erro_padrao > 0 antes de dividir.',
     },
   },
@@ -148,7 +148,7 @@ export const statsBiExplained: Record<string, Extra> = {
     ],
     errorDemo: {
       code: 'p1, p2 = 0.15, 0.15\nn = (1.96 + 0.84) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2',
-      message: 'ZeroDivisionError: float division by zero',
+      message: 'ZeroDivisionError: division by zero',
       fix: 'Para calcular o tamanho de amostra tens de definir um efeito mínimo detetável diferente de zero (p2 != p1, ex.: +1 pp ou +2 pp).',
     },
   },
@@ -174,7 +174,7 @@ export const statsBiExplained: Record<string, Extra> = {
     ],
     errorDemo: {
       code: 'x = [10, 10, 10]\ny = [50, 60, 70]\nmx, my = sum(x) / 3, sum(y) / 3\ndeclive = sum((a - mx) * (b - my) for a, b in zip(x, y)) / sum((a - mx) ** 2 for a in x)',
-      message: 'ZeroDivisionError: float division by zero',
+      message: 'ZeroDivisionError: division by zero',
       fix: 'Se a variável explicativa x for constante (variância = 0), não é possível calcular declive — uma variável que nunca muda não consegue explicar variações em y.',
     },
   },

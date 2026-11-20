@@ -1,0 +1,204 @@
+/* Lesson Reading Column */
+.lesson-article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.lesson-article > * {
+  min-width: 0;
+}
+
+.lesson-header {
+  display: grid;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-md);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+
+.lesson-lede {
+  font-size: var(--text-md);
+  color: var(--color-ink-2);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+.analogy-box {
+  background: var(--color-paper-3);
+  padding: var(--space-md);
+  border-radius: var(--radius-pill);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.analogy-box h2 {
+  font-size: var(--text-md);
+  color: var(--color-accent);
+}
+
+.analogy-box p {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+  line-height: 1.6;
+}
+
+.prose-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: var(--space-xs);
+}
+
+.prose-section h2 {
+  font-size: var(--text-lg);
+  margin-top: var(--space-xs);
+}
+
+.prose-section p,
+.prose-section li {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+  line-height: 1.65;
+}
+
+.prose-list {
+  margin: 0;
+  padding-left: var(--space-lg);
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.code-sample {
+  margin: 0;
+  padding: var(--space-md);
+  background: var(--color-code-bg);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-ink);
+  overflow-x: auto;
+}
+
+/* Clean Tables (Craft § 9: sentence-case heads, horizontal rules only, no outer card border) */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  position: relative;
+}
+
+.chart-scroll-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.data-table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-paper-2);
+  z-index: 2;
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-muted);
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule-2);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+  vertical-align: top;
+}
+
+.data-table td.mono-cell {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-cool);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Interactive Quiz Block */
+.quiz-well {
+  border: 0;
+  min-width: 0;
+  margin: var(--space-xs) 0 0;
+  background: var(--color-paper-3);
+  padding: var(--space-md);
+  border-radius: var(--radius-pill);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.quiz-options {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.quiz-option {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+.quiz-radio {
+  margin-top: var(--space-2xs);
+  accent-color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.quiz-option:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.quiz-option.is-correct {
+  background: var(--color-ok-soft);
+  border-color: var(--color-ok);
+  color: var(--color-ink);
+}
+
+.quiz-option.is-wrong {
+  background: var(--color-bad-soft);
+  border-color: var(--color-bad);
+  color: var(--color-ink);
+}
+
+.helper-slot {
+  min-height: 1lh;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.helper-slot.is-ok { color: var(--color-ok); }
+.helper-slot.is-bad { color: var(--color-bad); }
+
+.lesson-pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  margin-top: auto;
+}

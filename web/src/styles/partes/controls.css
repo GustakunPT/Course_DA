@@ -1,0 +1,167 @@
+/* Measured Mono Tokens (Console rule: mono only for measured figures, IDs, code) */
+.measured,
+code,
+pre,
+.code-editor,
+.terminal-input {
+  font-family: var(--font-outlier);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-chip);
+  background: var(--color-cool-soft);
+  color: var(--color-cool);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.status-chip.is-person {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.status-chip.is-ok {
+  background: var(--color-ok-soft);
+  color: var(--color-ok);
+}
+
+.status-chip.is-helped {
+  background: var(--color-cool-soft);
+  color: var(--color-cool);
+}
+
+.status-chip.is-bad {
+  background: var(--color-bad-soft);
+  color: var(--color-bad);
+}
+
+/* Etapa de projeto concluída: autoavaliada, nunca com o verde de "corrigida". */
+.status-chip.is-projeto {
+  background: transparent;
+  color: var(--color-ink-2);
+  border-color: var(--color-ink-2);
+}
+
+/* Controls (8 states, 36px height with 44px touch target on coarse pointers) */
+.btn {
+  height: 36px;
+  padding-inline: var(--space-md);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--color-paper-3);
+  border-color: var(--color-ink-2);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-accent) 88%, var(--color-ink));
+  border-color: color-mix(in oklab, var(--color-accent) 88%, var(--color-ink));
+}
+
+.btn-danger-outline {
+  border-color: color-mix(in oklab, var(--color-bad) 55%, var(--color-rule-2));
+  color: var(--color-bad);
+  background: color-mix(in oklab, var(--color-bad) 8%, var(--color-paper-2));
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-bad) 15%, var(--color-paper-2));
+  border-color: var(--color-bad);
+}
+
+.input-field,
+.select-field {
+  height: 36px;
+  padding-inline: var(--space-sm);
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  min-width: 0;
+}
+
+.input-field:focus-visible,
+.select-field:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.input-field:disabled,
+.select-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .nav-tab,
+  .input-field,
+  .select-field,
+  .mode-btn,
+  .sym-btn,
+  .ecra-aba,
+  .ecra-fechar,
+  .font-menu-item,
+  .nav-theme-btn,
+  .nav-font-btn,
+  .nav-progress-btn,
+  .answer-field-input,
+  .projeto-lista label,
+  .lesson-timer-pill,
+  .gantt-lesson-btn {
+    min-height: 44px;
+  }
+
+  .nav-theme-btn,
+  .nav-font-btn,
+  .sym-btn,
+  .ecra-fechar {
+    min-width: 44px;
+  }
+
+  .code-editor,
+  .code-highlight-layer,
+  .code-gutter,
+  .answer-field-input,
+  .input-field,
+  .select-field,
+  .code-input-inline {
+    font-size: max(16px, var(--text-sm));
+  }
+}

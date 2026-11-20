@@ -6,7 +6,7 @@ export const pythonTrack: Track = {
   fullTitle: 'Python do Zero Absoluto à Caixa Registadora',
   summary:
     'Pensamento computacional desde a primeira linha de código até à leitura e validação real das 5 078 vendas da Mercearia.',
-  engineLabel: 'Python 3.12 (Pyodide)',
+  engineLabel: 'Python 3.14 (Pyodide)',
   lessons: [
     {
       id: 'py-00-pensamento',
