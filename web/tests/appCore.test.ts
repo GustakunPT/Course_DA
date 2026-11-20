@@ -155,6 +155,29 @@ describe('editorHistory', () => {
     expect(redoEditor(ed)).toBe(false);
   });
 
+  it('escrever logo a seguir noutra etapa não apaga o estado inicial dessa etapa', () => {
+    const outra = novoEditor('');
+    outra.value = 'a';
+    recordEditorInput(outra);
+    // Menos de 500 ms depois, noutra etapa: a primeira tecla é um passo novo, não se junta à anterior.
+    state.lessonId = `teste-${Math.random()}`;
+    const ed = novoEditor('original');
+    ed.value = 'original!';
+    recordEditorInput(ed);
+    expect(undoEditor(ed)).toBe(true);
+    expect(ed.value).toBe('original');
+  });
+
+  it('a primeira tecla nunca substitui o estado inicial, mesmo dentro da janela de 500 ms', () => {
+    const ed = novoEditor('');
+    ed.value = 'x';
+    recordEditorInput(ed);
+    ed.value = 'xy';
+    recordEditorInput(ed);
+    undoEditor(ed);
+    expect(ed.value).toBe('');
+  });
+
   it('cada separador tem o seu histórico', () => {
     const ed = novoEditor('desafio');
     applyEditorEdit(ed, 'desafio 2', 9, 9);
