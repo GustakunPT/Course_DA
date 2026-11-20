@@ -1,0 +1,44 @@
+# Configuração das ferramentas de Python. O projeto não é um pacote instalável:
+# este ficheiro só guarda as regras das ferramentas que correm no CI.
+#   ruff check .          (estilo e erros comuns)
+#   ruff format --check . (formatação)
+#   mypy                  (tipos dos scripts de src/)
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+# Os exercícios das semanas e os cadernos são escritos por quem está a aprender.
+extend-exclude = ["exercicios", "cadernos", "exemplo-projeto-turismo-algarve", "web"]
+
+[tool.ruff.format]
+# Os blocos de código das lições (.md) têm comentários alinhados à mão, de propósito.
+exclude = ["*.md"]
+
+[tool.ruff.lint]
+# E/W: estilo PEP 8 · F: erros reais (nomes indefinidos, imports por usar)
+# I: ordem dos imports · B: armadilhas comuns · UP: sintaxe moderna de Python
+# ANN: todas as funções de src/ têm tipos nos parâmetros e no retorno.
+select = ["E", "W", "F", "I", "B", "UP", "ANN"]
+# Muitas linhas longas são frases em português dentro de strings: não vale a pena parti-las.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Modelo para o aluno completar: o import de csv é uma pista do que vai precisar.
+"src/caixa.py" = ["F401", "ANN"]
+# Nos testes do pytest as fixtures e as funções de teste dispensam anotações.
+"tests/**" = ["ANN"]
+"verificar.py" = ["ANN"]
+
+[tool.ruff.lint.isort]
+# Os scripts de src/ e o conftest são importados diretamente pelos testes (sys.path).
+known-first-party = ["auditoria_dados", "caixa", "carregar_base", "conftest", "gerar_dados", "graficos"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["src"]
+# A Caixa Registadora é o modelo que o aluno completa: fica de fora.
+exclude = ['src/caixa\.py']
+strict_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
