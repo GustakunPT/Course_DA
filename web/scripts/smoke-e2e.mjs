@@ -84,10 +84,12 @@ async function run() {
       await page.keyboard.press('Escape');
 
       // 4) Trilha SQL + execução no Worker SQLite
-      await page.locator('[data-select-track="sql"]').click();
+      // A trilha aparece na barra de topo e nos botões do índice lateral: usa-se a da barra de topo.
+      await page.locator('.track-strip [data-select-track="sql"]').click();
       await page.locator('h1', { hasText: 'SELECT' }).waitFor({ state: 'visible' });
       await page.locator('[data-wb-tab="sqlfree"]').click();
-      await page.locator('[data-action="run-code"]').click();
+      // O resultado vazio também tem um botão "Executar código atual": usa-se o botão principal da bancada.
+      await page.locator('.workbench-actions [data-action="run-code"]').click();
       await page
         .locator('.output-panel table.data-table tbody tr')
         .first()
