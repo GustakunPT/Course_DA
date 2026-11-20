@@ -14,7 +14,8 @@ const MERGE_WINDOW_MS = 500;
 
 const editorUndoStacks = new Map<string, EditorSnapshot[]>();
 const editorRedoStacks = new Map<string, EditorSnapshot[]>();
-let lastSnapshotTime = 0;
+/** Última tecla registada: só se junta a ela uma tecla do mesmo histórico, dentro da janela. */
+let ultimaTecla: { chave: string; tempo: number } | null = null;
 
 function editorHistoryKey(): string {
   return `${state.lessonId}:${state.wbTab}:${state.practiceIdx}`;
@@ -48,8 +49,12 @@ export function recordEditorInput(ed: HTMLTextAreaElement): void {
   const undo = getStack(editorUndoStacks);
   const redo = getStack(editorRedoStacks);
   const now = performance.now();
+  const chave = editorHistoryKey();
   const snap = snapshotOf(ed);
-  if (undo.length > 0 && now - lastSnapshotTime < MERGE_WINDOW_MS) {
+  // undo[0] é o estado inicial do editor: nunca se junta a ele, senão o Desfazer deixava de lá voltar.
+  const juntar =
+    ultimaTecla !== null && ultimaTecla.chave === chave && now - ultimaTecla.tempo < MERGE_WINDOW_MS && undo.length > 1;
+  if (juntar) {
     undo[undo.length - 1] = snap;
   } else {
     if (undo.length === 0 || undo[undo.length - 1].value !== snap.value) {
@@ -57,7 +62,7 @@ export function recordEditorInput(ed: HTMLTextAreaElement): void {
       if (undo.length > MAX_SNAPSHOTS) undo.shift();
     }
   }
-  lastSnapshotTime = now;
+  ultimaTecla = { chave, tempo: now };
   redo.length = 0;
 }
 
@@ -74,7 +79,7 @@ export function applyEditorEdit(ed: HTMLTextAreaElement, nextValue: string, next
   undo.push({ value: nextValue, start: nextStart, end: nextEnd });
   if (undo.length > MAX_SNAPSHOTS) undo.shift();
   redo.length = 0;
-  lastSnapshotTime = 0;
+  ultimaTecla = null;
   ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
@@ -82,7 +87,7 @@ function restoreSnapshot(ed: HTMLTextAreaElement, snap: EditorSnapshot): void {
   ed.value = snap.value;
   ed.selectionStart = snap.start;
   ed.selectionEnd = snap.end;
-  lastSnapshotTime = 0;
+  ultimaTecla = null;
   ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
