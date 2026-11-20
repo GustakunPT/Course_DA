@@ -4,7 +4,8 @@ export const sqlTrack: Track = {
   id: 'sql',
   shortTitle: '2. SQL',
   fullTitle: 'SQL para Analistas de Dados',
-  summary: 'Consultas relacionais ao vivo sobre produtos (15), clientes (120) e vendas (5 078): filtros, agregações, JOINs, CTEs e Window Functions.',
+  summary:
+    'Consultas relacionais ao vivo sobre produtos (15), clientes (120) e vendas (5 078): filtros, agregações, JOINs, CTEs e Window Functions.',
   engineLabel: 'SQLite WebAssembly (5 078 vendas)',
   lessons: [
     {
@@ -13,7 +14,8 @@ export const sqlTrack: Track = {
       title: 'SELECT, DISTINCT e LIMIT: explorar tabelas',
       lede: 'Em SQL pedes exatamente as colunas de que precisas, espreitas as primeiras linhas com LIMIT e removes repetidos com DISTINCT.',
       analogyTitle: 'Pedir ao fiel de armazém apenas as colunas necessárias',
-      analogyBody: 'Em vez de despejar os 5 078 talões todos em cima do balcão (SELECT *), dizes exatamente que colunas queres ver e limitas a amostra às primeiras 5 ou 10 linhas.',
+      analogyBody:
+        'Em vez de despejar os 5 078 talões todos em cima do balcão (SELECT *), dizes exatamente que colunas queres ver e limitas a amostra às primeiras 5 ou 10 linhas.',
       concepts: [
         'SELECT escolhe colunas específicas; FROM indica a tabela (produtos, clientes ou vendas).',
         'SELECT DISTINCT devolve apenas os valores únicos de uma coluna (por exemplo, as cidades onde temos clientes).',
@@ -23,16 +25,29 @@ export const sqlTrack: Track = {
       ],
       referenceTitle: 'Sintaxe base de consulta (W3Schools SQL)',
       referenceRows: [
-        { syntax: 'SELECT col1, col2 FROM tab;', meaning: 'Lê apenas as colunas indicadas', example: 'SELECT nome, preco FROM produtos;' },
-        { syntax: 'SELECT DISTINCT col FROM tab;', meaning: 'Lista valores sem duplicados', example: 'SELECT DISTINCT categoria FROM produtos;' },
-        { syntax: 'LIMIT n;', meaning: 'Devolve apenas as primeiras n linhas', example: 'SELECT * FROM vendas LIMIT 5;' },
+        {
+          syntax: 'SELECT col1, col2 FROM tab;',
+          meaning: 'Lê apenas as colunas indicadas',
+          example: 'SELECT nome, preco FROM produtos;',
+        },
+        {
+          syntax: 'SELECT DISTINCT col FROM tab;',
+          meaning: 'Lista valores sem duplicados',
+          example: 'SELECT DISTINCT categoria FROM produtos;',
+        },
+        {
+          syntax: 'LIMIT n;',
+          meaning: 'Devolve apenas as primeiras n linhas',
+          example: 'SELECT * FROM vendas LIMIT 5;',
+        },
       ],
       engine: 'sql',
       exampleCode: `SELECT nome, categoria, preco
 FROM produtos
 LIMIT 8;`,
       sqlChallenge: {
-        description: 'Lista as categorias únicas existentes na tabela produtos (uma coluna chamada categoria), ordenadas alfabeticamente.',
+        description:
+          'Lista as categorias únicas existentes na tabela produtos (uma coluna chamada categoria), ordenadas alfabeticamente.',
         starterSql: `-- Devolve as categorias únicas da tabela produtos por ordem alfabética
 SELECT categoria
 FROM produtos;`,
@@ -52,12 +67,7 @@ ORDER BY categoria ASC;`,
       },
       quiz: {
         question: 'Qual cláusula SQL impede que a mesma cidade apareça repetida 20 vezes no resultado?',
-        options: [
-          'UNIQUE',
-          'DISTINCT',
-          'GROUP',
-          'LIMIT',
-        ],
+        options: ['UNIQUE', 'DISTINCT', 'GROUP', 'LIMIT'],
         correctIndex: 1,
         explanation: 'SELECT DISTINCT cidade FROM clientes devolve apenas uma linha por cada cidade distinta.',
       },
@@ -68,18 +78,27 @@ ORDER BY categoria ASC;`,
       title: 'WHERE, IN, BETWEEN e LIKE: filtrar registos',
       lede: 'A cláusula WHERE filtra linhas antes de qualquer agrupamento, combinando comparações numéricas, intervalos de datas e padrões de texto.',
       analogyTitle: 'A peneira à entrada da contabilidade',
-      analogyBody: 'O WHERE funciona linha a linha: cada venda passa pela peneira; se cumprir a regra segue para o resultado, se não cumprir fica de fora.',
+      analogyBody:
+        'O WHERE funciona linha a linha: cada venda passa pela peneira; se cumprir a regra segue para o resultado, se não cumprir fica de fora.',
       concepts: [
         'BETWEEN inclui ambos os extremos: preco BETWEEN 1.00 AND 3.00 apanha 1.00 e 3.00.',
         "IN ('Porto', 'Gaia') substitui vários OR repetidos de forma muito mais limpa. Em SQL o texto vai sempre entre aspas simples; as aspas duplas são para nomes de colunas.",
         "LIKE usa % como joker para qualquer sequência de caracteres (ex.: nome LIKE '%Silva').",
         'NULL quer dizer "valor desconhecido": WHERE coluna = NULL nunca devolve linhas. Usa WHERE coluna IS NULL ou IS NOT NULL.',
-        'O AND é avaliado antes do OR: WHERE cidade = \'Porto\' OR cidade = \'Braga\' AND preco > 2 só aplica o preço a Braga. Usa parênteses sempre que misturares os dois.',
+        "O AND é avaliado antes do OR: WHERE cidade = 'Porto' OR cidade = 'Braga' AND preco > 2 só aplica o preço a Braga. Usa parênteses sempre que misturares os dois.",
       ],
       referenceTitle: 'Operadores de filtro em WHERE (W3Schools)',
       referenceRows: [
-        { syntax: 'WHERE col IN (v1, v2)', meaning: 'Corresponde a qualquer valor da lista', example: "WHERE cidade IN ('Porto', 'Braga')" },
-        { syntax: 'WHERE col BETWEEN a AND b', meaning: 'Intervalo inclusivo [a, b]', example: "WHERE data BETWEEN '2025-12-01' AND '2025-12-31'" },
+        {
+          syntax: 'WHERE col IN (v1, v2)',
+          meaning: 'Corresponde a qualquer valor da lista',
+          example: "WHERE cidade IN ('Porto', 'Braga')",
+        },
+        {
+          syntax: 'WHERE col BETWEEN a AND b',
+          meaning: 'Intervalo inclusivo [a, b]',
+          example: "WHERE data BETWEEN '2025-12-01' AND '2025-12-31'",
+        },
         { syntax: "WHERE col LIKE 'P%'", meaning: 'Pesquisa por padrão de texto', example: "WHERE nome LIKE '%(kg)%'" },
       ],
       engine: 'sql',
@@ -87,7 +106,8 @@ ORDER BY categoria ASC;`,
 FROM produtos
 WHERE categoria = 'Mercearia' AND preco >= 1.20;`,
       sqlChallenge: {
-        description: 'Seleciona id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termina em "Santos".',
+        description:
+          'Seleciona id, nome e cidade de todos os clientes das cidades "Porto" ou "Matosinhos" cujo nome termina em "Santos".',
         starterSql: `SELECT id, nome, cidade
 FROM clientes
 WHERE cidade IN ('Porto', 'Matosinhos');`,
@@ -97,12 +117,17 @@ WHERE cidade IN ('Porto', 'Matosinhos')
   AND nome LIKE '%Santos';`,
         hint: "Junta AND nome LIKE '%Santos' à condição WHERE.",
         validate: (_cols, rows) => {
-          const certas = rows.every((r) => ['Porto', 'Matosinhos'].includes(String(r[2])) && String(r[1]).endsWith('Santos'));
+          const certas = rows.every(
+            (r) => ['Porto', 'Matosinhos'].includes(String(r[2])) && String(r[1]).endsWith('Santos'),
+          );
           const cidades = new Set(rows.map((r) => String(r[2])));
           const ok = certas && rows.length === 9 && cidades.has('Porto') && cidades.has('Matosinhos');
           let message = 'Certo: encontraste os 9 clientes Santos (6 do Porto e 3 de Matosinhos).';
-          if (!certas) message = "Há linhas a mais: confirma o filtro de cidade IN ('Porto', 'Matosinhos') e o nome LIKE '%Santos'.";
-          else if (!cidades.has('Matosinhos') || !cidades.has('Porto')) message = 'Falta uma das cidades: devem aparecer clientes do Porto e de Matosinhos.';
+          if (!certas)
+            message =
+              "Há linhas a mais: confirma o filtro de cidade IN ('Porto', 'Matosinhos') e o nome LIKE '%Santos'.";
+          else if (!cidades.has('Matosinhos') || !cidades.has('Porto'))
+            message = 'Falta uma das cidades: devem aparecer clientes do Porto e de Matosinhos.';
           else if (!ok) message = `Encontraste ${rows.length} clientes, mas são 9 no total. Tiraste algum LIMIT?`;
           return { passed: ok, message };
         },
@@ -116,7 +141,8 @@ WHERE cidade IN ('Porto', 'Matosinhos')
           'Têm a mesma precedência, por isso dá erro',
         ],
         correctIndex: 1,
-        explanation: 'Tal como a multiplicação precede a soma, o AND liga mais forte do que o OR. Usa sempre parênteses quando combinas ambos.',
+        explanation:
+          'Tal como a multiplicação precede a soma, o AND liga mais forte do que o OR. Usa sempre parênteses quando combinas ambos.',
       },
     },
     {
@@ -125,7 +151,8 @@ WHERE cidade IN ('Porto', 'Matosinhos')
       title: 'ORDER BY e colunas calculadas com AS',
       lede: 'Cria métricas por linha como quantidade * preco, atribui-lhes nomes claros com AS e ordena o ranking com ORDER BY.',
       analogyTitle: 'Arrumar as faturas da mais alta para a mais baixa',
-      analogyBody: 'Em vendas.csv não existe coluna subtotal: tens quantidade e preco separados. O SQL calcula o valor da linha em tempo real e ordena o pódio.',
+      analogyBody:
+        'Em vendas.csv não existe coluna subtotal: tens quantidade e preco separados. O SQL calcula o valor da linha em tempo real e ordena o pódio.',
       concepts: [
         'quantidade * preco AS subtotal cria uma coluna derivada legível no relatório.',
         'ORDER BY coluna DESC ordena do maior para o menor; ASC (padrão) ordena do menor para o maior.',
@@ -135,9 +162,17 @@ WHERE cidade IN ('Porto', 'Matosinhos')
       ],
       referenceTitle: 'Cálculos e ordenação',
       referenceRows: [
-        { syntax: 'expr AS alias', meaning: 'Dá nome a uma coluna calculada', example: 'ROUND(quantidade * preco, 2) AS subtotal' },
+        {
+          syntax: 'expr AS alias',
+          meaning: 'Dá nome a uma coluna calculada',
+          example: 'ROUND(quantidade * preco, 2) AS subtotal',
+        },
         { syntax: 'ORDER BY col DESC', meaning: 'Ordena por ordem decrescente', example: 'ORDER BY preco DESC' },
-        { syntax: 'ORDER BY c1 DESC, c2 ASC', meaning: 'Ordenação com critério de desempate', example: 'ORDER BY subtotal DESC, id ASC' },
+        {
+          syntax: 'ORDER BY c1 DESC, c2 ASC',
+          meaning: 'Ordenação com critério de desempate',
+          example: 'ORDER BY subtotal DESC, id ASC',
+        },
       ],
       engine: 'sql',
       exampleCode: `SELECT
@@ -150,7 +185,8 @@ FROM vendas
 ORDER BY subtotal DESC, data ASC
 LIMIT 6;`,
       sqlChallenge: {
-        description: 'Lista os 5 produtos mais caros da tabela produtos mostrando nome, preco e preco_com_iva (preco * 1.23 arredondado a 2 casas com ROUND), do mais caro para o mais barato.',
+        description:
+          'Lista os 5 produtos mais caros da tabela produtos mostrando nome, preco e preco_com_iva (preco * 1.23 arredondado a 2 casas com ROUND), do mais caro para o mais barato.',
         starterSql: `SELECT
   nome,
   preco
@@ -164,7 +200,11 @@ ORDER BY preco DESC
 LIMIT 5;`,
         hint: 'Calcula ROUND(preco * 1.23, 2) AS preco_com_iva e termina com ORDER BY preco DESC LIMIT 5.',
         validate: (cols, rows) => {
-          const ok = rows.length === 5 && cols.length === 3 && rows[0][0] === 'Azeite' && Math.abs(Number(rows[0][2]) - 9.23) < 0.02;
+          const ok =
+            rows.length === 5 &&
+            cols.length === 3 &&
+            rows[0][0] === 'Azeite' &&
+            Math.abs(Number(rows[0][2]) - 9.23) < 0.02;
           return {
             passed: ok,
             message: ok
@@ -182,7 +222,8 @@ LIMIT 5;`,
           'SELECT -> FROM -> WHERE -> LIMIT -> ORDER BY',
         ],
         correctIndex: 1,
-        explanation: 'Em SQL a ordem gramatical fixa é: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY e por fim LIMIT.',
+        explanation:
+          'Em SQL a ordem gramatical fixa é: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY e por fim LIMIT.',
       },
     },
     {
@@ -191,7 +232,8 @@ LIMIT 5;`,
       title: 'GROUP BY e funções de agregação',
       lede: 'Confirma em SQL os 4 números da Caixa Registadora usando COUNT, SUM, AVG, MIN e MAX com GROUP BY.',
       analogyTitle: 'Separar os talões em caixas por artigo e somar cada caixa',
-      analogyBody: 'No fecho da loja, imagina despejar os 5 078 talões na mesa e abrir uma caixa para cada produto ("Azeite", "Leite", "Pão"). Depois de distribuíres todos os talões pelas caixas, fechas cada caixa numa única folha-resumo com o total de euros, o número de talões e a média — é exatamente isso que o GROUP BY faz.',
+      analogyBody:
+        'No fecho da loja, imagina despejar os 5 078 talões na mesa e abrir uma caixa para cada produto ("Azeite", "Leite", "Pão"). Depois de distribuíres todos os talões pelas caixas, fechas cada caixa numa única folha-resumo com o total de euros, o número de talões e a média — é exatamente isso que o GROUP BY faz.',
       concepts: [
         'COUNT(*) conta linhas, COUNT(coluna) ignora NULL e COUNT(DISTINCT coluna) conta valores únicos (ex.: clientes diferentes): são três perguntas distintas.',
         'SUM() soma valores, AVG() calcula a média e MIN()/MAX() devolvem extremos dentro de cada grupo.',
@@ -201,7 +243,11 @@ LIMIT 5;`,
       ],
       referenceTitle: 'Funções de agregação SQL (W3Schools)',
       referenceRows: [
-        { syntax: 'COUNT(*) / COUNT(DISTINCT c)', meaning: 'Conta linhas / valores distintos', example: 'COUNT(DISTINCT cliente_id)' },
+        {
+          syntax: 'COUNT(*) / COUNT(DISTINCT c)',
+          meaning: 'Conta linhas / valores distintos',
+          example: 'COUNT(DISTINCT cliente_id)',
+        },
         { syntax: 'SUM(expr)', meaning: 'Soma todos os valores do grupo', example: 'SUM(quantidade * preco)' },
         { syntax: 'AVG(expr)', meaning: 'Calcula a média do grupo', example: 'ROUND(AVG(quantidade * preco), 2)' },
         { syntax: 'MIN(c) / MAX(c)', meaning: 'Valor mínimo e máximo', example: 'MIN(data), MAX(data)' },
@@ -216,7 +262,8 @@ GROUP BY produto
 ORDER BY faturacao_eur DESC
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Descobre os 3 dias com maior faturação em 2025: devolve as colunas data e faturacao_dia (arredondada a 2 casas), ordenadas da maior para a menor.',
+        description:
+          'Descobre os 3 dias com maior faturação em 2025: devolve as colunas data e faturacao_dia (arredondada a 2 casas), ordenadas da maior para a menor.',
         starterSql: `SELECT
   data,
   ROUND(SUM(quantidade * preco), 2) AS faturacao_dia
@@ -259,19 +306,28 @@ LIMIT 3;`,
       title: 'HAVING vs WHERE: filtrar grupos agregados',
       lede: 'O WHERE não consegue ver o resultado de um SUM() porque corre antes do agrupamento; para filtrar totais por grupo existe o HAVING.',
       analogyTitle: 'Peneirar antes de pesar vs escolher só os sacos pesados',
-      analogyBody: 'WHERE retira maçãs estragadas antes de encher os sacos; HAVING pesa os sacos já fechados pelo GROUP BY e fica apenas com os sacos acima de 2 500 €.',
+      analogyBody:
+        'WHERE retira maçãs estragadas antes de encher os sacos; HAVING pesa os sacos já fechados pelo GROUP BY e fica apenas com os sacos acima de 2 500 €.',
       concepts: [
         'WHERE corre antes do GROUP BY e filtra linhas individuais (não conhece SUM, COUNT nem AVG).',
         'HAVING corre depois do GROUP BY e é o único sítio onde podes filtrar totais, contagens ou médias de cada grupo.',
         'Podes combinar os dois na mesma query: WHERE escolhe o período ou cidade; HAVING escolhe apenas os grupos que ultrapassam uma meta.',
-        'Performance prática: sempre que a condição depender da linha (ex.: data >= \'2025-07-01\'), põe-na no WHERE para o motor agrupar menos dados.',
+        "Performance prática: sempre que a condição depender da linha (ex.: data >= '2025-07-01'), põe-na no WHERE para o motor agrupar menos dados.",
         'Uso clássico de auditoria: GROUP BY chave HAVING COUNT(*) > 1 encontra imediatamente códigos ou vendas duplicadas numa tabela.',
       ],
       referenceTitle: 'Pipeline de filtragem em SQL',
       referenceRows: [
-        { syntax: "WHERE data >= '2025-07-01'", meaning: 'Filtra linhas brutas antes de agrupar', example: 'Só 2.º semestre' },
+        {
+          syntax: "WHERE data >= '2025-07-01'",
+          meaning: 'Filtra linhas brutas antes de agrupar',
+          example: 'Só 2.º semestre',
+        },
         { syntax: 'GROUP BY produto', meaning: 'Agrega linhas por chave', example: 'Um grupo por artigo' },
-        { syntax: 'HAVING SUM(quantidade) > 850', meaning: 'Filtra os grupos pelo agregado', example: 'Artigos de alta rotação' },
+        {
+          syntax: 'HAVING SUM(quantidade) > 850',
+          meaning: 'Filtra os grupos pelo agregado',
+          example: 'Artigos de alta rotação',
+        },
       ],
       engine: 'sql',
       exampleCode: `SELECT
@@ -283,7 +339,8 @@ GROUP BY produto
 HAVING SUM(quantidade * preco) > 2000
 ORDER BY faturacao DESC;`,
       sqlChallenge: {
-        description: 'Encontra todos os produtos que venderam mais de 880 unidades no total do ano: mostra produto e unidades, ordenados por unidades DESC.',
+        description:
+          'Encontra todos os produtos que venderam mais de 880 unidades no total do ano: mostra produto e unidades, ordenados por unidades DESC.',
         starterSql: `SELECT
   produto,
   SUM(quantidade) AS unidades
@@ -308,7 +365,8 @@ ORDER BY unidades DESC;`,
         },
       },
       quiz: {
-        question: 'Porque falha a query SELECT cliente_id, COUNT(*) FROM vendas WHERE COUNT(*) > 50 GROUP BY cliente_id?',
+        question:
+          'Porque falha a query SELECT cliente_id, COUNT(*) FROM vendas WHERE COUNT(*) > 50 GROUP BY cliente_id?',
         options: [
           'Porque COUNT(*) não pode ser usado com cliente_id.',
           'Porque agregações não podem ir no WHERE; vão no HAVING.',
@@ -316,7 +374,8 @@ ORDER BY unidades DESC;`,
           'Porque falta dar um nome à contagem com AS.',
         ],
         correctIndex: 1,
-        explanation: 'No momento em que o WHERE é executado os grupos ainda não existem; filtros sobre agregações pertencem ao HAVING.',
+        explanation:
+          'No momento em que o WHERE é executado os grupos ainda não existem; filtros sobre agregações pertencem ao HAVING.',
       },
     },
     {
@@ -325,7 +384,8 @@ ORDER BY unidades DESC;`,
       title: 'INNER JOIN e LEFT JOIN: cruzar tabelas',
       lede: 'A tabela vendas guarda apenas cliente_id e produto_id; com JOIN ligamos esses códigos às cidades dos clientes e às categorias dos produtos.',
       analogyTitle: 'Cruzar o número do cartão de cliente com o ficheiro de moradas',
-      analogyBody: 'O talão só imprime "Cliente #107" para não repetir nome e cidade 50 vezes. Com JOIN juntamos o talão à ficha #107 através da chave em comum.',
+      analogyBody:
+        'O talão só imprime "Cliente #107" para não repetir nome e cidade 50 vezes. Com JOIN juntamos o talão à ficha #107 através da chave em comum.',
       concepts: [
         'INNER JOIN devolve apenas linhas que têm correspondência nas duas tabelas.',
         'LEFT JOIN mantém todas as linhas da tabela da esquerda, preenchendo com NULL se não houver par à direita (perfeito para achar clientes sem compras!).',
@@ -335,9 +395,21 @@ ORDER BY unidades DESC;`,
       ],
       referenceTitle: 'Tipos de JOIN em SQL (W3Schools)',
       referenceRows: [
-        { syntax: 'INNER JOIN t2 ON t1.fk = t2.id', meaning: 'Interseção entre duas tabelas', example: 'INNER JOIN produtos p ON p.id = v.produto_id' },
-        { syntax: 'LEFT JOIN t2 ON t1.id = t2.fk', meaning: 'Preserva tudo da esquerda (mesmo sem par)', example: 'LEFT JOIN vendas v ON v.cliente_id = c.id' },
-        { syntax: 'WHERE t2.fk IS NULL', meaning: 'Anti-join: encontra registos sem par', example: 'Clientes com zero compras' },
+        {
+          syntax: 'INNER JOIN t2 ON t1.fk = t2.id',
+          meaning: 'Interseção entre duas tabelas',
+          example: 'INNER JOIN produtos p ON p.id = v.produto_id',
+        },
+        {
+          syntax: 'LEFT JOIN t2 ON t1.id = t2.fk',
+          meaning: 'Preserva tudo da esquerda (mesmo sem par)',
+          example: 'LEFT JOIN vendas v ON v.cliente_id = c.id',
+        },
+        {
+          syntax: 'WHERE t2.fk IS NULL',
+          meaning: 'Anti-join: encontra registos sem par',
+          example: 'Clientes com zero compras',
+        },
       ],
       engine: 'sql',
       exampleCode: `SELECT
@@ -349,7 +421,8 @@ INNER JOIN produtos p ON p.id = v.produto_id
 GROUP BY p.categoria
 ORDER BY faturacao_eur DESC;`,
       sqlChallenge: {
-        description: 'Cruza vendas com clientes para calcular a faturação total por cidade: devolve cidade e faturacao_eur (arredondada a 2 casas), ordenadas da maior faturação para a menor.',
+        description:
+          'Cruza vendas com clientes para calcular a faturação total por cidade: devolve cidade e faturacao_eur (arredondada a 2 casas), ordenadas da maior faturação para a menor.',
         starterSql: `SELECT
   c.cidade,
   ROUND(SUM(v.quantidade * v.preco), 2) AS faturacao_eur
@@ -376,15 +449,12 @@ ORDER BY faturacao_eur DESC;`,
         },
       },
       quiz: {
-        question: 'Queres listar todos os 120 clientes, incluindo os que nunca compraram nada (mostrando 0 €). Que JOIN deves usar a partir de clientes?',
-        options: [
-          'INNER JOIN vendas',
-          'LEFT JOIN vendas',
-          'CROSS JOIN vendas',
-          'RIGHT JOIN vendas',
-        ],
+        question:
+          'Queres listar todos os 120 clientes, incluindo os que nunca compraram nada (mostrando 0 €). Que JOIN deves usar a partir de clientes?',
+        options: ['INNER JOIN vendas', 'LEFT JOIN vendas', 'CROSS JOIN vendas', 'RIGHT JOIN vendas'],
         correctIndex: 1,
-        explanation: 'LEFT JOIN a partir de clientes preserva os 120 clientes mesmo que algum não tenha linhas correspondentes em vendas.',
+        explanation:
+          'LEFT JOIN a partir de clientes preserva os 120 clientes mesmo que algum não tenha linhas correspondentes em vendas.',
       },
     },
     {
@@ -393,7 +463,8 @@ ORDER BY faturacao_eur DESC;`,
       title: 'CASE WHEN, COALESCE e limpeza em SQL',
       lede: 'Nem toda a limpeza exige Python: o SQL permite criar segmentos de valor com CASE WHEN e tratar vazios com COALESCE e NULLIF.',
       analogyTitle: 'Carimbar clientes Ouro, Prata e Bronze na própria consulta',
-      analogyBody: 'CASE WHEN é o if / elif / else do SQL: avalia condições por ordem e devolve uma etiqueta nova para cada linha ou cliente.',
+      analogyBody:
+        'CASE WHEN é o if / elif / else do SQL: avalia condições por ordem e devolve uma etiqueta nova para cada linha ou cliente.',
       concepts: [
         'CASE WHEN cond THEN valor ELSE outro END cria colunas categóricas ou bandeiras binárias (1/0).',
         'NULLIF(coluna, "") transforma texto vazio "" num verdadeiro NULL.',
@@ -403,8 +474,16 @@ ORDER BY faturacao_eur DESC;`,
       ],
       referenceTitle: 'Expressões condicionais e nulos',
       referenceRows: [
-        { syntax: 'CASE WHEN ... THEN ... ELSE ... END', meaning: 'Lógica condicional em SQL', example: "CASE WHEN preco >= 3 THEN 'Premium' ELSE 'Base' END" },
-        { syntax: 'COALESCE(x, 0)', meaning: 'Substitui NULL por valor padrão', example: 'COALESCE(NULLIF(quantidade, ""), "1")' },
+        {
+          syntax: 'CASE WHEN ... THEN ... ELSE ... END',
+          meaning: 'Lógica condicional em SQL',
+          example: "CASE WHEN preco >= 3 THEN 'Premium' ELSE 'Base' END",
+        },
+        {
+          syntax: 'COALESCE(x, 0)',
+          meaning: 'Substitui NULL por valor padrão',
+          example: 'COALESCE(NULLIF(quantidade, ""), "1")',
+        },
         { syntax: 'TRIM(col)', meaning: 'Remove espaços nas extremidades', example: 'TRIM(produto)' },
       ],
       engine: 'sql',
@@ -415,7 +494,8 @@ ORDER BY faturacao_eur DESC;`,
   REPLACE(preco, ',', '.') AS preco_ponto
 FROM vendas_sujas;`,
       sqlChallenge: {
-        description: 'Classifica os 15 artigos de produtos nas faixas "Económico" (preco < 1.00), "Intermédio" (preco <= 3.00) e "Premium" (acima de 3.00): conta quantos produtos há em cada faixa (colunas faixa e qtd_produtos, ordenadas por qtd_produtos DESC).',
+        description:
+          'Classifica os 15 artigos de produtos nas faixas "Económico" (preco < 1.00), "Intermédio" (preco <= 3.00) e "Premium" (acima de 3.00): conta quantos produtos há em cada faixa (colunas faixa e qtd_produtos, ordenadas por qtd_produtos DESC).',
         starterSql: `SELECT
   CASE
     WHEN preco < 1.00 THEN 'Económico'
@@ -450,12 +530,7 @@ ORDER BY qtd_produtos DESC;`,
       },
       quiz: {
         question: 'Qual é o resultado de COALESCE(NULL, NULL, "Porto", "Lisboa")?',
-        options: [
-          'NULL',
-          '"Porto"',
-          '"Lisboa"',
-          '"Porto, Lisboa"',
-        ],
+        options: ['NULL', '"Porto"', '"Lisboa"', '"Porto, Lisboa"'],
         correctIndex: 1,
         explanation: 'COALESCE avalia os argumentos da esquerda para a direita e devolve o primeiro que não seja NULL.',
       },
@@ -466,7 +541,8 @@ ORDER BY qtd_produtos DESC;`,
       title: 'CTEs (WITH) e Window Functions (OVER)',
       lede: 'O nível profissional do analista SQL: organizar consultas em etapas legíveis com WITH e calcular acumulados e rankings sem colapsar linhas.',
       analogyTitle: 'A coluna de saldo acumulado no extrato bancário',
-      analogyBody: 'Um GROUP BY esmaga os 12 meses numa linha só. Uma Window Function com OVER (ORDER BY mes) mantém cada mês visível e acrescenta ao lado o acumulado do ano até àquele mês.',
+      analogyBody:
+        'Um GROUP BY esmaga os 12 meses numa linha só. Uma Window Function com OVER (ORDER BY mes) mantém cada mês visível e acrescenta ao lado o acumulado do ano até àquele mês.',
       concepts: [
         'WITH nome_cte AS (...) divide queries complexas em blocos limpos e fáceis de auditar.',
         'SUM(valor) OVER (ORDER BY mes) calcula o total acumulado (running total) linha a linha sem colapsar a tabela.',
@@ -476,10 +552,26 @@ ORDER BY qtd_produtos DESC;`,
       ],
       referenceTitle: 'CTEs e funções de janela',
       referenceRows: [
-        { syntax: 'WITH cte AS (SELECT ...) SELECT ...', meaning: 'Tabela temporária nomeada para a query', example: 'WITH mensal AS (...)' },
-        { syntax: 'SUM(x) OVER (ORDER BY data)', meaning: 'Soma acumulada ordenada', example: 'Acumulado anual mês a mês' },
-        { syntax: 'RANK() OVER (PARTITION BY g ORDER BY x DESC)', meaning: 'Posição no ranking por grupo', example: 'Top produto por categoria' },
-        { syntax: 'ROW_NUMBER() OVER (PARTITION BY id ORDER BY data DESC) = 1', meaning: 'Deduplica mantendo o registo mais recente por chave', example: 'Última compra de cada cliente' },
+        {
+          syntax: 'WITH cte AS (SELECT ...) SELECT ...',
+          meaning: 'Tabela temporária nomeada para a query',
+          example: 'WITH mensal AS (...)',
+        },
+        {
+          syntax: 'SUM(x) OVER (ORDER BY data)',
+          meaning: 'Soma acumulada ordenada',
+          example: 'Acumulado anual mês a mês',
+        },
+        {
+          syntax: 'RANK() OVER (PARTITION BY g ORDER BY x DESC)',
+          meaning: 'Posição no ranking por grupo',
+          example: 'Top produto por categoria',
+        },
+        {
+          syntax: 'ROW_NUMBER() OVER (PARTITION BY id ORDER BY data DESC) = 1',
+          meaning: 'Deduplica mantendo o registo mais recente por chave',
+          example: 'Última compra de cada cliente',
+        },
       ],
       engine: 'sql',
       exampleCode: `WITH por_produto AS (
@@ -499,7 +591,8 @@ SELECT
 FROM por_produto
 ORDER BY categoria, pos_na_categoria;`,
       sqlChallenge: {
-        description: 'Calcula a faturação mensal de 2025 (SUBSTR(data, 1, 7) AS mes) e o acumulado anual mês a mês: devolve 12 linhas com mes, faturacao_mes e acumulado_ano.',
+        description:
+          'Calcula a faturação mensal de 2025 (SUBSTR(data, 1, 7) AS mes) e o acumulado anual mês a mês: devolve 12 linhas com mes, faturacao_mes e acumulado_ano.',
         starterSql: `WITH mensal AS (
   SELECT
     SUBSTR(data, 1, 7) AS mes,
@@ -543,14 +636,10 @@ ORDER BY mes;`,
       },
       quiz: {
         question: 'Qual cláusula dentro de OVER (...) reinicia o ranking ou a soma para cada categoria separadamente?',
-        options: [
-          'GROUP BY categoria',
-          'PARTITION BY categoria',
-          'ORDER BY categoria',
-          'SPLIT BY categoria',
-        ],
+        options: ['GROUP BY categoria', 'PARTITION BY categoria', 'ORDER BY categoria', 'SPLIT BY categoria'],
         correctIndex: 1,
-        explanation: 'PARTITION BY divide a janela por grupos (como categorias ou cidades) sem reduzir o número de linhas.',
+        explanation:
+          'PARTITION BY divide a janela por grupos (como categorias ou cidades) sem reduzir o número de linhas.',
       },
     },
     {
@@ -559,7 +648,8 @@ ORDER BY mes;`,
       title: 'Subqueries, EXISTS vs IN e UNION ALL',
       lede: 'Domina subconsultas escalares, verificação rápida de existência com EXISTS e consolidação de múltiplas tabelas com UNION ALL.',
       analogyTitle: 'O post-it no balcão antes de percorrer as prateleiras',
-      analogyBody: 'Antes de assinalares que produtos custam acima da média da loja, calculas o preço médio e escreves esse número num post-it colado no balcão — essa consulta pequena entre parênteses é a subquery. Depois, percorres cada prateleira a comparar com o número do post-it. Já o UNION ALL é empilhar duas pastas com a mesma capa numa só pilha.',
+      analogyBody:
+        'Antes de assinalares que produtos custam acima da média da loja, calculas o preço médio e escreves esse número num post-it colado no balcão — essa consulta pequena entre parênteses é a subquery. Depois, percorres cada prateleira a comparar com o número do post-it. Já o UNION ALL é empilhar duas pastas com a mesma capa numa só pilha.',
       concepts: [
         'Subquery escalar: devolve 1 único valor que entra numa comparação (ex.: WHERE preco > (SELECT AVG(preco) FROM produtos)).',
         'EXISTS (SELECT 1 FROM vendas v WHERE v.cliente_id = c.id ...) pára assim que encontra a primeira correspondência, sendo mais rápido e seguro do que IN/NOT IN.',
@@ -572,13 +662,27 @@ ORDER BY mes;`,
         'Coloca a query interior entre parênteses curvos () dentro do WHERE ou do FROM.',
         'Usa UNION ALL quando quiseres juntar duas listas de resultados numa tabela vertical única.',
       ],
-      proPractice: 'Em bases de dados de produção com milhões de registos, NOT EXISTS é muito mais seguro do que NOT IN porque NOT IN falha silenciosamente se a subquery devolver um único valor NULL.',
-      commonPitfall: 'Usar UNION simples por hábito quando não há duplicados para remover, desperdiçando memória num sort desnecessário (prefere UNION ALL).',
+      proPractice:
+        'Em bases de dados de produção com milhões de registos, NOT EXISTS é muito mais seguro do que NOT IN porque NOT IN falha silenciosamente se a subquery devolver um único valor NULL.',
+      commonPitfall:
+        'Usar UNION simples por hábito quando não há duplicados para remover, desperdiçando memória num sort desnecessário (prefere UNION ALL).',
       referenceTitle: 'Subconsultas e Operadores de Conjunto',
       referenceRows: [
-        { syntax: 'WHERE col > (SELECT AVG(col) FROM t)', meaning: 'Subquery escalar de comparação dinâmica', example: 'Artigos acima do preço médio' },
-        { syntax: 'WHERE EXISTS (SELECT 1 FROM t2 WHERE ...)', meaning: 'Filtra se existir pelo menos 1 registo relacionado', example: 'Clientes com compras de Azeite' },
-        { syntax: 'SELECT ... UNION ALL SELECT ...', meaning: 'Empilha duas consultas com as mesmas colunas', example: 'Comparar série Base vs Sazonal' },
+        {
+          syntax: 'WHERE col > (SELECT AVG(col) FROM t)',
+          meaning: 'Subquery escalar de comparação dinâmica',
+          example: 'Artigos acima do preço médio',
+        },
+        {
+          syntax: 'WHERE EXISTS (SELECT 1 FROM t2 WHERE ...)',
+          meaning: 'Filtra se existir pelo menos 1 registo relacionado',
+          example: 'Clientes com compras de Azeite',
+        },
+        {
+          syntax: 'SELECT ... UNION ALL SELECT ...',
+          meaning: 'Empilha duas consultas com as mesmas colunas',
+          example: 'Comparar série Base vs Sazonal',
+        },
       ],
       engine: 'sql',
       exampleCode: `-- Compara num único resultado a série Base e a série Sazonal com UNION ALL:
@@ -588,7 +692,8 @@ UNION ALL
 SELECT 'Sazonal Realista' AS serie, COUNT(*) AS linhas, ROUND(SUM(quantidade * preco), 2) AS faturacao
 FROM vendas_sazonais;`,
       sqlChallenge: {
-        description: 'Usando uma subquery no WHERE, seleciona nome, categoria e preco de todos os produtos cujo preco seja estritamente superior ao preço médio de todos os produtos da tabela produtos, ordenados por preco DESC.',
+        description:
+          'Usando uma subquery no WHERE, seleciona nome, categoria e preco de todos os produtos cujo preco seja estritamente superior ao preço médio de todos os produtos da tabela produtos, ordenados por preco DESC.',
         starterSql: `SELECT
   nome,
   categoria,
@@ -623,7 +728,8 @@ ORDER BY preco DESC;`,
           'Repete linhas do resultado quando a subquery tem ids duplicados.',
         ],
         correctIndex: 1,
-        explanation: 'X NOT IN (1, 2, NULL) dá UNKNOWN para todas as linhas e o resultado vem vazio, sem erro nenhum. Por isso prefere-se NOT EXISTS ou LEFT JOIN ... IS NULL.',
+        explanation:
+          'X NOT IN (1, 2, NULL) dá UNKNOWN para todas as linhas e o resultado vem vazio, sem erro nenhum. Por isso prefere-se NOT EXISTS ou LEFT JOIN ... IS NULL.',
       },
     },
     {
@@ -632,7 +738,8 @@ ORDER BY preco DESC;`,
       title: 'Médias móveis (ROWS BETWEEN) e matriz RFM de clientes',
       lede: 'Calcula médias móveis de 3 meses em SQL usando frames de janela no desafio e, nos dois treinos, constrói e segmenta a tabela RFM (Recência, Frequência, Valor Monetário).',
       analogyTitle: 'A média das últimas 3 contas da luz e a caderneta de 3 carimbos',
-      analogyBody: 'Uma conta da luz alta num mês de frio não quer dizer que gastas demais o ano todo: olhas para a média das últimas 3 contas (média móvel) para ver a tendência real. Já o RFM é a caderneta do merceeiro com três carimbos por cliente: veio há pouco tempo (R)? Vem muitas vezes (F)? Deixa muito dinheiro na caixa (M)?',
+      analogyBody:
+        'Uma conta da luz alta num mês de frio não quer dizer que gastas demais o ano todo: olhas para a média das últimas 3 contas (média móvel) para ver a tendência real. Já o RFM é a caderneta do merceeiro com três carimbos por cliente: veio há pouco tempo (R)? Vem muitas vezes (F)? Deixa muito dinheiro na caixa (M)?',
       concepts: [
         'AVG(faturacao) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) calcula a média móvel trimestral.',
         'JULIANDAY("2025-12-31") - JULIANDAY(MAX(data)) calcula há quantos dias o cliente fez a última compra (Recência).',
@@ -645,13 +752,23 @@ ORDER BY preco DESC;`,
         'Usa AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) para a média móvel de 3 meses.',
         'Arredonda com ROUND(..., 2) para manter a tabela limpa.',
       ],
-      proPractice: 'Em dashboards financeiros, nunca se analisa apenas a linha diária bruta: acompanha-se sempre a média móvel de 7 dias (MM7) ou 3 meses (MM3) para isolar a tendência estrutural.',
-      commonPitfall: 'Esquecer a cláusula ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, o que calcula a média acumulada desde janeiro em vez da janela móvel de 3 meses.',
+      proPractice:
+        'Em dashboards financeiros, nunca se analisa apenas a linha diária bruta: acompanha-se sempre a média móvel de 7 dias (MM7) ou 3 meses (MM3) para isolar a tendência estrutural.',
+      commonPitfall:
+        'Esquecer a cláusula ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, o que calcula a média acumulada desde janeiro em vez da janela móvel de 3 meses.',
       referenceTitle: 'Janelas Móveis e RFM em SQL',
       referenceRows: [
-        { syntax: 'ROWS BETWEEN 2 PRECEDING AND CURRENT ROW', meaning: 'Janela de 3 linhas (2 anteriores + atual)', example: 'Média móvel trimestral' },
+        {
+          syntax: 'ROWS BETWEEN 2 PRECEDING AND CURRENT ROW',
+          meaning: 'Janela de 3 linhas (2 anteriores + atual)',
+          example: 'Média móvel trimestral',
+        },
         { syntax: 'MAX(data)', meaning: 'Data da compra mais recente do cliente', example: 'Base da Recência (R)' },
-        { syntax: 'COUNT(DISTINCT data)', meaning: 'Número de dias em que o cliente visitou a loja', example: 'Frequência de visitas (F)' },
+        {
+          syntax: 'COUNT(DISTINCT data)',
+          meaning: 'Número de dias em que o cliente visitou a loja',
+          example: 'Frequência de visitas (F)',
+        },
       ],
       engine: 'sql',
       exampleCode: `-- Top 6 clientes na Matriz RFM sobre vendas_sazonais (referência 2025-12-31):
@@ -667,7 +784,8 @@ GROUP BY c.id, c.nome
 ORDER BY valor_monetario_eur DESC
 LIMIT 6;`,
       sqlChallenge: {
-        description: 'Sobre a tabela vendas_sazonais, calcula para os 12 meses de 2025: mes, faturacao_mes e media_movel_3m (média móvel do mês atual e dos 2 meses anteriores usando ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, arredondada a 2 casas).',
+        description:
+          'Sobre a tabela vendas_sazonais, calcula para os 12 meses de 2025: mes, faturacao_mes e media_movel_3m (média móvel do mês atual e dos 2 meses anteriores usando ROWS BETWEEN 2 PRECEDING AND CURRENT ROW, arredondada a 2 casas).',
         starterSql: `WITH mensal_saz AS (
   SELECT
     SUBSTR(data, 1, 7) AS mes,
@@ -697,7 +815,13 @@ ORDER BY mes;`,
         hint: 'Usa ROUND(AVG(faturacao_mes) OVER (ORDER BY mes ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS media_movel_3m.',
         validate: (cols, rows) => {
           const formaCerta = rows.length === 12 && cols.length === 3;
-          const valoresCertos = formaCerta && [[0, 2185.21], [1, 1889.22], [11, 4267.66]].every(([i, v]) => Math.abs(Number(rows[i][2]) - v) < 0.011);
+          const valoresCertos =
+            formaCerta &&
+            [
+              [0, 2185.21],
+              [1, 1889.22],
+              [11, 4267.66],
+            ].every(([i, v]) => Math.abs(Number(rows[i][2]) - v) < 0.011);
           return {
             passed: valoresCertos,
             message: valoresCertos
@@ -709,7 +833,8 @@ ORDER BY mes;`,
         },
       },
       quiz: {
-        question: 'Na janela ROWS BETWEEN 6 PRECEDING AND CURRENT ROW sobre uma tabela diária ordenada por data, quantos dias entram no cálculo de cada linha?',
+        question:
+          'Na janela ROWS BETWEEN 6 PRECEDING AND CURRENT ROW sobre uma tabela diária ordenada por data, quantos dias entram no cálculo de cada linha?',
         options: [
           '6 dias (o dia atual não conta)',
           '7 dias (os 6 anteriores e o atual)',
@@ -726,7 +851,8 @@ ORDER BY mes;`,
       title: 'Revisão geral: o relatório por cidade',
       lede: 'O dono quer saber, cidade a cidade, quantos clientes compraram, quanto faturou cada cidade e quanto vale em média cada cliente. Respondes com uma só query que junta quase tudo o que aprendeste na trilha.',
       analogyTitle: 'A reunião de segunda-feira',
-      analogyBody: 'Até aqui cada etapa treinava uma peça: filtrar, agrupar, juntar tabelas, classificar. Num pedido real as peças vêm todas juntas. Antes de escrever, separa a pergunta em passos: de onde vêm os dados, como se juntam, por que coluna se agrupa, que grupos ficam de fora e como se ordena.',
+      analogyBody:
+        'Até aqui cada etapa treinava uma peça: filtrar, agrupar, juntar tabelas, classificar. Num pedido real as peças vêm todas juntas. Antes de escrever, separa a pergunta em passos: de onde vêm os dados, como se juntam, por que coluna se agrupa, que grupos ficam de fora e como se ordena.',
       beginnerSteps: [
         'FROM vendas v JOIN clientes c ON c.id = v.cliente_id: junta a cidade a cada venda.',
         'GROUP BY c.cidade: uma linha por cidade.',
@@ -738,17 +864,31 @@ ORDER BY mes;`,
         'A ordem de escrita é SELECT, FROM, JOIN, WHERE, GROUP BY, HAVING, ORDER BY; a ordem em que o motor executa começa no FROM e acaba no ORDER BY.',
         'COUNT(*) conta linhas (vendas) e COUNT(DISTINCT cliente_id) conta clientes diferentes. Confundir os dois é um dos erros mais comuns em relatórios.',
         'Um valor médio por cliente calcula-se como faturação total a dividir pelo número de clientes, não com AVG do subtotal (que daria o valor médio por venda).',
-        'O CASE WHEN pode usar agregações: CASE WHEN SUM(...) >= 4500 THEN \'Alta\' ELSE \'Normal\' END classifica cada grupo.',
+        "O CASE WHEN pode usar agregações: CASE WHEN SUM(...) >= 4500 THEN 'Alta' ELSE 'Normal' END classifica cada grupo.",
         'Escreve a query por camadas e corre-a a cada passo: primeiro o JOIN com LIMIT 5, depois o GROUP BY, depois o HAVING. Assim sabes onde está o erro quando ele aparece.',
       ],
-      proPractice: 'Num relatório para a direção, cada número precisa de uma definição clara. "Clientes" quer dizer clientes que compraram no período, e isso deve estar escrito ao lado da tabela.',
-      commonPitfall: 'Usar COUNT(*) para contar clientes: dá o número de vendas, e uma cidade com poucos clientes muito assíduos parece maior do que é.',
+      proPractice:
+        'Num relatório para a direção, cada número precisa de uma definição clara. "Clientes" quer dizer clientes que compraram no período, e isso deve estar escrito ao lado da tabela.',
+      commonPitfall:
+        'Usar COUNT(*) para contar clientes: dá o número de vendas, e uma cidade com poucos clientes muito assíduos parece maior do que é.',
       referenceTitle: 'As peças da query, por ordem de execução',
       referenceRows: [
-        { syntax: 'FROM vendas v JOIN clientes c ON c.id = v.cliente_id', meaning: 'Junta as tabelas', example: 'Cada venda ganha a cidade do cliente' },
-        { syntax: 'WHERE v.data >= \'2025-07-01\'', meaning: 'Filtra linhas antes de agrupar', example: 'Só o 2.º semestre' },
+        {
+          syntax: 'FROM vendas v JOIN clientes c ON c.id = v.cliente_id',
+          meaning: 'Junta as tabelas',
+          example: 'Cada venda ganha a cidade do cliente',
+        },
+        {
+          syntax: "WHERE v.data >= '2025-07-01'",
+          meaning: 'Filtra linhas antes de agrupar',
+          example: 'Só o 2.º semestre',
+        },
         { syntax: 'GROUP BY c.cidade', meaning: 'Uma linha por cidade', example: '6 cidades' },
-        { syntax: 'HAVING COUNT(DISTINCT v.cliente_id) >= 15', meaning: 'Filtra grupos', example: 'Tira cidades com poucos clientes' },
+        {
+          syntax: 'HAVING COUNT(DISTINCT v.cliente_id) >= 15',
+          meaning: 'Filtra grupos',
+          example: 'Tira cidades com poucos clientes',
+        },
         { syntax: 'ORDER BY faturacao DESC', meaning: 'Ordena o resultado final', example: 'A maior em cima' },
       ],
       engine: 'sql',
@@ -758,7 +898,8 @@ FROM vendas v
 JOIN clientes c ON c.id = v.cliente_id
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Mostra, por cidade: cidade, clientes (clientes diferentes que compraram), faturacao (arredondada a 2 casas), valor_por_cliente (faturacao / clientes, 2 casas) e escalao (\'Alta\' se a faturação for 4500 € ou mais, \'Normal\' nos outros casos). Deixa de fora as cidades com menos de 15 clientes e ordena por faturacao, da maior para a menor.',
+        description:
+          "Mostra, por cidade: cidade, clientes (clientes diferentes que compraram), faturacao (arredondada a 2 casas), valor_por_cliente (faturacao / clientes, 2 casas) e escalao ('Alta' se a faturação for 4500 € ou mais, 'Normal' nos outros casos). Deixa de fora as cidades com menos de 15 clientes e ordena por faturacao, da maior para a menor.",
         starterSql: `SELECT
   c.cidade,
   COUNT(*) AS clientes,
@@ -777,30 +918,43 @@ JOIN clientes c ON c.id = v.cliente_id
 GROUP BY c.cidade
 HAVING COUNT(DISTINCT v.cliente_id) >= 15
 ORDER BY faturacao DESC;`,
-        hint: 'Conta clientes com COUNT(DISTINCT v.cliente_id), filtra com HAVING COUNT(DISTINCT v.cliente_id) >= 15 e classifica com CASE WHEN SUM(v.quantidade * v.preco) >= 4500 THEN \'Alta\' ELSE \'Normal\' END.',
+        hint: "Conta clientes com COUNT(DISTINCT v.cliente_id), filtra com HAVING COUNT(DISTINCT v.cliente_id) >= 15 e classifica com CASE WHEN SUM(v.quantidade * v.preco) >= 4500 THEN 'Alta' ELSE 'Normal' END.",
         validate: (cols, rows) => {
           const col = (nome: string) => cols.indexOf(nome);
           const [iC, iN, iF, iV, iE] = ['cidade', 'clientes', 'faturacao', 'valor_por_cliente', 'escalao'].map(col);
           if ([iC, iN, iF, iV, iE].some((i) => i < 0)) {
-            return { passed: false, message: 'Faltam colunas: o resultado deve ter cidade, clientes, faturacao, valor_por_cliente e escalao.' };
+            return {
+              passed: false,
+              message: 'Faltam colunas: o resultado deve ter cidade, clientes, faturacao, valor_por_cliente e escalao.',
+            };
           }
           const linha = (cidade: string) => rows.find((r) => r[iC] === cidade);
           const lisboa = linha('Lisboa');
           const braga = linha('Braga');
           const porto = linha('Porto');
           if (rows.length !== 5 || linha('Maia')) {
-            return { passed: false, message: `Devem ficar 5 cidades (a Maia, com 10 clientes, sai no HAVING). Obtive ${rows.length}.` };
+            return {
+              passed: false,
+              message: `Devem ficar 5 cidades (a Maia, com 10 clientes, sai no HAVING). Obtive ${rows.length}.`,
+            };
           }
           if (!lisboa || Number(lisboa[iN]) !== 26) {
-            return { passed: false, message: 'Lisboa deve ter 26 clientes. Conta clientes diferentes com COUNT(DISTINCT v.cliente_id), não vendas.' };
+            return {
+              passed: false,
+              message:
+                'Lisboa deve ter 26 clientes. Conta clientes diferentes com COUNT(DISTINCT v.cliente_id), não vendas.',
+            };
           }
           const ordenado = rows.every((r, i) => i === 0 || Number(rows[i - 1][iF]) >= Number(r[iF]));
           const ok =
             ordenado &&
             rows[0][iC] === 'Lisboa' &&
             Math.abs(Number(lisboa[iF]) - 5885.34) < 0.01 &&
-            !!braga && Math.abs(Number(braga[iV]) - 254.18) < 0.01 &&
-            braga[iE] === 'Alta' && !!porto && porto[iE] === 'Normal';
+            !!braga &&
+            Math.abs(Number(braga[iV]) - 254.18) < 0.01 &&
+            braga[iE] === 'Alta' &&
+            !!porto &&
+            porto[iE] === 'Normal';
           return {
             passed: ok,
             message: ok
@@ -810,10 +964,12 @@ ORDER BY faturacao DESC;`,
         },
       },
       quiz: {
-        question: 'Uma cidade tem 300 vendas feitas por 20 clientes. O que dá COUNT(*) e o que dá COUNT(DISTINCT cliente_id) para essa cidade?',
+        question:
+          'Uma cidade tem 300 vendas feitas por 20 clientes. O que dá COUNT(*) e o que dá COUNT(DISTINCT cliente_id) para essa cidade?',
         options: ['20 e 300', '300 e 20', '300 nos dois casos', '20 nos dois casos'],
         correctIndex: 1,
-        explanation: 'COUNT(*) conta linhas, ou seja, vendas (300). COUNT(DISTINCT cliente_id) conta clientes diferentes (20).',
+        explanation:
+          'COUNT(*) conta linhas, ou seja, vendas (300). COUNT(DISTINCT cliente_id) conta clientes diferentes (20).',
       },
     },
   ],

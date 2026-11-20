@@ -104,7 +104,8 @@ describe('estrutura do currículo', () => {
   });
 
   it('a trilha Pandas tem 2 treinos por etapa e os desafios de estatística ficaram curtos', () => {
-    for (const l of allTracks.find((t) => t.id === 'pandas')!.lessons) expect(l.practice?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
+    for (const l of allTracks.find((t) => t.id === 'pandas')!.lessons)
+      expect(l.practice?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
     for (const l of allTracks.find((t) => t.id === 'estatistica')!.lessons) {
       expect(l.pythonChallenge!.checks.length, l.id).toBeLessThanOrEqual(6);
     }
@@ -198,8 +199,14 @@ describe('soluções SQL passam na correção', () => {
 const treinosSql = todas.flatMap((l) => (l.practiceSql ?? []).map((ch, i) => [`${l.id} treino ${i + 1}`, ch] as const));
 describe('treinos SQL', () => {
   it('cada etapa de SQL tem pelo menos um treino e a sql-10 treina o RFM', () => {
-    for (const l of sqlLessons.filter((x) => x.trilha === 'sql' && x.id !== 'sql-11-revisao')) expect(l.practiceSql?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
-    expect(todas.find((l) => l.id === 'sql-10-medias-moveis-rfm')!.practiceSql!.map((t) => t.title).join(' ')).toContain('RFM');
+    for (const l of sqlLessons.filter((x) => x.trilha === 'sql' && x.id !== 'sql-11-revisao'))
+      expect(l.practiceSql?.length ?? 0, l.id).toBeGreaterThanOrEqual(2);
+    expect(
+      todas
+        .find((l) => l.id === 'sql-10-medias-moveis-rfm')!
+        .practiceSql!.map((t) => t.title)
+        .join(' '),
+    ).toContain('RFM');
   });
 
   it.each(treinosSql)('%s: a solução passa e o código inicial não', async (_nome, ch) => {
@@ -215,7 +222,10 @@ describe('treinos SQL', () => {
 describe('sql-02 recusa respostas incompletas', () => {
   const desafio = todas.find((l) => l.id === 'sql-02-where')!.sqlChallenge!;
   it.each([
-    ['LIMIT 1', "SELECT id, nome, cidade FROM clientes WHERE cidade IN ('Porto', 'Matosinhos') AND nome LIKE '%Santos' LIMIT 1"],
+    [
+      'LIMIT 1',
+      "SELECT id, nome, cidade FROM clientes WHERE cidade IN ('Porto', 'Matosinhos') AND nome LIKE '%Santos' LIMIT 1",
+    ],
     ['esquecer Matosinhos', "SELECT id, nome, cidade FROM clientes WHERE cidade = 'Porto' AND nome LIKE '%Santos'"],
     ['esquecer o Porto', "SELECT id, nome, cidade FROM clientes WHERE cidade = 'Matosinhos' AND nome LIKE '%Santos'"],
   ])('%s', async (_nome, sql) => {
@@ -265,28 +275,38 @@ describe('base SQL da bancada', () => {
     for (const l of sqlDemos) expect(l.explained!.join(' ').length, l.id).toBeGreaterThan(600);
   });
 
-  it.each(sqlDemos.map((l) => [l.id, l.errorDemo!] as const))('%s: o erro típico SQL dá a mensagem anunciada', async (_id, demo) => {
-    const res = await runSqlQuery(demo.code);
-    expect(res.error).toBeDefined();
-    expect(res.error).toContain(demo.message);
-  });
+  it.each(sqlDemos.map((l) => [l.id, l.errorDemo!] as const))(
+    '%s: o erro típico SQL dá a mensagem anunciada',
+    async (_id, demo) => {
+      const res = await runSqlQuery(demo.code);
+      expect(res.error).toBeDefined();
+      expect(res.error).toContain(demo.message);
+    },
+  );
 });
 
 describe('fichas da Referência', () => {
   it('cobrem todas as categorias do filtro', () => {
     const cats = new Set(cheatsheets.map((c) => c.category));
-    for (const c of ['Python', 'SQL', 'Pandas', 'NumPy & Gráficos', 'Estatística', 'Git', 'BI & DAX']) expect(cats.has(c as never), c).toBe(true);
+    for (const c of ['Python', 'SQL', 'Pandas', 'NumPy & Gráficos', 'Estatística', 'Git', 'BI & DAX'])
+      expect(cats.has(c as never), c).toBe(true);
   });
 
-  it.each(cheatsheets.filter((c) => c.tryEngine === 'sql').map((c) => [c.topic, c.trySnippet!] as const))('"%s": o exemplo SQL corre', async (_t, sql) => {
-    const res = await runSqlQuery(sql);
-    expect(res.error).toBeUndefined();
-    expect(res.rows.length).toBeGreaterThan(0);
-  });
+  it.each(cheatsheets.filter((c) => c.tryEngine === 'sql').map((c) => [c.topic, c.trySnippet!] as const))(
+    '"%s": o exemplo SQL corre',
+    async (_t, sql) => {
+      const res = await runSqlQuery(sql);
+      expect(res.error).toBeUndefined();
+      expect(res.rows.length).toBeGreaterThan(0);
+    },
+  );
 
-  it.each(cheatsheets.filter((c) => c.tryEngine === 'git').map((c) => [c.topic, c.trySnippet!] as const))('"%s": o exemplo Git corre', (_t, cmds) => {
-    const { output } = runGitSimulator(createInitialGitState(), cmds);
-    expect(output).not.toContain('não suportado');
-    expect(output).not.toContain('fatal');
-  });
+  it.each(cheatsheets.filter((c) => c.tryEngine === 'git').map((c) => [c.topic, c.trySnippet!] as const))(
+    '"%s": o exemplo Git corre',
+    (_t, cmds) => {
+      const { output } = runGitSimulator(createInitialGitState(), cmds);
+      expect(output).not.toContain('não suportado');
+      expect(output).not.toContain('fatal');
+    },
+  );
 });

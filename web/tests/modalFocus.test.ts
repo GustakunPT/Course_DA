@@ -6,12 +6,7 @@ import {
   restoreFocusFromSelectors,
 } from '../src/ui/modalFocus';
 
-function makeFakeElement(opts: {
-  id?: string;
-  action?: string;
-  disabled?: boolean;
-  hidden?: boolean;
-}) {
+function makeFakeElement(opts: { id?: string; action?: string; disabled?: boolean; hidden?: boolean }) {
   const attrs = new Map<string, string>();
   if (opts.action) attrs.set('data-action', opts.action);
   if (opts.disabled) attrs.set('disabled', '');
@@ -35,13 +30,28 @@ const fakeDoc: any = { activeElement: null };
 describe('acessibilidade de modais (WCAG focus management)', () => {
   it('identifica corretamente a modal ativa', () => {
     expect(
-      getActiveModalKind({ showGuideModal: false, showProgressModal: false, showThemeModal: false, showDiagnosticModal: false }),
+      getActiveModalKind({
+        showGuideModal: false,
+        showProgressModal: false,
+        showThemeModal: false,
+        showDiagnosticModal: false,
+      }),
     ).toBe('none');
     expect(
-      getActiveModalKind({ showGuideModal: true, showProgressModal: false, showThemeModal: false, showDiagnosticModal: false }),
+      getActiveModalKind({
+        showGuideModal: true,
+        showProgressModal: false,
+        showThemeModal: false,
+        showDiagnosticModal: false,
+      }),
     ).toBe('guide');
     expect(
-      getActiveModalKind({ showGuideModal: false, showProgressModal: false, showThemeModal: false, showDiagnosticModal: true }),
+      getActiveModalKind({
+        showGuideModal: false,
+        showProgressModal: false,
+        showThemeModal: false,
+        showDiagnosticModal: true,
+      }),
     ).toBe('diagnostic');
   });
 

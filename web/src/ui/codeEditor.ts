@@ -1,36 +1,138 @@
 import type { EngineKind } from '../data/types';
 import { escapeHtml } from './html';
 
-
 const PY_KEYWORDS = new Set([
-  'import', 'from', 'as', 'def', 'return', 'if', 'elif', 'else', 'for', 'in',
-  'while', 'with', 'try', 'except', 'finally', 'pass', 'break', 'continue',
-  'and', 'or', 'not', 'is', 'lambda', 'class', 'yield', 'raise', 'assert',
+  'import',
+  'from',
+  'as',
+  'def',
+  'return',
+  'if',
+  'elif',
+  'else',
+  'for',
+  'in',
+  'while',
+  'with',
+  'try',
+  'except',
+  'finally',
+  'pass',
+  'break',
+  'continue',
+  'and',
+  'or',
+  'not',
+  'is',
+  'lambda',
+  'class',
+  'yield',
+  'raise',
+  'assert',
 ]);
 
 const PY_CONSTANTS = new Set(['True', 'False', 'None']);
 
 const PY_BUILTINS = new Set([
-  'print', 'len', 'range', 'int', 'float', 'str', 'list', 'dict', 'set',
-  'round', 'max', 'min', 'sum', 'sorted', 'open', 'type', 'isinstance', 'enumerate',
+  'print',
+  'len',
+  'range',
+  'int',
+  'float',
+  'str',
+  'list',
+  'dict',
+  'set',
+  'round',
+  'max',
+  'min',
+  'sum',
+  'sorted',
+  'open',
+  'type',
+  'isinstance',
+  'enumerate',
 ]);
 
 const SQL_KEYWORDS = new Set([
-  'SELECT', 'DISTINCT', 'FROM', 'WHERE', 'GROUP', 'BY', 'HAVING', 'ORDER',
-  'LIMIT', 'ASC', 'DESC', 'AS', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE',
-  'IS', 'NULL', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS', 'JOIN', 'ON',
-  'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'WITH', 'OVER', 'PARTITION',
-  'CREATE', 'TABLE', 'DROP', 'INSERT', 'INTO', 'VALUES', 'PRIMARY', 'KEY',
+  'SELECT',
+  'DISTINCT',
+  'FROM',
+  'WHERE',
+  'GROUP',
+  'BY',
+  'HAVING',
+  'ORDER',
+  'LIMIT',
+  'ASC',
+  'DESC',
+  'AS',
+  'AND',
+  'OR',
+  'NOT',
+  'IN',
+  'BETWEEN',
+  'LIKE',
+  'IS',
+  'NULL',
+  'INNER',
+  'LEFT',
+  'RIGHT',
+  'FULL',
+  'CROSS',
+  'JOIN',
+  'ON',
+  'CASE',
+  'WHEN',
+  'THEN',
+  'ELSE',
+  'END',
+  'WITH',
+  'OVER',
+  'PARTITION',
+  'CREATE',
+  'TABLE',
+  'DROP',
+  'INSERT',
+  'INTO',
+  'VALUES',
+  'PRIMARY',
+  'KEY',
 ]);
 
 const SQL_FUNCTIONS = new Set([
-  'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'ROUND', 'COALESCE', 'NULLIF',
-  'TRIM', 'SUBSTR', 'REPLACE', 'CAST', 'RANK', 'DENSE_RANK', 'ROW_NUMBER',
+  'COUNT',
+  'SUM',
+  'AVG',
+  'MIN',
+  'MAX',
+  'ROUND',
+  'COALESCE',
+  'NULLIF',
+  'TRIM',
+  'SUBSTR',
+  'REPLACE',
+  'CAST',
+  'RANK',
+  'DENSE_RANK',
+  'ROW_NUMBER',
 ]);
 
 const GIT_SUBCOMMANDS = new Set([
-  'init', 'status', 'add', 'commit', 'switch', 'checkout', 'branch',
-  'merge', 'log', 'diff', 'remote', 'push', 'pull', 'clone',
+  'init',
+  'status',
+  'add',
+  'commit',
+  'switch',
+  'checkout',
+  'branch',
+  'merge',
+  'log',
+  'diff',
+  'remote',
+  'push',
+  'pull',
+  'clone',
 ]);
 
 function highlightPythonLine(line: string): string {
@@ -200,7 +302,9 @@ export function formatCodePrettier(code: string, engine: EngineKind): string {
         const up = word.toUpperCase();
         return kwUpper.includes(up) ? up : word;
       });
-      return (upperized.replace(/\s+$/, '') + (commentPart ? (upperized.trim() ? ' ' : '') + commentPart.trim() : '')).replace(/\s+$/, '');
+      return (
+        upperized.replace(/\s+$/, '') + (commentPart ? (upperized.trim() ? ' ' : '') + commentPart.trim() : '')
+      ).replace(/\s+$/, '');
     });
     return formatted.join('\n').trim() + '\n';
   }

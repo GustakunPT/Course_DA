@@ -58,6 +58,8 @@ describe('quizzes', () => {
       const certa = q.options[q.correctIndex].length;
       return q.options.every((o, i) => i === q.correctIndex || o.length < certa);
     });
-    expect(maisLonga.length, maisLonga.map((p) => p.chave).join(', ')).toBeLessThanOrEqual(Math.ceil(perguntas.length * 0.3));
+    expect(maisLonga.length, maisLonga.map((p) => p.chave).join(', ')).toBeLessThanOrEqual(
+      Math.ceil(perguntas.length * 0.3),
+    );
   });
 });

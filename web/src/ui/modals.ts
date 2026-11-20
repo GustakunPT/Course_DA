@@ -87,7 +87,8 @@ export function renderProgressModal(state: AppState): string {
   const totalRealSeconds = Object.values(state.lessonTimes).reduce((s, v) => s + v, 0);
   const totalRealMinutes = Math.round(totalRealSeconds / 60);
   const remainingMinutes = allTracks.reduce(
-    (sum, tr) => sum + tr.lessons.filter((l) => !state.completedLessons[l.id]).reduce((s, l) => s + getLessonMinutes(l), 0),
+    (sum, tr) =>
+      sum + tr.lessons.filter((l) => !state.completedLessons[l.id]).reduce((s, l) => s + getLessonMinutes(l), 0),
     0,
   );
   const cursoConcluido = doneCount === totalLessonsCount;

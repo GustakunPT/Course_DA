@@ -1,3 +1,5 @@
+import type { PyodideInterface } from 'pyodide';
+
 export interface PythonAssertionCheck {
   label: string;
   passed: boolean;
@@ -261,9 +263,10 @@ del __user_code__, __checks_json__, _executar_na_bancada
 _res_bancada
 `;
 
-export function writeCsvPairToPyodide(pyodide: any, name: string, content: string): void {
+export function writeCsvPairToPyodide(pyodide: PyodideInterface, name: string, content: string): void {
   pyodide.FS.writeFile(`/home/pyodide/dados/${name}`, content, { encoding: 'utf8' });
-  let isSymlink = false;
+  // Se /home/dados for um atalho para /home/pyodide/dados, o ficheiro já lá está.
+  let isSymlink: boolean;
   try {
     const stat = pyodide.FS.lstat('/home/dados');
     isSymlink = Boolean(pyodide.FS.isSymlink(stat.mode));
@@ -283,7 +286,7 @@ function stripPythonCommentsAndStrings(code: string): string {
 }
 
 export async function executeInPyodideInstance(opts: {
-  pyodide: any;
+  pyodide: PyodideInterface;
   code: string;
   checks?: PythonCheckSpec[];
   ficheirosExtra?: string[];
@@ -293,7 +296,17 @@ export async function executeInPyodideInstance(opts: {
   onStatus?: (msg: string) => void;
   onExecuting?: () => void;
 }): Promise<PythonExecutionResult> {
-  const { pyodide, code, checks, ficheirosExtra = [], loadedPackages, loadedFiles, startTime, onStatus, onExecuting } = opts;
+  const {
+    pyodide,
+    code,
+    checks,
+    ficheirosExtra = [],
+    loadedPackages,
+    loadedFiles,
+    startTime,
+    onStatus,
+    onExecuting,
+  } = opts;
 
   for (const nome of ficheirosExtra) {
     if (loadedFiles.has(nome)) continue;

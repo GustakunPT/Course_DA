@@ -1,3 +1,4 @@
+import type { PyodideInterface } from 'pyodide';
 import {
   BASE_CSV_FILES,
   PYODIDE_CORE_SRI,
@@ -22,7 +23,7 @@ export type PythonWorkerResponse = SandboxWorkerResponse<PythonExecutionResult>;
 
 const LOCAL_BOOTSTRAP_FILES = new Set(['pyodide.mjs', 'pyodide.asm.js']);
 
-let pyodidePromise: Promise<any> | null = null;
+let pyodidePromise: Promise<PyodideInterface> | null = null;
 let baseCsvsLoaded = false;
 const loadedPackages = new Set<string>();
 const loadedFiles = new Set<string>();
@@ -118,7 +119,7 @@ async function loadBaseCsvs(): Promise<Record<string, string>> {
   return rawCsvs;
 }
 
-async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<any> {
+async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<PyodideInterface> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
       onStatus('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');

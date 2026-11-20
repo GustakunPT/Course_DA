@@ -12,7 +12,8 @@ export const projetoFinalTrack: Track = {
   id: 'projeto-final',
   shortTitle: '8. Projeto final',
   fullTitle: 'Projeto final: os teus dados, a tua pergunta, o teu portefólio',
-  summary: 'Primeiro limpas a sério 20 300 viagens de bicicletas partilhadas, com regras escritas e contas do que sai. Depois escolhes os teus dados e a tua pergunta, fazes a análise no teu computador e publicas o projeto no teu portefólio.',
+  summary:
+    'Primeiro limpas a sério 20 300 viagens de bicicletas partilhadas, com regras escritas e contas do que sai. Depois escolhes os teus dados e a tua pergunta, fazes a análise no teu computador e publicas o projeto no teu portefólio.',
   engineLabel: 'Projeto no teu computador',
   lessons: [
     {
@@ -21,7 +22,8 @@ export const projetoFinalTrack: Track = {
       title: 'Limpeza a sério: 20 300 viagens de bicicletas',
       lede: 'Antes de escolheres os teus dados, treinas com um ficheiro à escala real: 20 300 viagens de uma rede de bicicletas partilhadas, com datas em três formatos, estações escritas de várias maneiras, viagens repetidas e durações impossíveis.',
       analogyTitle: 'A triagem do correio antes da distribuição',
-      analogyBody: 'Num centro de correio ninguém distribui as cartas sem antes as separar: tiram-se as repetidas, corrigem-se as moradas mal escritas e põem-se de lado as que não podem seguir, com um registo de quantas ficaram para trás. Limpar dados é igual: cada regra tem um motivo e cada linha retirada fica contada.',
+      analogyBody:
+        'Num centro de correio ninguém distribui as cartas sem antes as separar: tiram-se as repetidas, corrigem-se as moradas mal escritas e põem-se de lado as que não podem seguir, com um registo de quantas ficaram para trás. Limpar dados é igual: cada regra tem um motivo e cada linha retirada fica contada.',
       concepts: [
         'drop_duplicates(subset="viagem_id") olha só para o identificador e fica com a primeira ocorrência (keep="first" é o valor por omissão).',
         'Para os nomes das estações: .str.normalize("NFD").str.encode("ascii", "ignore").str.decode("ascii") tira os acentos; depois .str.lower().str.strip() e .str.replace("est. ", "estacao ", regex=False). No fim, .map(dicionario) troca a forma normalizada pelo nome oficial.',
@@ -37,16 +39,42 @@ export const projetoFinalTrack: Track = {
         'Tira as durações impossíveis e as viagens com fim antes do início, contando cada grupo.',
         'Guarda o resultado em limpo e as contagens no dicionário removidas.',
       ],
-      proPractice: 'Num relatório de limpeza diz-se sempre quantas linhas entraram, quantas saíram e porquê. Quem lê a tua análise tem de poder conferir esses números sem refazer o teu trabalho.',
-      commonPitfall: 'Converter datas sem format= e deixar o pandas adivinhar: 03/04/2025 tanto pode ser 3 de abril como 4 de março. Com os formatos escritos à mão não há surpresas.',
+      proPractice:
+        'Num relatório de limpeza diz-se sempre quantas linhas entraram, quantas saíram e porquê. Quem lê a tua análise tem de poder conferir esses números sem refazer o teu trabalho.',
+      commonPitfall:
+        'Converter datas sem format= e deixar o pandas adivinhar: 03/04/2025 tanto pode ser 3 de abril como 4 de março. Com os formatos escritos à mão não há surpresas.',
       referenceTitle: 'Limpeza a sério em pandas',
       referenceRows: [
-        { syntax: 'df.drop_duplicates(subset="viagem_id")', meaning: 'Tira as linhas com um identificador repetido e fica com a primeira', example: 'viagens.drop_duplicates(subset="viagem_id")' },
-        { syntax: 's.str.normalize("NFD").str.encode("ascii", "ignore").str.decode("ascii")', meaning: 'Tira os acentos de uma coluna de texto', example: '"Estação" passa a "Estacao"' },
-        { syntax: 's.map(dicionario)', meaning: 'Troca cada valor pelo do dicionário (NaN se não estiver lá)', example: 's.map(estacoes_canonicas)' },
-        { syntax: 'pd.to_datetime(s, format="%d/%m/%Y %H:%M", errors="coerce")', meaning: 'Converte só o que encaixa no formato; o resto fica NaT', example: '"14/03/2025 08:05"' },
-        { syntax: 'a.fillna(b)', meaning: 'Preenche os vazios de a com os valores de b na mesma linha', example: 'iso.fillna(barras).fillna(com_h)' },
-        { syntax: 's.str.strip().str.capitalize()', meaning: 'Tira os espaços das pontas e deixa só a primeira letra em maiúscula', example: '" ANUAL " passa a "Anual"' },
+        {
+          syntax: 'df.drop_duplicates(subset="viagem_id")',
+          meaning: 'Tira as linhas com um identificador repetido e fica com a primeira',
+          example: 'viagens.drop_duplicates(subset="viagem_id")',
+        },
+        {
+          syntax: 's.str.normalize("NFD").str.encode("ascii", "ignore").str.decode("ascii")',
+          meaning: 'Tira os acentos de uma coluna de texto',
+          example: '"Estação" passa a "Estacao"',
+        },
+        {
+          syntax: 's.map(dicionario)',
+          meaning: 'Troca cada valor pelo do dicionário (NaN se não estiver lá)',
+          example: 's.map(estacoes_canonicas)',
+        },
+        {
+          syntax: 'pd.to_datetime(s, format="%d/%m/%Y %H:%M", errors="coerce")',
+          meaning: 'Converte só o que encaixa no formato; o resto fica NaT',
+          example: '"14/03/2025 08:05"',
+        },
+        {
+          syntax: 'a.fillna(b)',
+          meaning: 'Preenche os vazios de a com os valores de b na mesma linha',
+          example: 'iso.fillna(barras).fillna(com_h)',
+        },
+        {
+          syntax: 's.str.strip().str.capitalize()',
+          meaning: 'Tira os espaços das pontas e deixa só a primeira letra em maiúscula',
+          example: '" ANUAL " passa a "Anual"',
+        },
       ],
       engine: 'python',
       ficheirosDados: ['bicicletas_viagens_sujas.csv'],
@@ -58,7 +86,8 @@ print(viagens["tipo_cliente"].value_counts(dropna=False))
 print(viagens["inicio"].sample(8, random_state=1).tolist())
 viagens.head(10)`,
       pythonChallenge: {
-        description: 'Limpa dados/bicicletas_viagens_sujas.csv por esta ordem: 1) tira os duplicados por viagem_id (fica a primeira); 2) normaliza estacao_partida e estacao_chegada (sem acentos, minúsculas, sem espaços nas pontas e "est. " passa a "estacao ") e troca-as pelo nome oficial com o dicionário estacoes_canonicas; 3) converte inicio e fim com os três formatos ("%Y-%m-%d %H:%M", "%d/%m/%Y %H:%M" e "%d-%m-%Y %Hh%M"), cada um com errors="coerce", e junta-os; 4) em valor_eur troca a vírgula por ponto e converte para float (o vazio fica NaN); 5) em tipo_cliente faz strip() e capitalize(), e o vazio passa a "Desconhecido"; 6) tira as viagens com duracao_min <= 0 ou > 1440; 7) tira as viagens com fim < inicio. Guarda o resultado em limpo e, em removidas, um dicionário com quantas linhas saíram em cada passo: "duplicadas", "duracao_impossivel" e "fim_antes_inicio".',
+        description:
+          'Limpa dados/bicicletas_viagens_sujas.csv por esta ordem: 1) tira os duplicados por viagem_id (fica a primeira); 2) normaliza estacao_partida e estacao_chegada (sem acentos, minúsculas, sem espaços nas pontas e "est. " passa a "estacao ") e troca-as pelo nome oficial com o dicionário estacoes_canonicas; 3) converte inicio e fim com os três formatos ("%Y-%m-%d %H:%M", "%d/%m/%Y %H:%M" e "%d-%m-%Y %Hh%M"), cada um com errors="coerce", e junta-os; 4) em valor_eur troca a vírgula por ponto e converte para float (o vazio fica NaN); 5) em tipo_cliente faz strip() e capitalize(), e o vazio passa a "Desconhecido"; 6) tira as viagens com duracao_min <= 0 ou > 1440; 7) tira as viagens com fim < inicio. Guarda o resultado em limpo e, em removidas, um dicionário com quantas linhas saíram em cada passo: "duplicadas", "duracao_impossivel" e "fim_antes_inicio".',
         starterCode: `import pandas as pd
 
 # Forma normalizada (sem acentos, minúsculas, "estacao ...") -> nome oficial
@@ -142,13 +171,50 @@ limpo = df[~ao_contrario]
 print(removidas, len(limpo))
 limpo.head()`,
         checks: [
-          { label: 'removidas: 300 duplicadas, 200 durações impossíveis e 150 fins antes do início', expr: 'isinstance(removidas, dict) and {k: int(v) for k, v in removidas.items()} == {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}', actualExpr: 'removidas', hint: 'Em cada passo conta as linhas que saem: len(antes) - len(depois), ou a soma da máscara antes de filtrar. As chaves são "duplicadas", "duracao_impossivel" e "fim_antes_inicio".' },
-          { label: 'limpo tem 19 650 viagens, sem viagem_id repetido', expr: 'len(limpo) == 19650 and limpo["viagem_id"].is_unique', actualExpr: 'len(limpo) if limpo is not None else None', hint: '20 300 linhas menos 300 duplicadas, 200 durações impossíveis e 150 fins antes do início.' },
-          { label: 'Só ficam os 12 nomes oficiais das estações', expr: 'limpo["estacao_partida"].notna().all() and limpo["estacao_chegada"].notna().all() and len(set(limpo["estacao_partida"]) | set(limpo["estacao_chegada"])) == 12 and all(str(e).startswith("Estação ") for e in set(limpo["estacao_partida"]) | set(limpo["estacao_chegada"]))', actualExpr: 'sorted(set(limpo["estacao_partida"].astype(str)) | set(limpo["estacao_chegada"].astype(str)))', hint: 'Normaliza (sem acentos, minúsculas, strip e "est. " para "estacao ") e só depois faz .map(estacoes_canonicas). Um NaN quer dizer que a forma normalizada não está no dicionário.' },
-          { label: 'inicio e fim são datas, sem falhas, e nenhum fim vem antes do início', expr: 'pd.api.types.is_datetime64_any_dtype(limpo["inicio"]) and pd.api.types.is_datetime64_any_dtype(limpo["fim"]) and limpo["inicio"].notna().all() and limpo["fim"].notna().all() and bool((limpo["fim"] >= limpo["inicio"]).all())', actualExpr: '(str(limpo["inicio"].dtype), int(limpo["inicio"].isna().sum()), int(limpo["fim"].isna().sum()))', hint: 'Um pd.to_datetime(..., format=..., errors="coerce") por formato e depois iso.fillna(barras).fillna(com_h). O terceiro formato é "%d-%m-%Y %Hh%M".' },
-          { label: 'valor_eur é número: 500 vazios e soma de 23 704.00 €', expr: 'pd.api.types.is_float_dtype(limpo["valor_eur"]) and int(limpo["valor_eur"].isna().sum()) == 500 and math.isclose(float(limpo["valor_eur"].sum()), 23704.0, abs_tol=0.01)', actualExpr: '(str(limpo["valor_eur"].dtype), int(limpo["valor_eur"].isna().sum()))', hint: 'df["valor_eur"].str.replace(",", ".").astype(float). Os vazios ficam NaN: não os troques por 0.' },
-          { label: 'tipo_cliente: Anual (11 507), Ocasional (7 543) e Desconhecido (600)', expr: 'limpo["tipo_cliente"].value_counts().to_dict() == {"Anual": 11507, "Ocasional": 7543, "Desconhecido": 600}', actualExpr: 'limpo["tipo_cliente"].value_counts(dropna=False).to_dict()', hint: '.str.strip().str.capitalize() e depois .fillna("Desconhecido").' },
-          { label: 'A limpeza funciona com outro lote de viagens', expr: '(lambda r: {k: int(v) for k, v in r["removidas"].items()} == {"duplicadas": 1, "duracao_impossivel": 1, "fim_antes_inicio": 1} and list(r["limpo"]["viagem_id"]) == ["V1", "V2"] and list(r["limpo"]["estacao_partida"]) == ["Estação Central", "Estação Ribeira"] and list(r["limpo"]["estacao_chegada"]) == ["Estação Farol", "Estação São Bento"] and list(r["limpo"]["tipo_cliente"]) == ["Anual", "Desconhecido"] and abs(float(r["limpo"]["valor_eur"].iloc[1]) - 1.5) < 0.001 and str(r["limpo"]["inicio"].iloc[1]) == "2025-03-14 09:00:00")(correr_com(viagens=pd.DataFrame({"viagem_id": ["V1", "V1", "V2", "V3", "V4"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:05", "14/03/2025 09:00", "14-03-2025 9h05", "2025-03-15 10:00"], "fim": ["2025-03-14 08:20", "2025-03-14 08:20", "14/03/2025 09:30", "14-03-2025 8h55", "2025-03-15 10:00"], "estacao_partida": [" estacao central ", " estacao central ", "EST. RIBEIRA", "Estacao Hospital", "Estação Central"], "estacao_chegada": ["Estação Farol", "Estação Farol", "ESTAÇÃO SÃO BENTO", "Estação Central", "Estação Central"], "duracao_min": [15, 15, 30, 10, 0], "tipo_cliente": ["anual", "anual", None, "Ocasional", "Ocasional"], "valor_eur": ["0.00", "0.00", "1,50", "2.00", "1.00"]})))', actualExpr: 'correr_com(viagens=pd.DataFrame({"viagem_id": ["V1", "V1", "V2", "V3", "V4"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:05", "14/03/2025 09:00", "14-03-2025 9h05", "2025-03-15 10:00"], "fim": ["2025-03-14 08:20", "2025-03-14 08:20", "14/03/2025 09:30", "14-03-2025 8h55", "2025-03-15 10:00"], "estacao_partida": [" estacao central ", " estacao central ", "EST. RIBEIRA", "Estacao Hospital", "Estação Central"], "estacao_chegada": ["Estação Farol", "Estação Farol", "ESTAÇÃO SÃO BENTO", "Estação Central", "Estação Central"], "duracao_min": [15, 15, 30, 10, 0], "tipo_cliente": ["anual", "anual", None, "Ocasional", "Ocasional"], "valor_eur": ["0.00", "0.00", "1,50", "2.00", "1.00"]})).get("removidas")', hint: 'Calcula tudo a partir de viagens, sem escrever os números à mão: num lote de 5 linhas sai 1 duplicada, 1 duração impossível e 1 fim antes do início.' },
+          {
+            label: 'removidas: 300 duplicadas, 200 durações impossíveis e 150 fins antes do início',
+            expr: 'isinstance(removidas, dict) and {k: int(v) for k, v in removidas.items()} == {"duplicadas": 300, "duracao_impossivel": 200, "fim_antes_inicio": 150}',
+            actualExpr: 'removidas',
+            hint: 'Em cada passo conta as linhas que saem: len(antes) - len(depois), ou a soma da máscara antes de filtrar. As chaves são "duplicadas", "duracao_impossivel" e "fim_antes_inicio".',
+          },
+          {
+            label: 'limpo tem 19 650 viagens, sem viagem_id repetido',
+            expr: 'len(limpo) == 19650 and limpo["viagem_id"].is_unique',
+            actualExpr: 'len(limpo) if limpo is not None else None',
+            hint: '20 300 linhas menos 300 duplicadas, 200 durações impossíveis e 150 fins antes do início.',
+          },
+          {
+            label: 'Só ficam os 12 nomes oficiais das estações',
+            expr: 'limpo["estacao_partida"].notna().all() and limpo["estacao_chegada"].notna().all() and len(set(limpo["estacao_partida"]) | set(limpo["estacao_chegada"])) == 12 and all(str(e).startswith("Estação ") for e in set(limpo["estacao_partida"]) | set(limpo["estacao_chegada"]))',
+            actualExpr: 'sorted(set(limpo["estacao_partida"].astype(str)) | set(limpo["estacao_chegada"].astype(str)))',
+            hint: 'Normaliza (sem acentos, minúsculas, strip e "est. " para "estacao ") e só depois faz .map(estacoes_canonicas). Um NaN quer dizer que a forma normalizada não está no dicionário.',
+          },
+          {
+            label: 'inicio e fim são datas, sem falhas, e nenhum fim vem antes do início',
+            expr: 'pd.api.types.is_datetime64_any_dtype(limpo["inicio"]) and pd.api.types.is_datetime64_any_dtype(limpo["fim"]) and limpo["inicio"].notna().all() and limpo["fim"].notna().all() and bool((limpo["fim"] >= limpo["inicio"]).all())',
+            actualExpr:
+              '(str(limpo["inicio"].dtype), int(limpo["inicio"].isna().sum()), int(limpo["fim"].isna().sum()))',
+            hint: 'Um pd.to_datetime(..., format=..., errors="coerce") por formato e depois iso.fillna(barras).fillna(com_h). O terceiro formato é "%d-%m-%Y %Hh%M".',
+          },
+          {
+            label: 'valor_eur é número: 500 vazios e soma de 23 704.00 €',
+            expr: 'pd.api.types.is_float_dtype(limpo["valor_eur"]) and int(limpo["valor_eur"].isna().sum()) == 500 and math.isclose(float(limpo["valor_eur"].sum()), 23704.0, abs_tol=0.01)',
+            actualExpr: '(str(limpo["valor_eur"].dtype), int(limpo["valor_eur"].isna().sum()))',
+            hint: 'df["valor_eur"].str.replace(",", ".").astype(float). Os vazios ficam NaN: não os troques por 0.',
+          },
+          {
+            label: 'tipo_cliente: Anual (11 507), Ocasional (7 543) e Desconhecido (600)',
+            expr: 'limpo["tipo_cliente"].value_counts().to_dict() == {"Anual": 11507, "Ocasional": 7543, "Desconhecido": 600}',
+            actualExpr: 'limpo["tipo_cliente"].value_counts(dropna=False).to_dict()',
+            hint: '.str.strip().str.capitalize() e depois .fillna("Desconhecido").',
+          },
+          {
+            label: 'A limpeza funciona com outro lote de viagens',
+            expr: '(lambda r: {k: int(v) for k, v in r["removidas"].items()} == {"duplicadas": 1, "duracao_impossivel": 1, "fim_antes_inicio": 1} and list(r["limpo"]["viagem_id"]) == ["V1", "V2"] and list(r["limpo"]["estacao_partida"]) == ["Estação Central", "Estação Ribeira"] and list(r["limpo"]["estacao_chegada"]) == ["Estação Farol", "Estação São Bento"] and list(r["limpo"]["tipo_cliente"]) == ["Anual", "Desconhecido"] and abs(float(r["limpo"]["valor_eur"].iloc[1]) - 1.5) < 0.001 and str(r["limpo"]["inicio"].iloc[1]) == "2025-03-14 09:00:00")(correr_com(viagens=pd.DataFrame({"viagem_id": ["V1", "V1", "V2", "V3", "V4"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:05", "14/03/2025 09:00", "14-03-2025 9h05", "2025-03-15 10:00"], "fim": ["2025-03-14 08:20", "2025-03-14 08:20", "14/03/2025 09:30", "14-03-2025 8h55", "2025-03-15 10:00"], "estacao_partida": [" estacao central ", " estacao central ", "EST. RIBEIRA", "Estacao Hospital", "Estação Central"], "estacao_chegada": ["Estação Farol", "Estação Farol", "ESTAÇÃO SÃO BENTO", "Estação Central", "Estação Central"], "duracao_min": [15, 15, 30, 10, 0], "tipo_cliente": ["anual", "anual", None, "Ocasional", "Ocasional"], "valor_eur": ["0.00", "0.00", "1,50", "2.00", "1.00"]})))',
+            actualExpr:
+              'correr_com(viagens=pd.DataFrame({"viagem_id": ["V1", "V1", "V2", "V3", "V4"], "inicio": ["2025-03-14 08:05", "2025-03-14 08:05", "14/03/2025 09:00", "14-03-2025 9h05", "2025-03-15 10:00"], "fim": ["2025-03-14 08:20", "2025-03-14 08:20", "14/03/2025 09:30", "14-03-2025 8h55", "2025-03-15 10:00"], "estacao_partida": [" estacao central ", " estacao central ", "EST. RIBEIRA", "Estacao Hospital", "Estação Central"], "estacao_chegada": ["Estação Farol", "Estação Farol", "ESTAÇÃO SÃO BENTO", "Estação Central", "Estação Central"], "duracao_min": [15, 15, 30, 10, 0], "tipo_cliente": ["anual", "anual", None, "Ocasional", "Ocasional"], "valor_eur": ["0.00", "0.00", "1,50", "2.00", "1.00"]})).get("removidas")',
+            hint: 'Calcula tudo a partir de viagens, sem escrever os números à mão: num lote de 5 linhas sai 1 duplicada, 1 duração impossível e 1 fim antes do início.',
+          },
         ],
       },
       quiz: {
@@ -160,7 +226,8 @@ limpo.head()`,
           'Para poderes repor mais tarde as linhas que apagaste do ficheiro',
         ],
         correctIndex: 1,
-        explanation: 'As contagens por motivo são o recibo da limpeza: mostram que 650 das 20 300 linhas saíram e porquê. Sem elas, ninguém consegue conferir se a limpeza foi razoável ou se apagou dados a mais.',
+        explanation:
+          'As contagens por motivo são o recibo da limpeza: mostram que 650 das 20 300 linhas saíram e porquê. Sem elas, ninguém consegue conferir se a limpeza foi razoável ou se apagou dados a mais.',
       },
     },
     {
@@ -169,7 +236,8 @@ limpo.head()`,
       title: 'Preparar o computador: Python, VS Code, Jupyter e Git',
       lede: 'Até aqui corriste tudo no browser. Antes de começares o teu projeto próprio, instalas Python, VS Code (com Jupyter) e Git no teu computador, crias conta no GitHub e aprendes a resolver os 4 erros mais comuns no Windows.',
       analogyTitle: 'Montar a bancada antes de cozinhar',
-      analogyBody: 'Não precisas de uma cozinha profissional, mas precisas de faca afiada, tábua e fogão a funcionar antes de ligar o lume. Instalar o Python com PATH, criar uma pasta .venv e ligar o Git ao GitHub leva 20 minutos e evita que bloqueies a meio do projeto.',
+      analogyBody:
+        'Não precisas de uma cozinha profissional, mas precisas de faca afiada, tábua e fogão a funcionar antes de ligar o lume. Instalar o Python com PATH, criar uma pasta .venv e ligar o Git ao GitHub leva 20 minutos e evita que bloqueies a meio do projeto.',
       concepts: [
         'Python 3 no Windows: descarrega de python.org (ou winget install Python.Python.3.12) e marca obrigatoriamente "Add Python to PATH" no primeiro ecrã do instalador. Confirma com python --version (ou py --version no Windows).',
         'Ambiente virtual (.venv) por projeto: evita conflitos entre bibliotecas. No terminal, cria com python -m venv .venv, ativa (.venv\\Scripts\\Activate.ps1 no PowerShell ou source .venv/bin/activate no Git Bash/macOS) e instala pandas, matplotlib e jupyter.',
@@ -184,16 +252,42 @@ limpo.head()`,
         'Cria uma pasta de teste, faz python -m venv .venv, ativa o ambiente e corre pip install pandas matplotlib jupyter.',
         'Abre um ficheiro teste.ipynb no VS Code, escolhe o kernel .venv e corre import pandas as pd; print(pd.__version__).',
       ],
-      proPractice: 'Usa sempre um .venv por projeto e nunca instales pacotes no Python global do sistema: quando partilhas o código, pip freeze ou requirements.txt garante que outra pessoa corre exatamente as mesmas bibliotecas.',
-      commonPitfall: 'Instalar Python no Windows sem marcar "Add Python to PATH", ou instalar pandas no terminal global e depois no VS Code usar outro Python no notebook (dando ModuleNotFoundError).',
+      proPractice:
+        'Usa sempre um .venv por projeto e nunca instales pacotes no Python global do sistema: quando partilhas o código, pip freeze ou requirements.txt garante que outra pessoa corre exatamente as mesmas bibliotecas.',
+      commonPitfall:
+        'Instalar Python no Windows sem marcar "Add Python to PATH", ou instalar pandas no terminal global e depois no VS Code usar outro Python no notebook (dando ModuleNotFoundError).',
       referenceTitle: 'Comandos de arranque e erros típicos no Windows',
       referenceRows: [
-        { syntax: 'python --version  (ou py --version)', meaning: 'Confirma que o Python está instalado e no PATH', example: 'Python 3.12.x' },
-        { syntax: 'python -m venv .venv', meaning: 'Cria o ambiente virtual isolado na pasta do projeto', example: 'Pasta .venv/' },
-        { syntax: '.venv\\Scripts\\Activate.ps1  (ou source .venv/Scripts/activate no Git Bash)', meaning: 'Ativa o ambiente virtual no Windows antes de instalar pacotes', example: 'Aparece (.venv) no início da linha' },
-        { syntax: 'Set-ExecutionPolicy -Scope CurrentUser RemoteSigned', meaning: 'Resolve o erro PSSecurityException ao ativar .venv no PowerShell do Windows', example: 'Corre uma única vez' },
-        { syntax: 'pip install pandas matplotlib jupyter', meaning: 'Instala as 3 bibliotecas base do projeto final dentro do .venv', example: 'Com (.venv) ativo' },
-        { syntax: 'git config --global user.name "O Teu Nome" && git config --global user.email "teu@email.pt"', meaning: 'Identifica os teus commits antes de fazeres o primeiro git commit', example: 'Igual ao email do GitHub' },
+        {
+          syntax: 'python --version  (ou py --version)',
+          meaning: 'Confirma que o Python está instalado e no PATH',
+          example: 'Python 3.12.x',
+        },
+        {
+          syntax: 'python -m venv .venv',
+          meaning: 'Cria o ambiente virtual isolado na pasta do projeto',
+          example: 'Pasta .venv/',
+        },
+        {
+          syntax: '.venv\\Scripts\\Activate.ps1  (ou source .venv/Scripts/activate no Git Bash)',
+          meaning: 'Ativa o ambiente virtual no Windows antes de instalar pacotes',
+          example: 'Aparece (.venv) no início da linha',
+        },
+        {
+          syntax: 'Set-ExecutionPolicy -Scope CurrentUser RemoteSigned',
+          meaning: 'Resolve o erro PSSecurityException ao ativar .venv no PowerShell do Windows',
+          example: 'Corre uma única vez',
+        },
+        {
+          syntax: 'pip install pandas matplotlib jupyter',
+          meaning: 'Instala as 3 bibliotecas base do projeto final dentro do .venv',
+          example: 'Com (.venv) ativo',
+        },
+        {
+          syntax: 'git config --global user.name "O Teu Nome" && git config --global user.email "teu@email.pt"',
+          meaning: 'Identifica os teus commits antes de fazeres o primeiro git commit',
+          example: 'Igual ao email do GitHub',
+        },
       ],
       engine: 'projeto',
       exampleCode: `# --- 1. Verificar Python e Git (PowerShell ou Git Bash) ---
@@ -232,14 +326,31 @@ python -c "import pandas as pd, matplotlib; print('Pronto:', pd.__version__)"`,
           'Corri import pandas as pd numa célula de um ficheiro .ipynb sem ModuleNotFoundError.',
         ],
         grelha: [
-          { criterio: 'Python no PATH', bom: 'python --version e pip funcionam diretamente no terminal.', aMelhorar: 'Só abre pela Microsoft Store ou dá "\'python\' is not recognized".' },
-          { criterio: 'Ambiente isolado (.venv)', bom: 'Pacotes instalados dentro de .venv, e o VS Code usa o kernel .venv no .ipynb.', aMelhorar: 'Instala pacotes globalmente ou o caderno usa outro Python e falha ao importar pandas.' },
-          { criterio: 'Git e GitHub prontos', bom: 'git --version funciona, user.name/email configurados e conta no GitHub criada.', aMelhorar: 'Deixa para configurar o Git na véspera de publicar e bloqueia no primeiro commit.' },
-          { criterio: 'Autonomia no Windows', bom: 'Sabe resolver PSSecurityException ou usar Git Bash em alternativa ao PowerShell.', aMelhorar: 'Bloqueia no primeiro erro de permissão de scripts sem saber o comando.' },
+          {
+            criterio: 'Python no PATH',
+            bom: 'python --version e pip funcionam diretamente no terminal.',
+            aMelhorar: 'Só abre pela Microsoft Store ou dá "\'python\' is not recognized".',
+          },
+          {
+            criterio: 'Ambiente isolado (.venv)',
+            bom: 'Pacotes instalados dentro de .venv, e o VS Code usa o kernel .venv no .ipynb.',
+            aMelhorar: 'Instala pacotes globalmente ou o caderno usa outro Python e falha ao importar pandas.',
+          },
+          {
+            criterio: 'Git e GitHub prontos',
+            bom: 'git --version funciona, user.name/email configurados e conta no GitHub criada.',
+            aMelhorar: 'Deixa para configurar o Git na véspera de publicar e bloqueia no primeiro commit.',
+          },
+          {
+            criterio: 'Autonomia no Windows',
+            bom: 'Sabe resolver PSSecurityException ou usar Git Bash em alternativa ao PowerShell.',
+            aMelhorar: 'Bloqueia no primeiro erro de permissão de scripts sem saber o comando.',
+          },
         ],
       },
       quiz: {
-        question: 'Instalaste o pandas no terminal dentro do .venv, mas quando corres import pandas as pd num caderno .ipynb no VS Code aparece ModuleNotFoundError. Qual é a causa mais provável?',
+        question:
+          'Instalaste o pandas no terminal dentro do .venv, mas quando corres import pandas as pd num caderno .ipynb no VS Code aparece ModuleNotFoundError. Qual é a causa mais provável?',
         options: [
           'O pandas não funciona em ficheiros .ipynb, só em .py.',
           'O notebook no VS Code está a usar o kernel do Python global em vez do kernel do .venv.',
@@ -247,7 +358,8 @@ python -c "import pandas as pd, matplotlib; print('Pronto:', pd.__version__)"`,
           'Tens de instalar o pandas com sudo ou como Administrador.',
         ],
         correctIndex: 1,
-        explanation: 'No VS Code, cada caderno .ipynb escolhe o seu kernel no canto superior direito. Se ficar o Python global em vez de .venv, o caderno não vê as bibliotecas instaladas dentro do .venv.',
+        explanation:
+          'No VS Code, cada caderno .ipynb escolhe o seu kernel no canto superior direito. Se ficar o Python global em vez de .venv, o caderno não vê as bibliotecas instaladas dentro do .venv.',
       },
     },
     {
@@ -256,7 +368,8 @@ python -c "import pandas as pd, matplotlib; print('Pronto:', pd.__version__)"`,
       title: 'O teu projeto: escolher a pergunta e os dados',
       lede: 'Agora és tu que decides. Passas de um tema que te interessa a uma pergunta com uma decisão, encontras dados públicos que a respondem, confirmas a licença e crias o repositório onde o projeto vai viver.',
       analogyTitle: 'A planta antes da obra',
-      analogyBody: 'Ninguém começa uma casa a comprar tijolos. Primeiro decide-se para quem é, quantos quartos tem e quanto custa; só depois se escolhe o terreno. Na análise de dados, a pergunta é a planta e os dados são o terreno: se o terreno não serve, muda-se de terreno ou ajusta-se a planta antes de começar a cavar.',
+      analogyBody:
+        'Ninguém começa uma casa a comprar tijolos. Primeiro decide-se para quem é, quantos quartos tem e quanto custa; só depois se escolhe o terreno. Na análise de dados, a pergunta é a planta e os dados são o terreno: se o terreno não serve, muda-se de terreno ou ajusta-se a planta antes de começar a cavar.',
       concepts: [
         'Antes de começares, espreita o projeto de exemplo completo e publicado do curso (Turismo no Algarve) em github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve: vês logo o README, os dois cadernos e o gráfico final.',
         'Um tema não é uma pergunta. "Turismo no Algarve" é um tema; "Em que meses deve um alojamento do Algarve reforçar o pessoal?" é uma pergunta com decisão. Começa por "onde", "quando", "quanto" ou "qual" e diz quem decide.',
@@ -273,16 +386,43 @@ python -c "import pandas as pd, matplotlib; print('Pronto:', pd.__version__)"`,
         'Cria a pasta do projeto com dados/, cadernos/, README.md e .gitignore, corre git init -b main e faz o primeiro commit.',
         'Escreve no README a pergunta, quem decide e de onde vêm os dados com a licença concreta.',
       ],
-      proPractice: 'Numa entrevista perguntam quase sempre "porque escolheste este projeto?". A melhor resposta é a pergunta e quem a usaria: "Queria saber em que meses um alojamento do Algarve precisa de mais pessoal, e os dados de dormidas por mês respondem a isso."',
-      commonPitfall: 'Escolher primeiro os dados "porque são interessantes" e procurar depois uma pergunta: acabas com um projeto que descreve colunas e não ajuda ninguém a decidir. Outro erro comum é escolher um conjunto com 30 linhas, onde nenhuma conclusão se aguenta.',
+      proPractice:
+        'Numa entrevista perguntam quase sempre "porque escolheste este projeto?". A melhor resposta é a pergunta e quem a usaria: "Queria saber em que meses um alojamento do Algarve precisa de mais pessoal, e os dados de dormidas por mês respondem a isso."',
+      commonPitfall:
+        'Escolher primeiro os dados "porque são interessantes" e procurar depois uma pergunta: acabas com um projeto que descreve colunas e não ajuda ninguém a decidir. Outro erro comum é escolher um conjunto com 30 linhas, onde nenhuma conclusão se aguenta.',
       referenceTitle: 'Fontes abertas e ideias de perguntas por tema',
       referenceRows: [
-        { syntax: 'Exemplo completo publicado no GitHub', meaning: 'Repositório de referência do curso (dados, 2 cadernos, gráfico e README)', example: 'https://github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve' },
-        { syntax: 'Turismo — INE / dados.gov.pt (CC BY 4.0)', meaning: 'Dormidas em alojamento turístico por município e mês', example: '"Em que meses deve um alojamento do Algarve reforçar o pessoal?"' },
-        { syntax: 'Mobilidade — dadosabertos.cm-porto.pt (CC0) / dados.gov.pt', meaning: 'Viagens, validações ou condicionamentos de trânsito por zona e hora', example: '"Em que troços e horas concentrar manutenção sem travar a hora de ponta?"' },
-        { syntax: 'Saúde — dados.gov.pt / Transparência SNS (CC BY 4.0)', meaning: 'Tempos médios de espera ou atendimentos por hospital e especialidade', example: '"Que hospitais têm maior diferença face à meta de espera em cirurgia?"' },
-        { syntax: 'Energia — dados.gov.pt / DGEG (CC BY 4.0)', meaning: 'Consumo elétrico ou produção renovável por distrito e mês', example: '"Em que meses o peso solar reduz mais a dependência de outras fontes?"' },
-        { syntax: 'https://www.pordata.pt/ e https://www.ine.pt/', meaning: 'Usa a PORDATA para descobrir indicadores, mas descarrega da fonte original (INE / dados.gov.pt) para teres licença aberta clara', example: 'Confirma sempre a licença na página do conjunto' },
+        {
+          syntax: 'Exemplo completo publicado no GitHub',
+          meaning: 'Repositório de referência do curso (dados, 2 cadernos, gráfico e README)',
+          example: 'https://github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve',
+        },
+        {
+          syntax: 'Turismo — INE / dados.gov.pt (CC BY 4.0)',
+          meaning: 'Dormidas em alojamento turístico por município e mês',
+          example: '"Em que meses deve um alojamento do Algarve reforçar o pessoal?"',
+        },
+        {
+          syntax: 'Mobilidade — dadosabertos.cm-porto.pt (CC0) / dados.gov.pt',
+          meaning: 'Viagens, validações ou condicionamentos de trânsito por zona e hora',
+          example: '"Em que troços e horas concentrar manutenção sem travar a hora de ponta?"',
+        },
+        {
+          syntax: 'Saúde — dados.gov.pt / Transparência SNS (CC BY 4.0)',
+          meaning: 'Tempos médios de espera ou atendimentos por hospital e especialidade',
+          example: '"Que hospitais têm maior diferença face à meta de espera em cirurgia?"',
+        },
+        {
+          syntax: 'Energia — dados.gov.pt / DGEG (CC BY 4.0)',
+          meaning: 'Consumo elétrico ou produção renovável por distrito e mês',
+          example: '"Em que meses o peso solar reduz mais a dependência de outras fontes?"',
+        },
+        {
+          syntax: 'https://www.pordata.pt/ e https://www.ine.pt/',
+          meaning:
+            'Usa a PORDATA para descobrir indicadores, mas descarrega da fonte original (INE / dados.gov.pt) para teres licença aberta clara',
+          example: 'Confirma sempre a licença na página do conjunto',
+        },
       ],
       engine: 'projeto',
       exampleCode: `# --- No terminal (Git Bash no Windows, Terminal no macOS ou Linux) ---
@@ -324,11 +464,32 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
           'Não editei o ficheiro original à mão: as mudanças vão ser feitas no caderno.',
         ],
         grelha: [
-          { criterio: 'Pergunta', bom: 'Uma frase com uma decisão e quem a toma: "Em que meses deve um alojamento do Algarve reforçar o pessoal?"', aMelhorar: 'Um tema ("turismo") ou uma pergunta que só descreve ("como evoluíram as dormidas?").' },
-          { criterio: 'Os dados respondem', bom: 'Têm as colunas (o quê, onde, quando), o período e linhas suficientes para comparar.', aMelhorar: 'Falta a coluna principal, o período é curto ou há tão poucas linhas que qualquer diferença pode ser acaso.' },
-          { criterio: 'Fonte e licença', bom: 'README com a fonte, o link, a data de descarga e a licença confirmada na página do conjunto.', aMelhorar: '"Dados da internet", sem link nem licença.' },
-          { criterio: 'Estrutura', bom: 'dados/, cadernos/, README.md e .gitignore desde o primeiro commit, com o ficheiro original intacto.', aMelhorar: 'Tudo na mesma pasta, o original editado no Excel e nenhum .gitignore.' },
-          { criterio: 'Tamanho do projeto', bom: 'Cabe em uma ou duas semanas: um conjunto de dados principal e uma pergunta.', aMelhorar: 'Cinco perguntas e quatro fontes que nunca chegam a ser cruzadas.' },
+          {
+            criterio: 'Pergunta',
+            bom: 'Uma frase com uma decisão e quem a toma: "Em que meses deve um alojamento do Algarve reforçar o pessoal?"',
+            aMelhorar: 'Um tema ("turismo") ou uma pergunta que só descreve ("como evoluíram as dormidas?").',
+          },
+          {
+            criterio: 'Os dados respondem',
+            bom: 'Têm as colunas (o quê, onde, quando), o período e linhas suficientes para comparar.',
+            aMelhorar:
+              'Falta a coluna principal, o período é curto ou há tão poucas linhas que qualquer diferença pode ser acaso.',
+          },
+          {
+            criterio: 'Fonte e licença',
+            bom: 'README com a fonte, o link, a data de descarga e a licença confirmada na página do conjunto.',
+            aMelhorar: '"Dados da internet", sem link nem licença.',
+          },
+          {
+            criterio: 'Estrutura',
+            bom: 'dados/, cadernos/, README.md e .gitignore desde o primeiro commit, com o ficheiro original intacto.',
+            aMelhorar: 'Tudo na mesma pasta, o original editado no Excel e nenhum .gitignore.',
+          },
+          {
+            criterio: 'Tamanho do projeto',
+            bom: 'Cabe em uma ou duas semanas: um conjunto de dados principal e uma pergunta.',
+            aMelhorar: 'Cinco perguntas e quatro fontes que nunca chegam a ser cruzadas.',
+          },
         ],
       },
       quiz: {
@@ -340,7 +501,8 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
           '"Como é que o turismo mudou ao longo dos últimos vinte anos em todo o país?"',
         ],
         correctIndex: 1,
-        explanation: 'Uma boa pergunta tem uma decisão e alguém que a toma: diz que número procurar e o que fazer com ele. As outras são um tema, uma descrição do ficheiro ou uma pergunta tão larga que não leva a nenhuma decisão.',
+        explanation:
+          'Uma boa pergunta tem uma decisão e alguém que a toma: diz que número procurar e o que fazer com ele. As outras são um tema, uma descrição do ficheiro ou uma pergunta tão larga que não leva a nenhuma decisão.',
       },
     },
     {
@@ -349,7 +511,8 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
       title: 'Explorar e limpar os teus dados',
       lede: 'Repetes o método da limpeza das bicicletas, agora nos teus dados e sem enunciado: olhas para a forma, os tipos, os vazios e os duplicados, e escreves cada regra de limpeza com o motivo e as linhas que tirou.',
       analogyTitle: 'A inspeção antes de comprar um carro usado',
-      analogyBody: 'Ninguém compra um carro usado só pela fotografia: abre-se o capô, confirmam-se os quilómetros, procura-se ferrugem e anota-se o que é preciso arranjar. O primeiro caderno é essa inspeção: antes de qualquer conclusão, sabes o que os dados têm, o que lhes falta e o que vais corrigir, e fica tudo escrito para quem vier a seguir.',
+      analogyBody:
+        'Ninguém compra um carro usado só pela fotografia: abre-se o capô, confirmam-se os quilómetros, procura-se ferrugem e anota-se o que é preciso arranjar. O primeiro caderno é essa inspeção: antes de qualquer conclusão, sabes o que os dados têm, o que lhes falta e o que vais corrigir, e fica tudo escrito para quem vier a seguir.',
       concepts: [
         'Primeiro olhar: df.shape (linhas e colunas), df.dtypes (tipos), df.head() e df.sample(10). Uma coluna de números lida como object quase sempre esconde vírgulas, espaços ou texto como "n.d.".',
         'Ficheiros portugueses: muitos usam ponto e vírgula e vírgula decimal, por isso lês com pd.read_csv(..., sep=";", decimal=","). Se os acentos aparecerem estragados, experimenta encoding="latin-1"; se houver linhas de título antes da tabela, usa skiprows=.',
@@ -365,16 +528,38 @@ git commit -m "Pergunta, estrutura do projeto e dados originais do INE"`,
         'Junta as contagens num pequeno relatório de limpeza: quantas linhas entraram, quantas saíram por cada motivo e quantas ficaram.',
         'Guarda o resultado em dados/ com outro nome, reinicia o kernel, corre o caderno do início ao fim e faz commit.',
       ],
-      proPractice: 'No trabalho, a primeira pergunta sobre qualquer número é "de onde vem e o que tiraste?". Um relatório de limpeza com contagens por motivo responde a isso em 10 segundos e mostra a um recrutador que não escondes o que deitaste fora.',
-      commonPitfall: 'Limpar "até parecer bem" sem escrever as regras: duas semanas depois já não sabes porque saíram 400 linhas, e quem lê o caderno também não. O outro erro clássico é abrir e gravar o CSV original no Excel, que pode mudar datas e números sem avisar.',
+      proPractice:
+        'No trabalho, a primeira pergunta sobre qualquer número é "de onde vem e o que tiraste?". Um relatório de limpeza com contagens por motivo responde a isso em 10 segundos e mostra a um recrutador que não escondes o que deitaste fora.',
+      commonPitfall:
+        'Limpar "até parecer bem" sem escrever as regras: duas semanas depois já não sabes porque saíram 400 linhas, e quem lê o caderno também não. O outro erro clássico é abrir e gravar o CSV original no Excel, que pode mudar datas e números sem avisar.',
       referenceTitle: 'Primeiro caderno: explorar e limpar',
       referenceRows: [
-        { syntax: 'pd.read_csv(f, sep=";", decimal=",")', meaning: 'Lê um CSV no formato português (ponto e vírgula e vírgula decimal)', example: 'pd.read_csv("../dados/dormidas.csv", sep=";", decimal=",")' },
-        { syntax: 'df.shape, df.dtypes, df.sample(10)', meaning: 'Tamanho, tipos e uma amostra ao acaso', example: '(1200, 5)' },
+        {
+          syntax: 'pd.read_csv(f, sep=";", decimal=",")',
+          meaning: 'Lê um CSV no formato português (ponto e vírgula e vírgula decimal)',
+          example: 'pd.read_csv("../dados/dormidas.csv", sep=";", decimal=",")',
+        },
+        {
+          syntax: 'df.shape, df.dtypes, df.sample(10)',
+          meaning: 'Tamanho, tipos e uma amostra ao acaso',
+          example: '(1200, 5)',
+        },
         { syntax: 'df.isna().sum()', meaning: 'Vazios por coluna', example: 'dormidas    37' },
-        { syntax: 'df.duplicated(subset=["municipio", "ano", "mes"]).sum()', meaning: 'Repetidos na chave que devia ser única (com vários anos, o ano faz parte da chave)', example: '12' },
-        { syntax: 'pd.to_numeric(s, errors="coerce")', meaning: 'Converte para número; o que não for número fica NaN (conta-os antes e depois)', example: '"n.d." passa a NaN' },
-        { syntax: 'df.to_csv("../dados/limpo.csv", index=False)', meaning: 'Guarda o resultado sem tocar no original', example: 'dados/limpo.csv' },
+        {
+          syntax: 'df.duplicated(subset=["municipio", "ano", "mes"]).sum()',
+          meaning: 'Repetidos na chave que devia ser única (com vários anos, o ano faz parte da chave)',
+          example: '12',
+        },
+        {
+          syntax: 'pd.to_numeric(s, errors="coerce")',
+          meaning: 'Converte para número; o que não for número fica NaN (conta-os antes e depois)',
+          example: '"n.d." passa a NaN',
+        },
+        {
+          syntax: 'df.to_csv("../dados/limpo.csv", index=False)',
+          meaning: 'Guarda o resultado sem tocar no original',
+          example: 'dados/limpo.csv',
+        },
       ],
       engine: 'projeto',
       exampleCode: `# cadernos/01_explorar_limpar.ipynb, primeira célula
@@ -410,11 +595,31 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
           'Sinal 5 (Reprodutível): o original está intacto, o limpo está noutro ficheiro em dados/ e o caderno corre do zero após reiniciar o kernel.',
         ],
         grelha: [
-          { criterio: 'Exploração', bom: 'Forma, tipos, vazios e duplicados à vista, com uma frase sobre o que cada um quer dizer.', aMelhorar: 'Só um df.head(), sem olhar para os tipos nem para os vazios.' },
-          { criterio: 'Regras escritas', bom: 'Cada regra tem um motivo: "Tiro as linhas sem município porque não as consigo comparar com as outras."', aMelhorar: 'Código de limpeza sem explicação, ou regras que mudaram a meio sem nota.' },
-          { criterio: 'Contagens', bom: 'Entraram 1 200 linhas, saíram 37 sem valor e 12 repetidas, ficaram 1 151: as contas batem certo.', aMelhorar: 'Não se sabe quantas linhas saíram nem porquê.' },
-          { criterio: 'Tipos', bom: 'Números como int ou float, datas como datetime e categorias uniformizadas.', aMelhorar: 'Valores em texto com vírgula, datas em texto, "Lisboa" e "lisboa" como categorias diferentes.' },
-          { criterio: 'Reprodutível', bom: 'Corre do início ao fim depois de reiniciar o kernel, e o original fica intacto.', aMelhorar: 'Só funciona se as células correrem por uma ordem que só tu sabes.' },
+          {
+            criterio: 'Exploração',
+            bom: 'Forma, tipos, vazios e duplicados à vista, com uma frase sobre o que cada um quer dizer.',
+            aMelhorar: 'Só um df.head(), sem olhar para os tipos nem para os vazios.',
+          },
+          {
+            criterio: 'Regras escritas',
+            bom: 'Cada regra tem um motivo: "Tiro as linhas sem município porque não as consigo comparar com as outras."',
+            aMelhorar: 'Código de limpeza sem explicação, ou regras que mudaram a meio sem nota.',
+          },
+          {
+            criterio: 'Contagens',
+            bom: 'Entraram 1 200 linhas, saíram 37 sem valor e 12 repetidas, ficaram 1 151: as contas batem certo.',
+            aMelhorar: 'Não se sabe quantas linhas saíram nem porquê.',
+          },
+          {
+            criterio: 'Tipos',
+            bom: 'Números como int ou float, datas como datetime e categorias uniformizadas.',
+            aMelhorar: 'Valores em texto com vírgula, datas em texto, "Lisboa" e "lisboa" como categorias diferentes.',
+          },
+          {
+            criterio: 'Reprodutível',
+            bom: 'Corre do início ao fim depois de reiniciar o kernel, e o original fica intacto.',
+            aMelhorar: 'Só funciona se as células correrem por uma ordem que só tu sabes.',
+          },
         ],
       },
       quiz: {
@@ -426,7 +631,8 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
           'Ignoro-os, porque o pandas já os deixa de fora nas médias e nas somas',
         ],
         correctIndex: 1,
-        explanation: 'Não há uma resposta única para os vazios: depende do motivo. O que não pode faltar é a regra escrita e a contagem, para quem lê saber o que mudou. Trocar por 0 baixa as médias, editar no Excel não deixa rasto e ignorá-los esconde quantos casos tens de facto.',
+        explanation:
+          'Não há uma resposta única para os vazios: depende do motivo. O que não pode faltar é a regra escrita e a contagem, para quem lê saber o que mudou. Trocar por 0 baixa as médias, editar no Excel não deixa rasto e ignorá-los esconde quantos casos tens de facto.',
       },
     },
     {
@@ -435,7 +641,8 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
       title: 'Analisar e recomendar: um número, um gráfico, uma frase',
       lede: 'Respondes à tua pergunta como no projeto final guiado do Nível Profissional, agora sem guia: um número que responde, um gráfico honesto com a conclusão no título e uma recomendação numa frase que alguém pode usar. E dizes com clareza o que os teus dados não permitem concluir.',
       analogyTitle: 'O médico que explica as análises',
-      analogyBody: 'Um bom médico não te entrega a folha das análises e vai embora: diz o que tens, aponta o valor que o mostra e diz o que fazer. E diz também o que as análises não mostram ("para isso precisamos de outro exame"). A tua análise é igual: um número, uma imagem que o mostra, uma recomendação e os limites.',
+      analogyBody:
+        'Um bom médico não te entrega a folha das análises e vai embora: diz o que tens, aponta o valor que o mostra e diz o que fazer. E diz também o que as análises não mostram ("para isso precisamos de outro exame"). A tua análise é igual: um número, uma imagem que o mostra, uma recomendação e os limites.',
       concepts: [
         'Um número que responde à pergunta, com a comparação que lhe dá sentido: "o mês de pico tem 2,3 vezes as dormidas de um mês médio" diz mais do que o total desse mês sozinho.',
         'Gráfico honesto: nas quantidades (barras) o eixo começa no zero; um gráfico por mensagem; o título diz a conclusão ("Agosto vale mais do dobro de um mês médio") e não a descrição ("Dormidas por mês"); os eixos têm unidades.',
@@ -452,16 +659,43 @@ print("Saíram", antes - len(df), "linhas repetidas")`,
         'Escreve uma célula "Limites" com o que os dados não permitem concluir.',
         'Mostra só o título do gráfico e a frase a alguém que não conhece os dados: se não percebe o que fazer, reescreve.',
       ],
-      proPractice: 'Em entrevistas de DA é frequente receberes um ficheiro e meia hora para dizer o que farias. Quem responde com um número, um gráfico e uma frase com decisão, e diz logo o limite da análise, destaca-se de quem mostra dez gráficos sem conclusão.',
-      commonPitfall: 'Concluir mais do que os dados dizem: "o turismo faz subir as rendas" quando só viste que as duas coisas sobem nos mesmos municípios. Ou cortar o eixo das barras para a diferença parecer maior: um recrutador atento repara.',
+      proPractice:
+        'Em entrevistas de DA é frequente receberes um ficheiro e meia hora para dizer o que farias. Quem responde com um número, um gráfico e uma frase com decisão, e diz logo o limite da análise, destaca-se de quem mostra dez gráficos sem conclusão.',
+      commonPitfall:
+        'Concluir mais do que os dados dizem: "o turismo faz subir as rendas" quando só viste que as duas coisas sobem nos mesmos municípios. Ou cortar o eixo das barras para a diferença parecer maior: um recrutador atento repara.',
       referenceTitle: 'Do número à recomendação',
       referenceRows: [
-        { syntax: 'df.groupby("mes")["dormidas"].sum().sort_index()', meaning: 'Total de cada mês do calendário, com todos os anos somados. Com mes como número (1 a 12), as barras ficam por ordem; com nomes, ficavam por ordem alfabética', example: 'Dormidas de janeiro a dezembro' },
-        { syntax: 'pico / media', meaning: 'Quantas vezes um valor está acima da referência', example: '2,3 vezes um mês médio' },
-        { syntax: 'ax.bar(x, y); ax.set_ylim(bottom=0)', meaning: 'Barras com o eixo no zero', example: 'Quantidades por mês' },
-        { syntax: 'ax.set_title("Conclusão em frase")', meaning: 'O título diz o que o gráfico mostra', example: '"Agosto vale mais do dobro de um mês médio"' },
-        { syntax: 'fig.savefig("../figuras/dormidas_por_mes.png", dpi=150, bbox_inches="tight")', meaning: 'Guarda o gráfico para o README', example: 'figuras/dormidas_por_mes.png' },
-        { syntax: 'Limites', meaning: 'O que os dados não permitem concluir', example: '"Associação, não causa; só 3 anos de dados"' },
+        {
+          syntax: 'df.groupby("mes")["dormidas"].sum().sort_index()',
+          meaning:
+            'Total de cada mês do calendário, com todos os anos somados. Com mes como número (1 a 12), as barras ficam por ordem; com nomes, ficavam por ordem alfabética',
+          example: 'Dormidas de janeiro a dezembro',
+        },
+        {
+          syntax: 'pico / media',
+          meaning: 'Quantas vezes um valor está acima da referência',
+          example: '2,3 vezes um mês médio',
+        },
+        {
+          syntax: 'ax.bar(x, y); ax.set_ylim(bottom=0)',
+          meaning: 'Barras com o eixo no zero',
+          example: 'Quantidades por mês',
+        },
+        {
+          syntax: 'ax.set_title("Conclusão em frase")',
+          meaning: 'O título diz o que o gráfico mostra',
+          example: '"Agosto vale mais do dobro de um mês médio"',
+        },
+        {
+          syntax: 'fig.savefig("../figuras/dormidas_por_mes.png", dpi=150, bbox_inches="tight")',
+          meaning: 'Guarda o gráfico para o README',
+          example: 'figuras/dormidas_por_mes.png',
+        },
+        {
+          syntax: 'Limites',
+          meaning: 'O que os dados não permitem concluir',
+          example: '"Associação, não causa; só 3 anos de dados"',
+        },
       ],
       engine: 'projeto',
       exampleCode: `# cadernos/02_analise.ipynb: o número, o gráfico e a frase
@@ -518,15 +752,36 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
           'Mostrei o título do gráfico e a frase a alguém que não conhece os dados, e essa pessoa percebeu o que fazer.',
         ],
         grelha: [
-          { criterio: 'Número', bom: 'Um número que responde à pergunta, comparado com uma referência: "2,3 vezes um mês médio".', aMelhorar: 'Uma tabela de totais sem comparação, ou dez números sem dizer qual importa.' },
-          { criterio: 'Gráfico', bom: 'Um gráfico, uma mensagem: eixo no zero nas quantidades, conclusão no título e unidades nos eixos.', aMelhorar: 'Eixo cortado que exagera a diferença, título "Gráfico 1" ou cores sem significado.' },
-          { criterio: 'Recomendação', bom: 'Uma frase com o quê, quando ou onde, e o número: alguém pode agir na segunda-feira.', aMelhorar: '"Os dados mostram tendências interessantes", ou uma conclusão sem decisão.' },
-          { criterio: 'Limites', bom: 'Diz o que não se pode concluir: associação e não causa, poucos casos, período curto.', aMelhorar: 'Afirma uma causa a partir de uma correlação, ou esconde que há poucos dados.' },
-          { criterio: 'Comparações justas', bom: 'Taxas ou percentagens quando os grupos têm tamanhos diferentes; mediana quando há valores extremos.', aMelhorar: 'Compara os totais de Lisboa com os de um município pequeno e conclui que Lisboa "é melhor".' },
+          {
+            criterio: 'Número',
+            bom: 'Um número que responde à pergunta, comparado com uma referência: "2,3 vezes um mês médio".',
+            aMelhorar: 'Uma tabela de totais sem comparação, ou dez números sem dizer qual importa.',
+          },
+          {
+            criterio: 'Gráfico',
+            bom: 'Um gráfico, uma mensagem: eixo no zero nas quantidades, conclusão no título e unidades nos eixos.',
+            aMelhorar: 'Eixo cortado que exagera a diferença, título "Gráfico 1" ou cores sem significado.',
+          },
+          {
+            criterio: 'Recomendação',
+            bom: 'Uma frase com o quê, quando ou onde, e o número: alguém pode agir na segunda-feira.',
+            aMelhorar: '"Os dados mostram tendências interessantes", ou uma conclusão sem decisão.',
+          },
+          {
+            criterio: 'Limites',
+            bom: 'Diz o que não se pode concluir: associação e não causa, poucos casos, período curto.',
+            aMelhorar: 'Afirma uma causa a partir de uma correlação, ou esconde que há poucos dados.',
+          },
+          {
+            criterio: 'Comparações justas',
+            bom: 'Taxas ou percentagens quando os grupos têm tamanhos diferentes; mediana quando há valores extremos.',
+            aMelhorar: 'Compara os totais de Lisboa com os de um município pequeno e conclui que Lisboa "é melhor".',
+          },
         ],
       },
       quiz: {
-        question: 'Nos teus dados, os municípios com mais alojamento local têm rendas mais altas. O que podes escrever na conclusão?',
+        question:
+          'Nos teus dados, os municípios com mais alojamento local têm rendas mais altas. O que podes escrever na conclusão?',
         options: [
           '"O alojamento local faz subir as rendas."',
           '"Estão associados; estes dados sozinhos não mostram a causa."',
@@ -534,7 +789,8 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
           '"Não se pode dizer nada sobre isto, porque correlação nunca é causa."',
         ],
         correctIndex: 1,
-        explanation: 'Uma associação é um resultado verdadeiro e útil, mas pode ter uma terceira coisa por trás (por exemplo, serem municípios turísticos e centrais). Afirmar a causa, ou prometer o efeito de uma medida, pede outro tipo de estudo; dizer que não se pode concluir nada também está errado.',
+        explanation:
+          'Uma associação é um resultado verdadeiro e útil, mas pode ter uma terceira coisa por trás (por exemplo, serem municípios turísticos e centrais). Afirmar a causa, ou prometer o efeito de uma medida, pede outro tipo de estudo; dizer que não se pode concluir nada também está errado.',
       },
     },
     {
@@ -543,7 +799,8 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
       title: 'Publicar: o README e o repositório que um recrutador abre',
       lede: 'Fechas o projeto: um README com a pergunta, as conclusões com números em formato português, os dados (fonte e licença) e como correr o projeto, um histórico de commits que se lê e o link do repositório. Um recrutador decide em 2 minutos: faz com que bastem.',
       analogyTitle: 'O currículo de uma página',
-      analogyBody: 'Um recrutador lê um currículo em segundos e só chama para entrevista se a primeira página o convencer. O README é a primeira página do teu projeto: em cima, o que descobriste; a seguir, de onde vêm os dados e como confirmar; o resto fica nos cadernos, para quem quiser ver mais.',
+      analogyBody:
+        'Um recrutador lê um currículo em segundos e só chama para entrevista se a primeira página o convencer. O README é a primeira página do teu projeto: em cima, o que descobriste; a seguir, de onde vêm os dados e como confirmar; o resto fica nos cadernos, para quem quiser ver mais.',
       concepts: [
         'A ordem do README segue o modelo do exemplo publicado (github.com/GustakunPT/Course_DA/tree/main/exemplo-projeto-turismo-algarve): título com a pergunta, ## Pergunta, ## Conclusões, ## Dados (fonte, link, data e licença concreta), ## Limites, ## Como correr e ## Estrutura.',
         'Números em formato português: 1 234 567 dormidas, 12,5%, 3 456,78 €. Tira-os do caderno, não os escrevas de memória: um número que não bate certo com o caderno tira credibilidade a tudo o resto.',
@@ -559,16 +816,39 @@ print(f"Reforçar o pessoal em {acima}: são os meses acima da média, com o pic
         'Abre o repositório numa janela privada do browser: o README aparece, o gráfico carrega e os links funcionam?',
         'Cola o link aqui em baixo e mostra o projeto a alguém, de cronómetro na mão: 2 minutos chegam?',
       ],
-      proPractice: 'No CV e no LinkedIn, descreve o projeto numa linha com ação, ferramenta e resultado, seguida do link: "Analisei as dormidas do INE com pandas e mostrei em que meses um alojamento do Algarve precisa de mais pessoal." Na entrevista, conta-o pela ordem do README: pergunta, resultado, dados, limites.',
-      commonPitfall: 'Um README que começa pela instalação ou pelo método, números que não batem certo com o caderno e um gráfico que não aparece porque o caminho aponta para uma pasta do teu computador (C:\\Users\\...). No README e nos cadernos, usa caminhos relativos ao repositório.',
+      proPractice:
+        'No CV e no LinkedIn, descreve o projeto numa linha com ação, ferramenta e resultado, seguida do link: "Analisei as dormidas do INE com pandas e mostrei em que meses um alojamento do Algarve precisa de mais pessoal." Na entrevista, conta-o pela ordem do README: pergunta, resultado, dados, limites.',
+      commonPitfall:
+        'Um README que começa pela instalação ou pelo método, números que não batem certo com o caderno e um gráfico que não aparece porque o caminho aponta para uma pasta do teu computador (C:\\Users\\...). No README e nos cadernos, usa caminhos relativos ao repositório.',
       referenceTitle: 'O README de portefólio, secção a secção',
       referenceRows: [
-        { syntax: '# Título com a pergunta', meaning: 'Diz logo o que o projeto responde', example: '# Turismo no Algarve: em que meses reforçar o pessoal?' },
-        { syntax: '## Conclusões', meaning: '3 a 5 frases com números em formato português, a recomendação e o gráfico', example: '![Dormidas por mês](figuras/dormidas_por_mes.png)' },
-        { syntax: '## Dados', meaning: 'Fonte, link, data de descarga, licença e linhas que saíram na limpeza', example: 'INE, descarregado a 17/11/2026' },
+        {
+          syntax: '# Título com a pergunta',
+          meaning: 'Diz logo o que o projeto responde',
+          example: '# Turismo no Algarve: em que meses reforçar o pessoal?',
+        },
+        {
+          syntax: '## Conclusões',
+          meaning: '3 a 5 frases com números em formato português, a recomendação e o gráfico',
+          example: '![Dormidas por mês](figuras/dormidas_por_mes.png)',
+        },
+        {
+          syntax: '## Dados',
+          meaning: 'Fonte, link, data de descarga, licença e linhas que saíram na limpeza',
+          example: 'INE, descarregado a 17/11/2026',
+        },
         { syntax: '## Limites', meaning: 'O que os dados não permitem concluir', example: 'Associação, não causa' },
-        { syntax: '## Como correr', meaning: 'Comandos para repetir tudo num computador limpo', example: 'pip install -r requirements.txt' },
-        { syntax: 'git branch -M main, git remote add origin <link> e git push -u origin main', meaning: 'Dá o nome main ao ramo, liga o repositório local ao do GitHub (criado vazio, sem README nem licença) e envia os commits', example: 'git remote add origin https://github.com/utilizador/turismo-algarve.git' },
+        {
+          syntax: '## Como correr',
+          meaning: 'Comandos para repetir tudo num computador limpo',
+          example: 'pip install -r requirements.txt',
+        },
+        {
+          syntax: 'git branch -M main, git remote add origin <link> e git push -u origin main',
+          meaning:
+            'Dá o nome main ao ramo, liga o repositório local ao do GitHub (criado vazio, sem README nem licença) e envia os commits',
+          example: 'git remote add origin https://github.com/utilizador/turismo-algarve.git',
+        },
       ],
       engine: 'projeto',
       exampleCode: `<!-- README.md: números de exemplo, troca-os pelos do teu caderno -->
@@ -619,12 +899,37 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
           'O repositório não tem palavras-passe, chaves nem dados pessoais.',
         ],
         grelha: [
-          { criterio: 'Primeiros 10 segundos', bom: 'O título e as primeiras linhas dizem a pergunta e o resultado principal, com um número.', aMelhorar: 'Abre com "Projeto final do curso" ou com as instruções de instalação.' },
-          { criterio: 'Conclusões', bom: '3 a 5 frases com números em formato português, uma recomendação e o gráfico à vista.', aMelhorar: 'Descreve o método ("usei groupby") sem dizer o que descobriu.' },
-          { criterio: 'Dados e honestidade', bom: 'Fonte com link, licença, linhas que saíram na limpeza e limites escritos.', aMelhorar: 'Sem fonte nem licença, ou conclusões mais fortes do que os dados permitem.' },
-          { criterio: 'Reprodutível', bom: 'requirements.txt e comandos que funcionam num computador limpo, com caminhos relativos.', aMelhorar: 'Falta uma biblioteca, um caminho aponta para C:\\Users\\... ou o caderno só corre por uma ordem secreta.' },
-          { criterio: 'Histórico e arrumação', bom: 'Um commit por passo com mensagens claras, um nome de repositório que diz o tema e as pastas arrumadas.', aMelhorar: 'Um só commit "Add files via upload", o nome "projeto-final-v3" e ficheiros soltos na raiz.' },
-          { criterio: 'Comprimento', bom: 'Lê-se em 2 minutos; o detalhe fica nos cadernos, com links.', aMelhorar: 'Três ecrãs de texto, ou o caderno inteiro copiado para o README.' },
+          {
+            criterio: 'Primeiros 10 segundos',
+            bom: 'O título e as primeiras linhas dizem a pergunta e o resultado principal, com um número.',
+            aMelhorar: 'Abre com "Projeto final do curso" ou com as instruções de instalação.',
+          },
+          {
+            criterio: 'Conclusões',
+            bom: '3 a 5 frases com números em formato português, uma recomendação e o gráfico à vista.',
+            aMelhorar: 'Descreve o método ("usei groupby") sem dizer o que descobriu.',
+          },
+          {
+            criterio: 'Dados e honestidade',
+            bom: 'Fonte com link, licença, linhas que saíram na limpeza e limites escritos.',
+            aMelhorar: 'Sem fonte nem licença, ou conclusões mais fortes do que os dados permitem.',
+          },
+          {
+            criterio: 'Reprodutível',
+            bom: 'requirements.txt e comandos que funcionam num computador limpo, com caminhos relativos.',
+            aMelhorar:
+              'Falta uma biblioteca, um caminho aponta para C:\\Users\\... ou o caderno só corre por uma ordem secreta.',
+          },
+          {
+            criterio: 'Histórico e arrumação',
+            bom: 'Um commit por passo com mensagens claras, um nome de repositório que diz o tema e as pastas arrumadas.',
+            aMelhorar: 'Um só commit "Add files via upload", o nome "projeto-final-v3" e ficheiros soltos na raiz.',
+          },
+          {
+            criterio: 'Comprimento',
+            bom: 'Lê-se em 2 minutos; o detalhe fica nos cadernos, com links.',
+            aMelhorar: 'Três ecrãs de texto, ou o caderno inteiro copiado para o README.',
+          },
         ],
         pedirLinkGithub: true,
       },
@@ -637,7 +942,8 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
           'O código da limpeza, para ver que sabes pandas',
         ],
         correctIndex: 1,
-        explanation: 'Em 2 minutos o recrutador quer saber se fazes perguntas úteis e chegas a respostas com números. A instalação e as bibliotecas são para quem vai correr o projeto e ficam mais abaixo; o código está nos cadernos.',
+        explanation:
+          'Em 2 minutos o recrutador quer saber se fazes perguntas úteis e chegas a respostas com números. A instalação e as bibliotecas são para quem vai correr o projeto e ficam mais abaixo; o código está nos cadernos.',
       },
     },
     {
@@ -646,7 +952,8 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
       title: 'Portefólio sólido: fechar 3 a 4 projetos completos no GitHub',
       lede: 'Um projeto único mostra que completaste um exercício; 3 a 4 repositórios completos — de setores diferentes, do dado bruto sujo à recomendação de negócio — provam consistência a qualquer recrutador.',
       analogyTitle: 'A carteira de obras de um arquiteto',
-      analogyBody: 'Ninguém contrata um arquiteto por uma única maquete: quer ver 3 ou 4 projetos reais, para clientes diferentes, do terreno em bruto até à planta final. No GitHub é igual: o teu projeto próprio mais os casos que trabalhaste no curso formam um portefólio de 3 a 4 peças completas.',
+      analogyBody:
+        'Ninguém contrata um arquiteto por uma única maquete: quer ver 3 ou 4 projetos reais, para clientes diferentes, do terreno em bruto até à planta final. No GitHub é igual: o teu projeto próprio mais os casos que trabalhaste no curso formam um portefólio de 3 a 4 peças completas.',
       concepts: [
         'Os 4 pilares do portefólio completo (do dado bruto à recomendação): 1) Projeto próprio em dados públicos PT (etapas 03–06); 2) Mobilidade urbana — 20 300 viagens de bicicletas sujas; 3) E-commerce — diagnóstico da queda de março (2 700 pedidos em SQL, pandas, estatística e Excel/Power BI); 4) Varejo & BI — Mercearia do Bairro (SQL + Star Schema + DAX).',
         'Qualidade acima de quantidade: evita 10 cadernos soltos de tutoriais sem README (Tutorial Hell) ou modelos de Machine Learning prematuros sem pergunta de negócio clara.',
@@ -659,14 +966,32 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
         'Em cada repositório garante a mesma estrutura limpa: dados/ (ou link), cadernos/ ou sql/, figuras/ e README.md com Pergunta, Conclusões com números, Limites e Como correr.',
         'Fixa os 3–4 repositórios no topo do teu perfil do GitHub (Pins) e testa abrir cada link numa janela privada.',
       ],
-      proPractice: 'Ter 3 projetos completos de domínios diferentes (ex.: turismo, mobilidade e e-commerce) mostra versatilidade: em qualquer entrevista consegues puxar o caso mais próximo do setor da empresa.',
-      commonPitfall: 'Subir 8 ficheiros de exercícios soltos como "aula_1.ipynb" sem pergunta, sem limpeza documentada e sem recomendação de negócio — isso mostra apenas que seguiste aulas (Tutorial Hell), não que sabes analisar um problema real.',
+      proPractice:
+        'Ter 3 projetos completos de domínios diferentes (ex.: turismo, mobilidade e e-commerce) mostra versatilidade: em qualquer entrevista consegues puxar o caso mais próximo do setor da empresa.',
+      commonPitfall:
+        'Subir 8 ficheiros de exercícios soltos como "aula_1.ipynb" sem pergunta, sem limpeza documentada e sem recomendação de negócio — isso mostra apenas que seguiste aulas (Tutorial Hell), não que sabes analisar um problema real.',
       referenceTitle: 'Mapa dos 3 a 4 projetos completos para o teu GitHub',
       referenceRows: [
-        { syntax: 'Projeto 1: Dados públicos PT (teu tema)', meaning: 'Turismo, mobilidade, saúde ou energia (etapas 03–06)', example: 'Python + pandas + matplotlib + decisão' },
-        { syntax: 'Projeto 2: Rede de Bicicletas (20 300 viagens)', meaning: 'Limpeza auditada (300 dup, 200 dur, 150 datas) + horas de ponta (8h/17h)', example: 'dados/bicicletas_viagens_sujas.csv' },
-        { syntax: 'Projeto 3: E-commerce — Queda em Março (2 700 pedidos)', meaning: 'SQL + pandas + teste z (App 44,85% cancel.) + Tabela Dinâmica / DAX', example: 'dados/loja_online_pedidos.csv' },
-        { syntax: 'Projeto 4: Varejo & BI — Mercearia do Bairro', meaning: '5 078 vendas + Star Schema + medidas DAX + Curva ABC + relatório executivo', example: 'SQL + Excel/Power BI + Python' },
+        {
+          syntax: 'Projeto 1: Dados públicos PT (teu tema)',
+          meaning: 'Turismo, mobilidade, saúde ou energia (etapas 03–06)',
+          example: 'Python + pandas + matplotlib + decisão',
+        },
+        {
+          syntax: 'Projeto 2: Rede de Bicicletas (20 300 viagens)',
+          meaning: 'Limpeza auditada (300 dup, 200 dur, 150 datas) + horas de ponta (8h/17h)',
+          example: 'dados/bicicletas_viagens_sujas.csv',
+        },
+        {
+          syntax: 'Projeto 3: E-commerce — Queda em Março (2 700 pedidos)',
+          meaning: 'SQL + pandas + teste z (App 44,85% cancel.) + Tabela Dinâmica / DAX',
+          example: 'dados/loja_online_pedidos.csv',
+        },
+        {
+          syntax: 'Projeto 4: Varejo & BI — Mercearia do Bairro',
+          meaning: '5 078 vendas + Star Schema + medidas DAX + Curva ABC + relatório executivo',
+          example: 'SQL + Excel/Power BI + Python',
+        },
       ],
       engine: 'projeto',
       exampleCode: `<!-- Estrutura recomendada no teu perfil GitHub (Pins no topo) -->
@@ -695,14 +1020,31 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
           'Fixei os 3–4 projetos no topo do meu perfil do GitHub e verifiquei que todos os links e imagens carregam.',
         ],
         grelha: [
-          { criterio: 'Consistência (3–4 projetos)', bom: '3 ou 4 projetos completos de áreas distintas (ex.: setor público, mobilidade, e-commerce, varejo).', aMelhorar: 'Apenas 1 projeto ou 10 pastas de exercícios incompletos sem README.' },
-          { criterio: 'Foco no negócio', bom: 'Cada projeto responde a "quem decide?" e fecha com uma ação concreta sustentada por números.', aMelhorar: 'Mostra código ou modelos complexos sem explicar o impacto para o negócio.' },
-          { criterio: 'Do bruto ao visual', bom: 'Limpeza documentada, validação cruzada e gráfico/dashboard claro à vista no topo do README.', aMelhorar: 'Só o ficheiro final ou apenas tabelas impressas sem gráfico.' },
-          { criterio: 'Curadoria do perfil', bom: 'Os 3–4 melhores projetos estão fixados nos Pins do GitHub com descrições de 1 linha.', aMelhorar: 'Perfil desarrumado com repositórios de teste ou sem descrição.' },
+          {
+            criterio: 'Consistência (3–4 projetos)',
+            bom: '3 ou 4 projetos completos de áreas distintas (ex.: setor público, mobilidade, e-commerce, varejo).',
+            aMelhorar: 'Apenas 1 projeto ou 10 pastas de exercícios incompletos sem README.',
+          },
+          {
+            criterio: 'Foco no negócio',
+            bom: 'Cada projeto responde a "quem decide?" e fecha com uma ação concreta sustentada por números.',
+            aMelhorar: 'Mostra código ou modelos complexos sem explicar o impacto para o negócio.',
+          },
+          {
+            criterio: 'Do bruto ao visual',
+            bom: 'Limpeza documentada, validação cruzada e gráfico/dashboard claro à vista no topo do README.',
+            aMelhorar: 'Só o ficheiro final ou apenas tabelas impressas sem gráfico.',
+          },
+          {
+            criterio: 'Curadoria do perfil',
+            bom: 'Os 3–4 melhores projetos estão fixados nos Pins do GitHub com descrições de 1 linha.',
+            aMelhorar: 'Perfil desarrumado com repositórios de teste ou sem descrição.',
+          },
         ],
       },
       quiz: {
-        question: 'Um recrutador compara dois perfis júnior no GitHub: o Perfil A tem 12 repositórios de aulas e modelos de Machine Learning copiados sem README; o Perfil B tem 3 projetos completos em SQL, pandas e Power BI com limpeza documentada, gráficos e decisão de negócio. Qual passa à entrevista?',
+        question:
+          'Um recrutador compara dois perfis júnior no GitHub: o Perfil A tem 12 repositórios de aulas e modelos de Machine Learning copiados sem README; o Perfil B tem 3 projetos completos em SQL, pandas e Power BI com limpeza documentada, gráficos e decisão de negócio. Qual passa à entrevista?',
         options: [
           'O Perfil A, porque tem mais repositórios e já mostra Machine Learning.',
           'O Perfil B, porque prova autonomia do dado bruto até à decisão de negócio sem cair em Tutorial Hell.',
@@ -710,7 +1052,8 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
           'O Perfil A, porque os recrutadores procuram primeiro código de redes neuronais.',
         ],
         correctIndex: 1,
-        explanation: 'Para Analista de Dados Júnior, 3 a 4 projetos completos que dominam limpeza, SQL, estatística básica, visualização e decisão de negócio valem muito mais do que muitos tutoriais copiados ou ML prematuro.',
+        explanation:
+          'Para Analista de Dados Júnior, 3 a 4 projetos completos que dominam limpeza, SQL, estatística básica, visualização e decisão de negócio valem muito mais do que muitos tutoriais copiados ou ML prematuro.',
       },
     },
     {
@@ -719,7 +1062,8 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
       title: 'CV de analista e LinkedIn: projetos com números',
       lede: 'Transformas o projeto que acabaste de publicar num CV de 1 página e num perfil de LinkedIn que passam pela triagem em 10 segundos — com resultados e números em vez de listas de ferramentas.',
       analogyTitle: 'A ementa vs o prato pronto',
-      analogyBody: 'Escrever "Python, SQL, Power BI" numa lista é mostrar os ingredientes crus. Escrever "Analisei 20 300 viagens com pandas e identifiquei 3 estações que concentram 42% da procura" é servir o prato pronto: quem recruta vê logo o que consegues entregar.',
+      analogyBody:
+        'Escrever "Python, SQL, Power BI" numa lista é mostrar os ingredientes crus. Escrever "Analisei 20 300 viagens com pandas e identifiquei 3 estações que concentram 42% da procura" é servir o prato pronto: quem recruta vê logo o que consegues entregar.',
       concepts: [
         'Fórmula de cada linha de projeto no CV: Ação (verbo no passado) + Dados/Ferramenta + Resultado com número. Ex.: "Limpei e analisei 1 151 registos do INE com pandas e mostrei que junho a setembro concentram 61% das dormidas."',
         '1 página chega para analista júnior: nome, contacto + link do GitHub e LinkedIn, 2 a 3 projetos com números e link direto, experiência anterior (mesmo noutra área, destacando organização, atendimento ou metas) e formação.',
@@ -731,14 +1075,33 @@ Abre cadernos/01_explorar_limpar.ipynb e depois cadernos/02_analise.ipynb.
         'Monta um CV de 1 página em formato simples (Google Docs ou Word exportado para PDF) com links clicáveis para o GitHub e o LinkedIn.',
         'Atualiza o título e o "Sobre" do LinkedIn, e adiciona os links dos repositórios publicados na secção Destaques (Featured) com imagem do gráfico.',
       ],
-      proPractice: 'Se vens de outra área (comércio, hotelaria, saúde, administração), não escondas essa experiência: ela dá-te contexto de negócio que muitos recém-licenciados não têm. Liga-a a métricas, prazos e resolução de problemas.',
-      commonPitfall: 'Listar 15 ferramentas que só viste num vídeo de 10 minutos, ou escrever "Projeto final de curso" sem dizer que problema resolveste nem que número encontraste.',
+      proPractice:
+        'Se vens de outra área (comércio, hotelaria, saúde, administração), não escondas essa experiência: ela dá-te contexto de negócio que muitos recém-licenciados não têm. Liga-a a métricas, prazos e resolução de problemas.',
+      commonPitfall:
+        'Listar 15 ferramentas que só viste num vídeo de 10 minutos, ou escrever "Projeto final de curso" sem dizer que problema resolveste nem que número encontraste.',
       referenceTitle: 'Antes e depois no CV e LinkedIn',
       referenceRows: [
-        { syntax: 'Fraco: "Conhecimentos em Python, pandas e SQL."', meaning: 'Não prova que sabes aplicar a ferramenta a um problema real', example: 'Lista solta sem contexto' },
-        { syntax: 'Forte: "Analisei 2 700 pedidos com SQL e pandas e isolei uma falha na App que explicava -17,4% na faturação."', meaning: 'Mostra ação, dados, ferramenta e impacto mensurável', example: 'Passa na triagem em segundos' },
-        { syntax: 'Título LinkedIn: "Analista de Dados Júnior | SQL · Python · Power BI"', meaning: 'Aparece nas pesquisas dos recrutadores pelas palavras-chave certas', example: 'Evita títulos vagos como "Em transição de carreira"' },
-        { syntax: 'Destaques (Featured) no LinkedIn', meaning: 'Mostra o gráfico e o link do GitHub logo no topo do perfil', example: '1 clique para ver o teu trabalho' },
+        {
+          syntax: 'Fraco: "Conhecimentos em Python, pandas e SQL."',
+          meaning: 'Não prova que sabes aplicar a ferramenta a um problema real',
+          example: 'Lista solta sem contexto',
+        },
+        {
+          syntax:
+            'Forte: "Analisei 2 700 pedidos com SQL e pandas e isolei uma falha na App que explicava -17,4% na faturação."',
+          meaning: 'Mostra ação, dados, ferramenta e impacto mensurável',
+          example: 'Passa na triagem em segundos',
+        },
+        {
+          syntax: 'Título LinkedIn: "Analista de Dados Júnior | SQL · Python · Power BI"',
+          meaning: 'Aparece nas pesquisas dos recrutadores pelas palavras-chave certas',
+          example: 'Evita títulos vagos como "Em transição de carreira"',
+        },
+        {
+          syntax: 'Destaques (Featured) no LinkedIn',
+          meaning: 'Mostra o gráfico e o link do GitHub logo no topo do perfil',
+          example: '1 clique para ver o teu trabalho',
+        },
       ],
       engine: 'projeto',
       exampleCode: `<!-- Modelo de CV (1 página, exportar para PDF) -->
@@ -779,14 +1142,31 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
           'O meu projeto próprio publicado no GitHub está nos Destaques do LinkedIn com o link do repositório.',
         ],
         grelha: [
-          { criterio: 'Impacto nos projetos', bom: 'Cada ponto começa com verbo de ação no passado, cita a ferramenta e fecha com um número e decisão.', aMelhorar: 'Diz apenas "Fiz um projeto sobre turismo" ou lista bibliotecas sem resultados.' },
-          { criterio: 'Clareza e formato', bom: '1 página limpa, sem erros ortográficos, links clicáveis e fácil de ler em 10 segundos.', aMelhorar: '2–3 páginas, foto enorme, barras de "Python 75%" ou texto corrido sem secções.' },
-          { criterio: 'Alinhamento CV–LinkedIn', bom: 'As datas, projetos e palavras-chave do LinkedIn batem certo com o CV e o GitHub.', aMelhorar: 'LinkedIn vazio ou desatualizado face ao CV enviado.' },
-          { criterio: 'Honestidade técnica', bom: 'Só inclui competências que consegues explicar e demonstrar num teste ao vivo.', aMelhorar: 'Inclui tecnologias que nunca usaste só para encher.' },
+          {
+            criterio: 'Impacto nos projetos',
+            bom: 'Cada ponto começa com verbo de ação no passado, cita a ferramenta e fecha com um número e decisão.',
+            aMelhorar: 'Diz apenas "Fiz um projeto sobre turismo" ou lista bibliotecas sem resultados.',
+          },
+          {
+            criterio: 'Clareza e formato',
+            bom: '1 página limpa, sem erros ortográficos, links clicáveis e fácil de ler em 10 segundos.',
+            aMelhorar: '2–3 páginas, foto enorme, barras de "Python 75%" ou texto corrido sem secções.',
+          },
+          {
+            criterio: 'Alinhamento CV–LinkedIn',
+            bom: 'As datas, projetos e palavras-chave do LinkedIn batem certo com o CV e o GitHub.',
+            aMelhorar: 'LinkedIn vazio ou desatualizado face ao CV enviado.',
+          },
+          {
+            criterio: 'Honestidade técnica',
+            bom: 'Só inclui competências que consegues explicar e demonstrar num teste ao vivo.',
+            aMelhorar: 'Inclui tecnologias que nunca usaste só para encher.',
+          },
         ],
       },
       quiz: {
-        question: 'Qual destas descrições de projeto num CV chama mais a atenção de um recrutador para Analista de Dados Júnior?',
+        question:
+          'Qual destas descrições de projeto num CV chama mais a atenção de um recrutador para Analista de Dados Júnior?',
         options: [
           'Concluí um curso intensivo de Python, pandas, SQL e Power BI com 70 etapas.',
           'Projeto de vendas: usei Jupyter Notebook, pandas, groupby e matplotlib.',
@@ -794,7 +1174,8 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
           'Tenho conhecimentos de nível 4/5 em Excel e 3/5 em SQL.',
         ],
         correctIndex: 2,
-        explanation: 'Recrutadores procuram evidência do que fizeste com os dados: escala (20 300 viagens), método (limpeza + análise) e resultado concreto com número.',
+        explanation:
+          'Recrutadores procuram evidência do que fizeste com os dados: escala (20 300 viagens), método (limpeza + análise) e resultado concreto com número.',
       },
     },
     {
@@ -803,7 +1184,8 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
       title: 'Ler anúncios, entrevista comportamental e pitch de 2 minutos',
       lede: 'Sabes filtrar anúncios de emprego sem te autoexcluires, preparas as 4 respostas comportamentais mais pedidas com o método STAR e ensaias o pitch de 2 minutos do teu projeto.',
       analogyTitle: 'A lista de compras vs o essencial do jantar',
-      analogyBody: 'Um anúncio de emprego é escrito como uma lista de desejos ideal, não como um exame eliminatório. Se cumpres 60% a 70% dos requisitos principais (quase sempre SQL, Excel/BI e saber comunicar), deves candidatar-te.',
+      analogyBody:
+        'Um anúncio de emprego é escrito como uma lista de desejos ideal, não como um exame eliminatório. Se cumpres 60% a 70% dos requisitos principais (quase sempre SQL, Excel/BI e saber comunicar), deves candidatar-te.',
       concepts: [
         'Como ler um anúncio em 3 minutos: separa os requisitos reais (os primeiros 3–4 pontos, quase sempre SQL, Excel/Power BI e comunicação) da lista de desejos ("valoriza-se Spark/Airflow/3 anos de experiência").',
         'O pitch de 2 minutos do teu projeto segue 4 passos: 1) Pergunta e quem decide; 2) Dados e um problema real que limpaste; 3) Resultado principal com número e recomendação; 4) Um limite que encontraste.',
@@ -816,14 +1198,32 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
         'Prepara 3 histórias curtas no formato STAR: um problema de dados sujos, um número que não batia certo e como explicaste uma conclusão a alguém não técnico.',
         'Anota 2 perguntas para fazeres ao entrevistador no final.',
       ],
-      proPractice: 'Nas entrevistas técnicas e comportamentais, dizer "Não sei de cor a sintaxe exata, mas sei que resolveria com uma Window Function e validaria os nulos" vale muito mais do que inventar uma resposta.',
-      commonPitfall: 'Desistir de uma candidatura porque pede "2 anos de experiência" quando o resto encaixa, ou passar 5 minutos a explicar o código do projeto sem nunca dizer a conclusão de negócio.',
+      proPractice:
+        'Nas entrevistas técnicas e comportamentais, dizer "Não sei de cor a sintaxe exata, mas sei que resolveria com uma Window Function e validaria os nulos" vale muito mais do que inventar uma resposta.',
+      commonPitfall:
+        'Desistir de uma candidatura porque pede "2 anos de experiência" quando o resto encaixa, ou passar 5 minutos a explicar o código do projeto sem nunca dizer a conclusão de negócio.',
       referenceTitle: 'Guião rápido para a entrevista',
       referenceRows: [
-        { syntax: 'Pitch (0:00–0:30): Pergunta + Dados', meaning: 'Qual era o problema, quem decidia e que dados usaste', example: '"Queria saber em que meses reforçar equipa no Algarve usando dados do INE."' },
-        { syntax: 'Pitch (0:30–1:30): Limpeza + Descoberta', meaning: 'Um desafio nos dados e o resultado principal com número', example: '"Tirei 49 linhas inválidas e vi que agosto tem 2,3x um mês médio."' },
-        { syntax: 'Pitch (1:30–2:00): Recomendação + Limite', meaning: 'O que fazer na prática e o que os dados não provam', example: '"Recomendo reforço de junho a setembro; os dados não explicam a causa."' },
-        { syntax: 'STAR: Situação · Tarefa · Ação · Resultado', meaning: 'Estrutura de 60–90 segundos para perguntas comportamentais', example: 'Foca 60% do tempo na Ação e no Resultado' },
+        {
+          syntax: 'Pitch (0:00–0:30): Pergunta + Dados',
+          meaning: 'Qual era o problema, quem decidia e que dados usaste',
+          example: '"Queria saber em que meses reforçar equipa no Algarve usando dados do INE."',
+        },
+        {
+          syntax: 'Pitch (0:30–1:30): Limpeza + Descoberta',
+          meaning: 'Um desafio nos dados e o resultado principal com número',
+          example: '"Tirei 49 linhas inválidas e vi que agosto tem 2,3x um mês médio."',
+        },
+        {
+          syntax: 'Pitch (1:30–2:00): Recomendação + Limite',
+          meaning: 'O que fazer na prática e o que os dados não provam',
+          example: '"Recomendo reforço de junho a setembro; os dados não explicam a causa."',
+        },
+        {
+          syntax: 'STAR: Situação · Tarefa · Ação · Resultado',
+          meaning: 'Estrutura de 60–90 segundos para perguntas comportamentais',
+          example: 'Foca 60% do tempo na Ação e no Resultado',
+        },
       ],
       engine: 'projeto',
       exampleCode: `<!-- Guião do Pitch de 2 minutos (adapta ao teu projeto) -->
@@ -855,14 +1255,31 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
           'Tenho 2 perguntas preparadas para fazer à empresa no final da entrevista.',
         ],
         grelha: [
-          { criterio: 'Pitch em 2 minutos', bom: 'Vai direto à pergunta, mostra 1–2 números concretos, dá recomendação e reconhece um limite.', aMelhorar: 'Perde-se a explicar imports ou demora mais de 3 minutos sem dizer a conclusão.' },
-          { criterio: 'Histórias STAR', bom: 'Mostram o que TU fizeste passo a passo nos dados e fecham com o impacto ou aprendizagem.', aMelhorar: 'Respostas genéricas ("sou muito perfecionista") sem exemplo concreto.' },
-          { criterio: 'Leitura de anúncios', bom: 'Distingue requisitos centrais (SQL, BI, comunicação) de extras e candidata-se com 60–70% de encaixe.', aMelhorar: 'Espera cumprir 100% da lista de desejos antes de enviar o primeiro CV.' },
-          { criterio: 'Postura de analista', bom: 'Faz perguntas sobre o negócio e qualidade dos dados da equipa no fim da conversa.', aMelhorar: 'Não tem nenhuma pergunta para fazer ao entrevistador.' },
+          {
+            criterio: 'Pitch em 2 minutos',
+            bom: 'Vai direto à pergunta, mostra 1–2 números concretos, dá recomendação e reconhece um limite.',
+            aMelhorar: 'Perde-se a explicar imports ou demora mais de 3 minutos sem dizer a conclusão.',
+          },
+          {
+            criterio: 'Histórias STAR',
+            bom: 'Mostram o que TU fizeste passo a passo nos dados e fecham com o impacto ou aprendizagem.',
+            aMelhorar: 'Respostas genéricas ("sou muito perfecionista") sem exemplo concreto.',
+          },
+          {
+            criterio: 'Leitura de anúncios',
+            bom: 'Distingue requisitos centrais (SQL, BI, comunicação) de extras e candidata-se com 60–70% de encaixe.',
+            aMelhorar: 'Espera cumprir 100% da lista de desejos antes de enviar o primeiro CV.',
+          },
+          {
+            criterio: 'Postura de analista',
+            bom: 'Faz perguntas sobre o negócio e qualidade dos dados da equipa no fim da conversa.',
+            aMelhorar: 'Não tem nenhuma pergunta para fazer ao entrevistador.',
+          },
         ],
       },
       quiz: {
-        question: 'Um anúncio para Analista de Dados Júnior pede SQL, Excel, Power BI, comunicação com equipas de negócio e "valoriza-se experiência com Spark e Airflow". Dominas SQL, Excel, Power BI e Python, mas nunca usaste Spark nem Airflow. O que deves fazer?',
+        question:
+          'Um anúncio para Analista de Dados Júnior pede SQL, Excel, Power BI, comunicação com equipas de negócio e "valoriza-se experiência com Spark e Airflow". Dominas SQL, Excel, Power BI e Python, mas nunca usaste Spark nem Airflow. O que deves fazer?',
         options: [
           'Não te candidatar e estudar Spark e Airflow durante mais 3 meses primeiro.',
           'Escrever no CV que tens experiência profissional com Spark e Airflow.',
@@ -870,7 +1287,8 @@ SQL (JOINs, CTEs, Window Functions) · Python (pandas, matplotlib) · Excel & Po
           'Enviar o CV sem mencionar projetos, apenas com a lista de ferramentas.',
         ],
         correctIndex: 2,
-        explanation: '"Valoriza-se" significa extra desejável, não obrigatório. Os requisitos principais de um analista júnior são SQL, Excel/BI e comunicação; cumprir 60–70% do anúncio é o ponto certo para avançar.',
+        explanation:
+          '"Valoriza-se" significa extra desejável, não obrigatório. Os requisitos principais de um analista júnior são SQL, Excel/BI e comunicação; cumprir 60–70% do anúncio é o ponto certo para avançar.',
       },
     },
   ],

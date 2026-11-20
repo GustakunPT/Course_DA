@@ -5,15 +5,7 @@
 import { escapeHtml } from './html';
 
 export type FontSizeId =
-  | 'minimo'
-  | 'minusculo'
-  | 'muito-pequeno'
-  | 'compacto'
-  | 'pequeno'
-  | 'normal'
-  | 'grande'
-  | 'muito-grande'
-  | 'enorme';
+  'minimo' | 'minusculo' | 'muito-pequeno' | 'compacto' | 'pequeno' | 'normal' | 'grande' | 'muito-grande' | 'enorme';
 
 export interface FontSizeOption {
   id: FontSizeId;

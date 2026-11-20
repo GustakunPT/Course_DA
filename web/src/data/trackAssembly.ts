@@ -13,7 +13,9 @@ function comTreinosExtra(
 function applyMoreQuiz(track: Track, moreQuiz: Record<string, QuizSpec[]>): Track {
   return {
     ...enrichTrackWithPedagogy(track),
-    lessons: enrichTrackWithPedagogy(track).lessons.map((l) => (moreQuiz[l.id] ? { ...l, moreQuiz: moreQuiz[l.id] } : l)),
+    lessons: enrichTrackWithPedagogy(track).lessons.map((l) =>
+      moreQuiz[l.id] ? { ...l, moreQuiz: moreQuiz[l.id] } : l,
+    ),
   };
 }
 

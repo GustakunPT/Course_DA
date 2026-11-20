@@ -8,7 +8,8 @@ export const statsBiTrack: Track = {
   id: 'bi',
   shortTitle: '5. Estatística & BI',
   fullTitle: 'Estatística, Excel/DAX e Power BI para Analistas',
-  summary: 'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B (médias e proporções), tamanho de amostra, correlação, intervalos de confiança, probabilidade, qui-quadrado, ANOVA, regressão simples e múltipla, perguntas de entrevista e prática guiada de Excel e Power BI.',
+  summary:
+    'Medidas estatísticas robustas, outliers, Curva ABC (Pareto), Star Schema, DAX, gráficos honestos, teste A/B (médias e proporções), tamanho de amostra, correlação, intervalos de confiança, probabilidade, qui-quadrado, ANOVA, regressão simples e múltipla, perguntas de entrevista e prática guiada de Excel e Power BI.',
   engineLabel: 'Python + SQLite Analítico',
   lessons: [
     {
@@ -17,7 +18,8 @@ export const statsBiTrack: Track = {
       title: 'Média vs Mediana: quando os extremos enganam',
       lede: 'Em vendas a retalho, poucas compras grandes puxam a média para cima; comparar média e mediana revela a assimetria real dos dados.',
       analogyTitle: 'O restaurante que compra 20 garrafões de azeite',
-      analogyBody: 'Se 8 clientes gastam entre 1 € e 9 € e um cliente gasta 48 €, a média salta para 9,48 € mas a mediana mantém-se firme nos 4,80 €.',
+      analogyBody:
+        'Se 8 clientes gastam entre 1 € e 9 € e um cliente gasta 48 €, a média salta para 9,48 € mas a mediana mantém-se firme nos 4,80 €.',
       concepts: [
         'Nas 5 078 vendas reais da Mercearia, a média por linha é 5,30 € enquanto a mediana é 3,50 € (distribuição assimétrica positiva).',
         'Usa sempre mediana (P50) ao lado da média em salários, preços de casas e valores de cestos de compras.',
@@ -25,9 +27,21 @@ export const statsBiTrack: Track = {
       ],
       referenceTitle: 'Medidas de tendência central',
       referenceRows: [
-        { syntax: 'statistics.mean(x) / s.mean()', meaning: 'Média aritmética (sensível a extremos)', example: '5.30 € em vendas.csv' },
-        { syntax: 'statistics.median(x) / s.median()', meaning: 'Valor central P50 (robusto a outliers)', example: '3.50 € em vendas.csv' },
-        { syntax: 'statistics.mode(x) / s.mode()', meaning: 'Valor mais frequente na amostra', example: 'Quantidade modal' },
+        {
+          syntax: 'statistics.mean(x) / s.mean()',
+          meaning: 'Média aritmética (sensível a extremos)',
+          example: '5.30 € em vendas.csv',
+        },
+        {
+          syntax: 'statistics.median(x) / s.median()',
+          meaning: 'Valor central P50 (robusto a outliers)',
+          example: '3.50 € em vendas.csv',
+        },
+        {
+          syntax: 'statistics.mode(x) / s.mode()',
+          meaning: 'Valor mais frequente na amostra',
+          example: 'Quantidade modal',
+        },
       ],
       engine: 'python',
       exampleCode: `import csv, statistics
@@ -38,7 +52,8 @@ with open("dados/vendas.csv", encoding="utf-8") as f:
 print(f"Média real (5078 vendas):   {statistics.mean(subtotais):.2f} €")
 print(f"Mediana real (5078 vendas): {statistics.median(subtotais):.2f} €")`,
       pythonChallenge: {
-        description: 'Sobre taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]: calcula media, mediana, desvio_padrao (arredondado a 2 casas) e amplitude (max - min).',
+        description:
+          'Sobre taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]: calcula media, mediana, desvio_padrao (arredondado a 2 casas) e amplitude (max - min).',
         starterCode: `import statistics
 
 taloes_amostra = [1.20, 2.50, 3.40, 3.40, 4.80, 5.10, 7.50, 9.40, 48.00]
@@ -60,11 +75,36 @@ amplitude = max(taloes_amostra) - min(taloes_amostra)
 
 print(round(media, 2), mediana, desvio_padrao, amplitude)`,
         checks: [
-          { label: 'media (~9.48)', expr: 'isinstance(media, (int, float)) and math.isclose(media, 9.4778, abs_tol=0.01)', actualExpr: 'media', hint: 'Usa statistics.mean(taloes_amostra).' },
-          { label: 'mediana (4.80)', expr: 'isinstance(mediana, (int, float)) and math.isclose(mediana, 4.80, abs_tol=0.01)', actualExpr: 'mediana', hint: 'Usa statistics.median(taloes_amostra).' },
-          { label: 'desvio_padrao (14.66)', expr: 'isinstance(desvio_padrao, (int, float)) and math.isclose(desvio_padrao, 14.66, abs_tol=0.02)', actualExpr: 'desvio_padrao', hint: 'Usa round(statistics.stdev(taloes_amostra), 2).' },
-          { label: 'amplitude (46.80)', expr: 'isinstance(amplitude, (int, float)) and math.isclose(amplitude, 46.80, abs_tol=0.01)', actualExpr: 'amplitude', hint: 'Calcula max(taloes_amostra) - min(taloes_amostra).' },
-          { label: 'As medidas são calculadas a partir da lista', expr: '(lambda r: abs(r["media"] - 4.0) < 1e-9 and abs(r["mediana"] - 2.0) < 1e-9 and abs(r["amplitude"] - 8.0) < 1e-9)(correr_com(taloes_amostra=[1.0, 2.0, 9.0]))', actualExpr: 'correr_com(taloes_amostra=[1.0, 2.0, 9.0]).get("media")', hint: 'Usa statistics.mean, statistics.median e max/min sobre taloes_amostra.' },
+          {
+            label: 'media (~9.48)',
+            expr: 'isinstance(media, (int, float)) and math.isclose(media, 9.4778, abs_tol=0.01)',
+            actualExpr: 'media',
+            hint: 'Usa statistics.mean(taloes_amostra).',
+          },
+          {
+            label: 'mediana (4.80)',
+            expr: 'isinstance(mediana, (int, float)) and math.isclose(mediana, 4.80, abs_tol=0.01)',
+            actualExpr: 'mediana',
+            hint: 'Usa statistics.median(taloes_amostra).',
+          },
+          {
+            label: 'desvio_padrao (14.66)',
+            expr: 'isinstance(desvio_padrao, (int, float)) and math.isclose(desvio_padrao, 14.66, abs_tol=0.02)',
+            actualExpr: 'desvio_padrao',
+            hint: 'Usa round(statistics.stdev(taloes_amostra), 2).',
+          },
+          {
+            label: 'amplitude (46.80)',
+            expr: 'isinstance(amplitude, (int, float)) and math.isclose(amplitude, 46.80, abs_tol=0.01)',
+            actualExpr: 'amplitude',
+            hint: 'Calcula max(taloes_amostra) - min(taloes_amostra).',
+          },
+          {
+            label: 'As medidas são calculadas a partir da lista',
+            expr: '(lambda r: abs(r["media"] - 4.0) < 1e-9 and abs(r["mediana"] - 2.0) < 1e-9 and abs(r["amplitude"] - 8.0) < 1e-9)(correr_com(taloes_amostra=[1.0, 2.0, 9.0]))',
+            actualExpr: 'correr_com(taloes_amostra=[1.0, 2.0, 9.0]).get("media")',
+            hint: 'Usa statistics.mean, statistics.median e max/min sobre taloes_amostra.',
+          },
         ],
       },
       quiz: {
@@ -76,7 +116,8 @@ print(round(media, 2), mediana, desvio_padrao, amplitude)`,
           'Que os dados têm erros e precisam de ser limpos.',
         ],
         correctIndex: 1,
-        explanation: 'Quando há assimetria positiva (algumas compras grandes de Azeite ou Queijo), a média sobe acima da mediana.',
+        explanation:
+          'Quando há assimetria positiva (algumas compras grandes de Azeite ou Queijo), a média sobe acima da mediana.',
       },
     },
     {
@@ -85,7 +126,8 @@ print(round(media, 2), mediana, desvio_padrao, amplitude)`,
       title: 'Quartis, IQR e deteção de valores atípicos (outliers)',
       lede: 'Aprende a regra prática de Tukey (Q3 + 1,5 * IQR) usada em caixas de bigodes (boxplots) para sinalizar transações fora do padrão.',
       analogyTitle: 'Dobrar a fila de clientes duas vezes e medir com a régua do meio',
-      analogyBody: 'Imagina 100 clientes em fila do cesto mais barato ao mais caro. Dobras a fila ao meio (mediana, 50%) e voltas a dobrar cada metade para marcar Q1 (25%) e Q3 (75%). A largura dos 50% do meio (IQR) é a tua régua: qualquer compra que passe mais de 1,5 réguas acima de Q3 destaca-se logo como atípica.',
+      analogyBody:
+        'Imagina 100 clientes em fila do cesto mais barato ao mais caro. Dobras a fila ao meio (mediana, 50%) e voltas a dobrar cada metade para marcar Q1 (25%) e Q3 (75%). A largura dos 50% do meio (IQR) é a tua régua: qualquer compra que passe mais de 1,5 réguas acima de Q3 destaca-se logo como atípica.',
       concepts: [
         'Q1 (percentil 25), Q2 (mediana, percentil 50) e Q3 (percentil 75).',
         'IQR = Q3 - Q1 mede a dispersão dos 50% centrais sem ser distorcido por extremos.',
@@ -93,9 +135,17 @@ print(round(media, 2), mediana, desvio_padrao, amplitude)`,
       ],
       referenceTitle: 'Quartis e Outliers em Pandas',
       referenceRows: [
-        { syntax: 's.quantile(0.25) / s.quantile(0.75)', meaning: 'Calcula Q1 e Q3', example: 'q1, q3 = s.quantile([0.25, 0.75])' },
+        {
+          syntax: 's.quantile(0.25) / s.quantile(0.75)',
+          meaning: 'Calcula Q1 e Q3',
+          example: 'q1, q3 = s.quantile([0.25, 0.75])',
+        },
         { syntax: 'iqr = q3 - q1', meaning: 'Amplitude interquartil', example: 'Largura da caixa no boxplot' },
-        { syntax: 'limite_sup = q3 + 1.5 * iqr', meaning: 'Limiar clássico de outlier superior', example: 's[s > limite_sup]' },
+        {
+          syntax: 'limite_sup = q3 + 1.5 * iqr',
+          meaning: 'Limiar clássico de outlier superior',
+          example: 's[s > limite_sup]',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -110,7 +160,8 @@ limite = q3 + 1.5 * iqr
 print(f"Q1={q1:.2f} € | Q3={q3:.2f} € | IQR={iqr:.2f} € | Limite outlier={limite:.2f} €")
 print("Linhas acima do limiar:", int((df["sub"] > limite).sum()))`,
       pythonChallenge: {
-        description: 'Sobre dados/vendas.csv (subtotal = quantidade * preco), calcula iqr (Q3 - Q1 arredondado a 2 casas) e num_outliers (quantas vendas têm subtotal estritamente acima de Q3 + 1.5 * (Q3 - Q1)).',
+        description:
+          'Sobre dados/vendas.csv (subtotal = quantidade * preco), calcula iqr (Q3 - Q1 arredondado a 2 casas) e num_outliers (quantas vendas têm subtotal estritamente acima de Q3 + 1.5 * (Q3 - Q1)).',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -133,9 +184,25 @@ num_outliers = int((sub > (q3 + 1.5 * iqr_raw)).sum())
 
 print(iqr, num_outliers)`,
         checks: [
-          { label: 'iqr calculado corretamente (5.22)', expr: 'iqr is not None and math.isclose(float(iqr), 5.22, abs_tol=0.01)', actualExpr: 'iqr', hint: 'Calcula sub.quantile(0.75) - sub.quantile(0.25) (esperado ~5.22).' },
-          { label: 'num_outliers acima do limite superior (348)', expr: 'num_outliers is not None and int(num_outliers) == 348', actualExpr: 'num_outliers', hint: 'Conta int((sub > (q3 + 1.5 * (q3 - q1))).sum()).' },
-          { label: 'O IQR e os outliers vêm dos dados', expr: '(lambda r: abs(float(r["iqr"]) - 2.0) < 1e-9 and int(r["num_outliers"]) == 1)(correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})))', actualExpr: 'correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})).get("num_outliers")', hint: 'q1 e q3 com .quantile, iqr = q3 - q1, e conta os valores acima de q3 + 1.5 * iqr.' },
+          {
+            label: 'iqr calculado corretamente (5.22)',
+            expr: 'iqr is not None and math.isclose(float(iqr), 5.22, abs_tol=0.01)',
+            actualExpr: 'iqr',
+            hint: 'Calcula sub.quantile(0.75) - sub.quantile(0.25) (esperado ~5.22).',
+          },
+          {
+            label: 'num_outliers acima do limite superior (348)',
+            expr: 'num_outliers is not None and int(num_outliers) == 348',
+            actualExpr: 'num_outliers',
+            hint: 'Conta int((sub > (q3 + 1.5 * (q3 - q1))).sum()).',
+          },
+          {
+            label: 'O IQR e os outliers vêm dos dados',
+            expr: '(lambda r: abs(float(r["iqr"]) - 2.0) < 1e-9 and int(r["num_outliers"]) == 1)(correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})))',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"quantidade": [1, 1, 1, 1, 1], "preco": [1.0, 2.0, 3.0, 4.0, 100.0]})).get("num_outliers")',
+            hint: 'q1 e q3 com .quantile, iqr = q3 - q1, e conta os valores acima de q3 + 1.5 * iqr.',
+          },
         ],
       },
       quiz: {
@@ -147,7 +214,8 @@ print(iqr, num_outliers)`,
           'Não: os outliers nunca afetam a análise.',
         ],
         correctIndex: 1,
-        explanation: 'Um preço negativo (-1,00 €) é erro e corrige-se; 5 garrafas de Azeite (37,50 €) é uma venda real e valiosa. Distinguir os dois casos é uma competência crítica.',
+        explanation:
+          'Um preço negativo (-1,00 €) é erro e corrige-se; 5 garrafas de Azeite (37,50 €) é uma venda real e valiosa. Distinguir os dois casos é uma competência crítica.',
       },
     },
     {
@@ -156,7 +224,8 @@ print(iqr, num_outliers)`,
       title: 'Curva ABC: o princípio de Pareto (80/20) na Mercearia',
       lede: 'Descobre que pequena fração dos 15 produtos concentra a maior fatia da faturação anual da loja.',
       analogyTitle: 'A regra 80/20 do roupeiro e a árvore de KPIs da loja',
-      analogyBody: 'Em casa vestes 20% da roupa em 80% dos dias. Na mercearia acontece o mesmo: uma mão-cheia de artigos (Classe A) sustenta quase toda a caixa. E para perceberes porque a receita sobe ou desce, decompões a Métrica Norte como uma árvore: Faturação = Clientes Ativos × Compras por Cliente × Ticket Médio.',
+      analogyBody:
+        'Em casa vestes 20% da roupa em 80% dos dias. Na mercearia acontece o mesmo: uma mão-cheia de artigos (Classe A) sustenta quase toda a caixa. E para perceberes porque a receita sobe ou desce, decompões a Métrica Norte como uma árvore: Faturação = Clientes Ativos × Compras por Cliente × Ticket Médio.',
       concepts: [
         'Ordenam-se os produtos por faturação decrescente e calcula-se a quota individual (%) e a acumulada (.cumsum()).',
         'Apenas 2 artigos (Azeite e Queijo) representam quase 40% de toda a faturação da Mercearia — falta de stock neles corta imediatamente a caixa.',
@@ -166,9 +235,21 @@ print(iqr, num_outliers)`,
       referenceTitle: 'Curva ABC e Árvore de KPIs',
       referenceRows: [
         { syntax: 's / s.sum() * 100', meaning: 'Quota percentual de cada item', example: 'Peso na faturação' },
-        { syntax: 'quota.cumsum()', meaning: 'Soma acumulada das percentagens', example: 'Curva de Pareto (0% a 100%)' },
-        { syntax: 'Receita = Clientes × Freq. × Ticket', meaning: 'Decomposição da Métrica Norte em alavancas', example: 'Isolar se a queda veio de visitas ou do cesto' },
-        { syntax: 'Métrica Guardrail', meaning: 'Limite de segurança que não pode degradar', example: 'Subir vendas sem disparar devoluções ou perder margem' },
+        {
+          syntax: 'quota.cumsum()',
+          meaning: 'Soma acumulada das percentagens',
+          example: 'Curva de Pareto (0% a 100%)',
+        },
+        {
+          syntax: 'Receita = Clientes × Freq. × Ticket',
+          meaning: 'Decomposição da Métrica Norte em alavancas',
+          example: 'Isolar se a queda veio de visitas ou do cesto',
+        },
+        {
+          syntax: 'Métrica Guardrail',
+          meaning: 'Limite de segurança que não pode degradar',
+          example: 'Subir vendas sem disparar devoluções ou perder margem',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -180,7 +261,8 @@ abc["quota_pct"] = (abc["sub"] / abc["sub"].sum() * 100).round(2)
 abc["acumulado_pct"] = abc["quota_pct"].cumsum().round(2)
 abc.head(8)`,
       pythonChallenge: {
-        description: 'Ordena os produtos por faturação decrescente e guarda em quota_top2_pct a percentagem conjunta representada pelos 2 primeiros produtos (Azeite e Queijo) sobre o total da Mercearia, arredondada a 2 casas.',
+        description:
+          'Ordena os produtos por faturação decrescente e guarda em quota_top2_pct a percentagem conjunta representada pelos 2 primeiros produtos (Azeite e Queijo) sobre o total da Mercearia, arredondada a 2 casas.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -197,12 +279,24 @@ quota_top2_pct = round(float(por_prod.iloc[:2].sum() / por_prod.sum() * 100), 2)
 
 print(quota_top2_pct)`,
         checks: [
-          { label: 'quota_top2_pct (39.78%)', expr: 'quota_top2_pct is not None and math.isclose(float(quota_top2_pct), 39.78, abs_tol=0.1)', actualExpr: 'quota_top2_pct', hint: '(6262.50 + 4439.40) / 26902.89 * 100 = 39.78%.' },
-          { label: 'A quota é calculada a partir das vendas', expr: 'abs(float(correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]}))["quota_top2_pct"]) - 80.0) < 0.01', actualExpr: 'correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]})).get("quota_top2_pct")', hint: 'Ordena a faturação por produto e divide os 2 primeiros pelo total.' },
+          {
+            label: 'quota_top2_pct (39.78%)',
+            expr: 'quota_top2_pct is not None and math.isclose(float(quota_top2_pct), 39.78, abs_tol=0.1)',
+            actualExpr: 'quota_top2_pct',
+            hint: '(6262.50 + 4439.40) / 26902.89 * 100 = 39.78%.',
+          },
+          {
+            label: 'A quota é calculada a partir das vendas',
+            expr: 'abs(float(correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]}))["quota_top2_pct"]) - 80.0) < 0.01',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"produto": ["A", "B", "C"], "quantidade": [1, 1, 1], "preco": [5.0, 3.0, 2.0]})).get("quota_top2_pct")',
+            hint: 'Ordena a faturação por produto e divide os 2 primeiros pelo total.',
+          },
         ],
       },
       quiz: {
-        question: 'Na Curva ABC da Mercearia, porque é que o Pão vende centenas de unidades mas fica no fundo em faturação?',
+        question:
+          'Na Curva ABC da Mercearia, porque é que o Pão vende centenas de unidades mas fica no fundo em faturação?',
         options: [
           'Porque tem um preço unitário muito baixo (0,25 €).',
           'Porque vende sobretudo ao fim de semana.',
@@ -210,7 +304,8 @@ print(quota_top2_pct)`,
           'Porque é comprado por poucos clientes diferentes.',
         ],
         correctIndex: 0,
-        explanation: 'Nunca se descontinua um produto Classe C em receita sem verificar se ele é o chamariz que traz o cliente à loja.',
+        explanation:
+          'Nunca se descontinua um produto Classe C em receita sem verificar se ele é o chamariz que traz o cliente à loja.',
       },
     },
     {
@@ -219,7 +314,8 @@ print(quota_top2_pct)`,
       title: 'Modelação dimensional (esquema em estrela) para Power BI',
       lede: 'Aprende a organizar tabelas em Factos e Dimensões antes de construir relatórios em Power BI ou Tableau.',
       analogyTitle: 'A estrela com os talões no centro e os catálogos nas pontas',
-      analogyBody: 'Evita juntar tudo num único tabelão redundante para o Power BI: mantém fVendas enxuta no meio ligada de 1-para-muitos (*) a dProdutos, dClientes e dCalendario.',
+      analogyBody:
+        'Evita juntar tudo num único tabelão redundante para o Power BI: mantém fVendas enxuta no meio ligada de 1-para-muitos (*) a dProdutos, dClientes e dCalendario.',
       concepts: [
         'Tabela de Factos (vendas): guarda eventos quantificáveis (data, chaves estrangeiras, quantidade, preco).',
         'Tabelas de Dimensão (produtos, clientes, calendario): guardam contexto descritivo para filtros e slicers (cidade, categoria, trimestre).',
@@ -229,7 +325,11 @@ print(quota_top2_pct)`,
       referenceRows: [
         { syntax: 'dProdutos (1) -> (*) fVendas', meaning: 'Relação por produto_id', example: 'Filtra por Categoria' },
         { syntax: 'dClientes (1) -> (*) fVendas', meaning: 'Relação por cliente_id', example: 'Filtra por Cidade' },
-        { syntax: 'dCalendario (1) -> (*) fVendas', meaning: 'Relação por data contínua', example: 'Inteligência temporal YoY/MoM' },
+        {
+          syntax: 'dCalendario (1) -> (*) fVendas',
+          meaning: 'Relação por data contínua',
+          example: 'Inteligência temporal YoY/MoM',
+        },
       ],
       engine: 'sql',
       exampleCode: `-- Verificar integridade referencial do Star Schema (deve dar 0 órfãos!)
@@ -240,7 +340,8 @@ FROM vendas v
 LEFT JOIN produtos p ON p.id = v.produto_id
 LEFT JOIN clientes c ON c.id = v.cliente_id;`,
       sqlChallenge: {
-        description: 'Constrói uma vista agregada para um cartão matriz de Power BI cruzando categoria (de produtos) e cidade (de clientes): mostra categoria, cidade e faturacao arredondada a 2 casas, ordenada por categoria ASC e faturacao DESC.',
+        description:
+          'Constrói uma vista agregada para um cartão matriz de Power BI cruzando categoria (de produtos) e cidade (de clientes): mostra categoria, cidade e faturacao arredondada a 2 casas, ordenada por categoria ASC e faturacao DESC.',
         starterSql: `SELECT
   p.categoria,
   c.cidade,
@@ -269,7 +370,8 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
         },
       },
       quiz: {
-        question: 'Porque se cria sempre uma tabela dCalendario dedicada no Power BI em vez de usar apenas a coluna data de vendas?',
+        question:
+          'Porque se cria sempre uma tabela dCalendario dedicada no Power BI em vez de usar apenas a coluna data de vendas?',
         options: [
           'Porque o DAX de datas precisa de um calendário contínuo.',
           'Porque o Power BI não lê datas dentro da tabela de vendas.',
@@ -277,7 +379,8 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
           'Porque a coluna data de vendas é guardada como texto.',
         ],
         correctIndex: 0,
-        explanation: 'Funções como TOTALYTD ou DATEADD exigem uma coluna de datas única e contínua de 1 de janeiro a 31 de dezembro.',
+        explanation:
+          'Funções como TOTALYTD ou DATEADD exigem uma coluna de datas única e contínua de 1 de janeiro a 31 de dezembro.',
       },
     },
     {
@@ -286,7 +389,8 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
       title: 'Do SQL e pandas para o Excel moderno e o DAX',
       lede: 'Um analista completo transita fluentemente entre SQL, Pandas, Excel (XLOOKUP/SUMIFS) e medidas DAX no Power BI.',
       analogyTitle: 'Quatro línguas para dizer exatamente a mesma frase analítica',
-      analogyBody: 'Cruzar tabelas chama-se JOIN em SQL, merge em Pandas, XLOOKUP (PROCX) em Excel e RELATED em DAX. Quando percebes o conceito lógico, dominas qualquer ferramenta.',
+      analogyBody:
+        'Cruzar tabelas chama-se JOIN em SQL, merge em Pandas, XLOOKUP (PROCX) em Excel e RELATED em DAX. Quando percebes o conceito lógico, dominas qualquer ferramenta.',
       concepts: [
         'Medidas explícitas em DAX (SUMX, DIVIDE, CALCULATE) são recalculadas dinamicamente consoante os filtros clicados no relatório.',
         'DIVIDE(numerador, denominador, 0) protege contra divisões por zero sem sujar visuais com Infinity ou NaN.',
@@ -294,10 +398,26 @@ ORDER BY p.categoria ASC, faturacao DESC;`,
       ],
       referenceTitle: 'Dicionário de tradução do Analista de Dados',
       referenceRows: [
-        { syntax: 'SUMX(vendas, vendas[qtd] * vendas[preco])', meaning: 'DAX: multiplica linha a linha e soma', example: 'Equivale a SUM(qtd * preco) em SQL' },
-        { syntax: 'DIVIDE([Faturacao], DISTINCTCOUNT(vendas[cliente_id]))', meaning: 'DAX: gasto médio por cliente ativo', example: 'Seguro contra divisão por zero' },
-        { syntax: 'CALCULATE([Faturacao], ALL(produtos))', meaning: 'DAX: ignora filtro de produto para denominador de %', example: 'Quota % de cada produto' },
-        { syntax: '=XLOOKUP(C2; produtos!A:A; produtos!C:C)', meaning: 'Excel: procura categoria pelo produto_id', example: 'Substituto moderno do PROCV' },
+        {
+          syntax: 'SUMX(vendas, vendas[qtd] * vendas[preco])',
+          meaning: 'DAX: multiplica linha a linha e soma',
+          example: 'Equivale a SUM(qtd * preco) em SQL',
+        },
+        {
+          syntax: 'DIVIDE([Faturacao], DISTINCTCOUNT(vendas[cliente_id]))',
+          meaning: 'DAX: gasto médio por cliente ativo',
+          example: 'Seguro contra divisão por zero',
+        },
+        {
+          syntax: 'CALCULATE([Faturacao], ALL(produtos))',
+          meaning: 'DAX: ignora filtro de produto para denominador de %',
+          example: 'Quota % de cada produto',
+        },
+        {
+          syntax: '=XLOOKUP(C2; produtos!A:A; produtos!C:C)',
+          meaning: 'Excel: procura categoria pelo produto_id',
+          example: 'Substituto moderno do PROCV',
+        },
       ],
       engine: 'sql',
       exampleCode: `-- Equivalente SQL de DIVIDE([Faturacao], ALL(produtos)) para validar medidas DAX:
@@ -310,7 +430,8 @@ GROUP BY produto
 ORDER BY quota_all_pct DESC
 LIMIT 5;`,
       sqlChallenge: {
-        description: 'Valida em SQL a medida DAX "Gasto Médio por Cliente Ativo" em cada cidade: devolve cidade, clientes_ativos (COUNT(DISTINCT c.id)) e gasto_medio_cliente (faturação da cidade a dividir pelos seus clientes ativos, arredondado a 2 casas), ordenado por gasto_medio_cliente DESC.',
+        description:
+          'Valida em SQL a medida DAX "Gasto Médio por Cliente Ativo" em cada cidade: devolve cidade, clientes_ativos (COUNT(DISTINCT c.id)) e gasto_medio_cliente (faturação da cidade a dividir pelos seus clientes ativos, arredondado a 2 casas), ordenado por gasto_medio_cliente DESC.',
         starterSql: `SELECT
   c.cidade,
   COUNT(DISTINCT c.id) AS clientes_ativos
@@ -346,7 +467,8 @@ ORDER BY gasto_medio_cliente DESC;`,
           'Porque devia usar AVERAGE em vez de SUM no preço.',
         ],
         correctIndex: 0,
-        explanation: 'Para multiplicar duas colunas linha a linha antes de somar usa-se sempre o iterador SUMX(vendas, vendas[quantidade] * vendas[preco]).',
+        explanation:
+          'Para multiplicar duas colunas linha a linha antes de somar usa-se sempre o iterador SUMX(vendas, vendas[quantidade] * vendas[preco]).',
       },
     },
     {
@@ -355,7 +477,8 @@ ORDER BY gasto_medio_cliente DESC;`,
       title: 'Visualização honesta e relatório para a direção',
       lede: 'Escolhe a geometria certa para cada pergunta de negócio e transforma tabelas cruas numa recomendação acionável.',
       analogyTitle: 'Um painel claro lê-se em 5 segundos do outro lado do balcão',
-      analogyBody: 'Um bom gráfico não precisa de efeitos 3D nem de 15 cores: usa barras horizontais para rankings, linhas para evolução temporal e destaca a conclusão logo no título.',
+      analogyBody:
+        'Um bom gráfico não precisa de efeitos 3D nem de 15 cores: usa barras horizontais para rankings, linhas para evolução temporal e destaca a conclusão logo no título.',
       concepts: [
         'Evolução no tempo (12 meses): gráfico de linhas com eixo contínuo.',
         'Comparação de categorias ou cidades: barras horizontais ordenadas (nunca uses gráfico circular com mais de 3 ou 4 fatias!).',
@@ -366,9 +489,21 @@ ORDER BY gasto_medio_cliente DESC;`,
       referenceTitle: 'Guia rápido de escolha de gráficos e dashboards',
       referenceRows: [
         { syntax: 'Série temporal (Jan a Dez)', meaning: 'Gráfico de linha', example: 'Pico em setembro (2 462,82 €)' },
-        { syntax: 'Ranking de 15 produtos', meaning: 'Barras horizontais ordenadas do maior ao menor', example: 'Nomes leem-se sem rodar o pescoço' },
-        { syntax: 'Relação Preço vs Unidades', meaning: 'Gráfico de dispersão (Scatter plot)', example: 'Elasticidade-preço por artigo' },
-        { syntax: 'Topo -> Meio -> Base (3–5 KPIs)', meaning: 'Hierarquia visual de dashboard executivo', example: 'Resumo em cima, detalhe só no fim' },
+        {
+          syntax: 'Ranking de 15 produtos',
+          meaning: 'Barras horizontais ordenadas do maior ao menor',
+          example: 'Nomes leem-se sem rodar o pescoço',
+        },
+        {
+          syntax: 'Relação Preço vs Unidades',
+          meaning: 'Gráfico de dispersão (Scatter plot)',
+          example: 'Elasticidade-preço por artigo',
+        },
+        {
+          syntax: 'Topo -> Meio -> Base (3–5 KPIs)',
+          meaning: 'Hierarquia visual de dashboard executivo',
+          example: 'Resumo em cima, detalhe só no fim',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -382,8 +517,9 @@ pior = mensal.loc[mensal["sub"].idxmin()]
 
 print(f"Síntese executiva: Melhor mês {melhor['mes']} ({melhor['sub']} €) | Mês mais fraco {pior['mes']} ({pior['sub']} €)")
 mensal`,
-            pythonChallenge: {
-        description: 'Prepara os dados de um gráfico de barras honesto e do resumo executivo sobre vendas.csv: guarda em ranking_meses a faturação de cada mês de 2025 ordenada do maior para o menor (é a ordem certa para barras horizontais) e em variacao_pico_vale a diferença em euros (arredondada a 2 casas) entre o primeiro e o último mês desse ranking.',
+      pythonChallenge: {
+        description:
+          'Prepara os dados de um gráfico de barras honesto e do resumo executivo sobre vendas.csv: guarda em ranking_meses a faturação de cada mês de 2025 ordenada do maior para o menor (é a ordem certa para barras horizontais) e em variacao_pico_vale a diferença em euros (arredondada a 2 casas) entre o primeiro e o último mês desse ranking.',
         starterCode: `import pandas as pd
 
 vendas = pd.read_csv("dados/vendas.csv")
@@ -404,9 +540,25 @@ variacao_pico_vale = round(float(ranking_meses.iloc[0] - ranking_meses.iloc[-1])
 print(variacao_pico_vale)
 ranking_meses`,
         checks: [
-          { label: 'ranking_meses tem os 12 meses do maior para o menor', expr: 'hasattr(ranking_meses, "is_monotonic_decreasing") and len(ranking_meses) == 12 and ranking_meses.is_monotonic_decreasing and str(ranking_meses.index[0]) == "2025-09"', actualExpr: 'list(ranking_meses.index) if hasattr(ranking_meses, "index") else ranking_meses', hint: 'Agrupa por mes, soma sub e usa .sort_values(ascending=False).' },
-          { label: 'variacao_pico_vale (493.83 €)', expr: 'variacao_pico_vale is not None and math.isclose(float(variacao_pico_vale), 493.83, abs_tol=0.01)', actualExpr: 'variacao_pico_vale', hint: 'Subtrai o último valor do ranking ao primeiro (.iloc[0] - .iloc[-1]).' },
-          { label: 'O ranking e a variação vêm dos dados', expr: 'abs(float(correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]}))["variacao_pico_vale"]) - 4.0) < 0.01', actualExpr: 'correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]})).get("variacao_pico_vale")', hint: 'variacao_pico_vale = primeiro menos último valor de ranking_meses.' },
+          {
+            label: 'ranking_meses tem os 12 meses do maior para o menor',
+            expr: 'hasattr(ranking_meses, "is_monotonic_decreasing") and len(ranking_meses) == 12 and ranking_meses.is_monotonic_decreasing and str(ranking_meses.index[0]) == "2025-09"',
+            actualExpr: 'list(ranking_meses.index) if hasattr(ranking_meses, "index") else ranking_meses',
+            hint: 'Agrupa por mes, soma sub e usa .sort_values(ascending=False).',
+          },
+          {
+            label: 'variacao_pico_vale (493.83 €)',
+            expr: 'variacao_pico_vale is not None and math.isclose(float(variacao_pico_vale), 493.83, abs_tol=0.01)',
+            actualExpr: 'variacao_pico_vale',
+            hint: 'Subtrai o último valor do ranking ao primeiro (.iloc[0] - .iloc[-1]).',
+          },
+          {
+            label: 'O ranking e a variação vêm dos dados',
+            expr: 'abs(float(correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]}))["variacao_pico_vale"]) - 4.0) < 0.01',
+            actualExpr:
+              'correr_com(vendas=pd.DataFrame({"data": ["2025-01-01", "2025-02-01", "2025-02-02"], "quantidade": [1, 1, 1], "preco": [1.0, 3.0, 2.0]})).get("variacao_pico_vale")',
+            hint: 'variacao_pico_vale = primeiro menos último valor de ranking_meses.',
+          },
         ],
       },
       quiz: {
@@ -418,7 +570,8 @@ ranking_meses`,
           'Colunas verticais ordenadas',
         ],
         correctIndex: 1,
-        explanation: 'O olho humano compara comprimentos alinhados com grande precisão, mas falha ao comparar 15 ângulos num gráfico circular.',
+        explanation:
+          'O olho humano compara comprimentos alinhados com grande precisão, mas falha ao comparar 15 ângulos num gráfico circular.',
       },
     },
     {
@@ -427,7 +580,8 @@ ranking_meses`,
       title: 'Desenhar gráficos honestos com matplotlib',
       lede: 'Passa da tabela ao gráfico: desenha barras horizontais ordenadas e linhas temporais com matplotlib, com o eixo a começar no zero e um título que diz a conclusão.',
       analogyTitle: 'A montra da mercearia',
-      analogyBody: 'Uma tabela é o armazém: tem tudo, mas ninguém a lê a passar na rua. O gráfico é a montra: mostra só o essencial, arrumado do mais importante para o menos importante, sem truques de tamanho. Uma montra que corta metade da prateleira para parecer cheia engana o cliente; um eixo que não começa no zero faz o mesmo ao leitor.',
+      analogyBody:
+        'Uma tabela é o armazém: tem tudo, mas ninguém a lê a passar na rua. O gráfico é a montra: mostra só o essencial, arrumado do mais importante para o menos importante, sem truques de tamanho. Uma montra que corta metade da prateleira para parecer cheia engana o cliente; um eixo que não começa no zero faz o mesmo ao leitor.',
       concepts: [
         'fig, ax = plt.subplots() cria a folha (fig) e a área do gráfico (ax). Tudo o que desenhas vai para o ax.',
         'ax.barh(nomes, valores) desenha barras horizontais; ax.plot(x, y) desenha uma linha.',
@@ -441,15 +595,33 @@ ranking_meses`,
         'Desenha com ax.barh(por_categoria.index, por_categoria.values).',
         'Garante o zero com ax.set_xlim(left=0), escreve o título com ax.set_title(...) e o eixo com ax.set_xlabel("Faturação (€)").',
       ],
-      proPractice: 'Em relatórios reais o gráfico é guardado com fig.savefig("relatorios/graficos/categorias.png", dpi=150) e colado no PowerPoint ou no README do projeto.',
-      commonPitfall: 'Esquecer de ordenar os dados: as barras ficam por ordem alfabética e o leitor tem de procurar o maior valor com os olhos.',
+      proPractice:
+        'Em relatórios reais o gráfico é guardado com fig.savefig("relatorios/graficos/categorias.png", dpi=150) e colado no PowerPoint ou no README do projeto.',
+      commonPitfall:
+        'Esquecer de ordenar os dados: as barras ficam por ordem alfabética e o leitor tem de procurar o maior valor com os olhos.',
       referenceTitle: 'matplotlib essencial para analistas',
       referenceRows: [
-        { syntax: 'fig, ax = plt.subplots(figsize=(7, 4))', meaning: 'Cria a figura e a área de desenho', example: 'Largura 7 x altura 4 polegadas' },
-        { syntax: 'ax.barh(nomes, valores)', meaning: 'Barras horizontais (rankings)', example: 'Faturação por categoria' },
+        {
+          syntax: 'fig, ax = plt.subplots(figsize=(7, 4))',
+          meaning: 'Cria a figura e a área de desenho',
+          example: 'Largura 7 x altura 4 polegadas',
+        },
+        {
+          syntax: 'ax.barh(nomes, valores)',
+          meaning: 'Barras horizontais (rankings)',
+          example: 'Faturação por categoria',
+        },
         { syntax: 'ax.plot(x, y, marker="o")', meaning: 'Linha temporal com pontos', example: 'Faturação mês a mês' },
-        { syntax: 'ax.set_xlim(left=0) / ax.set_ylim(bottom=0)', meaning: 'Eixo honesto a começar no zero', example: 'Evita exagerar diferenças' },
-        { syntax: 'ax.set_title(...) / ax.set_xlabel(...)', meaning: 'Título com a conclusão e unidade no eixo', example: '"Faturação (€)"' },
+        {
+          syntax: 'ax.set_xlim(left=0) / ax.set_ylim(bottom=0)',
+          meaning: 'Eixo honesto a começar no zero',
+          example: 'Evita exagerar diferenças',
+        },
+        {
+          syntax: 'ax.set_title(...) / ax.set_xlabel(...)',
+          meaning: 'Título com a conclusão e unidade no eixo',
+          example: '"Faturação (€)"',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -468,7 +640,8 @@ ax.set_xlabel("Mês de 2025")
 ax.set_ylabel("Faturação (€)")
 fig.tight_layout()`,
       pythonChallenge: {
-        description: 'Desenha um gráfico de barras horizontais honesto com a faturação de 2025 (vendas.csv) por categoria de produto: 6 barras ordenadas com a maior no topo, eixo a começar no zero, um título com a conclusão e o eixo X com a unidade "€". Usa as variáveis fig e ax.',
+        description:
+          'Desenha um gráfico de barras horizontais honesto com a faturação de 2025 (vendas.csv) por categoria de produto: 6 barras ordenadas com a maior no topo, eixo a começar no zero, um título com a conclusão e o eixo X com a unidade "€". Usa as variáveis fig e ax.',
         starterCode: `import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -499,10 +672,30 @@ ax.set_title("A Mercearia vale mais de metade da faturação")
 ax.set_xlabel("Faturação em 2025 (€)")
 fig.tight_layout()`,
         checks: [
-          { label: 'Há 6 barras horizontais, uma por categoria', expr: 'len([p for p in ax.patches if p.get_width() > p.get_height()]) == 6', actualExpr: 'len(ax.patches)', hint: 'Usa ax.barh(por_categoria.index, por_categoria.values) com a faturação agrupada por categoria.' },
-          { label: 'As barras estão ordenadas, com a Mercearia (13 879,84 €) no topo', expr: '[round(p.get_width(), 2) for p in ax.patches] == [205.5, 1316.95, 1965.8, 2778.8, 6756.0, 13879.84]', actualExpr: '[round(p.get_width(), 2) for p in ax.patches]', hint: 'Ordena com .sort_values() (do menor para o maior) antes de desenhar: em barh a primeira barra fica em baixo.' },
-          { label: 'O eixo começa no zero', expr: 'ax.get_xlim()[0] <= 0', actualExpr: 'ax.get_xlim()', hint: 'Acrescenta ax.set_xlim(left=0).' },
-          { label: 'Tem título com a conclusão e o eixo X com "€"', expr: 'len(ax.get_title().strip()) >= 15 and "€" in ax.get_xlabel()', actualExpr: '(ax.get_title(), ax.get_xlabel())', hint: 'Usa ax.set_title("...conclusão...") e ax.set_xlabel("Faturação (€)").' },
+          {
+            label: 'Há 6 barras horizontais, uma por categoria',
+            expr: 'len([p for p in ax.patches if p.get_width() > p.get_height()]) == 6',
+            actualExpr: 'len(ax.patches)',
+            hint: 'Usa ax.barh(por_categoria.index, por_categoria.values) com a faturação agrupada por categoria.',
+          },
+          {
+            label: 'As barras estão ordenadas, com a Mercearia (13 879,84 €) no topo',
+            expr: '[round(p.get_width(), 2) for p in ax.patches] == [205.5, 1316.95, 1965.8, 2778.8, 6756.0, 13879.84]',
+            actualExpr: '[round(p.get_width(), 2) for p in ax.patches]',
+            hint: 'Ordena com .sort_values() (do menor para o maior) antes de desenhar: em barh a primeira barra fica em baixo.',
+          },
+          {
+            label: 'O eixo começa no zero',
+            expr: 'ax.get_xlim()[0] <= 0',
+            actualExpr: 'ax.get_xlim()',
+            hint: 'Acrescenta ax.set_xlim(left=0).',
+          },
+          {
+            label: 'Tem título com a conclusão e o eixo X com "€"',
+            expr: 'len(ax.get_title().strip()) >= 15 and "€" in ax.get_xlabel()',
+            actualExpr: '(ax.get_title(), ax.get_xlabel())',
+            hint: 'Usa ax.set_title("...conclusão...") e ax.set_xlabel("Faturação (€)").',
+          },
         ],
       },
       quiz: {
@@ -514,7 +707,8 @@ fig.tight_layout()`,
           'Porque só assim aparecem os valores negativos das devoluções.',
         ],
         correctIndex: 1,
-        explanation: 'O olho compara comprimentos. Se o eixo começar em 1 000 €, uma barra de 2 000 € parece o dobro de outra de 1 500 €, quando a diferença é só de um terço.',
+        explanation:
+          'O olho compara comprimentos. Se o eixo começar em 1 000 €, uma barra de 2 000 € parece o dobro de outra de 1 500 €, quando a diferença é só de um terço.',
       },
     },
     {
@@ -523,7 +717,8 @@ fig.tight_layout()`,
       title: 'Diferença real ou acaso? Introdução ao teste A/B',
       lede: 'Aprende a responder à pergunta mais perigosa de um relatório: "esta diferença é real?". Comparas duas médias, calculas o erro padrão, a estatística t e o p-valor, e decides com um critério fixado antes de olhar para os dados.',
       analogyTitle: 'Atirar a moeda ao ar na caixa registadora',
-      analogyBody: 'Se atirares uma moeda 10 vezes e saírem 6 caras, ninguém diz que a moeda está viciada: é acaso. Com 1 000 lançamentos e 600 caras, já desconfias. O teste A/B faz esta conta por ti: mede o tamanho da diferença face ao "ruído" natural dos dados. O p-valor responde: se não houvesse diferença nenhuma, quantas vezes veríamos uma diferença tão grande só por acaso?',
+      analogyBody:
+        'Se atirares uma moeda 10 vezes e saírem 6 caras, ninguém diz que a moeda está viciada: é acaso. Com 1 000 lançamentos e 600 caras, já desconfias. O teste A/B faz esta conta por ti: mede o tamanho da diferença face ao "ruído" natural dos dados. O p-valor responde: se não houvesse diferença nenhuma, quantas vezes veríamos uma diferença tão grande só por acaso?',
       concepts: [
         'Hipótese nula (H0): os dois grupos são iguais e a diferença que vês é acaso. O teste tenta reunir provas contra H0.',
         'Erro padrão da diferença: raiz de (var_A / n_A + var_B / n_B). Mede o ruído esperado na diferença das médias.',
@@ -538,16 +733,34 @@ fig.tight_layout()`,
         'Calcula as médias, a diferença (a - b) e o erro padrão com .var() e len().',
         'Calcula t, o p-valor com math.erfc e decide: significativo = p_valor < 0.05.',
       ],
-      proPractice: 'Em empresas com testes A/B a sério (preços, campanhas, layout do site) usa-se scipy.stats.ttest_ind(a, b, equal_var=False) para médias, ou Bootstrap/Mann-Whitney quando a distribuição é muito assimétrica. Aqui fazes à mão para perceber cada peça.',
-      commonPitfall: 'Olhar para a diferença das médias e concluir logo. -0,28 € por linha parece uma tendência, mas pode estar dentro do ruído normal dos dados.',
+      proPractice:
+        'Em empresas com testes A/B a sério (preços, campanhas, layout do site) usa-se scipy.stats.ttest_ind(a, b, equal_var=False) para médias, ou Bootstrap/Mann-Whitney quando a distribuição é muito assimétrica. Aqui fazes à mão para perceber cada peça.',
+      commonPitfall:
+        'Olhar para a diferença das médias e concluir logo. -0,28 € por linha parece uma tendência, mas pode estar dentro do ruído normal dos dados.',
       referenceTitle: 'Teste de duas médias (Welch, amostras grandes)',
       referenceRows: [
         { syntax: 'a.mean() - b.mean()', meaning: 'Diferença observada', example: 'Fim de semana menos dias úteis' },
-        { syntax: 'math.sqrt(a.var() / len(a) + b.var() / len(b))', meaning: 'Erro padrão da diferença', example: 'O "ruído" esperado' },
+        {
+          syntax: 'math.sqrt(a.var() / len(a) + b.var() / len(b))',
+          meaning: 'Erro padrão da diferença',
+          example: 'O "ruído" esperado',
+        },
         { syntax: 't = diferenca / erro_padrao', meaning: 'Estatística t', example: '|t| > 1.96 é significativo a 5%' },
-        { syntax: 'math.erfc(abs(t) / math.sqrt(2))', meaning: 'p-valor bilateral (aproximação normal)', example: 't = 1.96 dá p ≈ 0.05' },
-        { syntax: 'Erro Tipo I (α) vs Tipo II (β)', meaning: 'Falso alarme vs oportunidade perdida', example: 'α = 5% (falso positivo); poder = 1 - β = 80%' },
-        { syntax: 'Bootstrap / Mann-Whitney U', meaning: 'Alternativa ao teste t em dados assimétricos', example: 'Quando poucos cestos gigantes distorcem a média' },
+        {
+          syntax: 'math.erfc(abs(t) / math.sqrt(2))',
+          meaning: 'p-valor bilateral (aproximação normal)',
+          example: 't = 1.96 dá p ≈ 0.05',
+        },
+        {
+          syntax: 'Erro Tipo I (α) vs Tipo II (β)',
+          meaning: 'Falso alarme vs oportunidade perdida',
+          example: 'α = 5% (falso positivo); poder = 1 - β = 80%',
+        },
+        {
+          syntax: 'Bootstrap / Mann-Whitney U',
+          meaning: 'Alternativa ao teste t em dados assimétricos',
+          example: 'Quando poucos cestos gigantes distorcem a média',
+        },
       ],
       engine: 'python',
       exampleCode: `import math
@@ -568,7 +781,8 @@ p_valor = math.erfc(abs(t) / math.sqrt(2))
 print(f"Dezembro: {a.mean():.2f} € | Resto: {b.mean():.2f} € | diferença {diferenca:.2f} €")
 print(f"t = {t:.2f} | p-valor = {p_valor:.6f} | significativo a 5%? {p_valor < 0.05}")`,
       pythonChallenge: {
-        description: 'O dono acha que ao fim de semana os clientes gastam menos por linha de venda. Testa em vendas.csv (sub = quantidade * preco): guarda media_fds e media_semana, diferenca (fim de semana menos dias úteis), erro_padrao, estatistica_t, p_valor (aproximação normal com math.erfc) e significativo (True se p_valor < 0.05).',
+        description:
+          'O dono acha que ao fim de semana os clientes gastam menos por linha de venda. Testa em vendas.csv (sub = quantidade * preco): guarda media_fds e media_semana, diferenca (fim de semana menos dias úteis), erro_padrao, estatistica_t, p_valor (aproximação normal com math.erfc) e significativo (True se p_valor < 0.05).',
         starterCode: `import math
 import pandas as pd
 
@@ -603,12 +817,43 @@ p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2))
 significativo = p_valor < 0.05
 print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significativo)`,
         checks: [
-          { label: 'Médias dos dois grupos (5.13 € e 5.40 €)', expr: 'math.isclose(float(media_fds), 5.1255, abs_tol=0.001) and math.isclose(float(media_semana), 5.4032, abs_tol=0.001)', actualExpr: '(media_fds, media_semana)', hint: 'Filtra com df[df["fim_de_semana"]]["sub"] e df[~df["fim_de_semana"]]["sub"] e usa .mean().' },
-          { label: 'diferenca (fim de semana menos dias úteis: -0.28 €)', expr: 'math.isclose(float(diferenca), -0.2776, abs_tol=0.001)', actualExpr: 'diferenca', hint: 'diferenca = media_fds - media_semana (a ordem importa: dá um valor negativo).' },
-          { label: 'erro_padrao (0.160)', expr: 'math.isclose(float(erro_padrao), 0.1601, abs_tol=0.001)', actualExpr: 'erro_padrao', hint: 'math.sqrt(a.var() / len(a) + b.var() / len(b)).' },
-          { label: 'estatistica_t (-1.73) e p_valor (0.083)', expr: 'math.isclose(float(estatistica_t), -1.734, abs_tol=0.005) and math.isclose(float(p_valor), 0.0829, abs_tol=0.001)', actualExpr: '(estatistica_t, p_valor)', hint: 'estatistica_t = diferenca / erro_padrao e p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2)).' },
-          { label: 'Decisão a 5%: a diferença não é significativa', expr: 'significativo is False or (hasattr(significativo, "item") and significativo.item() is False)', actualExpr: 'significativo', hint: 'significativo = p_valor < 0.05. Com p ≈ 0.083 não há provas suficientes.' },
-          { label: 'O teste é calculado a partir dos dados', expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]}))["diferenca"]) - 1.0) < 1e-9', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]})).get("diferenca")', hint: 'Separa os grupos com a coluna fim_de_semana e calcula as médias, sem números escritos à mão.' },
+          {
+            label: 'Médias dos dois grupos (5.13 € e 5.40 €)',
+            expr: 'math.isclose(float(media_fds), 5.1255, abs_tol=0.001) and math.isclose(float(media_semana), 5.4032, abs_tol=0.001)',
+            actualExpr: '(media_fds, media_semana)',
+            hint: 'Filtra com df[df["fim_de_semana"]]["sub"] e df[~df["fim_de_semana"]]["sub"] e usa .mean().',
+          },
+          {
+            label: 'diferenca (fim de semana menos dias úteis: -0.28 €)',
+            expr: 'math.isclose(float(diferenca), -0.2776, abs_tol=0.001)',
+            actualExpr: 'diferenca',
+            hint: 'diferenca = media_fds - media_semana (a ordem importa: dá um valor negativo).',
+          },
+          {
+            label: 'erro_padrao (0.160)',
+            expr: 'math.isclose(float(erro_padrao), 0.1601, abs_tol=0.001)',
+            actualExpr: 'erro_padrao',
+            hint: 'math.sqrt(a.var() / len(a) + b.var() / len(b)).',
+          },
+          {
+            label: 'estatistica_t (-1.73) e p_valor (0.083)',
+            expr: 'math.isclose(float(estatistica_t), -1.734, abs_tol=0.005) and math.isclose(float(p_valor), 0.0829, abs_tol=0.001)',
+            actualExpr: '(estatistica_t, p_valor)',
+            hint: 'estatistica_t = diferenca / erro_padrao e p_valor = math.erfc(abs(estatistica_t) / math.sqrt(2)).',
+          },
+          {
+            label: 'Decisão a 5%: a diferença não é significativa',
+            expr: 'significativo is False or (hasattr(significativo, "item") and significativo.item() is False)',
+            actualExpr: 'significativo',
+            hint: 'significativo = p_valor < 0.05. Com p ≈ 0.083 não há provas suficientes.',
+          },
+          {
+            label: 'O teste é calculado a partir dos dados',
+            expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]}))["diferenca"]) - 1.0) < 1e-9',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"data": ["2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07"], "quantidade": [1, 1, 1, 1], "preco": [2.0, 4.0, 1.0, 3.0]})).get("diferenca")',
+            hint: 'Separa os grupos com a coluna fim_de_semana e calcula as médias, sem números escritos à mão.',
+          },
         ],
       },
       quiz: {
@@ -620,7 +865,8 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
           'A diferença é significativa porque o p-valor é baixo.',
         ],
         correctIndex: 2,
-        explanation: 'p ≥ 0.05 não prova igualdade; só diz que uma diferença deste tamanho aparece com frequência por acaso. Para decidir com mais confiança, junta mais dados.',
+        explanation:
+          'p ≥ 0.05 não prova igualdade; só diz que uma diferença deste tamanho aparece com frequência por acaso. Para decidir com mais confiança, junta mais dados.',
       },
     },
     {
@@ -629,7 +875,8 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
       title: 'Correlação, amostras e intervalos de confiança',
       lede: 'Mede se duas variáveis andam juntas com a correlação de Pearson, percebe porque é que correlação não prova causa, e calcula um intervalo de confiança a 95% para dizer "quanto vale a média, mais ou menos".',
       analogyTitle: 'Provar a sopa com uma colher',
-      analogyBody: 'Para saber se a sopa está salgada não bebes a panela inteira: provas uma colher (a amostra). Se mexeste bem, a colher diz muito sobre a panela, mas não tudo. O intervalo de confiança é a margem honesta dessa prova: "a média está entre 5,14 € e 5,45 €". Uma colher pequena dá uma margem larga; uma concha dá uma margem estreita.',
+      analogyBody:
+        'Para saber se a sopa está salgada não bebes a panela inteira: provas uma colher (a amostra). Se mexeste bem, a colher diz muito sobre a panela, mas não tudo. O intervalo de confiança é a margem honesta dessa prova: "a média está entre 5,14 € e 5,45 €". Uma colher pequena dá uma margem larga; uma concha dá uma margem estreita.',
       concepts: [
         'A correlação de Pearson (r) vai de -1 a 1: perto de 1 as variáveis sobem juntas, perto de -1 uma sobe quando a outra desce, perto de 0 não há relação linear.',
         'Correlação não é causa: clientes que vêm mais vezes gastam mais (r ≈ 0,8), mas pode haver uma terceira causa (morar perto, ter família grande).',
@@ -644,13 +891,27 @@ print(round(diferenca, 2), round(estatistica_t, 2), round(p_valor, 3), significa
         'Para o IC: media = df["sub"].mean(), erro_padrao = df["sub"].std() / math.sqrt(len(df)), e soma/subtrai 1.96 * erro_padrao.',
         'Tira uma amostra de 200 linhas e repete o IC: a margem fica mais larga.',
       ],
-      proPractice: 'Num relatório, nunca escrevas só "o ticket médio é 5,30 €". Escreve "5,30 € (IC 95%: 5,14 € a 5,45 €)". O decisor percebe logo quanta confiança pode ter no número.',
-      commonPitfall: 'Ver uma correlação forte e concluir "fazer X causa Y". Para provar causa precisas de uma experiência controlada (como os testes A/B das etapas seguintes), não só de dados observados.',
+      proPractice:
+        'Num relatório, nunca escrevas só "o ticket médio é 5,30 €". Escreve "5,30 € (IC 95%: 5,14 € a 5,45 €)". O decisor percebe logo quanta confiança pode ter no número.',
+      commonPitfall:
+        'Ver uma correlação forte e concluir "fazer X causa Y". Para provar causa precisas de uma experiência controlada (como os testes A/B das etapas seguintes), não só de dados observados.',
       referenceTitle: 'Correlação e intervalos de confiança em pandas',
       referenceRows: [
-        { syntax: 'df["a"].corr(df["b"])', meaning: 'Correlação de Pearson entre duas colunas', example: 'r = 0.8 é uma relação forte' },
-        { syntax: 'df[["a", "b", "c"]].corr()', meaning: 'Matriz de correlações', example: 'Ver todas as relações de uma vez' },
-        { syntax: 'df.sample(200, random_state=42)', meaning: 'Amostra aleatória reprodutível', example: 'Simular um inquérito a 200 linhas' },
+        {
+          syntax: 'df["a"].corr(df["b"])',
+          meaning: 'Correlação de Pearson entre duas colunas',
+          example: 'r = 0.8 é uma relação forte',
+        },
+        {
+          syntax: 'df[["a", "b", "c"]].corr()',
+          meaning: 'Matriz de correlações',
+          example: 'Ver todas as relações de uma vez',
+        },
+        {
+          syntax: 'df.sample(200, random_state=42)',
+          meaning: 'Amostra aleatória reprodutível',
+          example: 'Simular um inquérito a 200 linhas',
+        },
         { syntax: 's.std() / math.sqrt(len(s))', meaning: 'Erro padrão da média', example: 'Quanto a média "abana"' },
         { syntax: 'media ± 1.96 * erro_padrao', meaning: 'Intervalo de confiança a 95%', example: '5,14 € a 5,45 €' },
       ],
@@ -669,7 +930,8 @@ media = por_dia["faturacao"].mean()
 erro_padrao = por_dia["faturacao"].std() / math.sqrt(len(por_dia))
 print(f"Faturação média diária: {media:.2f} € (IC 95%: {media - 1.96 * erro_padrao:.2f} € a {media + 1.96 * erro_padrao:.2f} €)")`,
       pythonChallenge: {
-        description: 'Em vendas.csv (sub = quantidade * preco):\n1) Cria por_cliente com visitas (dias diferentes) e gasto (soma de sub) por cliente e guarda r_visitas_gasto.\n2) Guarda r_preco_quantidade entre as colunas preco e quantidade.\n3) causa_provada: a correlação entre visitas e gasto prova que mais visitas causam mais gasto? (True ou False)\nO intervalo de confiança e as amostras estão nos treinos 1 e 2.',
+        description:
+          'Em vendas.csv (sub = quantidade * preco):\n1) Cria por_cliente com visitas (dias diferentes) e gasto (soma de sub) por cliente e guarda r_visitas_gasto.\n2) Guarda r_preco_quantidade entre as colunas preco e quantidade.\n3) causa_provada: a correlação entre visitas e gasto prova que mais visitas causam mais gasto? (True ou False)\nO intervalo de confiança e as amostras estão nos treinos 1 e 2.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -701,10 +963,31 @@ r_preco_quantidade = df["preco"].corr(df["quantidade"])
 causa_provada = False
 print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
         checks: [
-          { label: 'por_cliente tem uma linha por cliente (120) e r_visitas_gasto ≈ 0.80', expr: 'len(por_cliente) == 120 and abs(float(r_visitas_gasto) - 0.800) < 0.005', actualExpr: '(len(por_cliente), r_visitas_gasto)', hint: 'por_cliente = df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum")) e depois por_cliente["visitas"].corr(por_cliente["gasto"]).' },
-          { label: 'r_preco_quantidade ≈ 0 (sem relação linear)', expr: 'abs(float(r_preco_quantidade)) < 0.01', actualExpr: 'r_preco_quantidade', hint: 'df["preco"].corr(df["quantidade"]).' },
-          { label: 'A correlação vem dos dados', expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]}))["r_visitas_gasto"]) - 1.0) < 1e-9', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]})).get("r_visitas_gasto")', hint: 'Calcula r com .corr() a partir de df, sem escrever o número à mão.' },
-          { label: 'Correlação não prova causa', expr: 'causa_provada is False', actualExpr: 'causa_provada', hint: 'Dados observados mostram que as variáveis andam juntas, não qual causa qual. Para provar causa precisas de uma experiência.' },
+          {
+            label: 'por_cliente tem uma linha por cliente (120) e r_visitas_gasto ≈ 0.80',
+            expr: 'len(por_cliente) == 120 and abs(float(r_visitas_gasto) - 0.800) < 0.005',
+            actualExpr: '(len(por_cliente), r_visitas_gasto)',
+            hint: 'por_cliente = df.groupby("cliente_id").agg(visitas=("data", "nunique"), gasto=("sub", "sum")) e depois por_cliente["visitas"].corr(por_cliente["gasto"]).',
+          },
+          {
+            label: 'r_preco_quantidade ≈ 0 (sem relação linear)',
+            expr: 'abs(float(r_preco_quantidade)) < 0.01',
+            actualExpr: 'r_preco_quantidade',
+            hint: 'df["preco"].corr(df["quantidade"]).',
+          },
+          {
+            label: 'A correlação vem dos dados',
+            expr: 'abs(float(correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]}))["r_visitas_gasto"]) - 1.0) < 1e-9',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d1"], "cliente_id": [1, 1, 2], "quantidade": [1, 1, 1], "preco": [2.0, 2.0, 1.0]})).get("r_visitas_gasto")',
+            hint: 'Calcula r com .corr() a partir de df, sem escrever o número à mão.',
+          },
+          {
+            label: 'Correlação não prova causa',
+            expr: 'causa_provada is False',
+            actualExpr: 'causa_provada',
+            hint: 'Dados observados mostram que as variáveis andam juntas, não qual causa qual. Para provar causa precisas de uma experiência.',
+          },
         ],
       },
       quiz: {
@@ -716,7 +999,8 @@ print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
           'Mais faturação obriga sempre a contratar mais funcionários.',
         ],
         correctIndex: 1,
-        explanation: 'Lojas maiores têm mais clientes e mais funcionários: a dimensão da loja explica as duas coisas. Correlação forte mostra uma relação, não a direção da causa.',
+        explanation:
+          'Lojas maiores têm mais clientes e mais funcionários: a dimensão da loja explica as duas coisas. Correlação forte mostra uma relação, não a direção da causa.',
       },
     },
     {
@@ -725,7 +1009,8 @@ print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
       title: 'Prática guiada: Excel e Power BI com os dados da Mercearia',
       lede: 'Abre o Excel e o Power BI no teu computador e segue os passos com vendas.csv, produtos.csv e clientes.csv. No fim, escreve os números que encontraste na folha de respostas da bancada: a app diz-te quais estão certos.',
       analogyTitle: 'A mesma conta em três calculadoras',
-      analogyBody: 'Já fizeste estas contas em SQL e em pandas. Agora fazes as mesmas no Excel e no Power BI, que é onde muitas equipas de negócio trabalham. Se os números baterem certo nas três ferramentas, sabes que percebeste a lógica e não só a sintaxe.',
+      analogyBody:
+        'Já fizeste estas contas em SQL e em pandas. Agora fazes as mesmas no Excel e no Power BI, que é onde muitas equipas de negócio trabalham. Se os números baterem certo nas três ferramentas, sabes que percebeste a lógica e não só a sintaxe.',
       concepts: [
         'Excel: importa o CSV com Dados > Obter Dados > De Texto/CSV e converte o intervalo em Tabela (Ctrl + T) para as fórmulas usarem nomes de colunas.',
         'Excel: SOMA.SE.S (SUMIFS) soma com condições e PROCX (XLOOKUP) vai buscar um valor a outra tabela, como um JOIN.',
@@ -743,16 +1028,30 @@ print(round(r_visitas_gasto, 2), round(r_preco_quantidade, 3), causa_provada)`,
         'Power BI 3: põe um visual Matriz com clientes[cidade] nas linhas e [Faturação] nos valores, e ordena pela faturação.',
         'Escreve os 8 números na folha de respostas da bancada e carrega em Correr.',
       ],
-      proPractice: 'Antes de publicar um relatório, as equipas fazem um "reconciliar": a mesma métrica calculada em duas ferramentas (por exemplo, SQL e Power BI) tem de bater ao cêntimo. Se não bater, há um filtro, uma relação ou um arredondamento errado.',
-      commonPitfall: 'No Excel em português os argumentos separam-se com ponto e vírgula (;) e as funções têm nomes em português (SOMA.SE.S, PROCX). Se copiares uma fórmula em inglês com vírgulas, o Excel não a aceita.',
+      proPractice:
+        'Antes de publicar um relatório, as equipas fazem um "reconciliar": a mesma métrica calculada em duas ferramentas (por exemplo, SQL e Power BI) tem de bater ao cêntimo. Se não bater, há um filtro, uma relação ou um arredondamento errado.',
+      commonPitfall:
+        'No Excel em português os argumentos separam-se com ponto e vírgula (;) e as funções têm nomes em português (SOMA.SE.S, PROCX). Se copiares uma fórmula em inglês com vírgulas, o Excel não a aceita.',
       referenceTitle: 'Excel (PT / EN) e DAX, lado a lado com SQL',
       referenceRows: [
-        { syntax: 'SOMA.SE.S / SUMIFS', meaning: 'Soma com condições', example: 'SUM(...) WHERE produto = \'Pão\'' },
+        { syntax: 'SOMA.SE.S / SUMIFS', meaning: 'Soma com condições', example: "SUM(...) WHERE produto = 'Pão'" },
         { syntax: 'PROCX / XLOOKUP', meaning: 'Vai buscar um valor a outra tabela', example: 'JOIN produtos ON id' },
         { syntax: 'Tabela Dinâmica / PivotTable', meaning: 'Agrupar e resumir', example: 'GROUP BY mes' },
-        { syntax: 'SUMX(vendas, vendas[quantidade] * vendas[preco])', meaning: 'Medida DAX linha a linha', example: 'SUM(quantidade * preco)' },
-        { syntax: 'DISTINCTCOUNT(vendas[cliente_id])', meaning: 'Contar valores únicos', example: 'COUNT(DISTINCT cliente_id)' },
-        { syntax: 'DIVIDE([Faturação], [Clientes Ativos])', meaning: 'Divisão segura (sem erro com zero)', example: 'Gasto médio por cliente' },
+        {
+          syntax: 'SUMX(vendas, vendas[quantidade] * vendas[preco])',
+          meaning: 'Medida DAX linha a linha',
+          example: 'SUM(quantidade * preco)',
+        },
+        {
+          syntax: 'DISTINCTCOUNT(vendas[cliente_id])',
+          meaning: 'Contar valores únicos',
+          example: 'COUNT(DISTINCT cliente_id)',
+        },
+        {
+          syntax: 'DIVIDE([Faturação], [Clientes Ativos])',
+          meaning: 'Divisão segura (sem erro com zero)',
+          example: 'Gasto médio por cliente',
+        },
       ],
       engine: 'python',
       exampleCode: `# Exemplo: a conta do passo "Excel 2" para outro produto, feita em pandas.
@@ -766,7 +1065,8 @@ vendas["Subtotal"] = vendas["quantidade"] * vendas["preco"]
 faturacao_leite = vendas.loc[vendas["produto"] == "Leite", "Subtotal"].sum()
 print(f"Faturação do Leite: {faturacao_leite:.2f} €")`,
       pythonChallenge: {
-        description: 'Folha de respostas: segue os 7 passos de Excel e Power BI (à esquerda, em "Passo a passo") e escreve aqui os números que obtiveste, com 2 casas decimais quando forem euros. O guia completo está em licoes/pratica_excel_powerbi.md.',
+        description:
+          'Folha de respostas: segue os 7 passos de Excel e Power BI (à esquerda, em "Passo a passo") e escreve aqui os números que obtiveste, com 2 casas decimais quando forem euros. O guia completo está em licoes/pratica_excel_powerbi.md.',
         starterCode: `# Folha de respostas da prática guiada de Excel e Power BI.
 # Substitui cada None pelo valor que encontraste (ex.: 1234.56 ou "Porto").
 
@@ -801,17 +1101,53 @@ cidade_top = "Lisboa"
 print(total_faturacao, faturacao_pao, faturacao_charcutaria, mes_top, faturacao_mes_top)
 print(clientes_ativos, gasto_por_cliente, cidade_top)`,
         checks: [
-          { label: 'Excel 1: total da faturação', expr: 'abs(float(total_faturacao) - 26902.89) < 0.01', actualExpr: 'total_faturacao', hint: 'Confirma que a coluna Subtotal multiplica quantidade por preco em todas as 5 078 linhas e que a SOMA apanha a coluna inteira.' },
-          { label: 'Excel 2: faturação do Pão com SOMA.SE.S', expr: 'abs(float(faturacao_pao) - 205.50) < 0.01', actualExpr: 'faturacao_pao', hint: 'O primeiro argumento é a coluna a somar (Subtotal); depois vem a coluna do critério (produto) e o critério ("Pão").' },
-          { label: 'Excel 3: faturação da Charcutaria com PROCX', expr: 'abs(float(faturacao_charcutaria) - 6756.00) < 0.01', actualExpr: 'faturacao_charcutaria', hint: 'PROCX procura vendas[produto_id] na coluna produtos[id] e devolve produtos[categoria]. Depois soma com SOMA.SE.S pela nova coluna Categoria.' },
-          { label: 'Excel 4: mês com mais faturação e o seu valor', expr: 'str(mes_top).strip() == "2025-09" and abs(float(faturacao_mes_top) - 2462.82) < 0.01', actualExpr: '(mes_top, faturacao_mes_top)', hint: 'Na Tabela Dinâmica ordena a Soma de Subtotal do maior para o menor. Escreve o mês como texto, com aspas: "2025-01".' },
-          { label: 'Power BI 1: Clientes Ativos', expr: 'int(clientes_ativos) == 120', actualExpr: 'clientes_ativos', hint: 'DISTINCTCOUNT(vendas[cliente_id]) conta cada cliente uma vez; COUNT contaria linhas de venda.' },
-          { label: 'Power BI 2: Gasto por Cliente', expr: 'abs(float(gasto_por_cliente) - 224.19) < 0.01', actualExpr: 'gasto_por_cliente', hint: 'DIVIDE([Faturação], [Clientes Ativos]). Arredonda a 2 casas.' },
-          { label: 'Power BI 3: cidade com mais faturação', expr: 'str(cidade_top).strip().lower() == "lisboa"', actualExpr: 'cidade_top', hint: 'Sem a relação vendas[cliente_id] → clientes[id] na vista Modelo, a matriz repete o total em todas as cidades.' },
+          {
+            label: 'Excel 1: total da faturação',
+            expr: 'abs(float(total_faturacao) - 26902.89) < 0.01',
+            actualExpr: 'total_faturacao',
+            hint: 'Confirma que a coluna Subtotal multiplica quantidade por preco em todas as 5 078 linhas e que a SOMA apanha a coluna inteira.',
+          },
+          {
+            label: 'Excel 2: faturação do Pão com SOMA.SE.S',
+            expr: 'abs(float(faturacao_pao) - 205.50) < 0.01',
+            actualExpr: 'faturacao_pao',
+            hint: 'O primeiro argumento é a coluna a somar (Subtotal); depois vem a coluna do critério (produto) e o critério ("Pão").',
+          },
+          {
+            label: 'Excel 3: faturação da Charcutaria com PROCX',
+            expr: 'abs(float(faturacao_charcutaria) - 6756.00) < 0.01',
+            actualExpr: 'faturacao_charcutaria',
+            hint: 'PROCX procura vendas[produto_id] na coluna produtos[id] e devolve produtos[categoria]. Depois soma com SOMA.SE.S pela nova coluna Categoria.',
+          },
+          {
+            label: 'Excel 4: mês com mais faturação e o seu valor',
+            expr: 'str(mes_top).strip() == "2025-09" and abs(float(faturacao_mes_top) - 2462.82) < 0.01',
+            actualExpr: '(mes_top, faturacao_mes_top)',
+            hint: 'Na Tabela Dinâmica ordena a Soma de Subtotal do maior para o menor. Escreve o mês como texto, com aspas: "2025-01".',
+          },
+          {
+            label: 'Power BI 1: Clientes Ativos',
+            expr: 'int(clientes_ativos) == 120',
+            actualExpr: 'clientes_ativos',
+            hint: 'DISTINCTCOUNT(vendas[cliente_id]) conta cada cliente uma vez; COUNT contaria linhas de venda.',
+          },
+          {
+            label: 'Power BI 2: Gasto por Cliente',
+            expr: 'abs(float(gasto_por_cliente) - 224.19) < 0.01',
+            actualExpr: 'gasto_por_cliente',
+            hint: 'DIVIDE([Faturação], [Clientes Ativos]). Arredonda a 2 casas.',
+          },
+          {
+            label: 'Power BI 3: cidade com mais faturação',
+            expr: 'str(cidade_top).strip().lower() == "lisboa"',
+            actualExpr: 'cidade_top',
+            hint: 'Sem a relação vendas[cliente_id] → clientes[id] na vista Modelo, a matriz repete o total em todas as cidades.',
+          },
         ],
       },
       quiz: {
-        question: 'No Power BI, a matriz por cidade mostra o mesmo valor de faturação em todas as linhas. Qual é a causa mais provável?',
+        question:
+          'No Power BI, a matriz por cidade mostra o mesmo valor de faturação em todas as linhas. Qual é a causa mais provável?',
         options: [
           'A medida devia usar SUM em vez de SUMX.',
           'Falta a relação entre vendas e clientes na vista Modelo.',
@@ -819,7 +1155,8 @@ print(clientes_ativos, gasto_por_cliente, cidade_top)`,
           'O visual Matriz não suporta medidas DAX.',
         ],
         correctIndex: 1,
-        explanation: 'Sem relação, o filtro da cidade não chega à tabela vendas e a medida devolve o total geral em cada linha. É o erro mais comum de quem começa no Power BI.',
+        explanation:
+          'Sem relação, o filtro da cidade não chega à tabela vendas e a medida devolve o total geral em cada linha. É o erro mais comum de quem começa no Power BI.',
       },
     },
     {
@@ -828,7 +1165,8 @@ print(clientes_ativos, gasto_por_cliente, cidade_top)`,
       title: 'Teste A/B de proporções e tamanho de amostra',
       lede: 'A pergunta mais comum em entrevistas de produto: "a taxa de conversão subiu de verdade?". Comparas duas proporções com o teste z e calculas quantos dados precisas antes de começar um teste.',
       analogyTitle: 'Contar cestos com Queijo em vez de euros',
-      analogyBody: 'No teste A/B da etapa anterior comparaste médias em euros. Muitas vezes a métrica é um sim ou não: o cliente comprou? clicou? voltou? Aí comparas percentagens. E antes de testares, tens de saber se a loja tem clientes suficientes para ver a diferença que procuras: senão o teste nunca vai dar resposta, por muito tempo que esperes.',
+      analogyBody:
+        'No teste A/B da etapa anterior comparaste médias em euros. Muitas vezes a métrica é um sim ou não: o cliente comprou? clicou? voltou? Aí comparas percentagens. E antes de testares, tens de saber se a loja tem clientes suficientes para ver a diferença que procuras: senão o teste nunca vai dar resposta, por muito tempo que esperes.',
       concepts: [
         'Uma proporção é a média de uma coluna de True e False: cestos["tem_queijo"].mean() dá a taxa.',
         'Teste z de duas proporções: proporção conjunta p, erro padrão = raiz de p(1 - p)(1/n_A + 1/n_B), z = (p_A - p_B) / erro padrão e p-valor = math.erfc(abs(z) / math.sqrt(2)).',
@@ -845,15 +1183,33 @@ print(clientes_ativos, gasto_por_cliente, cidade_top)`,
         'Calcula z, o p-valor e decide a 5%.',
         'No fim calcula n_por_grupo para detetar uma subida de 1 pp a partir de p_semana e arredonda para cima com math.ceil.',
       ],
-      proPractice: 'Em empresas digitais, o tamanho de amostra calcula-se ANTES de lançar o teste e fixa a duração. Ferramentas como statsmodels (proportions_ztest, NormalIndPower) fazem estas contas; em entrevista pedem-te o raciocínio.',
-      commonPitfall: 'Dizer "subiu 5%" quando subiu 5 pontos percentuais. De 13,4% para 18,4% é +5,1 pp, mas +38% em termos relativos: confundir os dois muda a decisão.',
+      proPractice:
+        'Em empresas digitais, o tamanho de amostra calcula-se ANTES de lançar o teste e fixa a duração. Ferramentas como statsmodels (proportions_ztest, NormalIndPower) fazem estas contas; em entrevista pedem-te o raciocínio.',
+      commonPitfall:
+        'Dizer "subiu 5%" quando subiu 5 pontos percentuais. De 13,4% para 18,4% é +5,1 pp, mas +38% em termos relativos: confundir os dois muda a decisão.',
       referenceTitle: 'Teste z de duas proporções',
       referenceRows: [
         { syntax: 'serie_booleana.mean()', meaning: 'Proporção de True', example: '0.184 = 18,4% dos cestos' },
-        { syntax: '(a.sum() + b.sum()) / (len(a) + len(b))', meaning: 'Proporção conjunta (com H0 verdadeira)', example: 'p = 0.153' },
-        { syntax: 'math.sqrt(p * (1 - p) * (1 / len(a) + 1 / len(b)))', meaning: 'Erro padrão da diferença', example: '0.0137' },
-        { syntax: 'z = (p_a - p_b) / erro_padrao', meaning: 'Estatística z', example: '|z| > 1.96 é significativo a 5%' },
-        { syntax: '(1.96 + 0.84) ** 2 * (p1*(1-p1) + p2*(1-p2)) / (p2 - p1) ** 2', meaning: 'Tamanho de amostra por grupo', example: 'Arredondar com math.ceil' },
+        {
+          syntax: '(a.sum() + b.sum()) / (len(a) + len(b))',
+          meaning: 'Proporção conjunta (com H0 verdadeira)',
+          example: 'p = 0.153',
+        },
+        {
+          syntax: 'math.sqrt(p * (1 - p) * (1 / len(a) + 1 / len(b)))',
+          meaning: 'Erro padrão da diferença',
+          example: '0.0137',
+        },
+        {
+          syntax: 'z = (p_a - p_b) / erro_padrao',
+          meaning: 'Estatística z',
+          example: '|z| > 1.96 é significativo a 5%',
+        },
+        {
+          syntax: '(1.96 + 0.84) ** 2 * (p1*(1-p1) + p2*(1-p2)) / (p2 - p1) ** 2',
+          meaning: 'Tamanho de amostra por grupo',
+          example: 'Arredondar com math.ceil',
+        },
       ],
       engine: 'python',
       exampleCode: `import math
@@ -874,7 +1230,8 @@ print(f"z = {z:.2f} | p-valor = {p_valor:.3f} | significativo? {p_valor < 0.05}"
 n = math.ceil((1.96 + 0.84) ** 2 * (p_a * (1 - p_a) + p_b * (1 - p_b)) / (p_b - p_a) ** 2)
 print("Visitas necessárias por grupo:", n)`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv, um cesto é o conjunto de linhas do mesmo cliente no mesmo dia. Ao fim de semana há mais cestos com Queijo?\n1) cestos: um por cliente e dia, com tem_queijo.\n2) p_fds e p_semana: proporção de cestos com Queijo em cada grupo, e diferenca_pp em pontos percentuais.\n3) erro_padrao (com a proporção conjunta), z, p_valor e significativo (p < 0.05).\nO cálculo do tamanho de amostra está no treino 1.',
+        description:
+          'Em vendas_sazonais.csv, um cesto é o conjunto de linhas do mesmo cliente no mesmo dia. Ao fim de semana há mais cestos com Queijo?\n1) cestos: um por cliente e dia, com tem_queijo.\n2) p_fds e p_semana: proporção de cestos com Queijo em cada grupo, e diferenca_pp em pontos percentuais.\n3) erro_padrao (com a proporção conjunta), z, p_valor e significativo (p < 0.05).\nO cálculo do tamanho de amostra está no treino 1.',
         starterCode: `import math
 import pandas as pd
 
@@ -921,11 +1278,36 @@ significativo = p_valor < 0.05
 print(f"Fim de semana {p_fds:.1%} vs dias úteis {p_semana:.1%} (+{diferenca_pp:.1f} pp)")
 print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
         checks: [
-          { label: 'cestos: um por cliente e dia (2 910)', expr: 'len(cestos) == 2910', actualExpr: 'len(cestos) if cestos is not None else None', hint: 'df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index().' },
-          { label: 'p_fds (18.4%) e p_semana (13.4%)', expr: 'abs(float(p_fds) - 0.18445) < 0.0005 and abs(float(p_semana) - 0.13359) < 0.0005', actualExpr: '(p_fds, p_semana)', hint: 'Marca o fim de semana nos cestos (day_of_week >= 5) e faz .mean() de tem_queijo em cada grupo.' },
-          { label: 'diferenca_pp em pontos percentuais (+5.09)', expr: 'abs(float(diferenca_pp) - 5.086) < 0.01', actualExpr: 'diferenca_pp', hint: 'diferenca_pp = (p_fds - p_semana) * 100. Não dividas por p_semana: isso seria a variação relativa.' },
-          { label: 'erro_padrao com a proporção conjunta (0.0137)', expr: 'abs(float(erro_padrao) - 0.013745) < 0.0001', actualExpr: 'erro_padrao', hint: 'p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b)) e math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b))).' },
-          { label: 'z (3.70), p_valor (0.0002) e decisão: significativo', expr: 'abs(float(z) - 3.700) < 0.01 and abs(float(p_valor) - 0.000216) < 0.00002 and bool(significativo) is True', actualExpr: '(z, p_valor, significativo)', hint: 'z = (p_fds - p_semana) / erro_padrao e p_valor = math.erfc(abs(z) / math.sqrt(2)).' },
+          {
+            label: 'cestos: um por cliente e dia (2 910)',
+            expr: 'len(cestos) == 2910',
+            actualExpr: 'len(cestos) if cestos is not None else None',
+            hint: 'df.groupby(["data", "cliente_id"]).agg(tem_queijo=("queijo", "max")).reset_index().',
+          },
+          {
+            label: 'p_fds (18.4%) e p_semana (13.4%)',
+            expr: 'abs(float(p_fds) - 0.18445) < 0.0005 and abs(float(p_semana) - 0.13359) < 0.0005',
+            actualExpr: '(p_fds, p_semana)',
+            hint: 'Marca o fim de semana nos cestos (day_of_week >= 5) e faz .mean() de tem_queijo em cada grupo.',
+          },
+          {
+            label: 'diferenca_pp em pontos percentuais (+5.09)',
+            expr: 'abs(float(diferenca_pp) - 5.086) < 0.01',
+            actualExpr: 'diferenca_pp',
+            hint: 'diferenca_pp = (p_fds - p_semana) * 100. Não dividas por p_semana: isso seria a variação relativa.',
+          },
+          {
+            label: 'erro_padrao com a proporção conjunta (0.0137)',
+            expr: 'abs(float(erro_padrao) - 0.013745) < 0.0001',
+            actualExpr: 'erro_padrao',
+            hint: 'p_conjunta = (a.sum() + b.sum()) / (len(a) + len(b)) e math.sqrt(p_conjunta * (1 - p_conjunta) * (1 / len(a) + 1 / len(b))).',
+          },
+          {
+            label: 'z (3.70), p_valor (0.0002) e decisão: significativo',
+            expr: 'abs(float(z) - 3.700) < 0.01 and abs(float(p_valor) - 0.000216) < 0.00002 and bool(significativo) is True',
+            actualExpr: '(z, p_valor, significativo)',
+            hint: 'z = (p_fds - p_semana) / erro_padrao e p_valor = math.erfc(abs(z) / math.sqrt(2)).',
+          },
         ],
       },
       quiz: {
@@ -937,7 +1319,8 @@ print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
           'Subiu 1 ponto percentual, ou seja, +25% em termos relativos.',
         ],
         correctIndex: 3,
-        explanation: 'A diferença absoluta mede-se em pontos percentuais (5% - 4% = 1 pp). A variação relativa é 1 / 4 = +25%. Dizer só "subiu 1%" é ambíguo e costuma ser apanhado em entrevista.',
+        explanation:
+          'A diferença absoluta mede-se em pontos percentuais (5% - 4% = 1 pp). A variação relativa é 1 / 4 = +25%. Dizer só "subiu 1%" é ambíguo e costuma ser apanhado em entrevista.',
       },
     },
     {
@@ -946,7 +1329,8 @@ print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
       title: 'Probabilidade condicional, Bayes e o paradoxo de Simpson',
       lede: 'Três perguntas de quadro branco que aparecem em quase todas as entrevistas: "quem compra X também compra Y?", "um alerta disparou: qual a probabilidade de ser mesmo fraude?" e "como é que alguém pode ser melhor em todos os grupos e pior no total?".',
       analogyTitle: 'O alarme da loja que toca demasiadas vezes',
-      analogyBody: 'Um alarme que apanha 95% dos ladrões parece ótimo. Mas se só 1 em cada 100 pessoas que passam na porta for ladrão, a maioria dos toques são falsos alarmes: há muito mais clientes honestos do que ladrões. A regra de Bayes faz esta conta: junta a qualidade do alarme com a raridade do que procuras.',
+      analogyBody:
+        'Um alarme que apanha 95% dos ladrões parece ótimo. Mas se só 1 em cada 100 pessoas que passam na porta for ladrão, a maioria dos toques são falsos alarmes: há muito mais clientes honestos do que ladrões. A regra de Bayes faz esta conta: junta a qualidade do alarme com a raridade do que procuras.',
       concepts: [
         'Probabilidade condicional: P(Café | Leite) = cestos com Café e Leite / cestos com Leite. Em pandas: cestos[cestos["leite"]]["cafe"].mean().',
         'Lift = P(Café | Leite) / P(Café). Acima de 1 os produtos atraem-se (bom para promoções conjuntas); abaixo de 1 afastam-se.',
@@ -961,15 +1345,25 @@ print(f"z = {z:.2f} | p = {p_valor:.4f} | significativo? {significativo}")`,
         'Para o Bayes, calcula primeiro p_alerta e depois divide sensibilidade × prevalência por p_alerta.',
         'Para o Simpson, agrupa a tabela por funcionário e turno, e depois só por funcionário: compara as taxas.',
       ],
-      proPractice: 'A análise de cesto (market basket) com suporte, confiança e lift é usada em retalho para decidir promoções e a disposição da loja. Bibliotecas como mlxtend fazem isto em escala; a lógica é esta.',
-      commonPitfall: 'Comparar só totais. Antes de dizer que a Ana é pior, vê se as duas pessoas trabalham nas mesmas condições: o turno da noite é mais difícil e a Ana faz quase só noites.',
+      proPractice:
+        'A análise de cesto (market basket) com suporte, confiança e lift é usada em retalho para decidir promoções e a disposição da loja. Bibliotecas como mlxtend fazem isto em escala; a lógica é esta.',
+      commonPitfall:
+        'Comparar só totais. Antes de dizer que a Ana é pior, vê se as duas pessoas trabalham nas mesmas condições: o turno da noite é mais difícil e a Ana faz quase só noites.',
       referenceTitle: 'Probabilidade em pandas',
       referenceRows: [
         { syntax: 'df["col"].mean()', meaning: 'P(evento) numa coluna True/False', example: 'P(Café) = 0.126' },
         { syntax: 'df[df["b"]]["a"].mean()', meaning: 'P(A | B)', example: 'P(Café | Leite) = 0.093' },
         { syntax: 'p_a_dado_b / p_a', meaning: 'Lift', example: '0.74: afastam-se' },
-        { syntax: 'sens * prev / (sens * prev + fp * (1 - prev))', meaning: 'Regra de Bayes', example: 'P(fraude | alerta) = 16%' },
-        { syntax: 'df.groupby(["a", "b"])[["x", "n"]].sum()', meaning: 'Taxas por subgrupo (Simpson)', example: 'Somar antes de dividir' },
+        {
+          syntax: 'sens * prev / (sens * prev + fp * (1 - prev))',
+          meaning: 'Regra de Bayes',
+          example: 'P(fraude | alerta) = 16%',
+        },
+        {
+          syntax: 'df.groupby(["a", "b"])[["x", "n"]].sum()',
+          meaning: 'Taxas por subgrupo (Simpson)',
+          example: 'Somar antes de dividir',
+        },
       ],
       engine: 'python',
       exampleCode: `# Bayes com números redondos: um teste de diagnóstico.
@@ -986,7 +1380,8 @@ print(f"P(doença | positivo) = {p_doenca_dado_positivo:.1%}")  # cerca de 5%!
 # Em 100 000 pessoas: 100 doentes (99 positivos) e 99 900 saudáveis (1 998 positivos)
 print(f"Verdadeiros positivos: {99}, falsos positivos: {round(0.02 * 99_900)}")`,
       pythonChallenge: {
-        description: 'Quem leva Leite também leva Café? Em vendas.csv, um cesto é cliente + dia.\n1) cestos: uma linha por cesto, com as colunas cafe e leite (True se o cesto tiver o produto).\n2) p_cafe e p_cafe_dado_leite.\n3) lift e juntar_na_prateleira (True se lift > 1).\nA regra de Bayes está no treino 1 e o paradoxo de Simpson no treino 2.',
+        description:
+          'Quem leva Leite também leva Café? Em vendas.csv, um cesto é cliente + dia.\n1) cestos: uma linha por cesto, com as colunas cafe e leite (True se o cesto tiver o produto).\n2) p_cafe e p_cafe_dado_leite.\n3) lift e juntar_na_prateleira (True se lift > 1).\nA regra de Bayes está no treino 1 e o paradoxo de Simpson no treino 2.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas.csv")
@@ -1022,13 +1417,29 @@ lift = p_cafe_dado_leite / p_cafe
 juntar_na_prateleira = lift > 1
 print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | lift = {lift:.2f}")`,
         checks: [
-          { label: 'Cestos (2 447) e p_cafe (12.6%)', expr: 'len(cestos) == 2447 and abs(float(p_cafe) - 0.12628) < 0.0005', actualExpr: '(len(cestos) if cestos is not None else None, p_cafe)', hint: 'cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max")) e p_cafe = cestos["cafe"].mean().' },
-          { label: 'p_cafe_dado_leite (9.3%) e lift (0.74)', expr: 'abs(float(p_cafe_dado_leite) - 0.09315) < 0.0005 and abs(float(lift) - 0.7377) < 0.002', actualExpr: '(p_cafe_dado_leite, lift)', hint: 'Filtra só os cestos com leite: cestos[cestos["leite"]]["cafe"].mean(). lift = p_cafe_dado_leite / p_cafe.' },
-          { label: 'Decisão de prateleira a partir do lift', expr: 'bool(juntar_na_prateleira) is False and bool(correr_com(df=pd.DataFrame({"data": ["d1", "d1", "d2"], "cliente_id": [1, 1, 2], "produto": ["Café", "Leite", "Pão"], "cafe": [True, False, False], "leite": [False, True, False]}))["juntar_na_prateleira"]) is True', actualExpr: 'juntar_na_prateleira', hint: 'juntar_na_prateleira = lift > 1, calculado a partir dos cestos.' },
+          {
+            label: 'Cestos (2 447) e p_cafe (12.6%)',
+            expr: 'len(cestos) == 2447 and abs(float(p_cafe) - 0.12628) < 0.0005',
+            actualExpr: '(len(cestos) if cestos is not None else None, p_cafe)',
+            hint: 'cestos = df.groupby(["data", "cliente_id"]).agg(cafe=("cafe", "max"), leite=("leite", "max")) e p_cafe = cestos["cafe"].mean().',
+          },
+          {
+            label: 'p_cafe_dado_leite (9.3%) e lift (0.74)',
+            expr: 'abs(float(p_cafe_dado_leite) - 0.09315) < 0.0005 and abs(float(lift) - 0.7377) < 0.002',
+            actualExpr: '(p_cafe_dado_leite, lift)',
+            hint: 'Filtra só os cestos com leite: cestos[cestos["leite"]]["cafe"].mean(). lift = p_cafe_dado_leite / p_cafe.',
+          },
+          {
+            label: 'Decisão de prateleira a partir do lift',
+            expr: 'bool(juntar_na_prateleira) is False and bool(correr_com(df=pd.DataFrame({"data": ["d1", "d1", "d2"], "cliente_id": [1, 1, 2], "produto": ["Café", "Leite", "Pão"], "cafe": [True, False, False], "leite": [False, True, False]}))["juntar_na_prateleira"]) is True',
+            actualExpr: 'juntar_na_prateleira',
+            hint: 'juntar_na_prateleira = lift > 1, calculado a partir dos cestos.',
+          },
         ],
       },
       quiz: {
-        question: 'Um teste apanha 99% dos casos e tem 1% de falsos positivos. A doença afeta 1 em 10 000 pessoas. Um resultado positivo significa que a pessoa:',
+        question:
+          'Um teste apanha 99% dos casos e tem 1% de falsos positivos. A doença afeta 1 em 10 000 pessoas. Um resultado positivo significa que a pessoa:',
         options: [
           'tem a doença com probabilidade abaixo de 1%, porque quase todos os positivos são falsos.',
           'tem a doença com probabilidade de 99%, porque o teste acerta em 99 de cada 100 doentes que o fazem.',
@@ -1036,7 +1447,8 @@ print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | l
           'tem a doença com probabilidade de 1%, porque é a taxa de falsos positivos.',
         ],
         correctIndex: 0,
-        explanation: 'Em 1 000 000 de pessoas há 100 doentes (99 positivos) e 999 900 saudáveis (cerca de 9 999 falsos positivos). P(doença | positivo) = 99 / 10 098 ≈ 1%. Com eventos raros, a prevalência manda.',
+        explanation:
+          'Em 1 000 000 de pessoas há 100 doentes (99 positivos) e 999 900 saudáveis (cerca de 9 999 falsos positivos). P(doença | positivo) = 99 / 10 098 ≈ 1%. Com eventos raros, a prevalência manda.',
       },
     },
     {
@@ -1045,7 +1457,8 @@ print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | l
       title: 'Desvio padrão, z-score e regressão linear simples',
       lede: 'Mede a dispersão com variância e desvio padrão, deteta dias anómalos com o z-score e ajusta uma reta de regressão: quanto vale, em euros, cada cliente a mais na loja?',
       analogyTitle: 'A régua que atravessa a nuvem de pontos',
-      analogyBody: 'Marca num gráfico cada dia do ano: clientes no eixo horizontal, faturação no vertical. Fica uma nuvem a subir. A regressão encontra a régua que passa mais perto de todos os pontos. A inclinação da régua diz quanto sobe a faturação por cada cliente a mais; o R² diz quão apertada está a nuvem à volta da régua.',
+      analogyBody:
+        'Marca num gráfico cada dia do ano: clientes no eixo horizontal, faturação no vertical. Fica uma nuvem a subir. A regressão encontra a régua que passa mais perto de todos os pontos. A inclinação da régua diz quanto sobe a faturação por cada cliente a mais; o R² diz quão apertada está a nuvem à volta da régua.',
       concepts: [
         'Variância: média dos desvios ao quadrado. Desvio padrão: a raiz da variância, na mesma unidade dos dados (€). O pandas usa n - 1 (desvio padrão amostral).',
         'z-score = (valor - média) / desvio padrão: quantos desvios padrão um valor está acima ou abaixo da média. |z| > 3 é muito raro numa distribuição normal.',
@@ -1060,11 +1473,17 @@ print(f"P(Café) = {p_cafe:.1%} | P(Café | Leite) = {p_cafe_dado_leite:.1%} | l
         'declive = x.cov(y) / x.var(), ordenada = y.mean() - declive * x.mean() e r2 = x.corr(y) ** 2.',
         'Usa a reta para prever 10 clientes e decide se prever 30 clientes é seguro (vê o máximo de clientes observado).',
       ],
-      proPractice: 'Em Python profissional usa-se numpy.polyfit(x, y, 1), scipy.stats.linregress ou statsmodels (que dá também intervalos de confiança para o declive). No Excel, as funções DECLIVE e INTERCETAR fazem o mesmo.',
-      commonPitfall: 'Ler o declive como causa: "cada cliente traz 16,69 €" é uma associação média. E usar a reta para valores nunca vistos (30 clientes num dia, quando o recorde é 19) dá números sem fundamento.',
+      proPractice:
+        'Em Python profissional usa-se numpy.polyfit(x, y, 1), scipy.stats.linregress ou statsmodels (que dá também intervalos de confiança para o declive). No Excel, as funções DECLIVE e INTERCETAR fazem o mesmo.',
+      commonPitfall:
+        'Ler o declive como causa: "cada cliente traz 16,69 €" é uma associação média. E usar a reta para valores nunca vistos (30 clientes num dia, quando o recorde é 19) dá números sem fundamento.',
       referenceTitle: 'Dispersão e regressão em pandas',
       referenceRows: [
-        { syntax: 's.var() / s.std()', meaning: 'Variância e desvio padrão (amostrais, n - 1)', example: '3 522.96 e 59.35 €' },
+        {
+          syntax: 's.var() / s.std()',
+          meaning: 'Variância e desvio padrão (amostrais, n - 1)',
+          example: '3 522.96 e 59.35 €',
+        },
         { syntax: '(s - s.mean()) / s.std()', meaning: 'z-score de cada valor', example: '5.05 no dia 26 de dezembro' },
         { syntax: 'x.cov(y) / x.var()', meaning: 'Declive da reta de regressão', example: '16.69 € por cliente' },
         { syntax: 'y.mean() - declive * x.mean()', meaning: 'Ordenada na origem', example: '-30.51 €' },
@@ -1084,7 +1503,8 @@ print(f"Média {media:.2f} € | desvio padrão {dp:.2f} € | variância {por_d
 print("Dias com |z| > 3:")
 print(z[z.abs() > 3].round(2))`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) por_dia: clientes (clientes diferentes) e faturacao (soma de sub) por data.\n2) A reta faturacao = ordenada + declive × clientes: guarda declive, ordenada e r2.\n3) previsao_10: faturação prevista para um dia com 10 clientes.\n4) extrapolacao_30_segura: é seguro usar a reta para um dia com 30 clientes? (True ou False)\nVariância, desvio padrão e z-score estão no treino 1.',
+        description:
+          'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) por_dia: clientes (clientes diferentes) e faturacao (soma de sub) por data.\n2) A reta faturacao = ordenada + declive × clientes: guarda declive, ordenada e r2.\n3) previsao_10: faturação prevista para um dia com 10 clientes.\n4) extrapolacao_30_segura: é seguro usar a reta para um dia com 30 clientes? (True ou False)\nVariância, desvio padrão e z-score estão no treino 1.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
@@ -1123,14 +1543,35 @@ extrapolacao_30_segura = 30 <= x.max()
 print(f"faturação = {ordenada:.2f} + {declive:.2f} × clientes | R² = {r2:.2f}")
 print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {x.max()} clientes")`,
         checks: [
-          { label: 'por_dia: 365 dias com clientes e faturacao', expr: 'len(por_dia) == 365 and {"clientes", "faturacao"} <= set(por_dia.columns)', actualExpr: '(len(por_dia), list(por_dia.columns)) if por_dia is not None else None', hint: 'df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).' },
-          { label: 'Reta: declive (16.69 €/cliente) e ordenada (-30.51 €)', expr: 'abs(float(declive) - 16.6885) < 0.005 and abs(float(ordenada) - (-30.5127)) < 0.05', actualExpr: '(declive, ordenada)', hint: 'declive = x.cov(y) / x.var() e ordenada = y.mean() - declive * x.mean().' },
-          { label: 'r2 (0.64) e previsao_10 (136.37 €)', expr: 'abs(float(r2) - 0.63585) < 0.001 and abs(float(previsao_10) - 136.37) < 0.05', actualExpr: '(r2, previsao_10)', hint: 'r2 = x.corr(y) ** 2 e previsao_10 = ordenada + declive * 10.' },
-          { label: 'Extrapolar para 30 clientes não é seguro', expr: 'bool(extrapolacao_30_segura) is False', actualExpr: 'extrapolacao_30_segura', hint: 'O máximo observado é x.max() = 19 clientes num dia: 30 está fora do intervalo onde a reta foi ajustada.' },
+          {
+            label: 'por_dia: 365 dias com clientes e faturacao',
+            expr: 'len(por_dia) == 365 and {"clientes", "faturacao"} <= set(por_dia.columns)',
+            actualExpr: '(len(por_dia), list(por_dia.columns)) if por_dia is not None else None',
+            hint: 'df.groupby("data").agg(clientes=("cliente_id", "nunique"), faturacao=("sub", "sum")).',
+          },
+          {
+            label: 'Reta: declive (16.69 €/cliente) e ordenada (-30.51 €)',
+            expr: 'abs(float(declive) - 16.6885) < 0.005 and abs(float(ordenada) - (-30.5127)) < 0.05',
+            actualExpr: '(declive, ordenada)',
+            hint: 'declive = x.cov(y) / x.var() e ordenada = y.mean() - declive * x.mean().',
+          },
+          {
+            label: 'r2 (0.64) e previsao_10 (136.37 €)',
+            expr: 'abs(float(r2) - 0.63585) < 0.001 and abs(float(previsao_10) - 136.37) < 0.05',
+            actualExpr: '(r2, previsao_10)',
+            hint: 'r2 = x.corr(y) ** 2 e previsao_10 = ordenada + declive * 10.',
+          },
+          {
+            label: 'Extrapolar para 30 clientes não é seguro',
+            expr: 'bool(extrapolacao_30_segura) is False',
+            actualExpr: 'extrapolacao_30_segura',
+            hint: 'O máximo observado é x.max() = 19 clientes num dia: 30 está fora do intervalo onde a reta foi ajustada.',
+          },
         ],
       },
       quiz: {
-        question: 'Uma regressão da faturação diária contra o número de clientes dá declive 16,7 e R² = 0,64. Qual é a leitura correta?',
+        question:
+          'Uma regressão da faturação diária contra o número de clientes dá declive 16,7 e R² = 0,64. Qual é a leitura correta?',
         options: [
           'Cada cliente novo causa exatamente 16,7 € de faturação extra, todos os dias, sem exceção.',
           '64% dos clientes gastam 16,7 €.',
@@ -1138,7 +1579,8 @@ print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {
           'A reta acerta em 64% dos dias.',
         ],
         correctIndex: 2,
-        explanation: 'O declive é uma associação média, não uma causa garantida. O R² mede a fração da variação de y explicada pela reta, não a percentagem de acertos.',
+        explanation:
+          'O declive é uma associação média, não uma causa garantida. O R² mede a fração da variação de y explicada pela reta, não a percentagem de acertos.',
       },
     },
     {
@@ -1147,7 +1589,8 @@ print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {
       title: 'Perguntas rápidas de entrevista: enviesamentos, percentis e valor esperado',
       lede: 'Uma bateria de perguntas curtas, do género das que se fazem nos primeiros 15 minutos de uma entrevista técnica: testes múltiplos, assimetria e percentis, valor esperado de uma campanha e dois enviesamentos que estragam análises.',
       analogyTitle: 'Os aviões que voltaram da guerra',
-      analogyBody: 'Na Segunda Guerra, quiseram reforçar os aviões nas zonas com mais buracos de bala. Um estatístico, Abraham Wald, avisou: esses são os aviões que voltaram. Os buracos que importam estão nos aviões que caíram. Na mercearia é igual: se só inquirires os clientes que ainda vêm, nunca vais saber porque é que os outros deixaram de vir.',
+      analogyBody:
+        'Na Segunda Guerra, quiseram reforçar os aviões nas zonas com mais buracos de bala. Um estatístico, Abraham Wald, avisou: esses são os aviões que voltaram. Os buracos que importam estão nos aviões que caíram. Na mercearia é igual: se só inquirires os clientes que ainda vêm, nunca vais saber porque é que os outros deixaram de vir.',
       concepts: [
         'Testes múltiplos: com 20 testes a 5%, a probabilidade de pelo menos um falso positivo é 1 - 0.95^20 ≈ 64%. A correção de Bonferroni usa alfa / número de testes.',
         'Espreitar (peeking): parar um teste A/B no primeiro dia em que p < 0.05 aumenta muito os falsos positivos. A duração fixa-se antes.',
@@ -1163,11 +1606,17 @@ print(f"Previsão para 10 clientes: {previsao_10:.2f} € | máximo observado: {
         'valor_esperado = prob_uso * margem_por_uso - custo_vale.',
         'Responde às duas perguntas de enviesamento com True ou False.',
       ],
-      proPractice: 'Numa entrevista, explica sempre o raciocínio em voz alta antes do número: "há 20 testes, cada um com 5% de falso positivo, por isso a probabilidade de nenhum falhar é 0,95 elevado a 20…". O entrevistador avalia o método mais do que a conta.',
-      commonPitfall: 'Responder que a probabilidade de um falso positivo em 20 testes é 20 × 5% = 100%. As probabilidades não se somam assim: calcula a probabilidade de nenhum falhar e subtrai a 1.',
+      proPractice:
+        'Numa entrevista, explica sempre o raciocínio em voz alta antes do número: "há 20 testes, cada um com 5% de falso positivo, por isso a probabilidade de nenhum falhar é 0,95 elevado a 20…". O entrevistador avalia o método mais do que a conta.',
+      commonPitfall:
+        'Responder que a probabilidade de um falso positivo em 20 testes é 20 × 5% = 100%. As probabilidades não se somam assim: calcula a probabilidade de nenhum falhar e subtrai a 1.',
       referenceTitle: 'Cábula de entrevista',
       referenceRows: [
-        { syntax: '1 - (1 - alfa) ** k', meaning: 'P(pelo menos 1 falso positivo em k testes)', example: 'k = 20 dá 64%' },
+        {
+          syntax: '1 - (1 - alfa) ** k',
+          meaning: 'P(pelo menos 1 falso positivo em k testes)',
+          example: 'k = 20 dá 64%',
+        },
         { syntax: 'alfa / k', meaning: 'Correção de Bonferroni', example: '0.05 / 20 = 0.0025' },
         { syntax: 's.quantile(0.9)', meaning: 'Percentil 90', example: '23.88 € por cesto' },
         { syntax: 'media > mediana', meaning: 'Cauda à direita', example: '10.99 € > 8.40 €' },
@@ -1183,7 +1632,8 @@ print(f"Valor esperado por raspadinha: {valor_esperado:+.2f} €")
 for k in [1, 5, 10, 20, 50]:
     print(f"{k:>2} testes: {1 - 0.95 ** k:.0%} de hipótese de pelo menos um falso positivo")`,
       pythonChallenge: {
-        description: 'Duas perguntas de entrevista:\n1) prob_falso_positivo_20: probabilidade de pelo menos um falso positivo em 20 testes a 5%; alfa_bonferroni para esses 20 testes.\n2) Em vendas.csv (sub = quantidade * preco), soma sub por cesto (data e cliente_id) e guarda media_cesto, mediana_cesto, p90_cesto e assimetria ("direita" ou "esquerda").\nO valor esperado está no treino 1 e os enviesamentos no treino 2.',
+        description:
+          'Duas perguntas de entrevista:\n1) prob_falso_positivo_20: probabilidade de pelo menos um falso positivo em 20 testes a 5%; alfa_bonferroni para esses 20 testes.\n2) Em vendas.csv (sub = quantidade * preco), soma sub por cesto (data e cliente_id) e guarda media_cesto, mediana_cesto, p90_cesto e assimetria ("direita" ou "esquerda").\nO valor esperado está no treino 1 e os enviesamentos no treino 2.',
         starterCode: `import pandas as pd
 
 # 1) Testes múltiplos
@@ -1216,14 +1666,36 @@ assimetria = "direita" if media_cesto > mediana_cesto else "esquerda"
 print(f"P(≥1 falso positivo em 20 testes) = {prob_falso_positivo_20:.0%} | Bonferroni: {alfa_bonferroni}")
 print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P90 {p90_cesto:.2f} € → cauda à {assimetria}")`,
         checks: [
-          { label: 'Testes múltiplos: 64% e Bonferroni 0.0025', expr: 'abs(float(prob_falso_positivo_20) - 0.64151) < 0.0005 and abs(float(alfa_bonferroni) - 0.0025) < 1e-9', actualExpr: '(prob_falso_positivo_20, alfa_bonferroni)', hint: 'Probabilidade de nenhum falhar: 0.95 ** 20. A de pelo menos um falhar é 1 menos isso. Bonferroni: 0.05 / 20.' },
-          { label: 'Cesto médio (10.99 €) e mediano (8.40 €)', expr: 'len(por_cesto) == 2447 and abs(float(media_cesto) - 10.9942) < 0.005 and abs(float(mediana_cesto) - 8.40) < 0.005', actualExpr: '(len(por_cesto) if por_cesto is not None else None, media_cesto, mediana_cesto)', hint: 'por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum(), depois .mean() e .median().' },
-          { label: 'Percentil 90 (23.88 €) e assimetria à direita', expr: 'abs(float(p90_cesto) - 23.876) < 0.01 and assimetria == "direita"', actualExpr: '(p90_cesto, assimetria)', hint: 'por_cesto.quantile(0.9). A média acima da mediana indica poucos cestos muito grandes: cauda à direita.' },
-          { label: 'A assimetria é decidida pelos dados', expr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]}))["assimetria"] == "esquerda"', actualExpr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]})).get("assimetria")', hint: 'assimetria = "direita" if media_cesto > mediana_cesto else "esquerda".' },
+          {
+            label: 'Testes múltiplos: 64% e Bonferroni 0.0025',
+            expr: 'abs(float(prob_falso_positivo_20) - 0.64151) < 0.0005 and abs(float(alfa_bonferroni) - 0.0025) < 1e-9',
+            actualExpr: '(prob_falso_positivo_20, alfa_bonferroni)',
+            hint: 'Probabilidade de nenhum falhar: 0.95 ** 20. A de pelo menos um falhar é 1 menos isso. Bonferroni: 0.05 / 20.',
+          },
+          {
+            label: 'Cesto médio (10.99 €) e mediano (8.40 €)',
+            expr: 'len(por_cesto) == 2447 and abs(float(media_cesto) - 10.9942) < 0.005 and abs(float(mediana_cesto) - 8.40) < 0.005',
+            actualExpr: '(len(por_cesto) if por_cesto is not None else None, media_cesto, mediana_cesto)',
+            hint: 'por_cesto = df.groupby(["data", "cliente_id"])["sub"].sum(), depois .mean() e .median().',
+          },
+          {
+            label: 'Percentil 90 (23.88 €) e assimetria à direita',
+            expr: 'abs(float(p90_cesto) - 23.876) < 0.01 and assimetria == "direita"',
+            actualExpr: '(p90_cesto, assimetria)',
+            hint: 'por_cesto.quantile(0.9). A média acima da mediana indica poucos cestos muito grandes: cauda à direita.',
+          },
+          {
+            label: 'A assimetria é decidida pelos dados',
+            expr: 'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]}))["assimetria"] == "esquerda"',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"data": ["d1", "d2", "d3"], "cliente_id": [1, 1, 1], "quantidade": [1, 1, 1], "preco": [1.0, 9.0, 10.0]})).get("assimetria")',
+            hint: 'assimetria = "direita" if media_cesto > mediana_cesto else "esquerda".',
+          },
         ],
       },
       quiz: {
-        question: 'Fizeste 20 testes A/B independentes, todos sem efeito real, com alfa de 5%. Qual é a probabilidade de pelo menos um dar "significativo"?',
+        question:
+          'Fizeste 20 testes A/B independentes, todos sem efeito real, com alfa de 5%. Qual é a probabilidade de pelo menos um dar "significativo"?',
         options: [
           'Cerca de 64%.',
           '5%, porque cada teste tem 5% de erro.',
@@ -1231,7 +1703,8 @@ print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P9
           '0,25%, pela correção de Bonferroni.',
         ],
         correctIndex: 0,
-        explanation: 'A probabilidade de nenhum dar falso positivo é 0,95^20 ≈ 36%, por isso a de pelo menos um é ≈ 64%. É por isso que se corrige o alfa (Bonferroni: 0,05 / 20) quando se fazem muitos testes.',
+        explanation:
+          'A probabilidade de nenhum dar falso positivo é 0,95^20 ≈ 36%, por isso a de pelo menos um é ≈ 64%. É por isso que se corrige o alfa (Bonferroni: 0,05 / 20) quando se fazem muitos testes.',
       },
     },
     {
@@ -1240,7 +1713,8 @@ print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P9
       title: 'Mais de dois grupos: qui-quadrado e ANOVA',
       lede: 'O teste A/B compara dois grupos. Quando há mais (6 categorias, 4 trimestres), usa-se o qui-quadrado para contagens e a ANOVA para médias. Constróis os dois à mão e lês o resultado como numa entrevista.',
       analogyTitle: 'O cabaz que muda com as estações',
-      analogyBody: 'Se o que se compra não dependesse da altura do ano, cada trimestre teria a mesma mistura de categorias: as mesmas percentagens de Bebidas, Charcutaria, Fruta… O qui-quadrado mede o quanto a realidade se afasta dessa mistura "sem efeito". A ANOVA faz o mesmo para médias: compara a variação entre trimestres com a variação normal dentro de cada trimestre.',
+      analogyBody:
+        'Se o que se compra não dependesse da altura do ano, cada trimestre teria a mesma mistura de categorias: as mesmas percentagens de Bebidas, Charcutaria, Fruta… O qui-quadrado mede o quanto a realidade se afasta dessa mistura "sem efeito". A ANOVA faz o mesmo para médias: compara a variação entre trimestres com a variação normal dentro de cada trimestre.',
       concepts: [
         'Qui-quadrado de independência: parte de uma tabela de contagens (pd.crosstab). Se as variáveis fossem independentes, cada célula esperaria total_linha × total_coluna / total.',
         'Estatística qui² = soma de (observado - esperado)² / esperado em todas as células. Graus de liberdade = (linhas - 1) × (colunas - 1).',
@@ -1255,15 +1729,25 @@ print(f"Cesto: média {media_cesto:.2f} €, mediana {mediana_cesto:.2f} €, P9
         'Repete para trimestre × categoria em vendas_sazonais.csv e procura a célula com maior resíduo padronizado.',
         'Para a ANOVA, agrupa a faturação diária por trimestre e calcula a variação entre grupos e dentro dos grupos.',
       ],
-      proPractice: 'No dia a dia usa-se scipy.stats.chi2_contingency(tabela) e scipy.stats.f_oneway(*grupos), que devolvem a estatística e o p-valor numa linha. Em entrevista pedem-te para explicar o que estas funções calculam, por isso aqui fazes as contas à mão.',
-      commonPitfall: 'Usar o qui-quadrado com percentagens em vez de contagens, ou com células com esperados muito pequenos (menos de 5). E concluir "o T3 é diferente" só porque o teste global deu significativo, sem olhar para os resíduos.',
+      proPractice:
+        'No dia a dia usa-se scipy.stats.chi2_contingency(tabela) e scipy.stats.f_oneway(*grupos), que devolvem a estatística e o p-valor numa linha. Em entrevista pedem-te para explicar o que estas funções calculam, por isso aqui fazes as contas à mão.',
+      commonPitfall:
+        'Usar o qui-quadrado com percentagens em vez de contagens, ou com células com esperados muito pequenos (menos de 5). E concluir "o T3 é diferente" só porque o teste global deu significativo, sem olhar para os resíduos.',
       referenceTitle: 'Qui-quadrado e ANOVA à mão',
       referenceRows: [
         { syntax: 'pd.crosstab(df["a"], df["b"])', meaning: 'Tabela de contagens', example: 'trimestre × categoria' },
-        { syntax: 'np.outer(t.sum(axis=1), t.sum(axis=0)) / t.values.sum()', meaning: 'Contagens esperadas sem efeito', example: 'Mesma tabela, mesma forma' },
+        {
+          syntax: 'np.outer(t.sum(axis=1), t.sum(axis=0)) / t.values.sum()',
+          meaning: 'Contagens esperadas sem efeito',
+          example: 'Mesma tabela, mesma forma',
+        },
         { syntax: '((t - esp) ** 2 / esp).values.sum()', meaning: 'Estatística qui²', example: '228.3 com 15 gl' },
         { syntax: '(t - esp) / np.sqrt(esp)', meaning: 'Resíduos padronizados', example: '+7.1 em Bebidas no T3' },
-        { syntax: '(SS_entre / (k - 1)) / (SS_dentro / (N - k))', meaning: 'Estatística F da ANOVA', example: '24.4 contra 2.63 crítico' },
+        {
+          syntax: '(SS_entre / (k - 1)) / (SS_dentro / (N - k))',
+          meaning: 'Estatística F da ANOVA',
+          example: '24.4 contra 2.63 crítico',
+        },
       ],
       engine: 'python',
       exampleCode: `import numpy as np
@@ -1282,7 +1766,8 @@ print(esperados)
 print(f"qui² = {qui2:.2f} com {gl} graus de liberdade (crítico a 5%: 5.99)")
 print(((tabela - esperados) / np.sqrt(esperados)).round(2))`,
       pythonChallenge: {
-        description: 'Qui-quadrado de independência, passo a passo:\n1) Completa qui_quadrado(tabela), que devolve (qui2, gl).\n2) Em vendas.csv (com a categoria vinda de produtos.csv), a mistura de categorias muda ao fim de semana? Guarda qui2_fds, gl_fds, p_fds e independente_fds (True se p ≥ 0.05).\n3) Em vendas_sazonais.csv, faz o mesmo para trimestre × categoria (qui2_trim, gl_trim, p_trim) e guarda celula_maior_desvio = (trimestre, categoria) com o maior resíduo padronizado.\nA ANOVA está no treino 1.',
+        description:
+          'Qui-quadrado de independência, passo a passo:\n1) Completa qui_quadrado(tabela), que devolve (qui2, gl).\n2) Em vendas.csv (com a categoria vinda de produtos.csv), a mistura de categorias muda ao fim de semana? Guarda qui2_fds, gl_fds, p_fds e independente_fds (True se p ≥ 0.05).\n3) Em vendas_sazonais.csv, faz o mesmo para trimestre × categoria (qui2_trim, gl_trim, p_trim) e guarda celula_maior_desvio = (trimestre, categoria) com o maior resíduo padronizado.\nA ANOVA está no treino 1.',
         starterCode: `import math
 import numpy as np
 import pandas as pd
@@ -1369,10 +1854,30 @@ print(f"Fim de semana: qui² = {qui2_fds:.2f} ({gl_fds} gl), p = {p_fds:.3f}")
 print(f"Trimestres: qui² = {qui2_trim:.1f} ({gl_trim} gl), p < 0.001 | maior desvio: {celula_maior_desvio}")
 print(residuos.round(1))`,
         checks: [
-          { label: 'qui_quadrado funciona numa tabela 2 × 2 (6.67 com 1 gl)', expr: '(lambda r: abs(float(r[0]) - 6.6667) < 0.001 and int(r[1]) == 1)(qui_quadrado(pd.DataFrame([[10, 20], [20, 10]])))', actualExpr: 'qui_quadrado(pd.DataFrame([[10, 20], [20, 10]]))', hint: 'esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum(); qui2 = soma de (observado - esperado) ** 2 / esperado; gl = (linhas - 1) * (colunas - 1).' },
-          { label: 'Fim de semana: qui² 2.22 com 5 gl, p = 0.82, independente', expr: 'abs(float(qui2_fds) - 2.219) < 0.01 and int(gl_fds) == 5 and abs(float(p_fds) - 0.818) < 0.005 and bool(independente_fds) is True', actualExpr: '(qui2_fds, gl_fds, p_fds, independente_fds)', hint: 'qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"])) e depois p_valor_qui2(qui2_fds, gl_fds).' },
-          { label: 'Trimestres: qui² 228.3 com 15 gl e p < 0.001', expr: 'abs(float(qui2_trim) - 228.29) < 0.05 and int(gl_trim) == 15 and float(p_trim) < 0.001', actualExpr: '(qui2_trim, gl_trim, p_trim)', hint: 'tabela = pd.crosstab(saz["trimestre"], saz["categoria"]) e qui_quadrado(tabela).' },
-          { label: 'Célula com maior desvio: Bebidas no 3.º trimestre', expr: 'tuple(celula_maior_desvio) == ("T3", "Bebidas")', actualExpr: 'celula_maior_desvio', hint: 'residuos = (tabela - esperados) / np.sqrt(esperados) e residuos.stack().idxmax().' },
+          {
+            label: 'qui_quadrado funciona numa tabela 2 × 2 (6.67 com 1 gl)',
+            expr: '(lambda r: abs(float(r[0]) - 6.6667) < 0.001 and int(r[1]) == 1)(qui_quadrado(pd.DataFrame([[10, 20], [20, 10]])))',
+            actualExpr: 'qui_quadrado(pd.DataFrame([[10, 20], [20, 10]]))',
+            hint: 'esperados = np.outer(tabela.sum(axis=1), tabela.sum(axis=0)) / tabela.values.sum(); qui2 = soma de (observado - esperado) ** 2 / esperado; gl = (linhas - 1) * (colunas - 1).',
+          },
+          {
+            label: 'Fim de semana: qui² 2.22 com 5 gl, p = 0.82, independente',
+            expr: 'abs(float(qui2_fds) - 2.219) < 0.01 and int(gl_fds) == 5 and abs(float(p_fds) - 0.818) < 0.005 and bool(independente_fds) is True',
+            actualExpr: '(qui2_fds, gl_fds, p_fds, independente_fds)',
+            hint: 'qui_quadrado(pd.crosstab(vendas["fim_de_semana"], vendas["categoria"])) e depois p_valor_qui2(qui2_fds, gl_fds).',
+          },
+          {
+            label: 'Trimestres: qui² 228.3 com 15 gl e p < 0.001',
+            expr: 'abs(float(qui2_trim) - 228.29) < 0.05 and int(gl_trim) == 15 and float(p_trim) < 0.001',
+            actualExpr: '(qui2_trim, gl_trim, p_trim)',
+            hint: 'tabela = pd.crosstab(saz["trimestre"], saz["categoria"]) e qui_quadrado(tabela).',
+          },
+          {
+            label: 'Célula com maior desvio: Bebidas no 3.º trimestre',
+            expr: 'tuple(celula_maior_desvio) == ("T3", "Bebidas")',
+            actualExpr: 'celula_maior_desvio',
+            hint: 'residuos = (tabela - esperados) / np.sqrt(esperados) e residuos.stack().idxmax().',
+          },
         ],
       },
       quiz: {
@@ -1384,7 +1889,8 @@ print(residuos.round(1))`,
           'As lojas são iguais, porque o p-valor é muito pequeno.',
         ],
         correctIndex: 1,
-        explanation: 'A ANOVA testa se todas as médias são iguais. Rejeitar isso só diz que há pelo menos uma diferença. Para saber quais lojas diferem, fazem-se comparações par a par (por exemplo, Tukey) com correção para testes múltiplos.',
+        explanation:
+          'A ANOVA testa se todas as médias são iguais. Rejeitar isso só diz que há pelo menos uma diferença. Para saber quais lojas diferem, fazem-se comparações par a par (por exemplo, Tukey) com correção para testes múltiplos.',
       },
     },
     {
@@ -1393,7 +1899,8 @@ print(residuos.round(1))`,
       title: 'Regressão linear múltipla: separar efeitos',
       lede: 'Na etapa anterior, cada cliente valia 16,69 € por dia. Mas dezembro tem mais clientes E cestos maiores: parte desse valor era o Natal. A regressão múltipla separa os efeitos e mede cada um "mantendo o resto constante".',
       analogyTitle: 'Quem ganhou o jogo: o avançado ou a equipa?',
-      analogyBody: 'Um avançado que joga sempre na melhor equipa marca muitos golos. Parte é mérito dele, parte é a equipa. Para separar, comparas jogos em que só uma coisa muda. A regressão múltipla faz isso com contas: estima o efeito dos clientes, do fim de semana e de dezembro ao mesmo tempo, para que nenhum fique com o mérito dos outros.',
+      analogyBody:
+        'Um avançado que joga sempre na melhor equipa marca muitos golos. Parte é mérito dele, parte é a equipa. Para separar, comparas jogos em que só uma coisa muda. A regressão múltipla faz isso com contas: estima o efeito dos clientes, do fim de semana e de dezembro ao mesmo tempo, para que nenhum fique com o mérito dos outros.',
       concepts: [
         'Modelo: faturação = b0 + b1 × clientes + b2 × fim_de_semana + b3 × dezembro. As variáveis sim/não entram como 0 ou 1 (variáveis dummy).',
         'Cada coeficiente lê-se "mantendo as outras variáveis constantes": b3 é quanto um dia de dezembro fatura a mais do que um dia normal com os mesmos clientes e o mesmo dia da semana.',
@@ -1408,13 +1915,23 @@ print(residuos.round(1))`,
         'Calcula as previsões X @ coef, o R² e o R² ajustado.',
         'Compara b_clientes com o declive simples da etapa anterior e usa o modelo para prever um sábado de dezembro com 10 clientes.',
       ],
-      proPractice: 'Em análise profissional usa-se statsmodels (smf.ols("faturacao ~ clientes + fim_de_semana + dezembro", data=df).fit().summary()), que mostra também erros padrão e p-valores de cada coeficiente. Em scikit-learn usa-se LinearRegression quando o objetivo é prever.',
-      commonPitfall: 'Ler o coeficiente da regressão simples como "o efeito" de uma variável quando há outra escondida a mexer nas duas. Pergunta sempre: o que mais muda ao mesmo tempo que x?',
+      proPractice:
+        'Em análise profissional usa-se statsmodels (smf.ols("faturacao ~ clientes + fim_de_semana + dezembro", data=df).fit().summary()), que mostra também erros padrão e p-valores de cada coeficiente. Em scikit-learn usa-se LinearRegression quando o objetivo é prever.',
+      commonPitfall:
+        'Ler o coeficiente da regressão simples como "o efeito" de uma variável quando há outra escondida a mexer nas duas. Pergunta sempre: o que mais muda ao mesmo tempo que x?',
       referenceTitle: 'Regressão múltipla com numpy',
       referenceRows: [
         { syntax: 'serie.astype(int)', meaning: 'Variável dummy 0/1', example: 'dezembro = 1 em dezembro' },
-        { syntax: 'np.column_stack([np.ones(n), x1, x2])', meaning: 'Matriz X com coluna de 1', example: 'O 1 dá a ordenada b0' },
-        { syntax: 'np.linalg.lstsq(X, y, rcond=None)[0]', meaning: 'Coeficientes por mínimos quadrados', example: '[b0, b1, b2, b3]' },
+        {
+          syntax: 'np.column_stack([np.ones(n), x1, x2])',
+          meaning: 'Matriz X com coluna de 1',
+          example: 'O 1 dá a ordenada b0',
+        },
+        {
+          syntax: 'np.linalg.lstsq(X, y, rcond=None)[0]',
+          meaning: 'Coeficientes por mínimos quadrados',
+          example: '[b0, b1, b2, b3]',
+        },
         { syntax: '1 - ((y - prev) ** 2).sum() / ((y - y.mean()) ** 2).sum()', meaning: 'R²', example: '0.73' },
         { syntax: '1 - (1 - r2) * (n - 1) / (n - p - 1)', meaning: 'R² ajustado (p variáveis)', example: '0.73' },
       ],
@@ -1431,7 +1948,8 @@ b0, b_area, b_garagem = np.linalg.lstsq(X, preco, rcond=None)[0]
 print(f"preço = {b0:.1f} + {b_area:.2f} × área + {b_garagem:.1f} × garagem")
 print(f"Com a mesma área, ter garagem vale +{b_garagem:.0f} mil €")`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes e faturacao por data, e as colunas fim_de_semana e dezembro (0 ou 1). Ajusta faturacao = b0 + b_clientes × clientes + b_fds × fim_de_semana + b_dezembro × dezembro com np.linalg.lstsq. Guarda os 4 coeficientes, r2, r2_ajustado, declive_simples (o declive só com clientes, como na etapa anterior), previsao_sabado_dezembro (10 clientes, fim de semana, dezembro) e dezembro_inflacionava (True se declive_simples > b_clientes).',
+        description:
+          'Em vendas_sazonais.csv (sub = quantidade * preco), cria por_dia com clientes e faturacao por data, e as colunas fim_de_semana e dezembro (0 ou 1). Ajusta faturacao = b0 + b_clientes × clientes + b_fds × fim_de_semana + b_dezembro × dezembro com np.linalg.lstsq. Guarda os 4 coeficientes, r2, r2_ajustado, declive_simples (o declive só com clientes, como na etapa anterior), previsao_sabado_dezembro (10 clientes, fim de semana, dezembro) e dezembro_inflacionava (True se declive_simples > b_clientes).',
         starterCode: `import numpy as np
 import pandas as pd
 
@@ -1479,11 +1997,37 @@ print(f"R² = {r2:.3f} | R² ajustado = {r2_ajustado:.3f}")
 print(f"Declive simples {declive_simples:.2f} € vs múltiplo {b_clientes:.2f} € por cliente")
 print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €")`,
         checks: [
-          { label: 'por_dia com 365 dias e colunas 0/1', expr: 'len(por_dia) == 365 and set(por_dia["dezembro"].unique()) == {0, 1} and int(por_dia["dezembro"].sum()) == 31 and int(por_dia["fim_de_semana"].sum()) == 104', actualExpr: '(len(por_dia), int(por_dia["dezembro"].sum()), int(por_dia["fim_de_semana"].sum())) if por_dia is not None else None', hint: 'Usa .astype(int) para transformar True/False em 1/0.' },
-          { label: 'Coeficientes: b0 -8.07, clientes 12.29, fim de semana 22.92, dezembro 71.98', expr: 'abs(float(b0) - (-8.0707)) < 0.01 and abs(float(b_clientes) - 12.2878) < 0.001 and abs(float(b_fds) - 22.9175) < 0.01 and abs(float(b_dezembro) - 71.9818) < 0.01', actualExpr: '(b0, b_clientes, b_fds, b_dezembro)', hint: 'X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e np.linalg.lstsq(X, y, rcond=None)[0]. A ordem das colunas define a ordem dos coeficientes.' },
-          { label: 'r2 (0.735) e r2_ajustado (0.732)', expr: 'abs(float(r2) - 0.73457) < 0.0005 and abs(float(r2_ajustado) - 0.73236) < 0.0005', actualExpr: '(r2, r2_ajustado)', hint: 'r2 = 1 - soma dos resíduos² / soma de (y - média)²; r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - 3 - 1).' },
-          { label: 'Declive simples (16.69) maior do que o múltiplo: dezembro inflacionava', expr: 'abs(float(declive_simples) - 16.6885) < 0.005 and bool(dezembro_inflacionava) is True', actualExpr: '(declive_simples, dezembro_inflacionava)', hint: 'declive_simples = clientes.cov(faturacao) / clientes.var(), como na etapa anterior.' },
-          { label: 'Previsão para um sábado de dezembro com 10 clientes (209.71 €)', expr: 'abs(float(previsao_sabado_dezembro) - 209.706) < 0.05', actualExpr: 'previsao_sabado_dezembro', hint: 'b0 + b_clientes * 10 + b_fds * 1 + b_dezembro * 1.' },
+          {
+            label: 'por_dia com 365 dias e colunas 0/1',
+            expr: 'len(por_dia) == 365 and set(por_dia["dezembro"].unique()) == {0, 1} and int(por_dia["dezembro"].sum()) == 31 and int(por_dia["fim_de_semana"].sum()) == 104',
+            actualExpr:
+              '(len(por_dia), int(por_dia["dezembro"].sum()), int(por_dia["fim_de_semana"].sum())) if por_dia is not None else None',
+            hint: 'Usa .astype(int) para transformar True/False em 1/0.',
+          },
+          {
+            label: 'Coeficientes: b0 -8.07, clientes 12.29, fim de semana 22.92, dezembro 71.98',
+            expr: 'abs(float(b0) - (-8.0707)) < 0.01 and abs(float(b_clientes) - 12.2878) < 0.001 and abs(float(b_fds) - 22.9175) < 0.01 and abs(float(b_dezembro) - 71.9818) < 0.01',
+            actualExpr: '(b0, b_clientes, b_fds, b_dezembro)',
+            hint: 'X = np.column_stack([np.ones(n), clientes, fim_de_semana, dezembro]) e np.linalg.lstsq(X, y, rcond=None)[0]. A ordem das colunas define a ordem dos coeficientes.',
+          },
+          {
+            label: 'r2 (0.735) e r2_ajustado (0.732)',
+            expr: 'abs(float(r2) - 0.73457) < 0.0005 and abs(float(r2_ajustado) - 0.73236) < 0.0005',
+            actualExpr: '(r2, r2_ajustado)',
+            hint: 'r2 = 1 - soma dos resíduos² / soma de (y - média)²; r2_ajustado = 1 - (1 - r2) * (n - 1) / (n - 3 - 1).',
+          },
+          {
+            label: 'Declive simples (16.69) maior do que o múltiplo: dezembro inflacionava',
+            expr: 'abs(float(declive_simples) - 16.6885) < 0.005 and bool(dezembro_inflacionava) is True',
+            actualExpr: '(declive_simples, dezembro_inflacionava)',
+            hint: 'declive_simples = clientes.cov(faturacao) / clientes.var(), como na etapa anterior.',
+          },
+          {
+            label: 'Previsão para um sábado de dezembro com 10 clientes (209.71 €)',
+            expr: 'abs(float(previsao_sabado_dezembro) - 209.706) < 0.05',
+            actualExpr: 'previsao_sabado_dezembro',
+            hint: 'b0 + b_clientes * 10 + b_fds * 1 + b_dezembro * 1.',
+          },
         ],
       },
       quiz: {
@@ -1495,7 +2039,8 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
           'Dezembro explica 72% da faturação.',
         ],
         correctIndex: 2,
-        explanation: 'Os coeficientes de uma regressão múltipla medem o efeito de uma variável mantendo as outras constantes. Aqui a unidade é o dia, porque o modelo foi ajustado com dados diários.',
+        explanation:
+          'Os coeficientes de uma regressão múltipla medem o efeito de uma variável mantendo as outras constantes. Aqui a unidade é o dia, porque o modelo foi ajustado com dados diários.',
       },
     },
     {
@@ -1504,7 +2049,8 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
       title: 'Ver a incerteza: simulação, bootstrap e testes de permutação',
       lede: 'Em vez de confiar em fórmulas, deixa o computador repetir a experiência mil vezes. Vês a curva das médias a formar-se num histograma, confirmas o erro padrão da etapa anterior e aprendes o bootstrap e o teste de permutação, que também aparecem em entrevistas.',
       analogyTitle: 'Provar a sopa mil vezes',
-      analogyBody: 'Uma colher de sopa dá uma ideia do sal, mas cada colher é um pouco diferente. Se provares mil colheres e marcares o resultado de cada uma, as marcas formam um monte à volta do sal verdadeiro. A largura desse monte é o erro padrão. O bootstrap faz isto quando só tens uma panela pequena: volta a tirar colheres da mesma amostra, com reposição.',
+      analogyBody:
+        'Uma colher de sopa dá uma ideia do sal, mas cada colher é um pouco diferente. Se provares mil colheres e marcares o resultado de cada uma, as marcas formam um monte à volta do sal verdadeiro. A largura desse monte é o erro padrão. O bootstrap faz isto quando só tens uma panela pequena: volta a tirar colheres da mesma amostra, com reposição.',
       concepts: [
         'Distribuição amostral: se repetires a amostragem muitas vezes, as médias das amostras formam uma curva em sino centrada na média verdadeira, mesmo que os dados originais sejam assimétricos (Teorema do Limite Central).',
         'O desvio padrão dessas médias é o erro padrão: a simulação deve dar quase o mesmo que a fórmula desvio padrão / raiz de n.',
@@ -1519,14 +2065,32 @@ print(f"Sábado de dezembro com 10 clientes: {previsao_sabado_dezembro:.2f} €"
         'Conta a percentagem de médias que ficam a menos de 1.96 erros padrão da média verdadeira.',
         'Desenha o histograma das médias com ax.hist(medias_amostra, bins=30) e marca a média verdadeira com ax.axvline.',
       ],
-      proPractice: 'Em entrevistas para analista é comum perguntarem "como calculavas um intervalo de confiança para a mediana?" ou "e se os dados não forem normais?". A resposta curta é: bootstrap. Em Python profissional usa-se scipy.stats.bootstrap e scipy.stats.permutation_test.',
-      commonPitfall: 'Reamostrar sem reposição no bootstrap: rng.choice(amostra, size=len(amostra), replace=False) devolve sempre a mesma amostra baralhada e o intervalo fica com largura zero.',
+      proPractice:
+        'Em entrevistas para analista é comum perguntarem "como calculavas um intervalo de confiança para a mediana?" ou "e se os dados não forem normais?". A resposta curta é: bootstrap. Em Python profissional usa-se scipy.stats.bootstrap e scipy.stats.permutation_test.',
+      commonPitfall:
+        'Reamostrar sem reposição no bootstrap: rng.choice(amostra, size=len(amostra), replace=False) devolve sempre a mesma amostra baralhada e o intervalo fica com largura zero.',
       referenceTitle: 'Simulação com NumPy',
       referenceRows: [
-        { syntax: 'rng = np.random.default_rng(42)', meaning: 'Gerador aleatório com semente fixa', example: 'Resultados reprodutíveis' },
-        { syntax: 'rng.choice(x, size=50)', meaning: 'Amostra de 50 valores com reposição', example: 'Uma "colher" da sopa' },
-        { syntax: 'np.percentile(boot, [2.5, 97.5])', meaning: 'Intervalo de confiança por bootstrap', example: 'IC da mediana' },
-        { syntax: 'rng.permutation(rotulos)', meaning: 'Baralha os rótulos dos grupos', example: 'Teste de permutação' },
+        {
+          syntax: 'rng = np.random.default_rng(42)',
+          meaning: 'Gerador aleatório com semente fixa',
+          example: 'Resultados reprodutíveis',
+        },
+        {
+          syntax: 'rng.choice(x, size=50)',
+          meaning: 'Amostra de 50 valores com reposição',
+          example: 'Uma "colher" da sopa',
+        },
+        {
+          syntax: 'np.percentile(boot, [2.5, 97.5])',
+          meaning: 'Intervalo de confiança por bootstrap',
+          example: 'IC da mediana',
+        },
+        {
+          syntax: 'rng.permutation(rotulos)',
+          meaning: 'Baralha os rótulos dos grupos',
+          example: 'Teste de permutação',
+        },
         { syntax: 'ax.hist(valores, bins=30)', meaning: 'Histograma', example: 'A curva das médias' },
       ],
       engine: 'python',
@@ -1546,7 +2110,8 @@ ax.axvline(dado.mean(), color="black")
 ax.set_title("As médias formam um sino, mesmo com dados assimétricos")
 fig.tight_layout()`,
       pythonChallenge: {
-        description: 'Em vendas.csv (sub = quantidade * preco, como array NumPy), com rng = np.random.default_rng(42):\n1) medias_amostra: array com a média de 1000 amostras de 50 linhas (rng.choice com reposição).\n2) media_das_medias, erro_simulado (desvio padrão das médias, ddof=1) e erro_teorico (sub.std(ddof=1) / raiz de 50).\n3) pct_dentro: percentagem de médias a menos de 1.96 × erro_teorico da média verdadeira.\n4) Histograma das médias (bins=30) com um título que diga a conclusão.\nO bootstrap está no treino 1 e o teste de permutação no treino 2.',
+        description:
+          'Em vendas.csv (sub = quantidade * preco, como array NumPy), com rng = np.random.default_rng(42):\n1) medias_amostra: array com a média de 1000 amostras de 50 linhas (rng.choice com reposição).\n2) media_das_medias, erro_simulado (desvio padrão das médias, ddof=1) e erro_teorico (sub.std(ddof=1) / raiz de 50).\n3) pct_dentro: percentagem de médias a menos de 1.96 × erro_teorico da média verdadeira.\n4) Histograma das médias (bins=30) com um título que diga a conclusão.\nO bootstrap está no treino 1 e o teste de permutação no treino 2.',
         starterCode: `import math
 import numpy as np
 import pandas as pd
@@ -1599,14 +2164,35 @@ ax.set_xlabel("Média de uma amostra de 50 linhas (€)")
 fig.tight_layout()
 print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} € | {pct_dentro:.1f}% dentro de ±1.96 EP")`,
         checks: [
-          { label: '1000 médias centradas na média verdadeira (5.30 €)', expr: 'len(medias_amostra) == 1000 and abs(float(media_das_medias) - 5.2979) < 0.2 and abs(float(media_das_medias) - float(np.mean(medias_amostra))) < 1e-9', actualExpr: '(len(medias_amostra) if medias_amostra is not None else None, media_das_medias)', hint: 'medias_amostra = np.array([rng.choice(sub, size=50).mean() for _ in range(1000)]).' },
-          { label: 'Erro simulado ≈ erro teórico (0.80 €)', expr: 'abs(float(erro_teorico) - 0.80195) < 0.001 and abs(float(erro_simulado) - float(np.std(medias_amostra, ddof=1))) < 1e-9 and 0.9 < float(erro_simulado) / float(erro_teorico) < 1.1', actualExpr: '(erro_simulado, erro_teorico)', hint: 'erro_simulado = medias_amostra.std(ddof=1) e erro_teorico = sub.std(ddof=1) / math.sqrt(50).' },
-          { label: 'Cerca de 95% das médias dentro de ±1.96 erros padrão', expr: '92 <= float(pct_dentro) <= 98 and abs(float(pct_dentro) - float((np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100)) < 1e-9', actualExpr: 'pct_dentro', hint: '(np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100.' },
-          { label: 'Histograma das médias com título', expr: 'len(ax.patches) >= 10 and len(ax.get_title().strip()) >= 15', actualExpr: '(len(ax.patches), ax.get_title())', hint: 'ax.hist(medias_amostra, bins=30) e ax.set_title("...").' },
+          {
+            label: '1000 médias centradas na média verdadeira (5.30 €)',
+            expr: 'len(medias_amostra) == 1000 and abs(float(media_das_medias) - 5.2979) < 0.2 and abs(float(media_das_medias) - float(np.mean(medias_amostra))) < 1e-9',
+            actualExpr: '(len(medias_amostra) if medias_amostra is not None else None, media_das_medias)',
+            hint: 'medias_amostra = np.array([rng.choice(sub, size=50).mean() for _ in range(1000)]).',
+          },
+          {
+            label: 'Erro simulado ≈ erro teórico (0.80 €)',
+            expr: 'abs(float(erro_teorico) - 0.80195) < 0.001 and abs(float(erro_simulado) - float(np.std(medias_amostra, ddof=1))) < 1e-9 and 0.9 < float(erro_simulado) / float(erro_teorico) < 1.1',
+            actualExpr: '(erro_simulado, erro_teorico)',
+            hint: 'erro_simulado = medias_amostra.std(ddof=1) e erro_teorico = sub.std(ddof=1) / math.sqrt(50).',
+          },
+          {
+            label: 'Cerca de 95% das médias dentro de ±1.96 erros padrão',
+            expr: '92 <= float(pct_dentro) <= 98 and abs(float(pct_dentro) - float((np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100)) < 1e-9',
+            actualExpr: 'pct_dentro',
+            hint: '(np.abs(medias_amostra - sub.mean()) <= 1.96 * erro_teorico).mean() * 100.',
+          },
+          {
+            label: 'Histograma das médias com título',
+            expr: 'len(ax.patches) >= 10 and len(ax.get_title().strip()) >= 15',
+            actualExpr: '(len(ax.patches), ax.get_title())',
+            hint: 'ax.hist(medias_amostra, bins=30) e ax.set_title("...").',
+          },
         ],
       },
       quiz: {
-        question: 'Tens uma amostra de 200 cestos e queres um intervalo de confiança para a mediana. O que fazes no bootstrap?',
+        question:
+          'Tens uma amostra de 200 cestos e queres um intervalo de confiança para a mediana. O que fazes no bootstrap?',
         options: [
           'Calculas a mediana ± 1.96 × desvio padrão / raiz de 200, como na fórmula da média.',
           'Reamostras com reposição muitas vezes e usas os percentis 2,5 e 97,5.',
@@ -1614,7 +2200,8 @@ print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} €
           'Reamostras sem reposição, para não repetir cestos.',
         ],
         correctIndex: 1,
-        explanation: 'O bootstrap trata a amostra como se fosse a população e repete a amostragem com reposição. Sem reposição, todas as reamostras seriam iguais à original.',
+        explanation:
+          'O bootstrap trata a amostra como se fosse a população e repete a amostragem com reposição. Sem reposição, todas as reamostras seriam iguais à original.',
       },
     },
     {
@@ -1623,7 +2210,8 @@ print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} €
       title: 'Inteligência de tempo: acumulado do ano, mês anterior e média móvel',
       lede: 'Os relatórios de gestão perguntam sempre "quanto levamos este ano?", "subimos face ao mês passado?" e "qual é a tendência?". Aprendes as medidas de tempo do DAX e as fórmulas do Excel equivalentes, e confirmas os números em pandas.',
       analogyTitle: 'O conta-quilómetros e o velocímetro',
-      analogyBody: 'O acumulado do ano é o conta-quilómetros: só sobe e diz quanto já fizeste desde janeiro. A variação face ao mês anterior é o velocímetro: diz se estás a acelerar ou a travar agora. A média móvel é olhar para a velocidade média dos últimos minutos, para não te assustares com uma travagem pontual.',
+      analogyBody:
+        'O acumulado do ano é o conta-quilómetros: só sobe e diz quanto já fizeste desde janeiro. A variação face ao mês anterior é o velocímetro: diz se estás a acelerar ou a travar agora. A média móvel é olhar para a velocidade média dos últimos minutos, para não te assustares com uma travagem pontual.',
       concepts: [
         'Acumulado do ano (YTD): em DAX, TOTALYTD([Faturação], calendario[data]); no Excel, =SOMA($B$2:B2) arrastado para baixo; em pandas, .cumsum().',
         'Mês anterior: em DAX, CALCULATE([Faturação], DATEADD(calendario[data], -1, MONTH)); em pandas, .shift(1). A variação é (atual - anterior) / anterior, com DIVIDE para não dividir por zero.',
@@ -1638,15 +2226,37 @@ print(f"Erro simulado {erro_simulado:.3f} € vs teórico {erro_teorico:.3f} €
         'Calcula a média móvel de 3 meses com .rolling(3).mean() e lê dezembro.',
         'Divide dezembro pelo total do ano para obter a quota.',
       ],
-      proPractice: 'Num dashboard de gestão, os cartões do topo costumam ser: faturação do mês, variação face ao mês anterior, acumulado do ano e comparação com o mesmo período do ano anterior (SAMEPERIODLASTYEAR). Com só um ano de dados, como aqui, essa última não é possível: diz isso no relatório em vez de a inventar.',
-      commonPitfall: 'Usar TOTALYTD sem uma tabela calendário completa: se faltarem dias (por exemplo, domingos sem vendas), o acumulado salta ou fica errado. A tabela calendário cria-se à parte, com CALENDAR ou CALENDARAUTO.',
+      proPractice:
+        'Num dashboard de gestão, os cartões do topo costumam ser: faturação do mês, variação face ao mês anterior, acumulado do ano e comparação com o mesmo período do ano anterior (SAMEPERIODLASTYEAR). Com só um ano de dados, como aqui, essa última não é possível: diz isso no relatório em vez de a inventar.',
+      commonPitfall:
+        'Usar TOTALYTD sem uma tabela calendário completa: se faltarem dias (por exemplo, domingos sem vendas), o acumulado salta ou fica errado. A tabela calendário cria-se à parte, com CALENDAR ou CALENDARAUTO.',
       referenceTitle: 'Medidas de tempo em DAX, Excel e pandas',
       referenceRows: [
-        { syntax: 'TOTALYTD([Faturação], calendario[data])', meaning: 'Acumulado do ano (DAX)', example: 'Excel: =SOMA($B$2:B2) | pandas: .cumsum()' },
-        { syntax: 'CALCULATE([Faturação], DATEADD(calendario[data], -1, MONTH))', meaning: 'Mês anterior (DAX)', example: 'pandas: .shift(1)' },
-        { syntax: 'DIVIDE([Faturação] - [Mês Anterior], [Mês Anterior])', meaning: 'Variação em % sem erro de divisão', example: 'pandas: .pct_change()' },
-        { syntax: 'AVERAGEX(DATESINPERIOD(...), [Faturação])', meaning: 'Média móvel (DAX)', example: 'Excel: =MÉDIA(B2:B4) | pandas: .rolling(3).mean()' },
-        { syntax: 'SAMEPERIODLASTYEAR(calendario[data])', meaning: 'Mesmo período do ano anterior', example: 'Precisa de 2 anos de dados' },
+        {
+          syntax: 'TOTALYTD([Faturação], calendario[data])',
+          meaning: 'Acumulado do ano (DAX)',
+          example: 'Excel: =SOMA($B$2:B2) | pandas: .cumsum()',
+        },
+        {
+          syntax: 'CALCULATE([Faturação], DATEADD(calendario[data], -1, MONTH))',
+          meaning: 'Mês anterior (DAX)',
+          example: 'pandas: .shift(1)',
+        },
+        {
+          syntax: 'DIVIDE([Faturação] - [Mês Anterior], [Mês Anterior])',
+          meaning: 'Variação em % sem erro de divisão',
+          example: 'pandas: .pct_change()',
+        },
+        {
+          syntax: 'AVERAGEX(DATESINPERIOD(...), [Faturação])',
+          meaning: 'Média móvel (DAX)',
+          example: 'Excel: =MÉDIA(B2:B4) | pandas: .rolling(3).mean()',
+        },
+        {
+          syntax: 'SAMEPERIODLASTYEAR(calendario[data])',
+          meaning: 'Mesmo período do ano anterior',
+          example: 'Precisa de 2 anos de dados',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -1665,7 +2275,8 @@ tabela = pd.DataFrame({
 })
 print(tabela.round(1))`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) mensal: faturação por mês (12 meses).\n2) acumulado = mensal.cumsum() e acumulado_junho.\n3) variacao_pct = variação face ao mês anterior em %; guarda subida_dezembro_pct.\n4) media_movel_dezembro: média móvel de 3 meses em dezembro.\n5) quota_dezembro_pct: peso de dezembro no ano.\nO acumulado do mês até ao dia 15 está no treino 1.',
+        description:
+          'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) mensal: faturação por mês (12 meses).\n2) acumulado = mensal.cumsum() e acumulado_junho.\n3) variacao_pct = variação face ao mês anterior em %; guarda subida_dezembro_pct.\n4) media_movel_dezembro: média móvel de 3 meses em dezembro.\n5) quota_dezembro_pct: peso de dezembro no ano.\nO acumulado do mês até ao dia 15 está no treino 1.',
         starterCode: `import pandas as pd
 
 df = pd.read_csv("dados/vendas_sazonais.csv")
@@ -1694,14 +2305,36 @@ quota_dezembro_pct = round(float(mensal["2025-12"] / mensal.sum() * 100), 2)
 print(f"Acumulado até junho: {acumulado_junho} € | dezembro: +{subida_dezembro_pct}% face a novembro")
 print(f"Média móvel 3m em dezembro: {media_movel_dezembro} € | dezembro vale {quota_dezembro_pct}% do ano")`,
         checks: [
-          { label: 'mensal com 12 meses e acumulado_junho (15 080.99 €)', expr: 'len(mensal) == 12 and abs(float(acumulado_junho) - 15080.99) < 0.01 and abs(float(acumulado.iloc[-1]) - 37426.47) < 0.01', actualExpr: '(len(mensal) if mensal is not None else None, acumulado_junho)', hint: 'mensal = df.groupby(df["data"].str.slice(0, 7))["sub"].sum() e acumulado = mensal.cumsum().' },
-          { label: 'subida_dezembro_pct (+75.53%)', expr: 'abs(float(subida_dezembro_pct) - 75.53) < 0.01', actualExpr: 'subida_dezembro_pct', hint: 'variacao_pct = mensal.pct_change() * 100 e lê "2025-12".' },
-          { label: 'media_movel_dezembro (4 267.66 €) e quota_dezembro_pct (16.88%)', expr: 'abs(float(media_movel_dezembro) - 4267.66) < 0.01 and abs(float(quota_dezembro_pct) - 16.88) < 0.01', actualExpr: '(media_movel_dezembro, quota_dezembro_pct)', hint: 'mensal.rolling(3).mean() e mensal["2025-12"] / mensal.sum() * 100.' },
-          { label: 'As medidas vêm dos dados', expr: '(lambda r: abs(float(r["acumulado"].iloc[-1]) - 78.0) < 1e-9 and abs(float(r["subida_dezembro_pct"]) - 9.09) < 0.01)(correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})))', actualExpr: 'correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})).get("subida_dezembro_pct")', hint: 'Calcula tudo a partir de df, sem números escritos à mão.' },
+          {
+            label: 'mensal com 12 meses e acumulado_junho (15 080.99 €)',
+            expr: 'len(mensal) == 12 and abs(float(acumulado_junho) - 15080.99) < 0.01 and abs(float(acumulado.iloc[-1]) - 37426.47) < 0.01',
+            actualExpr: '(len(mensal) if mensal is not None else None, acumulado_junho)',
+            hint: 'mensal = df.groupby(df["data"].str.slice(0, 7))["sub"].sum() e acumulado = mensal.cumsum().',
+          },
+          {
+            label: 'subida_dezembro_pct (+75.53%)',
+            expr: 'abs(float(subida_dezembro_pct) - 75.53) < 0.01',
+            actualExpr: 'subida_dezembro_pct',
+            hint: 'variacao_pct = mensal.pct_change() * 100 e lê "2025-12".',
+          },
+          {
+            label: 'media_movel_dezembro (4 267.66 €) e quota_dezembro_pct (16.88%)',
+            expr: 'abs(float(media_movel_dezembro) - 4267.66) < 0.01 and abs(float(quota_dezembro_pct) - 16.88) < 0.01',
+            actualExpr: '(media_movel_dezembro, quota_dezembro_pct)',
+            hint: 'mensal.rolling(3).mean() e mensal["2025-12"] / mensal.sum() * 100.',
+          },
+          {
+            label: 'As medidas vêm dos dados',
+            expr: '(lambda r: abs(float(r["acumulado"].iloc[-1]) - 78.0) < 1e-9 and abs(float(r["subida_dezembro_pct"]) - 9.09) < 0.01)(correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})))',
+            actualExpr:
+              'correr_com(df=pd.DataFrame({"data": [f"2025-{m:02d}-10" for m in range(1, 13)], "quantidade": [1] * 12, "preco": [float(m) for m in range(1, 13)]})).get("subida_dezembro_pct")',
+            hint: 'Calcula tudo a partir de df, sem números escritos à mão.',
+          },
         ],
       },
       quiz: {
-        question: 'Num dashboard, a medida TOTALYTD devolve valores estranhos que saltam de dia para dia. Qual é a causa mais provável?',
+        question:
+          'Num dashboard, a medida TOTALYTD devolve valores estranhos que saltam de dia para dia. Qual é a causa mais provável?',
         options: [
           'A medida devia usar SUM em vez de TOTALYTD.',
           'O Power BI não suporta acumulados quando os dados têm mais de um ano de vendas.',
@@ -1709,7 +2342,8 @@ print(f"Média móvel 3m em dezembro: {media_movel_dezembro} € | dezembro vale
           'A faturação tem valores negativos.',
         ],
         correctIndex: 2,
-        explanation: 'As funções de tempo do DAX percorrem uma tabela de datas contínua. Usar a coluna de datas das vendas (onde faltam dias) dá acumulados errados.',
+        explanation:
+          'As funções de tempo do DAX percorrem uma tabela de datas contínua. Usar a coluna de datas das vendas (onde faltam dias) dá acumulados errados.',
       },
     },
     {
@@ -1718,7 +2352,8 @@ print(f"Média móvel 3m em dezembro: {media_movel_dezembro} € | dezembro vale
       title: 'Séries temporais: tendência, sazonalidade e uma previsão simples',
       lede: 'Uma série de vendas diárias mistura três coisas: a tendência (a loja está a crescer?), a sazonalidade (o fim de semana vende mais) e o ruído. Separas as duas primeiras e usas-as para uma previsão simples e explicável.',
       analogyTitle: 'A maré e as ondas',
-      analogyBody: 'Na praia, a maré sobe devagar durante horas (a tendência) e as ondas chegam e vão com um ritmo regular (a sazonalidade). Para saber onde vai estar a água daqui a uma hora, olhas para a maré e depois para o ritmo das ondas. Nas vendas é igual: a tendência diz para onde a loja vai, o padrão semanal diz como cada dia se desvia.',
+      analogyBody:
+        'Na praia, a maré sobe devagar durante horas (a tendência) e as ondas chegam e vão com um ritmo regular (a sazonalidade). Para saber onde vai estar a água daqui a uma hora, olhas para a maré e depois para o ritmo das ondas. Nas vendas é igual: a tendência diz para onde a loja vai, o padrão semanal diz como cada dia se desvia.',
       concepts: [
         'Tendência linear: np.polyfit(t, y, 1) ajusta uma reta ao longo do tempo, com t = 0, 1, 2, ... O declive diz quanto a faturação sobe por dia.',
         'Índice sazonal: média de cada dia da semana a dividir pela média geral. Um índice de 1.5 quer dizer que esse dia vende 50% acima de um dia médio.',
@@ -1732,14 +2367,28 @@ print(f"Média móvel 3m em dezembro: {media_movel_dezembro} € | dezembro vale
         'Agrupa por serie.index.day_of_week, faz a média e divide pela média geral.',
         'Para segunda-feira, 5 de janeiro de 2026, t = 369 (365 dias de 2025 mais 4). Multiplica a tendência nesse dia pelo índice de segunda.',
       ],
-      proPractice: 'Em retalho, esta decomposição serve para planear turnos e stock: se o domingo vale 1,5 vezes um dia médio, é nesse dia que fazem falta mais pessoas na caixa. Apresenta sempre a previsão com uma margem (por exemplo, mais ou menos 20%), nunca como um número exato.',
-      commonPitfall: 'Prever com uma média simples de todos os dias: para uma segunda-feira, isso sobrestima, porque a média inclui os fins de semana fortes.',
+      proPractice:
+        'Em retalho, esta decomposição serve para planear turnos e stock: se o domingo vale 1,5 vezes um dia médio, é nesse dia que fazem falta mais pessoas na caixa. Apresenta sempre a previsão com uma margem (por exemplo, mais ou menos 20%), nunca como um número exato.',
+      commonPitfall:
+        'Prever com uma média simples de todos os dias: para uma segunda-feira, isso sobrestima, porque a média inclui os fins de semana fortes.',
       referenceTitle: 'Decomposição simples de uma série',
       referenceRows: [
         { syntax: 'np.polyfit(t, y, 1)', meaning: 'Reta de tendência (declive, ordenada)', example: '+0.25 € por dia' },
-        { syntax: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean()', meaning: 'Índice sazonal semanal', example: 'domingo 1.50, quinta 0.66' },
-        { syntax: '(ordenada + declive * t_futuro) * indice[dia]', meaning: 'Previsão tendência × sazonalidade', example: 'segunda 5/1/2026: 109.90 €' },
-        { syntax: 'serie.rolling(7).mean()', meaning: 'Média móvel semanal (alisa as ondas)', example: 'Mostra a maré' },
+        {
+          syntax: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean()',
+          meaning: 'Índice sazonal semanal',
+          example: 'domingo 1.50, quinta 0.66',
+        },
+        {
+          syntax: '(ordenada + declive * t_futuro) * indice[dia]',
+          meaning: 'Previsão tendência × sazonalidade',
+          example: 'segunda 5/1/2026: 109.90 €',
+        },
+        {
+          syntax: 'serie.rolling(7).mean()',
+          meaning: 'Média móvel semanal (alisa as ondas)',
+          example: 'Mostra a maré',
+        },
       ],
       engine: 'python',
       exampleCode: `import pandas as pd
@@ -1758,7 +2407,8 @@ ax.set_title("A maré (média móvel) e as ondas (dias)")
 ax.legend()
 fig.tight_layout()`,
       pythonChallenge: {
-        description: 'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) serie: faturação por dia, com índice de datas (pd.to_datetime).\n2) declive e ordenada da tendência linear (np.polyfit com t = 0, 1, 2, ...).\n3) indice_semanal: média de cada dia da semana (0 = segunda) a dividir pela média geral; guarda dia_mais_forte e dia_mais_fraco.\n4) previsao_segunda: previsão para segunda-feira, 5 de janeiro de 2026 (t = 369) = tendência × índice de segunda.\nO efeito do Natal na tendência está no treino 1.',
+        description:
+          'Em vendas_sazonais.csv (sub = quantidade * preco):\n1) serie: faturação por dia, com índice de datas (pd.to_datetime).\n2) declive e ordenada da tendência linear (np.polyfit com t = 0, 1, 2, ...).\n3) indice_semanal: média de cada dia da semana (0 = segunda) a dividir pela média geral; guarda dia_mais_forte e dia_mais_fraco.\n4) previsao_segunda: previsão para segunda-feira, 5 de janeiro de 2026 (t = 369) = tendência × índice de segunda.\nO efeito do Natal na tendência está no treino 1.',
         starterCode: `import numpy as np
 import pandas as pd
 
@@ -1794,14 +2444,35 @@ print(f"Tendência: +{declive:.2f} € por dia")
 print(indice_semanal.round(2))
 print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
         checks: [
-          { label: 'serie com 365 dias e índice de datas', expr: 'len(serie) == 365 and str(serie.index.dtype).startswith("datetime64")', actualExpr: '(len(serie), str(serie.index.dtype)) if serie is not None else None', hint: 'serie = df.groupby("data")["sub"].sum() e serie.index = pd.to_datetime(serie.index).' },
-          { label: 'Tendência: +0.247 € por dia (ordenada 57.60 €)', expr: 'abs(float(declive) - 0.24692) < 0.0005 and abs(float(ordenada) - 57.5987) < 0.01', actualExpr: '(declive, ordenada)', hint: 't = np.arange(len(serie)) e declive, ordenada = np.polyfit(t, serie.values, 1).' },
-          { label: 'Índice semanal: domingo é o mais forte (1.50) e quinta o mais fraco (0.66)', expr: 'dia_mais_forte == 6 and dia_mais_fraco == 3 and abs(float(indice_semanal[6]) - 1.495) < 0.001 and abs(float(indice_semanal.mean()) - 1.0) < 0.02', actualExpr: '(dia_mais_forte, dia_mais_fraco)', hint: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean(). Domingo é 6 e quinta é 3.' },
-          { label: 'previsao_segunda (109.90 €)', expr: 'abs(float(previsao_segunda) - 109.895) < 0.01', actualExpr: 'previsao_segunda', hint: '(ordenada + declive * 369) * indice_semanal[0].' },
+          {
+            label: 'serie com 365 dias e índice de datas',
+            expr: 'len(serie) == 365 and str(serie.index.dtype).startswith("datetime64")',
+            actualExpr: '(len(serie), str(serie.index.dtype)) if serie is not None else None',
+            hint: 'serie = df.groupby("data")["sub"].sum() e serie.index = pd.to_datetime(serie.index).',
+          },
+          {
+            label: 'Tendência: +0.247 € por dia (ordenada 57.60 €)',
+            expr: 'abs(float(declive) - 0.24692) < 0.0005 and abs(float(ordenada) - 57.5987) < 0.01',
+            actualExpr: '(declive, ordenada)',
+            hint: 't = np.arange(len(serie)) e declive, ordenada = np.polyfit(t, serie.values, 1).',
+          },
+          {
+            label: 'Índice semanal: domingo é o mais forte (1.50) e quinta o mais fraco (0.66)',
+            expr: 'dia_mais_forte == 6 and dia_mais_fraco == 3 and abs(float(indice_semanal[6]) - 1.495) < 0.001 and abs(float(indice_semanal.mean()) - 1.0) < 0.02',
+            actualExpr: '(dia_mais_forte, dia_mais_fraco)',
+            hint: 'serie.groupby(serie.index.day_of_week).mean() / serie.mean(). Domingo é 6 e quinta é 3.',
+          },
+          {
+            label: 'previsao_segunda (109.90 €)',
+            expr: 'abs(float(previsao_segunda) - 109.895) < 0.01',
+            actualExpr: 'previsao_segunda',
+            hint: '(ordenada + declive * 369) * indice_semanal[0].',
+          },
         ],
       },
       quiz: {
-        question: 'O índice sazonal do domingo é 1,5 e a tendência prevê 100 € para o próximo domingo. Qual é a previsão?',
+        question:
+          'O índice sazonal do domingo é 1,5 e a tendência prevê 100 € para o próximo domingo. Qual é a previsão?',
         options: [
           '100 €, porque a tendência já inclui o efeito de todos os dias da semana.',
           '150 €: a tendência vezes o índice do domingo.',
@@ -1809,7 +2480,8 @@ print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
           '66,7 €: a tendência a dividir pelo índice.',
         ],
         correctIndex: 1,
-        explanation: 'O índice multiplica: 1,5 quer dizer 50% acima de um dia médio. A tendência dá o nível; o índice ajusta-o ao dia da semana.',
+        explanation:
+          'O índice multiplica: 1,5 quer dizer 50% acima de um dia médio. A tendência dá o nível; o índice ajusta-o ao dia da semana.',
       },
     },
     {
@@ -1818,7 +2490,8 @@ print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
       title: 'Prática Excel & Power Query: importar, limpar e reconciliar dados novos',
       lede: 'Descarregas loja_online_pedidos.csv (no Explorador CSV), importas para o Excel com Power Query (ou Calc / Google Sheets no Mac/Linux), corriges o separador decimal inglês e reconcilias valor bruto vs faturação líquida na folha de respostas.',
       analogyTitle: 'A alfândega antes do armazém',
-      analogyBody: 'Um CSV vindo de outro sistema traz pontos nos preços ("115.40") quando o teu Excel em português espera vírgulas ("115,40"). O Power Query funciona como a alfândega: converte os tipos na entrada para nunca mais multiplicares preços por 100 sem querer.',
+      analogyBody:
+        'Um CSV vindo de outro sistema traz pontos nos preços ("115.40") quando o teu Excel em português espera vírgulas ("115,40"). O Power Query funciona como a alfândega: converte os tipos na entrada para nunca mais multiplicares preços por 100 sem querer.',
       concepts: [
         'Importar com região certa: no Excel (Dados > De Texto/CSV > Transformar Dados), escolhe "Alterar Tipo > Com Localidade > Inglês (Estados Unidos)" na coluna preco_unit para que 115.40 não vire 11540 ou erro.',
         'Reconciliação de estados: antes de somar vendas, confirma sempre o peso de cada estado (Concluído vs Cancelado). Somar tudo sem filtrar inflaciona a faturação.',
@@ -1833,16 +2506,42 @@ print(f"Previsão para segunda, 5/1/2026: {previsao_segunda:.2f} €")`,
         'Calcula: valor bruto total (todas as 2 700 linhas), faturação líquida (só estado = "Concluído"), pedidos concluídos, pedidos cancelados e taxa de cancelamento global (%).',
         'Preenche os 5 valores na folha de respostas ao lado e carrega em Executar.',
       ],
-      proPractice: 'Em equipas de BI, o Power Query grava os passos de limpeza num guião repetível: no mês seguinte basta substituir o CSV e clicar em "Atualizar Tudo" (Refresh All).',
-      commonPitfall: 'Abrir o CSV com duplo clique no Windows em português: o Excel usa ponto e vírgula como separador e mete todas as colunas na coluna A, ou troca pontos por datas (ex.: "10.03" vira 10 de março). Usa sempre Dados > De Texto/CSV.',
+      proPractice:
+        'Em equipas de BI, o Power Query grava os passos de limpeza num guião repetível: no mês seguinte basta substituir o CSV e clicar em "Atualizar Tudo" (Refresh All).',
+      commonPitfall:
+        'Abrir o CSV com duplo clique no Windows em português: o Excel usa ponto e vírgula como separador e mete todas as colunas na coluna A, ou troca pontos por datas (ex.: "10.03" vira 10 de março). Usa sempre Dados > De Texto/CSV.',
       referenceTitle: 'Importar, diagnosticar erros e reconciliar no Excel (PT / EN)',
       referenceRows: [
-        { syntax: 'Dados > Obter Dados > De Texto/CSV', meaning: 'Importa UTF-8 com delimitador vírgula sem estragar acentos', example: 'Origem: 65001: Unicode (UTF-8)' },
-        { syntax: 'Power Query: Alterar Tipo com Localidade (Inglês EUA)', meaning: 'Lê 115.40 corretamente num Windows em português', example: 'Tipo: Número Decimal' },
-        { syntax: '=SE.ERRO(A2/B2; 0)  (EN: IFERROR)', meaning: 'Evita #DIV/0! ou #N/D em relatórios', example: 'Taxa de cancelamento limpa' },
-        { syntax: '#N/D · #VALOR! · #DIV/0! · #REF!', meaning: 'Chave ausente · texto em conta · divisão por 0 · célula apagada', example: 'Diagnóstico rápido de fórmulas' },
-        { syntax: '=CONTAR.SE(Pedidos[estado]; "Concluído")  (EN: COUNTIF)', meaning: 'Conta pedidos com um critério', example: '2 432 pedidos' },
-        { syntax: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor])  (EN: SUMIF)', meaning: 'Soma Valor apenas para linhas concluídas', example: '246 900,06 €' },
+        {
+          syntax: 'Dados > Obter Dados > De Texto/CSV',
+          meaning: 'Importa UTF-8 com delimitador vírgula sem estragar acentos',
+          example: 'Origem: 65001: Unicode (UTF-8)',
+        },
+        {
+          syntax: 'Power Query: Alterar Tipo com Localidade (Inglês EUA)',
+          meaning: 'Lê 115.40 corretamente num Windows em português',
+          example: 'Tipo: Número Decimal',
+        },
+        {
+          syntax: '=SE.ERRO(A2/B2; 0)  (EN: IFERROR)',
+          meaning: 'Evita #DIV/0! ou #N/D em relatórios',
+          example: 'Taxa de cancelamento limpa',
+        },
+        {
+          syntax: '#N/D · #VALOR! · #DIV/0! · #REF!',
+          meaning: 'Chave ausente · texto em conta · divisão por 0 · célula apagada',
+          example: 'Diagnóstico rápido de fórmulas',
+        },
+        {
+          syntax: '=CONTAR.SE(Pedidos[estado]; "Concluído")  (EN: COUNTIF)',
+          meaning: 'Conta pedidos com um critério',
+          example: '2 432 pedidos',
+        },
+        {
+          syntax: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor])  (EN: SUMIF)',
+          meaning: 'Soma Valor apenas para linhas concluídas',
+          example: '246 900,06 €',
+        },
       ],
       engine: 'python',
       ficheirosDados: ['loja_online_pedidos.csv'],
@@ -1853,7 +2552,8 @@ df = pd.read_csv("dados/loja_online_pedidos.csv")
 df["Valor"] = df["quantidade"] * df["preco_unit"]
 print(df.groupby("estado").agg(pedidos=("pedido_id", "count"), valor_eur=("Valor", "sum")).round(2))`,
       pythonChallenge: {
-        description: 'Folha de respostas (Excel / Power Query sobre loja_online_pedidos.csv): substitui cada None pelos 5 números que calculaste na tua folha (euros e % com 2 casas decimais).',
+        description:
+          'Folha de respostas (Excel / Power Query sobre loja_online_pedidos.csv): substitui cada None pelos 5 números que calculaste na tua folha (euros e % com 2 casas decimais).',
         starterCode: `# Folha de respostas: Excel & Power Query (loja_online_pedidos.csv)
 # Substitui cada None pelo número obtido na tua folha de cálculo.
 
@@ -1873,14 +2573,35 @@ taxa_cancelamento_pct = 9.93
 
 print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelados, taxa_cancelamento_pct)`,
         checks: [
-          { label: 'valor_bruto_total (274 466,03 €)', expr: 'abs(float(valor_bruto_total) - 274466.03) < 0.05', actualExpr: 'valor_bruto_total', hint: 'Soma [@quantidade]*[@preco_unit] nas 2 700 linhas. Se der milhões, o Excel leu o ponto decimal como separador de milhares!' },
-          { label: 'faturacao_liquida (246 900,06 €)', expr: 'abs(float(faturacao_liquida) - 246900.06) < 0.05', actualExpr: 'faturacao_liquida', hint: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor]).' },
-          { label: 'Contagens: 2 432 concluídos e 268 cancelados', expr: 'int(pedidos_concluidos) == 2432 and int(pedidos_cancelados) == 268', actualExpr: '(pedidos_concluidos, pedidos_cancelados)', hint: '=CONTAR.SE(Pedidos[estado]; "Concluído") e "Cancelado". A soma tem de dar 2 700.' },
-          { label: 'taxa_cancelamento_pct (9,93%)', expr: 'abs(float(taxa_cancelamento_pct) - 9.93) < 0.02', actualExpr: 'taxa_cancelamento_pct', hint: '268 / 2700 * 100 = 9.93%.' },
+          {
+            label: 'valor_bruto_total (274 466,03 €)',
+            expr: 'abs(float(valor_bruto_total) - 274466.03) < 0.05',
+            actualExpr: 'valor_bruto_total',
+            hint: 'Soma [@quantidade]*[@preco_unit] nas 2 700 linhas. Se der milhões, o Excel leu o ponto decimal como separador de milhares!',
+          },
+          {
+            label: 'faturacao_liquida (246 900,06 €)',
+            expr: 'abs(float(faturacao_liquida) - 246900.06) < 0.05',
+            actualExpr: 'faturacao_liquida',
+            hint: '=SOMA.SE(Pedidos[estado]; "Concluído"; Pedidos[Valor]).',
+          },
+          {
+            label: 'Contagens: 2 432 concluídos e 268 cancelados',
+            expr: 'int(pedidos_concluidos) == 2432 and int(pedidos_cancelados) == 268',
+            actualExpr: '(pedidos_concluidos, pedidos_cancelados)',
+            hint: '=CONTAR.SE(Pedidos[estado]; "Concluído") e "Cancelado". A soma tem de dar 2 700.',
+          },
+          {
+            label: 'taxa_cancelamento_pct (9,93%)',
+            expr: 'abs(float(taxa_cancelamento_pct) - 9.93) < 0.02',
+            actualExpr: 'taxa_cancelamento_pct',
+            hint: '268 / 2700 * 100 = 9.93%.',
+          },
         ],
       },
       quiz: {
-        question: 'Abres um CSV internacional no Excel em português e o preço "115.40" aparece como "11540" (cem vezes maior). Como corriges isto na importação?',
+        question:
+          'Abres um CSV internacional no Excel em português e o preço "115.40" aparece como "11540" (cem vezes maior). Como corriges isto na importação?',
         options: [
           'Dividir a coluna toda por 100 à mão depois de importar.',
           'Importar por Dados > De Texto/CSV e, no Power Query, usar "Alterar Tipo > Com Localidade > Inglês (EUA)" na coluna de preço.',
@@ -1888,7 +2609,8 @@ print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelad
           'Guardar o CSV em formato .txt e abrir no Bloco de Notas.',
         ],
         correctIndex: 1,
-        explanation: 'Definir a localidade Inglesa (EUA) no passo de conversão de tipo no Power Query ensina o Excel a ler o ponto como separador decimal de forma segura e repetível.',
+        explanation:
+          'Definir a localidade Inglesa (EUA) no passo de conversão de tipo no Power Query ensina o Excel a ler o ponto como separador decimal de forma segura e repetível.',
       },
     },
     {
@@ -1897,7 +2619,8 @@ print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelad
       title: 'Prática Excel: Tabelas Dinâmicas, SOMA.SE.S e vários critérios',
       lede: 'Constróis uma Tabela Dinâmica cruzada (Região × Canal) e fórmulas SOMA.SE.S / MÉDIA.SE.S com múltiplos critérios sobre loja_online_pedidos.csv — no Excel, Calc ou Google Sheets.',
       analogyTitle: 'A matriz que responde a 8 perguntas num clique',
-      analogyBody: 'Em vez de escrever 8 fórmulas SOMA.SE.S separadas para cruzar Região e Canal, uma Tabela Dinâmica gera a matriz inteira em 5 segundos — e deixa-te filtrar por estado ("Concluído") no topo.',
+      analogyBody:
+        'Em vez de escrever 8 fórmulas SOMA.SE.S separadas para cruzar Região e Canal, uma Tabela Dinâmica gera a matriz inteira em 5 segundos — e deixa-te filtrar por estado ("Concluído") no topo.',
       concepts: [
         'SOMA.SE.S (SUMIFS) aceita quantos pares (intervalo_critério; critério) precisares: estado="Concluído", categoria="Eletrónica" e regiao="Lisboa".',
         'MÉDIA.SE.S (AVERAGEIFS) calcula médias condicionadas (ex.: ticket médio apenas nos pedidos concluídos de uma categoria).',
@@ -1909,13 +2632,27 @@ print(valor_bruto_total, faturacao_liquida, pedidos_concluidos, pedidos_cancelad
         'Insere uma Tabela Dinâmica: Filtro = estado ("Concluído"), Linhas = regiao, Colunas = canal, Valores = Soma de Valor.',
         'Lê na matriz: região líder no total, faturação Web em Lisboa e faturação App no Norte.',
       ],
-      proPractice: 'Nunca metas valores totais e subtotais dentro dos dados antes de criar uma Tabela Dinâmica, ou vais duplicar todas as somas.',
-      commonPitfall: 'Esquecer o filtro de estado = "Concluído" na Tabela Dinâmica, misturando pedidos cancelados com receita efetiva.',
+      proPractice:
+        'Nunca metas valores totais e subtotais dentro dos dados antes de criar uma Tabela Dinâmica, ou vais duplicar todas as somas.',
+      commonPitfall:
+        'Esquecer o filtro de estado = "Concluído" na Tabela Dinâmica, misturando pedidos cancelados com receita efetiva.',
       referenceTitle: 'Fórmulas multi-critério em Excel (PT / EN)',
       referenceRows: [
-        { syntax: '=SOMA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica"; Reg; "Lisboa")', meaning: 'SUMIFS com 3 condições em simultâneo', example: '23 411,22 €' },
-        { syntax: '=MÉDIA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica")', meaning: 'AVERAGEIFS: média apenas nos pedidos válidos', example: '152,97 €' },
-        { syntax: 'Tabela Dinâmica: Filtro(estado) + Linhas(regiao) + Colunas(canal)', meaning: 'Cruza duas dimensões em matriz com totais automáticos', example: 'Web Lisboa = 40 301,95 €' },
+        {
+          syntax: '=SOMA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica"; Reg; "Lisboa")',
+          meaning: 'SUMIFS com 3 condições em simultâneo',
+          example: '23 411,22 €',
+        },
+        {
+          syntax: '=MÉDIA.SE.S(Valor; Estado; "Concluído"; Cat; "Eletrónica")',
+          meaning: 'AVERAGEIFS: média apenas nos pedidos válidos',
+          example: '152,97 €',
+        },
+        {
+          syntax: 'Tabela Dinâmica: Filtro(estado) + Linhas(regiao) + Colunas(canal)',
+          meaning: 'Cruza duas dimensões em matriz com totais automáticos',
+          example: 'Web Lisboa = 40 301,95 €',
+        },
       ],
       engine: 'python',
       ficheirosDados: ['loja_online_pedidos.csv'],
@@ -1927,7 +2664,8 @@ df["Valor"] = df["quantidade"] * df["preco_unit"]
 conc = df[df["estado"] == "Concluído"]
 print(conc.pivot_table(index="regiao", columns="canal", values="Valor", aggfunc="sum", margins=True).round(2))`,
       pythonChallenge: {
-        description: 'Folha de respostas (Tabelas Dinâmicas e SOMA.SE.S sobre loja_online_pedidos.csv): preenche os 5 valores obtidos no Excel / Calc / Google Sheets.',
+        description:
+          'Folha de respostas (Tabelas Dinâmicas e SOMA.SE.S sobre loja_online_pedidos.csv): preenche os 5 valores obtidos no Excel / Calc / Google Sheets.',
         starterCode: `# Folha de respostas: Tabelas Dinâmicas & SOMA.SE.S (loja_online_pedidos.csv)
 eletronica_lisboa = None     # SOMA.SE.S: Concluído + Eletrónica + Lisboa
 ticket_medio_eletr = None    # MÉDIA.SE.S: média de Valor em Concluído + Eletrónica
@@ -1945,14 +2683,35 @@ app_norte = 24544.32
 
 print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app_norte)`,
         checks: [
-          { label: 'eletronica_lisboa (23 411,22 €)', expr: 'abs(float(eletronica_lisboa) - 23411.22) < 0.05', actualExpr: 'eletronica_lisboa', hint: 'SOMA.SE.S com 3 critérios: estado="Concluído", categoria="Eletrónica" e regiao="Lisboa".' },
-          { label: 'ticket_medio_eletr (152,97 €)', expr: 'abs(float(ticket_medio_eletr) - 152.97) < 0.05', actualExpr: 'ticket_medio_eletr', hint: 'MÉDIA.SE.S sobre Valor com estado="Concluído" e categoria="Eletrónica".' },
-          { label: 'regiao_lider_total ("Lisboa")', expr: 'str(regiao_lider_total).strip().lower() == "lisboa"', actualExpr: 'regiao_lider_total', hint: 'Soma total por linha na Tabela Dinâmica (Lisboa tem 65 856,49 €).' },
-          { label: 'Matriz: Web Lisboa (40 301,95 €) e App Norte (24 544,32 €)', expr: 'abs(float(web_lisboa) - 40301.95) < 0.05 and abs(float(app_norte) - 24544.32) < 0.05', actualExpr: '(web_lisboa, app_norte)', hint: 'Confirma que filtraste a Tabela Dinâmica para estado = "Concluído".' },
+          {
+            label: 'eletronica_lisboa (23 411,22 €)',
+            expr: 'abs(float(eletronica_lisboa) - 23411.22) < 0.05',
+            actualExpr: 'eletronica_lisboa',
+            hint: 'SOMA.SE.S com 3 critérios: estado="Concluído", categoria="Eletrónica" e regiao="Lisboa".',
+          },
+          {
+            label: 'ticket_medio_eletr (152,97 €)',
+            expr: 'abs(float(ticket_medio_eletr) - 152.97) < 0.05',
+            actualExpr: 'ticket_medio_eletr',
+            hint: 'MÉDIA.SE.S sobre Valor com estado="Concluído" e categoria="Eletrónica".',
+          },
+          {
+            label: 'regiao_lider_total ("Lisboa")',
+            expr: 'str(regiao_lider_total).strip().lower() == "lisboa"',
+            actualExpr: 'regiao_lider_total',
+            hint: 'Soma total por linha na Tabela Dinâmica (Lisboa tem 65 856,49 €).',
+          },
+          {
+            label: 'Matriz: Web Lisboa (40 301,95 €) e App Norte (24 544,32 €)',
+            expr: 'abs(float(web_lisboa) - 40301.95) < 0.05 and abs(float(app_norte) - 24544.32) < 0.05',
+            actualExpr: '(web_lisboa, app_norte)',
+            hint: 'Confirma que filtraste a Tabela Dinâmica para estado = "Concluído".',
+          },
         ],
       },
       quiz: {
-        question: 'Numa Tabela Dinâmica com regiao nas linhas e Soma de Valor nos valores, os números parecem cerca de 10% mais altos do que a faturação líquida em SQL. O que provavelmente faltou?',
+        question:
+          'Numa Tabela Dinâmica com regiao nas linhas e Soma de Valor nos valores, os números parecem cerca de 10% mais altos do que a faturação líquida em SQL. O que provavelmente faltou?',
         options: [
           'Ordenar a Tabela Dinâmica de Z para A.',
           'Colocar a coluna estado nos Filtros da Tabela Dinâmica e selecionar apenas "Concluído".',
@@ -1960,7 +2719,8 @@ print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app
           'Usar PROCV em vez de PROCX.',
         ],
         correctIndex: 1,
-        explanation: 'Sem o filtro estado = "Concluído", a Tabela Dinâmica soma também os pedidos cancelados (~10% do total).',
+        explanation:
+          'Sem o filtro estado = "Concluído", a Tabela Dinâmica soma também os pedidos cancelados (~10% do total).',
       },
     },
     {
@@ -1969,7 +2729,8 @@ print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app
       title: 'Prática Power BI: medidas DAX (CALCULATE, DIVIDE, %) e opções sem Windows',
       lede: 'Importas loja_online_pedidos.csv no Power BI Desktop (Windows), crias 4 medidas DAX com CALCULATE e DIVIDE e verificas os resultados na app. Se usas Mac ou Linux, aprendes como reproduzir o mesmo raciocínio sem bloquear.',
       analogyTitle: 'O painel de controlo com filtros dinâmicos',
-      analogyBody: 'Uma fórmula de Excel calcula um número fixo numa célula; uma medida DAX calcula um indicador dinâmico que muda conforme o utilizador clica num cartão ou segmentação de canal, mês ou categoria.',
+      analogyBody:
+        'Uma fórmula de Excel calcula um número fixo numa célula; uma medida DAX calcula um indicador dinâmico que muda conforme o utilizador clica num cartão ou segmentação de canal, mês ou categoria.',
       concepts: [
         'Power BI Desktop corre nativamente apenas em Windows. Em macOS/Linux podes: usar Power BI Service no browser (com ficheiro já criado ou conta escolar/trabalho), uma máquina virtual Windows, ou treinar as mesmas medidas em Excel Power Pivot / pandas.',
         'CALCULATE(expressão, filtro) muda o contexto de filtro da medida — por exemplo, isola apenas estado = "Concluído" ou canal = "Web" independentemente do visual.',
@@ -1983,14 +2744,32 @@ print(eletronica_lisboa, ticket_medio_eletr, regiao_lider_total, web_lisboa, app
         'Cria Quota Web % = DIVIDE(CALCULATE([Faturação Líquida], pedidos[canal] = "Web"), [Faturação Líquida]) * 100.',
         'Cria Clientes Concluídos = CALCULATE(DISTINCTCOUNT(pedidos[cliente_id]), pedidos[estado] = "Concluído") e põe [Faturação Líquida] por categoria numa matriz para ler a líder.',
       ],
-      proPractice: 'Nunca guardes colunas calculadas para rácios (como Ticket Médio ou Taxa de Cancelamento %): rácios têm de ser sempre Medidas DAX para recalcularem corretamente quando o utilizador filtra por mês ou região.',
-      commonPitfall: 'Escrever [Cancelados] / [Total] numa coluna calculada em vez de numa Medida: a soma das percentagens linha a linha dá resultados disparatados ao agregar por mês.',
+      proPractice:
+        'Nunca guardes colunas calculadas para rácios (como Ticket Médio ou Taxa de Cancelamento %): rácios têm de ser sempre Medidas DAX para recalcularem corretamente quando o utilizador filtra por mês ou região.',
+      commonPitfall:
+        'Escrever [Cancelados] / [Total] numa coluna calculada em vez de numa Medida: a soma das percentagens linha a linha dá resultados disparatados ao agregar por mês.',
       referenceTitle: 'Medidas DAX essenciais no Power BI',
       referenceRows: [
-        { syntax: 'CALCULATE(SUMX(pedidos, pedidos[quantidade]*pedidos[preco_unit]), pedidos[estado]="Concluído")', meaning: 'Faturação líquida ignorando cancelamentos', example: '246 900,06 €' },
-        { syntax: 'DIVIDE(CALCULATE(COUNTROWS(pedidos), pedidos[estado]="Cancelado"), COUNTROWS(pedidos)) * 100', meaning: 'Taxa de cancelamento % segura', example: '9,93%' },
-        { syntax: 'DIVIDE(CALCULATE([Faturação Líquida], pedidos[canal]="Web"), [Faturação Líquida]) * 100', meaning: 'Peso percentual do canal Web na faturação', example: '60,06%' },
-        { syntax: 'CALCULATE(DISTINCTCOUNT(pedidos[cliente_id]), pedidos[estado]="Concluído")', meaning: 'Clientes únicos com pelo menos 1 pedido concluído', example: '632 clientes' },
+        {
+          syntax: 'CALCULATE(SUMX(pedidos, pedidos[quantidade]*pedidos[preco_unit]), pedidos[estado]="Concluído")',
+          meaning: 'Faturação líquida ignorando cancelamentos',
+          example: '246 900,06 €',
+        },
+        {
+          syntax: 'DIVIDE(CALCULATE(COUNTROWS(pedidos), pedidos[estado]="Cancelado"), COUNTROWS(pedidos)) * 100',
+          meaning: 'Taxa de cancelamento % segura',
+          example: '9,93%',
+        },
+        {
+          syntax: 'DIVIDE(CALCULATE([Faturação Líquida], pedidos[canal]="Web"), [Faturação Líquida]) * 100',
+          meaning: 'Peso percentual do canal Web na faturação',
+          example: '60,06%',
+        },
+        {
+          syntax: 'CALCULATE(DISTINCTCOUNT(pedidos[cliente_id]), pedidos[estado]="Concluído")',
+          meaning: 'Clientes únicos com pelo menos 1 pedido concluído',
+          example: '632 clientes',
+        },
       ],
       engine: 'python',
       ficheirosDados: ['loja_online_pedidos.csv'],
@@ -2004,7 +2783,8 @@ print("Faturação líquida:", round(conc["valor"].sum(), 2))
 print("Quota Web %:", round(conc.loc[conc["canal"] == "Web", "valor"].sum() / conc["valor"].sum() * 100, 2))
 print("Por categoria:", conc.groupby("categoria")["valor"].sum().round(2).to_dict())`,
       pythonChallenge: {
-        description: 'Folha de respostas (Power BI DAX sobre loja_online_pedidos.csv): preenche os 5 valores calculados pelas tuas medidas DAX e matriz por categoria.',
+        description:
+          'Folha de respostas (Power BI DAX sobre loja_online_pedidos.csv): preenche os 5 valores calculados pelas tuas medidas DAX e matriz por categoria.',
         starterCode: `# Folha de respostas: Power BI DAX (loja_online_pedidos.csv)
 faturacao_web = None          # CALCULATE([Faturação Líquida], pedidos[canal] = "Web")
 quota_web_pct = None          # [Quota Web %] arredondada a 2 casas
@@ -2022,13 +2802,29 @@ faturacao_cat_lider = 92853.76
 
 print(faturacao_web, quota_web_pct, clientes_concluidos, categoria_lider, faturacao_cat_lider)`,
         checks: [
-          { label: 'faturacao_web (148 276,61 €) e quota_web_pct (60,06%)', expr: 'abs(float(faturacao_web) - 148276.61) < 0.05 and abs(float(quota_web_pct) - 60.06) < 0.05', actualExpr: '(faturacao_web, quota_web_pct)', hint: 'CALCULATE([Faturação Líquida], pedidos[canal] = "Web") a dividir por [Faturação Líquida] * 100.' },
-          { label: 'clientes_concluidos (632 clientes únicos)', expr: 'int(clientes_concluidos) == 632', actualExpr: 'clientes_concluidos', hint: 'DISTINCTCOUNT(pedidos[cliente_id]) filtrado por estado = "Concluído" (sem o filtro dá 637).' },
-          { label: 'categoria_lider ("Eletrónica") com 92 853,76 €', expr: 'str(categoria_lider).strip() == "Eletrónica" and abs(float(faturacao_cat_lider) - 92853.76) < 0.05', actualExpr: '(categoria_lider, faturacao_cat_lider)', hint: 'Coloca pedidos[categoria] numa matriz com [Faturação Líquida] e ordena de maior para menor.' },
+          {
+            label: 'faturacao_web (148 276,61 €) e quota_web_pct (60,06%)',
+            expr: 'abs(float(faturacao_web) - 148276.61) < 0.05 and abs(float(quota_web_pct) - 60.06) < 0.05',
+            actualExpr: '(faturacao_web, quota_web_pct)',
+            hint: 'CALCULATE([Faturação Líquida], pedidos[canal] = "Web") a dividir por [Faturação Líquida] * 100.',
+          },
+          {
+            label: 'clientes_concluidos (632 clientes únicos)',
+            expr: 'int(clientes_concluidos) == 632',
+            actualExpr: 'clientes_concluidos',
+            hint: 'DISTINCTCOUNT(pedidos[cliente_id]) filtrado por estado = "Concluído" (sem o filtro dá 637).',
+          },
+          {
+            label: 'categoria_lider ("Eletrónica") com 92 853,76 €',
+            expr: 'str(categoria_lider).strip() == "Eletrónica" and abs(float(faturacao_cat_lider) - 92853.76) < 0.05',
+            actualExpr: '(categoria_lider, faturacao_cat_lider)',
+            hint: 'Coloca pedidos[categoria] numa matriz com [Faturação Líquida] e ordena de maior para menor.',
+          },
         ],
       },
       quiz: {
-        question: 'Porque é que no Power BI deves criar "Taxa de Cancelamento %" como Medida DAX com DIVIDE e não como Coluna Calculada?',
+        question:
+          'Porque é que no Power BI deves criar "Taxa de Cancelamento %" como Medida DAX com DIVIDE e não como Coluna Calculada?',
         options: [
           'Porque colunas calculadas não aceitam números decimais.',
           'Porque uma Medida recalcula dinamicamente o numerador e o denominador quando o utilizador filtra por mês, canal ou região.',
@@ -2036,7 +2832,8 @@ print(faturacao_web, quota_web_pct, clientes_concluidos, categoria_lider, fatura
           'Porque as colunas calculadas só funcionam em Linux.',
         ],
         correctIndex: 1,
-        explanation: 'Somar ou fazer a média de percentagens pré-calculadas linha a linha está errado (efeito de tamanhos diferentes). Uma Medida calcula sempre SUM/COUNT no contexto dos filtros atuais do relatório.',
+        explanation:
+          'Somar ou fazer a média de percentagens pré-calculadas linha a linha está errado (efeito de tamanhos diferentes). Uma Medida calcula sempre SUM/COUNT no contexto dos filtros atuais do relatório.',
       },
     },
   ],

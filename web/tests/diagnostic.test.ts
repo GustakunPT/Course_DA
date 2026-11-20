@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  evaluateDiagnosticPlan,
-  FOUR_PILLARS,
-  sanitizeDiagnostic,
-  THREE_RISKS,
-} from '../src/data/diagnostic';
+import { evaluateDiagnosticPlan, FOUR_PILLARS, sanitizeDiagnostic, THREE_RISKS } from '../src/data/diagnostic';
 
 describe('diagnóstico inicial e plano personalizado', () => {
   it('tem os 4 pilares essenciais e os 3 riscos a evitar', () => {

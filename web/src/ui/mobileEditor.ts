@@ -5,7 +5,6 @@ import { escapeHtml } from './html';
 /** Separadores do ecrã de escrita, por esta ordem. */
 export type AbaEscrita = 'enunciado' | 'codigo' | 'resultado';
 
-
 const CHAVE_EDITOR_NORMAL = 'mercearia-editor-normal-v1';
 
 /** O ecrã de escrita só serve aparelhos de toque estreitos, e só se o aluno não escolheu o editor normal. */
@@ -75,7 +74,10 @@ export function renderEcraDeEscrita(o: {
   const simbolos =
     o.aba === 'codigo'
       ? `<div class="ecra-simbolos" aria-label="Símbolos rápidos de código">${o.simbolos
-          .map(([texto, valor]) => `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`)
+          .map(
+            ([texto, valor]) =>
+              `<button type="button" class="sym-btn" data-insert="${escapeHtml(valor)}">${escapeHtml(texto)}</button>`,
+          )
           .join('')}</div>`
       : '<div class="ecra-simbolos"></div>';
   return `

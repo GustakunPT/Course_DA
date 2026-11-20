@@ -47,19 +47,22 @@ export const FOUR_PILLARS = [
   {
     num: '1',
     title: 'Fundamentos de Negócio e Dados',
-    detail: 'Pensamento analítico, definição de KPIs e Excel / Google Sheets avançado (SOMA.SE.S, PROCX, Tabelas Dinâmicas).',
+    detail:
+      'Pensamento analítico, definição de KPIs e Excel / Google Sheets avançado (SOMA.SE.S, PROCX, Tabelas Dinâmicas).',
     tracks: 'Trilhas 1 (início) e 5',
   },
   {
     num: '2',
     title: 'Extração e Manipulação (SQL)',
-    detail: 'SELECT, filtros, GROUP BY, JOINs, subqueries, CTEs e Window Functions — a competência mais cobrada em entrevistas.',
+    detail:
+      'SELECT, filtros, GROUP BY, JOINs, subqueries, CTEs e Window Functions — a competência mais cobrada em entrevistas.',
     tracks: 'Trilha 2 e Nível Profissional',
   },
   {
     num: '3',
     title: 'Estatística e Programação (Python)',
-    detail: 'Média, mediana, dispersão, correlação, testes A/B e regressão junto com Python, Pandas, NumPy e Matplotlib.',
+    detail:
+      'Média, mediana, dispersão, correlação, testes A/B e regressão junto com Python, Pandas, NumPy e Matplotlib.',
     tracks: 'Trilhas 1, 3 e 6',
   },
   {
@@ -73,15 +76,18 @@ export const FOUR_PILLARS = [
 export const THREE_RISKS = [
   {
     title: 'Tutorial Hell (excesso de teoria)',
-    guard: 'Aqui nenhuma etapa termina só com leitura: cada lição obriga a código validado ou entregável real em dados imperfeitos.',
+    guard:
+      'Aqui nenhuma etapa termina só com leitura: cada lição obriga a código validado ou entregável real em dados imperfeitos.',
   },
   {
     title: 'Foco prematuro em Machine Learning',
-    guard: 'O percurso para na regressão e séries temporais para garantir domínio sólido de SQL, estatística descritiva/A/B e análise exploratória.',
+    guard:
+      'O percurso para na regressão e séries temporais para garantir domínio sólido de SQL, estatística descritiva/A/B e análise exploratória.',
   },
   {
     title: 'Ignorar o contexto de negócio',
-    guard: 'Cada desafio e projeto fecha com "Quem decide?", "Limites" e "Que ação tomar na segunda-feira com este número?".',
+    guard:
+      'Cada desafio e projeto fecha com "Quem decide?", "Limites" e "Que ação tomar na segunda-feira com este número?".',
   },
 ];
 

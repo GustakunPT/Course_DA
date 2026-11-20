@@ -49,7 +49,9 @@ describe('menu do botão Aa', () => {
   it('tem uma opção por tamanho e marca a atual', () => {
     const html = renderFontSizeMenu('grande');
     expect(html.match(/data-action="select-font-size"/g)).toHaveLength(FONT_SIZE_OPTIONS.length);
-    expect(html).toMatch(/data-font-size="grande"[^>]*aria-checked="true"|aria-checked="true"[^>]*data-font-size="grande"/);
+    expect(html).toMatch(
+      /data-font-size="grande"[^>]*aria-checked="true"|aria-checked="true"[^>]*data-font-size="grande"/,
+    );
     expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
   });
 

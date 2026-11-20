@@ -13,7 +13,15 @@ const publicRoot = resolve(webRoot, 'public');
 mkdirSync(publicDados, { recursive: true });
 mkdirSync(publicRelatorios, { recursive: true });
 
-for (const csvName of ['produtos.csv', 'clientes.csv', 'vendas.csv', 'vendas_sazonais.csv', 'vendas_sujas.csv', 'bicicletas_viagens_sujas.csv', 'loja_online_pedidos.csv']) {
+for (const csvName of [
+  'produtos.csv',
+  'clientes.csv',
+  'vendas.csv',
+  'vendas_sazonais.csv',
+  'vendas_sujas.csv',
+  'bicicletas_viagens_sujas.csv',
+  'loja_online_pedidos.csv',
+]) {
   const src = resolve(repoDados, csvName);
   const dst = resolve(publicDados, csvName);
   if (existsSync(src)) {

@@ -4,7 +4,8 @@ export const gitTrack: Track = {
   id: 'git',
   shortTitle: '4. Git & GitHub',
   fullTitle: 'Git, GitHub e Portefólio para Analistas de Dados',
-  summary: 'Controlo de versões ao vivo no terminal simulado: commits limpos, proteção de dados com .gitignore, branches e publicação de portefólio.',
+  summary:
+    'Controlo de versões ao vivo no terminal simulado: commits limpos, proteção de dados com .gitignore, branches e publicação de portefólio.',
   engineLabel: 'Simulador Terminal Git',
   lessons: [
     {
@@ -13,7 +14,8 @@ export const gitTrack: Track = {
       title: 'Linha de comandos, git init e git status',
       lede: 'Antes de versionar queries SQL e notebooks Python, inicializas o repositório e inspecionas o estado da pasta.',
       analogyTitle: 'Abrir o livro oficial de registo da Mercearia',
-      analogyBody: 'git init cria a pasta oculta .git que guarda toda a memória do projeto. E git status é a tua lanterna: diz sempre o que mudou e o que falta guardar.',
+      analogyBody:
+        'git init cria a pasta oculta .git que guarda toda a memória do projeto. E git status é a tua lanterna: diz sempre o que mudou e o que falta guardar.',
       concepts: [
         'pwd mostra a pasta atual e ls lista os ficheiros existentes.',
         'git init transforma uma pasta comum num repositório Git.',
@@ -33,7 +35,8 @@ ls
 git init
 git status`,
       gitChallenge: {
-        description: 'Inicializa o repositório da Mercearia com git init e verifica de seguida o estado dos ficheiros com git status.',
+        description:
+          'Inicializa o repositório da Mercearia com git init e verifica de seguida o estado dos ficheiros com git status.',
         starterCommands: `# Escreve os comandos um por linha
 pwd
 `,
@@ -44,9 +47,7 @@ git status`,
           const ok = state.initialized && output.includes('No ramo main');
           return {
             passed: ok,
-            message: ok
-              ? 'Repositório inicializado e inspecionado.'
-              : 'Corre git init seguido de git status.',
+            message: ok ? 'Repositório inicializado e inspecionado.' : 'Corre git init seguido de git status.',
           };
         },
       },
@@ -68,7 +69,8 @@ git status`,
       title: 'Staging e histórico: git add, commit e log',
       lede: 'O Git separa a preparação (git add) da fotografia definitiva (git commit) para que cada registo conte uma história limpa.',
       analogyTitle: 'Pôr os produtos na caixa antes de fechar a fatura',
-      analogyBody: 'Podes ter alterado 5 ficheiros mas querer gravar apenas a query SQL corrigida. Com git add escolhes o que entra na caixa; com git commit selas e assinas com uma mensagem clara.',
+      analogyBody:
+        'Podes ter alterado 5 ficheiros mas querer gravar apenas a query SQL corrigida. Com git add escolhes o que entra na caixa; com git commit selas e assinas com uma mensagem clara.',
       concepts: [
         'git diff mostra as linhas exatas adicionadas (+) e removidas (-) antes de preparar.',
         'git add <ficheiro> prepara um ficheiro específico; git add . prepara tudo o que não está ignorado.',
@@ -79,8 +81,16 @@ git status`,
       referenceTitle: 'Fluxo diário de gravação',
       referenceRows: [
         { syntax: 'git diff', meaning: 'Mostra alterações linha a linha', example: 'git diff' },
-        { syntax: 'git add <caminho>', meaning: 'Move ficheiro para staging area', example: 'git add sql/02_perguntas_negocio.sql' },
-        { syntax: 'git commit -m "msg"', meaning: 'Grava fotografia permanente com mensagem', example: 'git commit -m "Completa queries SQL"' },
+        {
+          syntax: 'git add <caminho>',
+          meaning: 'Move ficheiro para staging area',
+          example: 'git add sql/02_perguntas_negocio.sql',
+        },
+        {
+          syntax: 'git commit -m "msg"',
+          meaning: 'Grava fotografia permanente com mensagem',
+          example: 'git commit -m "Completa queries SQL"',
+        },
         { syntax: 'git log', meaning: 'Lista o histórico de commits', example: 'git log' },
       ],
       engine: 'git',
@@ -90,7 +100,8 @@ git add exercicios/semana03_variaveis.py
 git commit -m "Resolve exercicios de variaveis da semana 3"
 git log`,
       gitChallenge: {
-        description: 'Inicializa o repositório (se ainda não estiver), adiciona todos os ficheiros válidos com git add . e cria um commit com git commit -m "...".',
+        description:
+          'Inicializa o repositório (se ainda não estiver), adiciona todos os ficheiros válidos com git add . e cria um commit com git commit -m "...".',
         starterCommands: `git init
 # Prepara os ficheiros e faz um commit com mensagem clara
 `,
@@ -118,7 +129,8 @@ git log`,
           '"Alterações várias em vários ficheiros do projeto"',
         ],
         correctIndex: 1,
-        explanation: 'Uma boa mensagem diz o que mudou e porquê, permitindo a qualquer colega perceber o histórico meses depois.',
+        explanation:
+          'Uma boa mensagem diz o que mudou e porquê, permitindo a qualquer colega perceber o histórico meses depois.',
       },
     },
     {
@@ -127,7 +139,8 @@ git log`,
       title: '.gitignore e privacidade em projetos de dados',
       lede: 'Em análise de dados, saber o que NUNCA deve ir para o GitHub é tão importante quanto saber programar.',
       analogyTitle: 'O cofre privado que não vai para a montra',
-      analogyBody: 'Credenciais de base de dados (.env) e ficheiros Excel com nomes e moradas reais de clientes nunca podem ser publicados num repositório público (RGPD e segurança).',
+      analogyBody:
+        'Credenciais de base de dados (.env) e ficheiros Excel com nomes e moradas reais de clientes nunca podem ser publicados num repositório público (RGPD e segurança).',
       concepts: [
         'O ficheiro .gitignore lista nomes ou padrões (como *.env ou *_privados.xlsx) que o Git deve ignorar.',
         'Os dados da Mercearia podem ir para o GitHub apenas porque são sintéticos (gerados por src/gerar_dados.py com semente 42).',
@@ -138,8 +151,16 @@ git log`,
       referenceTitle: 'Regras essenciais de .gitignore para dados',
       referenceRows: [
         { syntax: '.env', meaning: 'Protege senhas de SQL e chaves de API', example: 'DATABASE_URL=...' },
-        { syntax: '__pycache__/ e .venv/', meaning: 'Ignora caches e ambiente virtual Python', example: 'Ficheiros locais da máquina' },
-        { syntax: '*.parquet / *_privados.xlsx', meaning: 'Ignora ficheiros brutos pesados ou com dados pessoais', example: 'Conformidade RGPD' },
+        {
+          syntax: '__pycache__/ e .venv/',
+          meaning: 'Ignora caches e ambiente virtual Python',
+          example: 'Ficheiros locais da máquina',
+        },
+        {
+          syntax: '*.parquet / *_privados.xlsx',
+          meaning: 'Ignora ficheiros brutos pesados ou com dados pessoais',
+          example: 'Conformidade RGPD',
+        },
       ],
       engine: 'git',
       exampleCode: `cat .gitignore
@@ -147,7 +168,8 @@ git init
 git add .env
 git status`,
       gitChallenge: {
-        description: 'Inspeciona o ficheiro .gitignore com cat .gitignore, adiciona uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirma com cat .gitignore.',
+        description:
+          'Inspeciona o ficheiro .gitignore com cat .gitignore, adiciona uma regra "*.bak" usando echo "*.bak" >> .gitignore e confirma com cat .gitignore.',
         starterCommands: `cat .gitignore
 # Acrescenta a regra *.bak ao .gitignore
 `,
@@ -166,7 +188,8 @@ cat .gitignore`,
         },
       },
       quiz: {
-        question: 'Subiste por engano uma password num commit e depois adicionaste .env ao .gitignore. A password desapareceu do histórico antigo?',
+        question:
+          'Subiste por engano uma password num commit e depois adicionaste .env ao .gitignore. A password desapareceu do histórico antigo?',
         options: [
           'Sim, o .gitignore apaga-a de todos os commits antigos.',
           'Não: continua no histórico e tem de ser trocada já.',
@@ -174,7 +197,8 @@ cat .gitignore`,
           'Sim, desde que faças um commit novo sem o ficheiro.',
         ],
         correctIndex: 1,
-        explanation: 'O histórico do Git é permanente: se uma chave foi publicada, considera-a comprometida e gera uma nova.',
+        explanation:
+          'O histórico do Git é permanente: se uma chave foi publicada, considera-a comprometida e gera uma nova.',
       },
     },
     {
@@ -183,7 +207,8 @@ cat .gitignore`,
       title: 'Ramos (branches) e fusão (git merge)',
       lede: 'Cria ramos isolados para desenvolver novas análises ou limpar dados sujos sem arriscar partir o ramo main.',
       analogyTitle: 'Fotocopiar a receita antes de testar um tempero novo',
-      analogyBody: 'No ramo limpeza-dados podes experimentar à vontade; quando os testes de verificar.py passam todos, regressas ao main e fazes git merge.',
+      analogyBody:
+        'No ramo limpeza-dados podes experimentar à vontade; quando os testes de verificar.py passam todos, regressas ao main e fazes git merge.',
       concepts: [
         'git switch -c nome-do-ramo cria um ramo novo e muda imediatamente para ele.',
         'git branch lista todos os ramos locais e assinala o ramo ativo com asterisco (*).',
@@ -194,9 +219,17 @@ cat .gitignore`,
       referenceTitle: 'Gestão de ramos em Git',
       referenceRows: [
         { syntax: 'git branch', meaning: 'Lista os ramos existentes', example: '* main' },
-        { syntax: 'git switch -c <ramo>', meaning: 'Cria e entra num novo ramo', example: 'git switch -c analise-setembro' },
+        {
+          syntax: 'git switch -c <ramo>',
+          meaning: 'Cria e entra num novo ramo',
+          example: 'git switch -c analise-setembro',
+        },
         { syntax: 'git switch main', meaning: 'Volta ao ramo principal', example: 'git switch main' },
-        { syntax: 'git merge <ramo>', meaning: 'Junta alterações de outro ramo no atual', example: 'git merge analise-setembro' },
+        {
+          syntax: 'git merge <ramo>',
+          meaning: 'Junta alterações de outro ramo no atual',
+          example: 'git merge analise-setembro',
+        },
       ],
       engine: 'git',
       exampleCode: `git init
@@ -206,7 +239,8 @@ git switch -c feature-relatorio
 git switch main
 git merge feature-relatorio`,
       gitChallenge: {
-        description: 'Inicializa o repo, cria um novo ramo chamado "limpeza-pandas" com git switch -c limpeza-pandas, faz git add . e um commit nesse ramo, volta a main e faz git merge limpeza-pandas.',
+        description:
+          'Inicializa o repo, cria um novo ramo chamado "limpeza-pandas" com git switch -c limpeza-pandas, faz git add . e um commit nesse ramo, volta a main e faz git merge limpeza-pandas.',
         starterCommands: `git init
 # Cria o ramo limpeza-pandas, faz commit, volta a main e faz merge
 `,
@@ -232,15 +266,12 @@ git merge limpeza-pandas`,
         },
       },
       quiz: {
-        question: 'Em equipas no GitHub, qual é o mecanismo padrão para pedir revisão de um ramo antes de o fundir no main?',
-        options: [
-          'Pull Request (PR)',
-          'git clone',
-          'git stash',
-          'Merge direto no main',
-        ],
+        question:
+          'Em equipas no GitHub, qual é o mecanismo padrão para pedir revisão de um ramo antes de o fundir no main?',
+        options: ['Pull Request (PR)', 'git clone', 'git stash', 'Merge direto no main'],
         correctIndex: 0,
-        explanation: 'Um Pull Request permite rever código, discutir queries SQL e correr verificações automáticas antes do merge.',
+        explanation:
+          'Um Pull Request permite rever código, discutir queries SQL e correr verificações automáticas antes do merge.',
       },
     },
     {
@@ -249,7 +280,8 @@ git merge limpeza-pandas`,
       title: 'GitHub remoto e como montar um portefólio de analista',
       lede: 'Publica o teu repositório com git push e estrutura um README executivo que recrutadores técnicos consigam avaliar em 60 segundos.',
       analogyTitle: 'O catálogo de obras aberto ao mercado de trabalho',
-      analogyBody: 'Se entregas a um recrutador uma caixa desarrumada de ficheiros soltos, ele fecha-a em 10 segundos. Um repositório no GitHub funciona como um catálogo de obras: na capa (README) vê o problema, os números-chave e um gráfico; dentro encontra o código pronto a reproduzir.',
+      analogyBody:
+        'Se entregas a um recrutador uma caixa desarrumada de ficheiros soltos, ele fecha-a em 10 segundos. Um repositório no GitHub funciona como um catálogo de obras: na capa (README) vê o problema, os números-chave e um gráfico; dentro encontra o código pronto a reproduzir.',
       concepts: [
         'git remote add origin <url> liga o teu repositório local à página do GitHub.',
         'git push -u origin main publica os teus commits na nuvem e liga o ramo local ao remoto.',
@@ -259,8 +291,16 @@ git merge limpeza-pandas`,
       ],
       referenceTitle: 'Sincronização com GitHub',
       referenceRows: [
-        { syntax: 'git remote add origin <url>', meaning: 'Associa repositório remoto no GitHub', example: 'https://github.com/user/mercearia.git' },
-        { syntax: 'git push -u origin main', meaning: 'Envia commits locais para o GitHub', example: 'Publica o portefólio' },
+        {
+          syntax: 'git remote add origin <url>',
+          meaning: 'Associa repositório remoto no GitHub',
+          example: 'https://github.com/user/mercearia.git',
+        },
+        {
+          syntax: 'git push -u origin main',
+          meaning: 'Envia commits locais para o GitHub',
+          example: 'Publica o portefólio',
+        },
         { syntax: 'git pull', meaning: 'Descarrega e integra novidades do remoto', example: 'Sincronizar noutro PC' },
       ],
       engine: 'git',
@@ -270,7 +310,8 @@ git commit -m "Publica portefólio completo Mercearia do Bairro"
 git remote add origin https://github.com/analista/mercearia-do-bairro.git
 git push -u origin main`,
       gitChallenge: {
-        description: 'Faz o percurso completo de publicação: git init, git add ., git commit -m "...", configura um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
+        description:
+          'Faz o percurso completo de publicação: git init, git add ., git commit -m "...", configura um remoto com git remote add origin https://github.com/analista/mercearia.git e envie com git push -u origin main.',
         starterCommands: `git init
 # Faz add, commit, remote add e push para main
 `,
@@ -299,7 +340,8 @@ git push -u origin main`,
           'O número de estrelas e seguidores do perfil.',
         ],
         correctIndex: 1,
-        explanation: 'Clareza de comunicação, rigor nos números e reprodutibilidade distinguem imediatamente um bom analista.',
+        explanation:
+          'Clareza de comunicação, rigor nos números e reprodutibilidade distinguem imediatamente um bom analista.',
       },
     },
   ],

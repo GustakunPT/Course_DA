@@ -41,9 +41,19 @@ function isTabularStdout(stdout: string): boolean {
   return lines.filter((l) => /\s{2,}/.test(l.trim()) || l.includes('|')).length >= 2;
 }
 
-export function renderOutputRegion(out: OutputViewModel, engine: EngineKind, opts: { hideStopButton?: boolean } = {}): string {
+export function renderOutputRegion(
+  out: OutputViewModel,
+  engine: EngineKind,
+  opts: { hideStopButton?: boolean } = {},
+): string {
   const engineName =
-    engine === 'sql' ? 'SQLite WebAssembly' : engine === 'git' ? 'Simulador Git' : engine === 'projeto' ? 'Projeto' : 'Python 3.12 (Pyodide)';
+    engine === 'sql'
+      ? 'SQLite WebAssembly'
+      : engine === 'git'
+        ? 'Simulador Git'
+        : engine === 'projeto'
+          ? 'Projeto'
+          : 'Python 3.12 (Pyodide)';
 
   if (out.kind === 'loading') {
     return `
@@ -119,11 +129,7 @@ export function renderOutputRegion(out: OutputViewModel, engine: EngineKind, opt
     <div class="output-panel" aria-live="polite">
       <div class="output-header">
         <span class="status-chip ${out.bannerOk === true ? 'is-ok' : out.bannerOk === false ? 'is-person' : ''}">
-          ${
-            out.bannerText
-              ? escapeHtml(out.bannerText)
-              : escapeHtml(`${engineName} executado`)
-          }
+          ${out.bannerText ? escapeHtml(out.bannerText) : escapeHtml(`${engineName} executado`)}
         </span>
         ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
       </div>
@@ -157,7 +163,8 @@ export function renderOutputRegion(out: OutputViewModel, engine: EngineKind, opt
                         (row) =>
                           `<tr>${row
                             .map((cell) => {
-                              const isNum = typeof cell === 'number' || (typeof cell === 'string' && /^-?\d+(\.\d+)?$/.test(cell));
+                              const isNum =
+                                typeof cell === 'number' || (typeof cell === 'string' && /^-?\d+(\.\d+)?$/.test(cell));
                               return `<td class="${isNum ? 'mono-cell' : ''}">${cell === null ? 'NULL' : escapeHtml(String(cell))}</td>`;
                             })
                             .join('')}</tr>`,

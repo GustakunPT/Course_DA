@@ -23,7 +23,9 @@ async function run() {
   try {
     ({ chromium } = await import('playwright'));
   } catch {
-    throw new Error('Playwright não está instalado. Instala com: npm install --no-save playwright && npx playwright install chromium');
+    throw new Error(
+      'Playwright não está instalado. Instala com: npm install --no-save playwright && npx playwright install chromium',
+    );
   }
 
   const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
@@ -59,7 +61,9 @@ async function run() {
       for (let i = 0; i < 6; i++) {
         await page.keyboard.press('Tab');
       }
-      const focusInside = await page.evaluate(() => Boolean(document.activeElement?.closest('.modal-backdrop[role="dialog"]')));
+      const focusInside = await page.evaluate(() =>
+        Boolean(document.activeElement?.closest('.modal-backdrop[role="dialog"]')),
+      );
       if (!focusInside) throw new Error('Foco escapou da modal ? Guia ao premir Tab.');
       await page.keyboard.press('Escape');
       await page.locator('.modal-backdrop[role="dialog"]').waitFor({ state: 'detached' });
@@ -84,21 +88,28 @@ async function run() {
       await page.locator('h1', { hasText: 'SELECT' }).waitFor({ state: 'visible' });
       await page.locator('[data-wb-tab="sqlfree"]').click();
       await page.locator('[data-action="run-code"]').click();
-      await page.locator('.output-panel table.data-table tbody tr').first().waitFor({ state: 'visible', timeout: 15_000 });
+      await page
+        .locator('.output-panel table.data-table tbody tr')
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
 
       // 5) Cronograma Gantt + verificação ARIA (zero aria-selected em botões fora de role="tab")
       await page.locator('[data-select-view="cronograma"]').click();
       await page.locator('.gantt-board').waitFor({ state: 'visible' });
-      const badAria = await page.evaluate(() =>
-        Array.from(document.querySelectorAll('button[aria-selected]:not([role="tab"])')).length,
+      const badAria = await page.evaluate(
+        () => Array.from(document.querySelectorAll('button[aria-selected]:not([role="tab"])')).length,
       );
       if (badAria > 0) throw new Error(`Encontrados ${badAria} botões com aria-selected sem role="tab".`);
 
       if (consoleErrors.length || pageErrors.length) {
-        throw new Error(`Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`);
+        throw new Error(
+          `Erros de browser detetados:\nConsole: ${consoleErrors.join('; ')}\nPage: ${pageErrors.join('; ')}`,
+        );
       }
 
-      console.log('✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).');
+      console.log(
+        '✓ Playwright E2E smoke test PASSED (skip-link, WCAG modal trap, nivelamento, SQL Worker, Gantt ARIA, 0 erros).',
+      );
     } finally {
       await browser.close();
     }

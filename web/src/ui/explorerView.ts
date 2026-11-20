@@ -7,7 +7,6 @@ export interface ExplorerFilters {
   categoria: string;
 }
 
-
 export function renderExplorerHtml(dataset: MerceariaDataset, filters: ExplorerFilters): string {
   const catByProdId = new Map(dataset.produtos.map((p) => [p.id, p.categoria]));
   const cityByClientId = new Map(dataset.clientes.map((c) => [c.id, c.cidade]));

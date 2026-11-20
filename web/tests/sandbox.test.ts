@@ -62,11 +62,15 @@ describe('isolamento da bancada IDE (segurança e âmbito educativo)', () => {
     ['().__class__.__bases__[0].__subclasses__()', 'bloqueado'],
     ['open("dados/vendas.csv", "w")', 'Escrita de ficheiros bloqueada'],
     ['open("/etc/passwd", "r")', 'limitada à pasta dados'],
-  ])('Python bloqueia execução fora de âmbito: %s', async (code, expectedErr) => {
-    const res = await runPythonCode(code);
-    expect(res.error, code).toBeDefined();
-    expect(res.error).toContain(expectedErr);
-  }, 120_000);
+  ])(
+    'Python bloqueia execução fora de âmbito: %s',
+    async (code, expectedErr) => {
+      const res = await runPythonCode(code);
+      expect(res.error, code).toBeDefined();
+      expect(res.error).toContain(expectedErr);
+    },
+    120_000,
+  );
 
   it('Python rejeita scripts acima do limite de tamanho', () => {
     const huge = 'x = 1\n'.repeat(6000);
@@ -84,7 +88,7 @@ describe('isolamento da bancada IDE (segurança e âmbito educativo)', () => {
   it.each([
     'DROP TABLE vendas;',
     'DELETE FROM vendas WHERE id = 1;',
-    "UPDATE produtos SET preco = 99 WHERE id = 1;",
+    'UPDATE produtos SET preco = 99 WHERE id = 1;',
     'INSERT INTO produtos VALUES (99, "X", "Y", 1.0);',
     'REPLACE INTO produtos VALUES (99, "X", "Y", 1.0);',
     'CREATE TABLE hack (x INT);',
@@ -152,30 +156,27 @@ describe('Web Worker Python (cancelamento e timeout)', () => {
   it('o timeout corta ciclos infinitos após entrar em execução e não corta o carregamento', async () => {
     let terminated = false;
     const workers: { onmessage: ((ev: { data: any }) => void) | null }[] = [];
-    setPythonWorkerForTests(
-      () => {
-        const w = {
-          onmessage: null as ((ev: { data: any }) => void) | null,
-          onerror: null,
-          postMessage(req: { id: number }) {
-            // Simula carregamento de 25 ms antes de executar (timeout de teste = 40 ms):
-            // se o temporizador começasse logo no arranque, podia falhar antes de terminar; aqui só começa em "executing".
-            setTimeout(() => {
-              w.onmessage?.({ data: { type: 'status', id: req.id, message: 'A carregar pandas…' } });
-            }, 25);
-            setTimeout(() => {
-              w.onmessage?.({ data: { type: 'executing', id: req.id } });
-            }, 35);
-          },
-          terminate() {
-            terminated = true;
-          },
-        };
-        workers.push(w);
-        return w;
-      },
-      40,
-    );
+    setPythonWorkerForTests(() => {
+      const w = {
+        onmessage: null as ((ev: { data: any }) => void) | null,
+        onerror: null,
+        postMessage(req: { id: number }) {
+          // Simula carregamento de 25 ms antes de executar (timeout de teste = 40 ms):
+          // se o temporizador começasse logo no arranque, podia falhar antes de terminar; aqui só começa em "executing".
+          setTimeout(() => {
+            w.onmessage?.({ data: { type: 'status', id: req.id, message: 'A carregar pandas…' } });
+          }, 25);
+          setTimeout(() => {
+            w.onmessage?.({ data: { type: 'executing', id: req.id } });
+          }, 35);
+        },
+        terminate() {
+          terminated = true;
+        },
+      };
+      workers.push(w);
+      return w;
+    }, 40);
     try {
       const res = await runPythonCode('while True:\n    pass');
       expect(workers).toHaveLength(1);
@@ -222,27 +223,24 @@ describe('Web Worker SQLite (cancelamento e timeout)', () => {
 
   it('o timeout corta consultas SQL pesadas após entrar em execução', async () => {
     let terminated = false;
-    setSqlWorkerForTests(
-      () => {
-        const w = {
-          onmessage: null as ((ev: { data: any }) => void) | null,
-          onerror: null,
-          postMessage(req: { id: number }) {
-            setTimeout(() => {
-              w.onmessage?.({ data: { type: 'status', id: req.id, message: 'A executar consulta SQL…' } });
-            }, 15);
-            setTimeout(() => {
-              w.onmessage?.({ data: { type: 'executing', id: req.id } });
-            }, 25);
-          },
-          terminate() {
-            terminated = true;
-          },
-        };
-        return w;
-      },
-      40,
-    );
+    setSqlWorkerForTests(() => {
+      const w = {
+        onmessage: null as ((ev: { data: any }) => void) | null,
+        onerror: null,
+        postMessage(req: { id: number }) {
+          setTimeout(() => {
+            w.onmessage?.({ data: { type: 'status', id: req.id, message: 'A executar consulta SQL…' } });
+          }, 15);
+          setTimeout(() => {
+            w.onmessage?.({ data: { type: 'executing', id: req.id } });
+          }, 25);
+        },
+        terminate() {
+          terminated = true;
+        },
+      };
+      return w;
+    }, 40);
     try {
       const res = await runSqlQuery('SELECT COUNT(*) FROM vendas a, vendas b;');
       expect(terminated).toBe(true);
