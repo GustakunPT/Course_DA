@@ -3,6 +3,8 @@ import {
   BASE_CSV_FILES,
   PYODIDE_CORE_SRI,
   PYODIDE_INDEX_URL,
+  PYTHON_VERSION_LABEL,
+  mensagemDeTransferencia,
   executeInPyodideInstance,
   validatePythonCodeScope,
   writeCsvPairToPyodide,
@@ -21,7 +23,7 @@ export type PythonWorkerRequest = {
 
 export type PythonWorkerResponse = SandboxWorkerResponse<PythonExecutionResult>;
 
-const LOCAL_BOOTSTRAP_FILES = new Set(['pyodide.mjs', 'pyodide.asm.js']);
+const LOCAL_BOOTSTRAP_FILES = new Set(['pyodide.mjs', 'pyodide.asm.mjs']);
 
 let pyodidePromise: Promise<PyodideInterface> | null = null;
 let baseCsvsLoaded = false;
@@ -29,10 +31,6 @@ const loadedPackages = new Set<string>();
 const loadedFiles = new Set<string>();
 let fetchPatchedForSri = false;
 let currentStatusReporter: ((msg: string) => void) | null = null;
-
-function formatMb(bytes: number): string {
-  return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',');
-}
 
 function wrapResponseWithProgress(res: Response, label: string): Response {
   if (!res.ok || !res.body) return res;
@@ -55,11 +53,7 @@ function wrapResponseWithProgress(res: Response, label: string): Response {
       const now = performance.now();
       if (now - lastEmit >= 200 || (total > 0 && loaded >= total)) {
         lastEmit = now;
-        const msg =
-          total > 0
-            ? `A transferir ${label} (${formatMb(loaded)} / ${formatMb(total)} MB)…`
-            : `A transferir ${label} (${formatMb(loaded)} MB)…`;
-        currentStatusReporter?.(msg);
+        currentStatusReporter?.(mensagemDeTransferencia(label, loaded, total));
       }
       controller.enqueue(value);
     },
@@ -75,7 +69,7 @@ function wrapResponseWithProgress(res: Response, label: string): Response {
   });
 }
 
-/** Garante integridade SRI nos artefactos Pyodide v0.26.4 e redireciona pacotes .whl/.zip para a CDN mantendo o integrity da Pyodide. */
+/** Garante integridade SRI nos artefactos do Pyodide e redireciona pacotes .whl/.zip para a CDN mantendo o integrity da Pyodide. */
 function installPyodideFetchIntegrity(): void {
   if (fetchPatchedForSri) return;
   fetchPatchedForSri = true;
@@ -122,9 +116,9 @@ async function loadBaseCsvs(): Promise<Record<string, string>> {
 async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<PyodideInterface> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
-      onStatus('A iniciar Python 3.12 WebAssembly (primeira execução demora alguns segundos)…');
+      onStatus(`A iniciar ${PYTHON_VERSION_LABEL} WebAssembly (primeira execução demora alguns segundos)…`);
       installPyodideFetchIntegrity();
-      // O runtime JS (pyodide.mjs e pyodide.asm.js) é servido localmente de 'self' (npm pinado 0.26.4);
+      // O runtime JS (pyodide.mjs e pyodide.asm.mjs) é servido localmente de 'self' (versão do npm, fixa);
       // wasm, stdlib e lockfile vêm da CDN com verificação criptográfica SRI (SHA-384).
       const localBase = `${globalThis.location.origin}/pyodide/`;
       const mod = await import(/* @vite-ignore */ `${localBase}pyodide.mjs`);

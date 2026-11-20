@@ -18,7 +18,7 @@ Python, SQL, pandas, Git/GitHub e Estatística/BI do zero, e acabar com um portf
 A pasta `web/` contém a plataforma interativa completa estilo **W3Schools**, com tema **Hallmark Console** (modo escuro Grafite e modo claro Papel) e editor com realce de sintaxe **VS Code Dark+ / Light+** e formatador **Prettier** (`Shift + Alt + F`):
 
 - **8 Trilhas de Analista de Dados (80 etapas do Zero Absoluto ao projeto final próprio):**
-  1. **Python do Zero Absoluto à Caixa Registadora** (inclui a etapa 01 de Pensamento Computacional + Pyodide Python 3.12 WebAssembly; as etapas 02 a 10 têm 2 exercícios de treino extra cada, uma explicação longa e um exemplo de erro típico com a mensagem do Python, a etapa 11 é uma revisão geral de todos os conceitos e a 12 é o projeto da Caixa Registadora)
+  1. **Python do Zero Absoluto à Caixa Registadora** (inclui a etapa 01 de Pensamento Computacional + Pyodide Python 3.14 WebAssembly; as etapas 02 a 10 têm 2 exercícios de treino extra cada, uma explicação longa e um exemplo de erro típico com a mensagem do Python, a etapa 11 é uma revisão geral de todos os conceitos e a 12 é o projeto da Caixa Registadora)
   2. **SQL para Analistas de Dados** (SQLite WebAssembly sobre as 5 078 vendas reais; 2 treinos e 3 perguntas de quiz por etapa, a etapa 10 treina a matriz RFM e a 11 é uma revisão geral: o relatório por cidade)
   3. **Pandas e Oficina de Limpeza** (`vendas.csv` e `vendas_sujas.csv` no browser; 2 treinos e 3 perguntas de quiz por etapa, uma etapa 08 com NumPy, `pd.crosstab`, quantis e datas, as ferramentas que a trilha de Estatística usa, e a 09 é uma revisão geral: faturação por categoria e trimestre)
   4. **Git, GitHub e Portefólio** (simulador interativo de terminal Git, com 2 treinos por etapa)
@@ -103,7 +103,7 @@ Como as peças encaixam (Python, SQL, app web, workers e API): ver [docs/ARQUITE
 
 Os testes da web confirmam que a solução oficial de cada desafio (Python, pandas, SQL e Git) passa
 na própria correção automática e que o código inicial ainda não passa. Os desafios Python correm no
-mesmo Pyodide 0.26.4 do browser (pacote npm `pyodide`); na primeira vez descarregam o pandas, por isso
+mesmo Pyodide do browser (pacote npm `pyodide`); na primeira vez descarregam o pandas, por isso
 precisam de internet.
 
 ## Cadernos de pandas (um por tema da trilha Pandas da Academia)

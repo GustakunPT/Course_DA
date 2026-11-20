@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,8 +49,10 @@ if (existsSync(wasmSrc)) {
 
 const pyodideSrcDir = resolve(webRoot, 'node_modules', 'pyodide');
 const publicPyodide = resolve(publicRoot, 'pyodide');
+// Recria a pasta: ficheiros de uma versão anterior do Pyodide não podem ficar no build.
+rmSync(publicPyodide, { recursive: true, force: true });
 mkdirSync(publicPyodide, { recursive: true });
-for (const pyFile of ['pyodide.mjs', 'pyodide.asm.js']) {
+for (const pyFile of ['pyodide.mjs', 'pyodide.asm.mjs']) {
   const src = resolve(pyodideSrcDir, pyFile);
   const dst = resolve(publicPyodide, pyFile);
   if (existsSync(src)) {

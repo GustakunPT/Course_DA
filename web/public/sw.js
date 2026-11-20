@@ -20,7 +20,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
-  const isPyodideCdn = url.origin === 'https://cdn.jsdelivr.net' && url.pathname.startsWith('/pyodide/v0.26.4/');
+  const isPyodideCdn = url.origin === 'https://cdn.jsdelivr.net' && url.pathname.startsWith('/pyodide/v__PYODIDE_VERSION__/');
 
   if (!isSameOrigin && !isPyodideCdn) return;
 
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Artefactos versionados (Vite assets com hash e Pyodide v0.26.4): cache-first.
+  // Artefactos versionados (Vite assets com hash e Pyodide da versão fixa): cache-first.
   if (isPyodideCdn || (isSameOrigin && (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/pyodide/')))) {
     event.respondWith(
       caches.match(req).then((cached) => {

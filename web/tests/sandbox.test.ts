@@ -35,6 +35,8 @@ const {
   stopPythonExecution,
   validatePythonCodeScope,
 } = await import('../src/engines/pythonEngine');
+const { PYODIDE_SCRIPT_SRI, PYODIDE_VERSION, mensagemDeTransferencia } =
+  await import('../src/engines/pythonRunnerCore');
 const { runSqlQuery, setSqlWorkerForTests, stopSqlExecution, validateSqlReadOnly } =
   await import('../src/engines/sqlEngine');
 const { createInitialGitState, runGitSimulator } = await import('../src/engines/gitEngine');
@@ -187,8 +189,25 @@ describe('Web Worker Python (cancelamento e timeout)', () => {
     }
   });
 
-  it('valida integridade SRI SHA-384 dos artefactos Pyodide v0.26.4 locais/CDN', () => {
-    for (const [fileName, expectedSri] of Object.entries(PYODIDE_CORE_SRI)) {
+  it('o progresso da transferência nunca mostra mais MB do que o total', () => {
+    const mb = 1024 * 1024;
+    expect(mensagemDeTransferencia('pandas', 1.5 * mb, 3 * mb)).toBe('A transferir pandas (1,5 / 3,0 MB)…');
+    // Ficheiro comprimido: já chegaram 9,2 MB descomprimidos de um Content-Length de 3,3 MB.
+    expect(mensagemDeTransferencia('pyodide.asm.wasm', 9.2 * mb, 3.3 * mb)).toBe(
+      'A transferir pyodide.asm.wasm (9,2 MB)…',
+    );
+    expect(mensagemDeTransferencia('x', 2 * mb, 0)).toBe('A transferir x (2,0 MB)…');
+  });
+
+  it('a versão do Pyodide na app é a do pacote npm (a que os testes das lições usam)', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../node_modules/pyodide/package.json', import.meta.url), 'utf-8')) as {
+      version: string;
+    };
+    expect(PYODIDE_VERSION).toBe(pkg.version);
+  });
+
+  it('valida integridade SRI SHA-384 dos artefactos Pyodide locais/CDN', () => {
+    for (const [fileName, expectedSri] of Object.entries({ ...PYODIDE_CORE_SRI, 'pyodide.js': PYODIDE_SCRIPT_SRI })) {
       const bytes = readFileSync(new URL(`../node_modules/pyodide/${fileName}`, import.meta.url));
       const actualSri = `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
       expect(actualSri, fileName).toBe(expectedSri);

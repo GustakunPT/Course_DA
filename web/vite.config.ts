@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { PYODIDE_VERSION } from './src/engines/pythonRunnerCore';
 
 // Usa no "npm run preview" os mesmos cabeçalhos de segurança (incluindo a CSP) que o vercel.json
 // aplica em produção, para que um problema de CSP apareça localmente antes do deploy.
@@ -38,8 +39,10 @@ function versionarServiceWorker(): Plugin {
     closeBundle() {
       const sw = resolve(outDir, 'sw.js');
       const original = readFileSync(sw, 'utf-8');
-      if (!original.includes('__BUILD_ID__')) throw new Error('sw.js sem o marcador __BUILD_ID__.');
-      writeFileSync(sw, original.replace('__BUILD_ID__', buildId));
+      for (const marcador of ['__BUILD_ID__', '__PYODIDE_VERSION__']) {
+        if (!original.includes(marcador)) throw new Error(`sw.js sem o marcador ${marcador}.`);
+      }
+      writeFileSync(sw, original.replace('__BUILD_ID__', buildId).replace('__PYODIDE_VERSION__', PYODIDE_VERSION));
     },
   };
 }

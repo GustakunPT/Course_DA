@@ -1,4 +1,4 @@
-// Corre as soluções dos desafios Python e pandas no mesmo Pyodide 0.26.4 (Python 3.12)
+// Corre as soluções dos desafios Python e pandas no mesmo Pyodide (Python 3.14)
 // que o browser usa, através do pacote npm "pyodide". Na primeira vez o pandas é
 // descarregado da CDN do jsDelivr, por isso este ficheiro precisa de internet.
 import { createHash } from 'node:crypto';
