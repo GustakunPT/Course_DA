@@ -1,4 +1,5 @@
-const CACHE_NAME = 'mercearia-cache-v1';
+// No build, o marcador abaixo passa a um código que muda a cada deploy (ver vite.config.ts).
+const CACHE_NAME = 'mercearia-__BUILD_ID__';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());

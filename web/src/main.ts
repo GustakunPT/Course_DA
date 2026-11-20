@@ -8,6 +8,11 @@
 //   workbench.ts       executar código e atualizar o resultado
 //   actions/           o que faz cada botão com data-action
 //   listeners/         restantes eventos, religados a cada render
+// Fontes servidas pelo próprio site (sem pedidos à Google): só o alfabeto latino, pesos 400 e 500.
+import '@fontsource/atkinson-hyperlegible-mono/latin-400.css';
+import '@fontsource/atkinson-hyperlegible-mono/latin-500.css';
+import '@fontsource/host-grotesk/latin-400.css';
+import '@fontsource/host-grotesk/latin-500.css';
 import './styles/app.css';
 import { installGlobalListeners, registerServiceWorker } from './app/globalListeners';
 import { cloudSync } from './app/progressSync';
