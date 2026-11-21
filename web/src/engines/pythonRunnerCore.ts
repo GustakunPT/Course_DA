@@ -32,6 +32,11 @@ export const PYODIDE_VERSION = '314.0.8';
 /** Versão do Python que o Pyodide traz, para mostrar ao aluno. */
 export const PYTHON_VERSION_LABEL = 'Python 3.14';
 export const PYODIDE_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+/**
+ * Pasta do site com o runtime JS do Pyodide. Leva a versão no caminho: um telemóvel com o
+ * pyodide.mjs de uma versão anterior em cache misturava-o com o wasm novo e o Python nunca arrancava.
+ */
+export const PYODIDE_LOCAL_PATH = `/pyodide/v${PYODIDE_VERSION}/`;
 export const PYODIDE_SCRIPT_URL = `${PYODIDE_INDEX_URL}pyodide.js`;
 export const PYODIDE_MJS_URL = `${PYODIDE_INDEX_URL}pyodide.mjs`;
 export const PYODIDE_SCRIPT_SRI = 'sha384-0Tw0jFeRF+UzB1HbzjzDi5ZNMyMclQPHmYkEquv9V+lAj/rZBHxu1c35Uq28kDPo';
@@ -57,6 +62,18 @@ export function mensagemDeTransferencia(label: string, carregado: number, total:
   return total > 0 && carregado <= total
     ? `A transferir ${label} (${formatMb(carregado)} / ${formatMb(total)} MB)…`
     : `A transferir ${label} (${formatMb(carregado)} MB)…`;
+}
+
+/**
+ * O Pyodide não rejeita a promessa quando o wasm não arranca: só escreve um aviso na consola e fica
+ * à espera para sempre. Esta função reconhece esses avisos para a bancada mostrar logo o erro.
+ */
+export function falhaNoArranqueDoPython(avisoDaConsola: string): string | null {
+  if (!/wasm instantiation failed|LinkError|CompileError|RuntimeError: Aborted/i.test(avisoDaConsola)) return null;
+  return (
+    `O ${PYTHON_VERSION_LABEL} não conseguiu arrancar neste browser. Recarrega a página; ` +
+    'se o erro continuar, atualiza o browser ou experimenta outro (Chrome, Firefox ou Safari recentes).'
+  );
 }
 
 export const MAX_PYTHON_CODE_CHARS = 30_000;

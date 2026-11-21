@@ -123,6 +123,26 @@ async function percursoComputador(browser, nomeBrowser) {
     await page.locator('#workbench-editor').waitFor({ state: 'visible' });
     await verificarAcessibilidade(page, `lição Python, ${nomeBrowser}`);
 
+    // 7) Python a sério no Web Worker: o Pyodide arranca (runtime local + wasm da CDN com SRI) e corre
+    //    o código da etapa. Com o código inicial as verificações falham, mas tem de haver resultado.
+    //    (A bancada guarda o separador do passo 4: volta-se ao desafio da etapa.)
+    await page.locator('[data-wb-tab="challenge"]').click();
+    await page.locator('.workbench-actions [data-action="run-code"]').click();
+    try {
+      await page
+        .locator('.output-panel', { hasText: /verificações certas|testes passaram/ })
+        .waitFor({ timeout: 90_000 });
+    } catch (err) {
+      const painel = await page
+        .locator('.output-panel')
+        .first()
+        .innerText()
+        .catch(() => '(sem painel de resultado)');
+      throw new Error(`Python não correu (${nomeBrowser}). Painel: ${painel.replace(/\s+/g, ' ').slice(0, 300)}`, {
+        cause: err,
+      });
+    }
+
     if (erros.length) throw new Error(`Erros de browser (${nomeBrowser}):\n${erros.join('\n')}`);
   } finally {
     await fechar();
@@ -210,7 +230,7 @@ async function run() {
     }
 
     console.log(
-      `✓ Playwright E2E smoke test PASSED em ${BROWSERS.join(', ')} (skip-link, modal, nivelamento, SQL Worker, Gantt ARIA, ecrã de escrita no telemóvel, axe-core WCAG AA, 0 erros).`,
+      `✓ Playwright E2E smoke test PASSED em ${BROWSERS.join(', ')} (skip-link, modal, nivelamento, SQL Worker, Python no Pyodide, Gantt ARIA, ecrã de escrita no telemóvel, axe-core WCAG AA, 0 erros).`,
     );
   } finally {
     server.kill('SIGTERM');

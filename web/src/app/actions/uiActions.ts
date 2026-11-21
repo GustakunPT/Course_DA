@@ -1,5 +1,6 @@
 // Ações de interface: tema, letra, painéis, modais de guia e cronograma.
 
+import { saveDrafts } from '../../data/progress';
 import { TRACK_INDEX } from '../../data/trackIndex';
 import { saveLessonTimes } from '../../data/timeTracker';
 import { applyFontSize, FONT_SIZE_OPTIONS, type FontSizeId, saveFontSize } from '../../ui/fontSize';
@@ -29,6 +30,11 @@ function showMobileTab(tab: 'lesson' | 'workbench'): void {
 }
 
 export const uiActions: ActionMap = {
+  // Quando o Python da bancada não arranca: guarda os rascunhos e recarrega a página.
+  'reload-page': () => {
+    saveDrafts(state.editorDrafts, true);
+    location.reload();
+  },
   'go-home': (_el, ev) => {
     ev.preventDefault();
     state.view = 'academia';

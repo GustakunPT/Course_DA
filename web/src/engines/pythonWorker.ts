@@ -3,6 +3,9 @@ import {
   BASE_CSV_FILES,
   PYODIDE_CORE_SRI,
   PYODIDE_INDEX_URL,
+  PYODIDE_LOCAL_PATH,
+  PYODIDE_VERSION,
+  falhaNoArranqueDoPython,
   PYTHON_VERSION_LABEL,
   mensagemDeTransferencia,
   executeInPyodideInstance,
@@ -74,7 +77,7 @@ function installPyodideFetchIntegrity(): void {
   if (fetchPatchedForSri) return;
   fetchPatchedForSri = true;
   const origFetch = globalThis.fetch.bind(globalThis);
-  const localPrefix = `${globalThis.location.origin}/pyodide/`;
+  const localPrefix = `${globalThis.location.origin}${PYODIDE_LOCAL_PATH}`;
 
   globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -113,6 +116,34 @@ async function loadBaseCsvs(): Promise<Record<string, string>> {
   return rawCsvs;
 }
 
+/**
+ * Corre o loadPyodide e rejeita logo se o Pyodide avisar na consola que o wasm não arrancou
+ * (sem isto a promessa nunca termina e a bancada ficava presa em "A transferir…").
+ */
+async function carregarComDetecaoDeFalha<T>(carregar: () => Promise<T>): Promise<T> {
+  const avisoOriginal = console.warn;
+  const erroOriginal = console.error;
+  let falhar: (err: Error) => void = () => {};
+  const falhou = new Promise<never>((_resolve, reject) => {
+    falhar = reject;
+  });
+  const vigiar =
+    (original: (...args: unknown[]) => void) =>
+    (...args: unknown[]): void => {
+      original.apply(console, args);
+      const mensagem = falhaNoArranqueDoPython(args.map(String).join(' '));
+      if (mensagem) falhar(new Error(mensagem));
+    };
+  console.warn = vigiar(avisoOriginal);
+  console.error = vigiar(erroOriginal);
+  try {
+    return await Promise.race([carregar(), falhou]);
+  } finally {
+    console.warn = avisoOriginal;
+    console.error = erroOriginal;
+  }
+}
+
 async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<PyodideInterface> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
@@ -120,9 +151,17 @@ async function getWorkerPyodide(onStatus: (msg: string) => void): Promise<Pyodid
       installPyodideFetchIntegrity();
       // O runtime JS (pyodide.mjs e pyodide.asm.mjs) é servido localmente de 'self' (versão do npm, fixa);
       // wasm, stdlib e lockfile vêm da CDN com verificação criptográfica SRI (SHA-384).
-      const localBase = `${globalThis.location.origin}/pyodide/`;
-      const mod = await import(/* @vite-ignore */ `${localBase}pyodide.mjs`);
-      const pyodide = await mod.loadPyodide({ indexURL: localBase });
+      const localBase = `${globalThis.location.origin}${PYODIDE_LOCAL_PATH}`;
+      const mod = (await import(/* @vite-ignore */ `${localBase}pyodide.mjs`)) as {
+        version?: string;
+        loadPyodide: (opts: { indexURL: string }) => Promise<PyodideInterface>;
+      };
+      if (mod.version !== PYODIDE_VERSION) {
+        throw new Error(
+          `O browser carregou o Pyodide ${mod.version ?? '?'} em vez do ${PYODIDE_VERSION}. Recarrega a página para atualizar.`,
+        );
+      }
+      const pyodide = await carregarComDetecaoDeFalha(() => mod.loadPyodide({ indexURL: localBase }));
       pyodide.FS.mkdirTree('/home/pyodide/dados');
       try {
         pyodide.FS.symlink('/home/pyodide/dados', '/home/dados');

@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,9 +48,11 @@ if (existsSync(wasmSrc)) {
 }
 
 const pyodideSrcDir = resolve(webRoot, 'node_modules', 'pyodide');
-const publicPyodide = resolve(publicRoot, 'pyodide');
+const pyodideVersion = JSON.parse(readFileSync(resolve(pyodideSrcDir, 'package.json'), 'utf-8')).version;
 // Recria a pasta: ficheiros de uma versão anterior do Pyodide não podem ficar no build.
-rmSync(publicPyodide, { recursive: true, force: true });
+rmSync(resolve(publicRoot, 'pyodide'), { recursive: true, force: true });
+// A versão vai no caminho (public/pyodide/v314.0.8/): o browser nunca mistura ficheiros de versões diferentes.
+const publicPyodide = resolve(publicRoot, 'pyodide', `v${pyodideVersion}`);
 mkdirSync(publicPyodide, { recursive: true });
 for (const pyFile of ['pyodide.mjs', 'pyodide.asm.mjs']) {
   const src = resolve(pyodideSrcDir, pyFile);
