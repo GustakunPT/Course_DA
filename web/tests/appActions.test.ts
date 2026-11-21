@@ -78,6 +78,14 @@ describe('ações data-action', () => {
     expect(state.ganttCollapsedTracks.size).toBe(TRACK_INDEX.length);
   });
 
+  it('reload-page guarda os rascunhos e recarrega', () => {
+    const recarregar = vi.spyOn(location, 'reload').mockImplementation(() => {});
+    montar('<button data-action="reload-page"></button>');
+    clicar('button');
+    expect(recarregar).toHaveBeenCalledOnce();
+    recarregar.mockRestore();
+  });
+
   it('uma ação desconhecida não faz nada', () => {
     montar('<button data-action="nao-existe"></button>');
     expect(() => clicar('button')).not.toThrow();

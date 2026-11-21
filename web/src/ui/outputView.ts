@@ -4,10 +4,14 @@ import { escapeHtml } from './html';
 // Painel de resultados da bancada (Python, SQL ou Git).
 
 export type OutputStateKind = 'empty' | 'loading' | 'error' | 'full';
-export type OutputErrorCategory = 'syntax_runtime' | 'network' | 'timeout' | 'worker_crash';
+export type OutputErrorCategory = 'syntax_runtime' | 'network' | 'timeout' | 'worker_crash' | 'engine_start';
 
 export function classifyOutputError(errorText?: string): OutputErrorCategory {
   const msg = errorText ?? '';
+  // O Python não arrancou (ficheiros de versões diferentes em cache ou browser sem suporte).
+  if (/não conseguiu arrancar|carregou o Pyodide/i.test(msg)) {
+    return 'engine_start';
+  }
   if (/não foi possível carregar|failed to fetch|networkerror|network|offline|http \d{3}|jsdelivr/i.test(msg)) {
     return 'network';
   }
@@ -103,22 +107,26 @@ export function renderOutputRegion(
         ? 'Falha de ligação ao descarregar recursos. Verifica a internet ou dados móveis e tenta novamente.'
         : category === 'timeout'
           ? 'A operação excedeu o tempo limite. Verifica se há ciclos infinitos ou ligação lenta e tenta novamente.'
-          : category === 'worker_crash'
-            ? 'O motor de execução reiniciou devido a um erro inesperado. Podes tentar novamente.'
-            : 'Revê a sintaxe na linha indicada ou clica em Repor código para recomeçar limpo.';
+          : category === 'engine_start'
+            ? 'O teu código fica guardado. Recarregar a página vai buscar outra vez o Python da bancada.'
+            : category === 'worker_crash'
+              ? 'O motor de execução reiniciou devido a um erro inesperado. Podes tentar novamente.'
+              : 'Revê a sintaxe na linha indicada ou clica em Repor código para recomeçar limpo.';
     return `
       <div class="output-panel" role="alert">
         <div class="output-header">
-          <span class="status-chip is-bad">${isTransient ? 'Falha de ligação ou execução' : 'Erro de execução'}</span>
+          <span class="status-chip is-bad">${category === 'engine_start' ? 'O Python não arrancou' : isTransient ? 'Falha de ligação ou execução' : 'Erro de execução'}</span>
           ${out.elapsedMs !== undefined ? `<span class="measured">${out.elapsedMs} ms</span>` : ''}
         </div>
         <div class="error-state">
           <p>${escapeHtml(out.errorText ?? 'Não foi possível concluir a execução.')}</p>
           <p class="helper-slot">${helperText}</p>
           ${
-            isTransient
-              ? '<div><button type="button" class="btn btn-primary" data-action="run-code">Tentar novamente</button></div>'
-              : ''
+            category === 'engine_start'
+              ? '<div><button type="button" class="btn btn-primary" data-action="reload-page">Recarregar a página</button></div>'
+              : isTransient
+                ? '<div><button type="button" class="btn btn-primary" data-action="run-code">Tentar novamente</button></div>'
+                : ''
           }
         </div>
       </div>

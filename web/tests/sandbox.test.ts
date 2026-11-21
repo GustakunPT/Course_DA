@@ -35,7 +35,7 @@ const {
   stopPythonExecution,
   validatePythonCodeScope,
 } = await import('../src/engines/pythonEngine');
-const { PYODIDE_SCRIPT_SRI, PYODIDE_VERSION, mensagemDeTransferencia } =
+const { PYODIDE_LOCAL_PATH, PYODIDE_SCRIPT_SRI, PYODIDE_VERSION, falhaNoArranqueDoPython, mensagemDeTransferencia } =
   await import('../src/engines/pythonRunnerCore');
 const { runSqlQuery, setSqlWorkerForTests, stopSqlExecution, validateSqlReadOnly } =
   await import('../src/engines/sqlEngine');
@@ -187,6 +187,19 @@ describe('Web Worker Python (cancelamento e timeout)', () => {
     } finally {
       setPythonWorkerForTests(null);
     }
+  });
+
+  it('o runtime local do Pyodide fica numa pasta com a versão (sem misturas com caches antigas)', () => {
+    expect(PYODIDE_LOCAL_PATH).toBe(`/pyodide/v${PYODIDE_VERSION}/`);
+  });
+
+  it('reconhece os avisos do Pyodide quando o wasm não arranca', () => {
+    const linkError =
+      'LinkError: WebAssembly.instantiate(): Import #3 "env" "JsvError_Check": function import requires a callable';
+    expect(falhaNoArranqueDoPython('wasm instantiation failed!')).toContain('não conseguiu arrancar');
+    expect(falhaNoArranqueDoPython(linkError)).toContain('Recarrega a página');
+    expect(falhaNoArranqueDoPython('Loading numpy')).toBeNull();
+    expect(falhaNoArranqueDoPython('DeprecationWarning: x')).toBeNull();
   });
 
   it('o progresso da transferência nunca mostra mais MB do que o total', () => {

@@ -45,4 +45,14 @@ describe('renderOutputRegion', () => {
     expect(netHtml).toContain('data-action="run-code"');
     expect(netHtml).not.toContain('Revê a sintaxe');
   });
+
+  it('quando o Python não arranca, propõe recarregar a página em vez de rever a sintaxe', () => {
+    const texto = 'O browser carregou o Pyodide 0.26.4 em vez do 314.0.8. Recarrega a página para atualizar.';
+    expect(classifyOutputError(texto)).toBe('engine_start');
+    expect(classifyOutputError('O Python 3.14 não conseguiu arrancar neste browser.')).toBe('engine_start');
+    const html = renderOutputRegion({ kind: 'error', errorText: texto }, 'python');
+    expect(html).toContain('data-action="reload-page"');
+    expect(html).toContain('O Python não arrancou');
+    expect(html).not.toContain('Revê a sintaxe');
+  });
 });
